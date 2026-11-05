@@ -1,6 +1,6 @@
 # SC-Wiki 当前功能总览
 
-科学字段右侧栏的功能与设计唯一入口为 [#221](../specs/221-scientific-field-sidebar/spec.md)。现行能力与待实施交互在该入口分别记录；标红判定和消除仍只引用 [#220](../specs/220-field-red-marking/spec.md)，不在本总览重复定义。
+科学字段右侧栏的功能与设计唯一入口为 [#221](../specs/221-scientific-field-sidebar/spec.md)。已落地能力、产品验收及历史迁移在该入口分别记录；标红判定和消除仍只引用 [#220](../specs/220-field-red-marking/spec.md)，不在本总览重复定义。
 
 ## 项目说明
 

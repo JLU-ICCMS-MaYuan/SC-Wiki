@@ -682,7 +682,7 @@ def submit_check(body: Target, user=Depends(get_current_user)):
 @router.get('/jobs/{job_id}')
 def get_job(job_id: str, user=Depends(get_current_user)):
     job = ev.read_job_status(job_id, user.id)
-    result = {k: job.get(k) for k in ('id', 'status', 'progress', 'error', 'completed_batches', 'total_batches', 'current_batch')}
+    result = {k: job.get(k) for k in ('id', 'status', 'progress', 'error', 'completed_batches', 'total_batches', 'current_batch', 'activity', 'activity_log')}
     if job['status'] == 'completed':
         stored = ev.read_job(job_id, user.id)
         from backend.ingest.field_drafts import authorized_draft, draft_version

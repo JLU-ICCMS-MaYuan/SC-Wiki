@@ -327,7 +327,7 @@ def _read_original_page(arguments, manifest, tools, *, retry=False):
 def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_partial=None,
                   model_name='', manifest=(), allow_condition_additions=False, additions=None,
                   max_rounds=13, on_completed=None, human_context=None, on_response=None,
-                  review_started_at=None):
+                  review_started_at=None, on_activity=None):
     """单一有界工具循环；部分结果立即保留，错误引用交回模型定位。"""
     from .field_document_followup import tools_for_chunks
     from .document_agent import AgentStopped
@@ -336,6 +336,31 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
     from .property_evidence import digest
     if not records:
         return {}
+    def activity(stage, message, **details):
+        if on_activity:
+            from .review_progress import public_activity
+            event = public_activity({'stage': stage, 'message': message, **details})
+            if event:
+                on_activity(event)
+    summary_seen = False
+    def streamed_public_summary(content):
+        nonlocal summary_seen
+        if on_partial:
+            on_partial(content)
+        if not on_activity or summary_seen or not isinstance(content, str):
+            return
+        # 只解码模型明确声明给用户的摘要字段；不转发原始流、提示词或内部推理。
+        match = re.search(r'"progress_summary"\s*:\s*', content[:2000])
+        if match:
+            try:
+                summary, _ = json.JSONDecoder().raw_decode(content[match.end():])
+            except (ValueError, json.JSONDecodeError):
+                return
+            summary_seen = True
+            if isinstance(summary, str) and summary.strip():
+                activity('model', '模型提供了当前核对摘要', summary=summary)
+        elif len(content) >= 2000:
+            summary_seen = True
     if model is None:
         from backend.rag.llm import complete_json
         model = complete_json
@@ -382,10 +407,13 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
         if cancelled():
             raise InterruptedError('模型核对已取消')
         request = {'records': [{k: deepcopy(v) for k, v in r.items() if k in {
-                       'key', 'field', 'label', 'claim', 'current_value', 'editable_fields', 'required',
+                       'key', 'field', 'label', 'check_mode', 'claim', 'current_value', 'editable_fields', 'required',
                        'state_key', 'module_key', 'record_key', 'record_field', 'record_group_key',
                        'provenance', 'state_review_context', 'state_results', 'scientific_record', 'extension_context',
                        'organization_context'}} |
+                       ({'review_semantics': '论文原始题名，按原文题名核对'} if r['field'] == 'paper.title' else
+                        {'review_semantics': '供知识图谱展示的科学贡献概括，独立于论文原标题；按事实及限定词核对，不要求与原标题相同'}
+                        if r['field'] == 'paper.knowledge_graph_title' else {}) |
                        ({'structure_input': deepcopy(r['_structure_model_input'])} if r.get('_structure_model_input') else {})
                        for r in pending.values()],
                    'sources': list(read.values()),
@@ -400,10 +428,12 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
         name = 'response'
         native_call = None
         try:
+            summary_seen = False
+            activity('model', '模型正在结合当前字段与已读依据核对')
             answer = model(PROMPT, json.dumps(request, ensure_ascii=False, default=str), retries=0,
                            tool_definitions=definitions,
                            **({'tool_history': tool_history} if tool_history else {}),
-                           **({'on_partial': on_partial} if on_partial else {}),
+                           **({'on_partial': streamed_public_summary} if on_partial or on_activity else {}),
                            **({'images': [*human_images, *images]} if human_images or images else {}))
             if not allow_condition_additions and answer.get('condition_additions'):
                 raise ValueError('固定字段核对不接受额外条件包，请通过给定key填写')
@@ -411,6 +441,8 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                 images_received = True
             if on_response:
                 on_response(request, answer)
+            if isinstance(answer.get('progress_summary'), str) and answer['progress_summary'].strip():
+                activity('model', '模型返回了本轮核对摘要', summary=answer['progress_summary'])
             native_call = answer.get('_tool_call')
             if cancelled():
                 raise InterruptedError('模型核对已取消')
@@ -463,6 +495,7 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                             raise ValueError('通过结论未引用实际已读原文，请重新定位')
                         value = raw.get('final_value', row.get('current_value'))
                         proposal = None
+                        reason = raw['reason']
                         from .scientific_evidence import canonical
                         if digest(canonical(value)) != digest(canonical(row.get('current_value'))):
                             from .evidence_proposals import validate_values
@@ -470,11 +503,15 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                             if row['field'].startswith('paper.') and isinstance(value, (str, list)):
                                 from .language_contract import validate_draft_generated_english
                                 validate_draft_generated_english({'paper': {row['field'].split('.')[-1]: value}})
+                            # 当前值没有被写入；只纠正可确认的候选操作措辞，不改变科学判断。
+                            reason = re.sub(r'已(?:据|根据)([^。；\n]{0,40})将([^。；\n]{0,60})(更正|修改|替换)为',
+                                            r'依据\1建议将\2\3为', reason)
+                            reason = re.sub(r'已将([^。；\n]{0,60})(更正|修改|替换)为', r'建议将\1\2为', reason)
                             proposal = {'values': {'': deepcopy(value)}, 'basis_kind': raw.get('basis_kind', 'paper_quote'),
-                                        'explanation': raw['reason'], 'evidences': evs, 'supported': status == 'supported',
+                                        'explanation': reason, 'evidences': evs, 'supported': status == 'supported',
                                         'unique': raw.get('unique') is True, 'final_verified': status == 'supported'}
                             status = 'unsupported' if status == 'supported' else status
-                        result = {'status': status, 'reason': raw['reason'], 'ai_reason': raw['reason'],
+                        result = {'status': status, 'reason': reason, 'ai_reason': reason,
                                   'evidences': evs, 'source_kind': raw.get('basis_kind', 'paper_quote'),
                                   'adopted_basis': raw.get('basis_kind', 'paper_quote'), 'proposal': proposal,
                                   'human_confirmed': False, 'model': model_name, 'location_errors': [],
@@ -495,6 +532,7 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                             result['point_binding'] = {'contract': 'tc-point-binding-v1', **deepcopy(raw['point_binding'])}
                         output[row['key']] = bind_result(row, result, chunks)
                         del pending[row['key']]
+                        activity('result', '模型判断已返回，正在校验并保存当前字段结果', summary=reason)
                         if on_completed:
                             on_completed(row, output[row['key']])
                     except Exception as exc:
@@ -524,6 +562,11 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
             if name not in allowed_tools:
                 tools.budget.consume('invalid_tool')
                 raise ValueError('请仅使用给定只读文档工具')
+            labels = {'lookup_bibliography': '查询正式题录', 'read_original_page': '读取PDF原页图像',
+                      'read_page': '读取文档页面文字', 'read_document': '读取当前文档',
+                      'search_within_document': '检索当前文献', 'read_region': '读取原文区域',
+                      'extract_table': '读取原始表格', 'inspect_figure': '读取图块文字与定位'}
+            activity('tool', '正在' + labels.get(name, '执行只读文档工具'), tool=name)
             if name == 'lookup_bibliography':
                 from .bibliography_lookup import lookup
                 from urllib.parse import quote
@@ -546,6 +589,12 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                 images = [image]
             else:
                 observation = tools.call(name, arguments, retry=bool(tool_failures.get(name)))
+            details = {'tool': name}
+            if arguments.get('file_id') in tools.documents or any(str(f.get('file_id')) == str(arguments.get('file_id')) for f in manifest):
+                details['file_id'] = str(arguments['file_id'])
+                if isinstance(arguments.get('page'), int):
+                    details['page'] = arguments['page']
+            activity('tool', '已完成' + labels.get(name, '只读文档工具'), **details)
             tool_failures[name] = 0
             if native_call:
                 tool_history = [
@@ -563,6 +612,7 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
             error = str(exc)
             break
         except (AgentStopped, ValueError, KeyError, TypeError) as exc:
+            activity('tool' if name != 'response' else 'model', '本轮查证遇到问题，正在按预算继续核实', tool=str(name))
             error = str(exc)
             if native_call:
                 tool_history = [
@@ -598,4 +648,18 @@ PROMPT += '''
 paper.research_materials是当前材料状态卡片的只读汇总，核实列表各项的原文依据，
 不能按论文主材料把列表缩减，也不追加尚无当前卡片的材料。材料名称应在对应状态字段纠正，
 此汇总不要返回final_value；它会随状态自动更新。
+'''
+
+
+PROMPT += '''
+字段含义必须分别对待：paper.title是论文原始题名；paper.knowledge_graph_title是用于知识图谱的
+科学贡献短标题，独立于原标题。图谱标题、summary、key_finding等叙述字段按全文科学含义核对，
+不能仅因没有逐字出现或不同于原标题就否定；只有不支持的事实、数值、范围或限定词才构成疑问。
+例如“first/第一个”需要核实其具体材料、条件及适用范围，并评价当前人工理由；不能把
+“原论文题名没这样写”当作其不成立的唯一原因。合理的当前概括即使还有更好的措辞也应核对当前值，
+不因为偏好另一候选而判错。确有事实错误时才提出更正候选，并说明当前值的问题。
+本次只是核对和提出候选，不能声称已经更正、替换或保存了主表单值；候选必须经用户显式应用。
+需要工具时可同时返回progress_summary：一句可公开的核对摘要，说明已查事实或正在核实的目标，
+不要输出内部逐字推理、系统提示或未发生的操作；此摘要不代替最终status和具体reason。
+如提供progress_summary，将它放在JSON开头、results之前，以便在核对仍进行时展示。
 '''

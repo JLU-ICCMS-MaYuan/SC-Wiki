@@ -147,7 +147,7 @@ it('已提交的人工修改记录显示理由而没有编辑控件', async () =
     reason: '依据原始实验记录', no_evidence_reason: '原记录不可公开', items: [],
   } } as never)
   render(<ManualEvidenceSection target={{ target: 'paper', target_id: '29' }} version="v1"
-    record={{ key: 'field', item_key: itemKey, field: 'paper.summary', label: '总结', status: 'supported', reason: '', evidences: [] }} />)
+    record={{ key: 'field', item_key: itemKey, field: 'paper.summary', label: '总结', current_value: '新值', status: 'supported', reason: '', evidences: [] }} />)
   await waitFor(() => expect(screen.getByText(/依据原始实验记录/)).toBeInTheDocument())
   expect(screen.queryByText('保存')).not.toBeInTheDocument()
   expect(screen.queryByText('选择图片、文本或 PDF')).not.toBeInTheDocument()

@@ -149,6 +149,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const evidenceTarget: EvidenceTarget | undefined = readOnly ? undefined : revisionPaperId
     ? revision ? { target: 'revision', target_id: revision.revision_id } : undefined
     : { target: 'upload', target_id: taskId }
+  const fieldSaver = useRef<ReturnType<typeof createFieldDraftSaver> | null>(null)
   const evidenceWorkflow = useEvidenceWorkflow({ target: evidenceTarget,
     readOnly,
     frozenRecords:frozenEvidenceRecords,
@@ -156,6 +157,11 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     getCurrentValue: record => draft ? currentEvidenceField(record, { ...draft.paper }, draft.material_states) : undefined,
     saveCurrent: () => saveDraft(false, false),
     hasUnsavedFields: () => Boolean(fieldSaver.current?.hasChanges(currentEditor.current.draft)),
+    hasUnsavedField: record => {
+      const current = draft
+      const field = current && currentEvidenceField(record, {...current.paper}, current.material_states)
+      return Boolean(field && fieldSaver.current?.hasFieldChanges(current, field.field))
+    },
     saveField: async record => {
       if (!draft || !fieldSaver.current || readOnly || revision?.conflict) return false
       const saver = fieldSaver.current
@@ -189,7 +195,6 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   })
   const revisionIdentity = () => revisionMeta.current
     ? { revision_id: revisionMeta.current.revision_id, draft_version: revisionMeta.current.draft_version } : {}
-  const fieldSaver = useRef<ReturnType<typeof createFieldDraftSaver> | null>(null)
   const persistDraft = useCallback(async (value: UploadDraft, _preparationId?: string) => {
     if (!fieldSaver.current) throw new Error(t('upload.draftMissing'))
     const result = await fieldSaver.current.save(value)

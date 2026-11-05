@@ -99,6 +99,7 @@ const AdminPaperEditPage: React.FC = () => {
   const [loadedSpectra,setLoadedSpectra] = useState<PropertySpectrumListing | undefined>(undefined)
   const [editMaterialStates, setEditMaterialStates] = useState<DraftMaterialState[]>([])
   const [editMaterialFamilies, setEditMaterialFamilies] = useState<FamilySelection[]>([])
+  const fieldSaver = useRef<ReturnType<typeof createFieldDraftSaver> | null>(null)
   const evidenceWorkflow = useEvidenceWorkflow({
     readOnly: accessDenied,
     onAccessError: handleAccessError,
@@ -106,6 +107,11 @@ const AdminPaperEditPage: React.FC = () => {
     getCurrentValue: record => currentEvidenceField(record, {...editForm, material_families: editMaterialFamilies}, editMaterialStates),
     saveCurrent: () => handleEditSave([], undefined, undefined, false),
     hasUnsavedFields: () => Boolean(fieldSaver.current?.hasChanges(editableDraft())),
+    hasUnsavedField: record => {
+      const current = {paper: {...editForm, material_families: editMaterialFamilies}, material_states: editMaterialStates}
+      const field = currentEvidenceField(record, {...current.paper}, current.material_states)
+      return Boolean(field && fieldSaver.current?.hasFieldChanges(current, field.field))
+    },
     saveField: async record => {
       if (accessDenied || !fieldSaver.current) return false
       const saver = fieldSaver.current
@@ -324,7 +330,6 @@ const AdminPaperEditPage: React.FC = () => {
   // 两段保存（契约 C4）：先论文级（Go，低风险），后科学数据（Python，整体替换）。
   // 科学数据段仅当论文原本有科学数据或当前编辑区有内容时执行——纯论文级编辑
   // （如无材料状态的综述）不需要触发整体替换。
-  const fieldSaver = useRef<ReturnType<typeof createFieldDraftSaver> | null>(null)
   const editableDraft = () => ({ _parsing_workflow: parsingWorkflow, paper: { ...editForm, material_families: editMaterialFamilies },
     material_states: editMaterialStates, ...(fixedContract ? { _form_contract_version: 1 } : {
       structure_candidates: editStructureCandidates, structural_observations: editStructuralObservations }) })

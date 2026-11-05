@@ -1,0 +1,66 @@
+{
+  "baseline": "d3a7e53506cf221c35e663aed887af35782a7fd9",
+  "failed": 15,
+  "tests": [
+    {
+      "name": "载入已保存资料即显示状态并禁用保存；修改后可保存、完成后恢复禁用",
+      "status": "failed"
+    },
+    {
+      "name": "未保存新值不加载旧值的人工理由作为新依据",
+      "status": "failed"
+    },
+    {
+      "name": "只读取当前字段保存基线，删除前项后按稳定身份判断，不扫描其他值",
+      "status": "failed"
+    },
+    {
+      "name": "upload 单字段自动保存最新依据、只排一个任务并隔离返回",
+      "status": "failed"
+    },
+    {
+      "name": "revision 单字段自动保存最新依据、只排一个任务并隔离返回",
+      "status": "failed"
+    },
+    {
+      "name": "admin 单字段自动保存最新依据、只排一个任务并隔离返回",
+      "status": "failed"
+    },
+    {
+      "name": "superadmin 单字段自动保存最新依据、只排一个任务并隔离返回",
+      "status": "failed"
+    },
+    {
+      "name": "221 upload 保存状态：全部保存后禁用，再次实际编辑恢复，不启动模型",
+      "status": "failed"
+    },
+    {
+      "name": "221 revision 保存状态：全部保存后禁用，再次实际编辑恢复，不启动模型",
+      "status": "failed"
+    },
+    {
+      "name": "221 admin 保存状态：全部保存后禁用，再次实际编辑恢复，不启动模型",
+      "status": "failed"
+    },
+    {
+      "name": "221 superadmin 保存状态：全部保存后禁用，再次实际编辑恢复，不启动模型",
+      "status": "failed"
+    },
+    {
+      "name": "221 upload 核对未通过：侧栏显示具体理由、保留人工资料，不弹中央框",
+      "status": "failed"
+    },
+    {
+      "name": "221 revision 核对未通过：侧栏显示具体理由、保留人工资料，不弹中央框",
+      "status": "failed"
+    },
+    {
+      "name": "221 admin 核对未通过：侧栏显示具体理由、保留人工资料，不弹中央框",
+      "status": "failed"
+    },
+    {
+      "name": "221 superadmin 核对未通过：侧栏显示具体理由、保留人工资料，不弹中央框",
+      "status": "failed"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "source_base": "12a8644f68c0e73cc836aa9c8f2ac281b90ead42",
+  "source_files": {
+    "backend/api/evidence.py": "285b2f6ade6477bf4f4758c245cc460f756b40a920f488ecd74fea443b50cd20",
+    "backend/ingest/field_decisions.py": "11318ff4674e0d268bc76dc8e150d9f2ba4da23dcd5153b02228171b0345bd9d",
+    "backend/ingest/model_review.py": "60ee1b770904825ffd89c56f5ca3d08f5d8709e60bb3216f5d89ebb6221e2296",
+    "backend/ingest/property_evidence.py": "7bf2c1d3bb65568e6550e49991accf6b51f807a4c8cacb79232d13e0e037629f",
+    "backend/ingest/review_progress.py": "6af438caa0dbe9df800ee4e980f49198714d7fa81dc6dd823fe23446eabc5093",
+    "frontend/src/components/EvidenceWorkflow.tsx": "745d1ab82d8c7349390485b73dfa292de502e6ca025bcf8614691314627fef42",
+    "frontend/src/components/FieldReviewFeedback.tsx": "d2c7be52187e045876e896a36a07cf681ac73b6b49c8e49972e137de3d4df793",
+    "frontend/src/components/ManualEvidenceSection.tsx": "170b1a163e3027eb21df78bce46e084b44e6aa2c45d762e5b207be9f9dc1db23",
+    "frontend/src/components/UploadTaskEditor.tsx": "b8c1c77c968cbb580f6ad90472bdba57359ec52762ee3812457084d979b5bffc",
+    "frontend/src/i18n/en/evidence.ts": "30b8f44911ef1e5dbeae47343a762e67afbf1edf63fdade3efb5055e949b4204",
+    "frontend/src/i18n/zh/evidence.ts": "b7ee78e251c470f12b6b2cca5ea8a87d45b9c0fd54f4bbd2696a92c310493259",
+    "frontend/src/lib/fieldDrafts.ts": "063e5d237a6258c0f7972930dd5720c042e09ce225cbd11d30c182d648f4236f",
+    "frontend/src/lib/manualEvidenceDrafts.ts": "8cfbf015b4f0a178841e90cab526956b062f421418aa06f29d8e2b1e92419f8c",
+    "frontend/src/pages/AdminPaperEditPage.tsx": "f69ef38b067918518251c2d86688e15be129f7e921b6c31532e187ae329632bc",
+    "scripts/check-form-contract.mjs": "f39ed6f8bb78698d06af361520668244984d421b3b1b4c5d10f9eef7bc4294c0",
+    "tests/01_decentralized_uploading/manual-evidence-section.test.tsx": "2351be6d9946d93ad01bdd82a7176786a5b831b07c6634770d013cc76a0da996",
+    "tests/01_decentralized_uploading/sidebar-feedback.test.tsx": "48eb29ae73920d91e626c93ae61462db8d8bf8348747a000597d12fcd40c5504",
+    "tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx": "681497efedb382d876832b8acc777331a1c0b13a6dfe4949aca8242ecfc1c920",
+    "tests/01_decentralized_uploading/sidebar-field-review-browser.mjs": "d149215f1d89974ae8bd239c59731fbd2dc1205c6cb909500e3326a0ebc5a065",
+    "tests/01_decentralized_uploading/sidebar-field-workflow.test.tsx": "b7448d8802d4a41c15c223a56f4de093da93826c5b21ec82a77a7cdd9dfdb89b",
+    "tests/01_decentralized_uploading/sidebar-performance-browser.mjs": "dfe601cc2c4b25629476e873dfd3d96e3e7338fb0f7ec17a57deeaec27dff9aa",
+    "tests/01_decentralized_uploading/test_sidebar_feedback.py": "bade522611c6042a6f424845529b078c43418be9593deface31f73c9ac8f08a7"
+  },
+  "form_tests": {
+    "passed": 182,
+    "failed": 0
+  },
+  "field_contract": "通过且摘要未变化",
+  "mutation": {
+    "render_regressions_detected": 8,
+    "red_marking_regressions_detected": 4
+  },
+  "build": "通过",
+  "backend": {
+    "passed": 92,
+    "baseline_failures": 11
+  },
+  "browser_scenarios": 16,
+  "performance_states": 15,
+  "performance_fields": 200,
+  "real_model_cases": 4,
+  "business_draft_writes": 0,
+  "pushed": false,
+  "deployed": false,
+  "remote_spec_verified": false
+}

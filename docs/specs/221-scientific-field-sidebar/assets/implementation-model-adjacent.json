@@ -1,0 +1,43 @@
+{
+  "model": "gpt-6.1-sol",
+  "provider": "server:LLM2",
+  "source_hashes": [
+    "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+    "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348"
+  ],
+  "source_files": {
+    "backend/ingest/model_review.py": "60ee1b770904825ffd89c56f5ca3d08f5d8709e60bb3216f5d89ebb6221e2296",
+    "backend/ingest/property_evidence.py": "7bf2c1d3bb65568e6550e49991accf6b51f807a4c8cacb79232d13e0e037629f",
+    "backend/ingest/review_progress.py": "6af438caa0dbe9df800ee4e980f49198714d7fa81dc6dd823fe23446eabc5093"
+  },
+  "source_head": "d3a7e53506cf221c35e663aed887af35782a7fd9",
+  "reused": "原文件SHA匹配的PaperChunk文字及正文/SI文件；未重新OCR",
+  "rerun": "各受影响字段实际模型核对及正式结果校验和隔离保存重读",
+  "cases": [
+    {
+      "name": "adjacent_summary",
+      "field": "paper.summary",
+      "value": "理论预测高压CaH6形成包合钙的类方钠石氢笼，并在150 GPa下具有220–235 K的超导临界温度。",
+      "status": "supported",
+      "reason": "当前总结准确概括了论文的主要预测。摘要明确报告CaH6中形成包合Ca的类方钠石氢笼，以及150 GPa下由Eliashberg方程得到的220–235 K临界温度；正文进一步说明H4单元相互连接构成笼架，Ca位于各笼中心。正文给出的两个端点分别为μ*=0.13时220 K和μ*=0.10时235 K，均属于150 GPa下的同一CaH6结构，故该范围并非不同压力结果的误合并。当前表述明确限定为理论预测，没有将其描述为实验观测。",
+      "human_confirmed": false,
+      "source_count": 3,
+      "model_calls": 1,
+      "tool_actions": 0,
+      "public_events": [
+        {
+          "stage": "model",
+          "message": "模型正在结合当前字段与已读依据核对"
+        },
+        {
+          "stage": "result",
+          "message": "模型判断已返回，正在校验并保存当前字段结果",
+          "summary": "当前总结准确概括了论文的主要预测。摘要明确报告CaH6中形成包合Ca的类方钠石氢笼，以及150 GPa下由Eliashberg方程得到的220–235 K临界温度；正文进一步说明H4单元相互连接构成笼架，Ca位于各笼中心。正文给出的两个端点分别为μ*=0.13时220 K和μ*=0.10时235 K，均属于150 GPa下的同一CaH6结构，故该范围并非不同压力结果的误合并。当前表述明确限定为理论预测，没有将其描述为实验观测。"
+        }
+      ],
+      "elapsed_seconds": 10.43,
+      "persisted_reread": true
+    }
+  ],
+  "real_business_writes": 0
+}

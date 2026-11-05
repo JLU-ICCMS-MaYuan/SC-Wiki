@@ -1,0 +1,217 @@
+{
+  "checks": [
+    {
+      "role": "upload",
+      "outcome": "supported",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "upload",
+      "outcome": "unsupported",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "upload",
+      "outcome": "failed",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "upload",
+      "outcome": "cancelled",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job",
+        "cancel"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "revision",
+      "outcome": "supported",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "revision",
+      "outcome": "unsupported",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "revision",
+      "outcome": "failed",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "revision",
+      "outcome": "cancelled",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job",
+        "cancel"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "admin",
+      "outcome": "supported",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "admin",
+      "outcome": "unsupported",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "admin",
+      "outcome": "failed",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "admin",
+      "outcome": "cancelled",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job",
+        "cancel"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "superadmin",
+      "outcome": "supported",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "superadmin",
+      "outcome": "unsupported",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "superadmin",
+      "outcome": "failed",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "role": "superadmin",
+      "outcome": "cancelled",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job",
+        "cancel"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    }
+  ],
+  "errors": []
+}

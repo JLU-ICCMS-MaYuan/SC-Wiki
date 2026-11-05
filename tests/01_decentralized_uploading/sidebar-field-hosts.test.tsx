@@ -21,6 +21,7 @@ const record=()=>({key:item,item_key:item,field,fields:[field],label:'μ*',state
  record_field:'payload.parameters.mu_star',current_value:draft.material_states[0].property_modules[0].records[0].payload.parameters.mu_star,
  status:'uncertain',reason:'需核对',evidences:[],human_modified:true,required:true,...sourceOverrides})
 beforeEach(()=>{
+ vi.mocked(api.del).mockResolvedValue({status:'cancelled'} as never)
  sourceOverrides={};failSave=false;order=[];manual={changed:true,reason:'',no_evidence_reason:'',items:[]}
  draft={paper:{id:177,title:'Original title',authors:[],year:2026,paper_type:'theoretical',
   material_families:[],review_status:'pending',uploaded_by_user_id:8},
@@ -35,7 +36,7 @@ beforeEach(()=>{
     payload:{parameters:{lambda_ep:2.69,mu_star:.13},calculation_conditions:{},
      tc_group:{version:1,group_key:'g',method_key:'method',point_key:'r'}},
    }]}]}],structure_candidates:[]}
- poll=new Promise(resolve=>{finishJob=resolve})
+ poll=new Promise(resolve=>{finishJob=value=>{if(value.status==='completed'&&value.records?.[0])sourceOverrides={...sourceOverrides,...value.records[0]};resolve(value)}})
  vi.mocked(api.get).mockImplementation(async path=>{
   if(path==='/api/admin/papers/177')return {...draft.paper,material_states:structuredClone(draft.material_states)} as never
   if(path.includes('/classification-catalogs'))return {material_families:[],structure_families:[],material_dimensionalities:[]} as never
@@ -108,10 +109,13 @@ it.each(['upload','revision','admin','superadmin'])('%s 单字段自动保存最
  expect(draft.paper.title).toBe('Original title')
  expect(screen.getByRole('progressbar')).toBeVisible()
  expect(screen.queryByText('正在保存当前字段及人工依据…')).not.toBeInTheDocument()
- const overlay=screen.getByRole('progressbar').closest('[role="dialog"]')!
+ const overlay=screen.getByRole('progressbar').closest('.evidence-review-drawer')!
  expect(overlay).toBeVisible()
+ expect(document.querySelector('[aria-labelledby="evidence-workflow-title"]')).toBeNull()
+ expect(screen.getByLabelText('人工修改判断理由（必填）')).toBeDisabled()
  await act(async()=>finishJob({id:'job',status:'completed',records:[{...record(),status:'supported',pending_review:false,stale:false}]}))
- await screen.findByText('核对通过，结果已保存；内容和依据不变时，提交将直接复用。')
+ await screen.findByText('核对通过（结果已保存）')
+ await waitFor(()=>expect(document.querySelector(`[data-evidence-key="${item}"]`)).toHaveAttribute('data-evidence-status','passed'))
  expect(vi.mocked(api.post).mock.calls.filter(([path])=>path.endsWith('/jobs'))).toHaveLength(1)
  expect(vi.mocked(api.patch).mock.calls).toHaveLength(1)
  expect(screen.getByDisplayValue('Local title')).toBeInTheDocument()
@@ -152,6 +156,50 @@ it.each(['upload','revision','admin','superadmin'])('%s 原文区只显示当前
  expect(within(drawer).getByRole('button',{name:'大模型核对',exact:true})).toBeVisible()
  expect(within(drawer).getByRole('button',{name:'人工审核通过',exact:true})).toBeVisible()
  expect(vi.mocked(api.post).mock.calls.filter(([path])=>path.endsWith('/jobs'))).toHaveLength(0)
+})
+
+it.each(["upload","revision","admin","superadmin"])("221 %s 取消侧栏核对后解锁，迟到结果不覆盖，人工输入保留",async kind=>{
+ await open(kind)
+ fireEvent.click(screen.getByRole("button",{name:"大模型核对",exact:true}))
+ await waitFor(()=>expect(order).toContain("job"))
+ const side=document.querySelector(".evidence-review-drawer") as HTMLElement
+ fireEvent.click(within(side).getByRole("button",{name:"取消",exact:true}))
+ expect(await screen.findByText("本次核对已取消，输入已保留。")).toBeVisible()
+ expect(screen.getByLabelText("人工修改判断理由（必填）")).toBeEnabled()
+ expect(screen.getByLabelText("人工修改判断理由（必填）")).toHaveValue("最新人工理由")
+ await act(async()=>finishJob({id:"job",status:"completed",records:[{...record(),status:"supported",pending_review:false}]}))
+ expect(screen.queryByText("核对通过（结果已保存）")).not.toBeInTheDocument()
+ expect(screen.getByLabelText("人工修改判断理由（必填）")).toHaveValue("最新人工理由")
+ expect(api.del).toHaveBeenCalledWith("/api/rag/evidence/jobs/job")
+})
+
+it.each(["upload","revision","admin","superadmin"])("221 %s 保存状态：全部保存后禁用，再次实际编辑恢复，不启动模型",async kind=>{
+ await open(kind)
+ const save=screen.getByRole("button",{name:"保存",exact:true})
+ fireEvent.click(save)
+ await waitFor(()=>expect(order).toContain("manual-save"))
+ await waitFor(()=>expect(save).toBeDisabled())
+ expect(screen.getByText("已保存")).toBeVisible()
+ fireEvent.change(screen.getByLabelText("人工修改判断理由（必填）"),{target:{value:"新的人工判断理由"}})
+ expect(save).toBeEnabled()
+ fireEvent.click(save)
+ await waitFor(()=>expect(save).toBeDisabled())
+ expect(vi.mocked(api.post).mock.calls.filter(([path])=>path.endsWith("/jobs"))).toHaveLength(0)
+})
+it.each(["upload","revision","admin","superadmin"])("221 %s 核对未通过：侧栏显示具体理由、保留人工资料，不弹中央框",async kind=>{
+ await open(kind)
+ fireEvent.click(screen.getByRole("button",{name:"大模型核对",exact:true}))
+ await waitFor(()=>expect(order).toContain("job"))
+ expect(document.querySelector(".evidence-review-drawer")).toBeVisible()
+ expect(document.querySelector('[aria-labelledby="evidence-workflow-title"]')).toBeNull()
+ const reason="原文只支持μ*=0.13，不支持当前0.12，请核查当前结果配对。"
+ await act(async()=>finishJob({id:"job",status:"completed",records:[{...record(),status:"unsupported",pending_review:true,stale:false,reason,ai_reason:reason}]}))
+ expect(await screen.findByText("核对未通过（结果已保存）")).toBeVisible()
+ expect(screen.getByText(reason)).toBeVisible()
+ expect(document.querySelector(`[data-evidence-key="${item}"]`)).toHaveAttribute("data-evidence-status","attention")
+ expect(screen.getByLabelText("人工修改判断理由（必填）")).toHaveValue("最新人工理由")
+ expect(screen.queryByRole("progressbar")).not.toBeInTheDocument()
+ expect(document.querySelector('[aria-labelledby="evidence-workflow-title"]')).toBeNull()
 })
 
 it.each(['upload','revision','admin','superadmin'])('%s 相关反证的长原文直接可读，不再内嵌展开标签',async kind=>{

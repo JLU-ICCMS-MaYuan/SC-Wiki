@@ -1,0 +1,17 @@
+[
+  {
+    "path": "assets/implementation-running.png",
+    "kind": "隔离正式宿主Chrome截图，非用户原始附件",
+    "sha256": "7e97516e399dc580a38df43a4ce96a8d265aa7cb77413f9a0e8b5af65080e21d"
+  },
+  {
+    "path": "assets/implementation-rejected.png",
+    "kind": "隔离正式宿主Chrome截图，非用户原始附件",
+    "sha256": "7d450eb5da0d1249497df5123ff0aec58b42e98fd562fe4b3648711920a349fb"
+  },
+  {
+    "path": "assets/implementation-passed.png",
+    "kind": "隔离正式宿主Chrome截图，非用户原始附件",
+    "sha256": "0938ba81e644a106af4d610c753fb431c3904ac021980d73346b4c020a89694b"
+  }
+]

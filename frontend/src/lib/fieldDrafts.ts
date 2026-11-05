@@ -1,3 +1,4 @@
+import { changedScientificFields } from './evidenceFields'
 import { api } from './api'
 import { rememberWorkdraft, workdraftEpoch } from './workdraftSession'
 import type { EvidenceTarget } from '../components/EvidenceWorkflow'
@@ -98,6 +99,19 @@ export function createFieldDraftSaver(target: EvidenceTarget) {
   return {
     initialize(value: unknown) { localBaseline = clone(value); serverVersion = undefined },
     hasChanges: (value: unknown) => fieldChanges(localBaseline, value).length > 0,
+    // 只读当前路径；列表按稳定身份匹配，不复制或比较整张草稿。
+    hasFieldChanges(value: any, field: string) {
+      let current = value, saved = localBaseline
+      for (const part of field.replace(/\[(\d+)\]/g, '.$1').split('.')) {
+        if (Array.isArray(current)) {
+          const row = current[Number(part)]
+          const identity = identityKeys.find(key => row?.[key] != null)
+          saved = identity && Array.isArray(saved) ? saved.find(item => item?.[identity] === row[identity]) : saved?.[Number(part)]
+          current = row
+        } else { current = current?.[part]; saved = saved?.[part] }
+      }
+      return changedScientificFields(saved, current, field).length > 0
+    },
     save: (value: unknown) => save(value),
     saveField: (value: unknown, field: string) => save(value, field),
   }

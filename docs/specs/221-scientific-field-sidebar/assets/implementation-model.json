@@ -1,0 +1,91 @@
+{
+  "model": "gpt-6.1-sol",
+  "provider": "server:LLM2",
+  "source_hashes": [
+    "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+    "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348"
+  ],
+  "source_files": {
+    "backend/ingest/model_review.py": "60ee1b770904825ffd89c56f5ca3d08f5d8709e60bb3216f5d89ebb6221e2296",
+    "backend/ingest/property_evidence.py": "7bf2c1d3bb65568e6550e49991accf6b51f807a4c8cacb79232d13e0e037629f",
+    "backend/ingest/review_progress.py": "6af438caa0dbe9df800ee4e980f49198714d7fa81dc6dd823fe23446eabc5093"
+  },
+  "source_head": "d3a7e53506cf221c35e663aed887af35782a7fd9",
+  "reused": "原文件SHA匹配的PaperChunk文字及正文/SI文件；未重新OCR",
+  "rerun": "各受影响字段实际模型核对及正式结果校验和隔离保存重读",
+  "cases": [
+    {
+      "name": "faithful_graph",
+      "field": "paper.knowledge_graph_title",
+      "value": "Predicted High-Temperature Superconductivity in Sodalite-Like CaH6 Hydrogen Cages Under High Pressure",
+      "status": "supported",
+      "reason": "当前标题准确概括了本文的科学贡献。摘要报告理论预测高压下CaH6形成包合Ca的类方钠石氢笼，并由Eliashberg方程得到150 GPa下220–235 K的超导临界温度；正文进一步明确H4单元相连形成氢笼、Ca位于笼中心。因此，Predicted、High-Temperature Superconductivity、Sodalite-Like、CaH6 Hydrogen Cages及Under High Pressure均有依据，且保留了理论预测而非实验确认的限定。作为图谱科学标题，无须与论文原标题逐字一致，可保留当前值。",
+      "human_confirmed": false,
+      "source_count": 2,
+      "model_calls": 1,
+      "tool_actions": 0,
+      "public_events": [
+        {
+          "stage": "model",
+          "message": "模型正在结合当前字段与已读依据核对"
+        },
+        {
+          "stage": "result",
+          "message": "模型判断已返回，正在校验并保存当前字段结果",
+          "summary": "当前标题准确概括了本文的科学贡献。摘要报告理论预测高压下CaH6形成包合Ca的类方钠石氢笼，并由Eliashberg方程得到150 GPa下220–235 K的超导临界温度；正文进一步明确H4单元相连形成氢笼、Ca位于笼中心。因此，Predicted、High-Temperature Superconductivity、Sodalite-Like、CaH6 Hydrogen Cages及Under High Pressure均有依据，且保留了理论预测而非实验确认的限定。作为图谱科学标题，无须与论文原标题逐字一致，可保留当前值。"
+        }
+      ],
+      "elapsed_seconds": 8.97,
+      "persisted_reread": true
+    },
+    {
+      "name": "manual_first_claim",
+      "field": "paper.knowledge_graph_title",
+      "value": "The first HTSC-clathrate hydride CaH6",
+      "status": "supported",
+      "reason": "作为科学贡献概括，当前标题可支持，但“first”应理解为首次理论提出的高温超导笼型氢化物，而非首次实验发现。正文第1页将此前相关氢化物结构概括为主要含分子氢片段，并将本文CaH6的氢方钠石笼作为新的结构特征；摘要报告其150 GPa下预测Tc为220–235 K；第4页结论进一步强调本文报道的包合钙的氢方钠石笼及其对其他高压氢化物的启示。结合这些历史背景、结构创新与理论超导结果，“The first HTSC-clathrate hydride CaH6”可作为本文贡献的综合概括。其优先性属于基于论文叙述的推断，不是原文逐字声明或独立的全面历史优先权检索结论。",
+      "human_confirmed": false,
+      "source_count": 3,
+      "model_calls": 1,
+      "tool_actions": 0,
+      "public_events": [
+        {
+          "stage": "model",
+          "message": "模型正在结合当前字段与已读依据核对"
+        },
+        {
+          "stage": "result",
+          "message": "模型判断已返回，正在校验并保存当前字段结果",
+          "summary": "作为科学贡献概括，当前标题可支持，但“first”应理解为首次理论提出的高温超导笼型氢化物，而非首次实验发现。正文第1页将此前相关氢化物结构概括为主要含分子氢片段，并将本文CaH6的氢方钠石笼作为新的结构特征；摘要报告其150 GPa下预测Tc为220–235 K；第4页结论进一步强调本文报道的包合钙的氢方钠石笼及其对其他高压氢化物的启示。结合这些历史背景、结构创新与理论超导结果，“The first HTSC-clathrate hydride CaH6”可作为本文贡献的综合概括。其优先性属于基于论文叙述的推断，不是原文逐字声明或独立的全面历史优先权检索结论。"
+        }
+      ],
+      "elapsed_seconds": 19.2,
+      "persisted_reread": true
+    },
+    {
+      "name": "original_title",
+      "field": "paper.title",
+      "value": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+      "status": "supported",
+      "reason": "正文PDF第1页题名为“Superconductive sodalite-like clathrate calcium hydride at high pressures”，与当前标题一致。",
+      "human_confirmed": false,
+      "source_count": 1,
+      "model_calls": 1,
+      "tool_actions": 0,
+      "public_events": [
+        {
+          "stage": "model",
+          "message": "模型正在结合当前字段与已读依据核对"
+        },
+        {
+          "stage": "result",
+          "message": "模型判断已返回，正在校验并保存当前字段结果",
+          "summary": "正文PDF第1页题名为“Superconductive sodalite-like clathrate calcium hydride at high pressures”，与当前标题一致。"
+        }
+      ],
+      "elapsed_seconds": 5.7,
+      "persisted_reread": true
+    }
+  ],
+  "real_business_writes": 0
+}

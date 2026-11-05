@@ -96,8 +96,14 @@ export function createManualEvidenceDrafts() {
         && (draft.dirty || draft.files.length > 0 || draft.busy))
     },
     edit(key: string, changes: Partial<Pick<ManualDraft, 'reason' | 'absence' | 'choice' | 'files'>>) {
+      const current = read(key)
+      if (Object.entries(changes).every(([name, value]) => current[name as keyof ManualDraft] === value)) return
       inputRevision += 1
-      patch(key, { ...changes, revision: read(key).revision + 1, dirty: true, error: '', notice: '' })
+      const next = { ...current, ...changes }
+      const originalChoice = current.saved?.items?.length ? 'provide' : current.saved?.no_evidence_reason ? 'none' : ''
+      const dirty = next.reason !== (current.saved?.reason || '') || next.absence !== (current.saved?.no_evidence_reason || '')
+        || next.choice !== originalChoice || next.files.length > 0
+      patch(key, { ...changes, revision: current.revision + 1, dirty, error: '', notice: '' })
     },
     hydrate(key: string, saved: ManualRecord, writes: number) {
       const current = read(key)

@@ -1,6 +1,6 @@
 # 实施与迁移计划
 
-Issue：[#221](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/221)。当前执行文档迁移，产品改动独立待实施。
+Issue：[#221](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/221)。用户已明确授权实施 T004—T008；迁移证据保持历史，新增交互逐项实现验证。
 
 ## 所有权与阶段
 
@@ -10,7 +10,7 @@ Issue：[#221](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/221)。当前�
 4. #220 只新增消红／模型核对结果与颜色联动，界面操作引用本单元，保留颜色规则唯一性。
 5. 校验迁移摘要、链接、Demo 资源与差异，更新 Overview 引用及 AGENTS，按范围自动提交；不自行推送。
 
-## 待实施技术路线
+## 已实施技术路线
 
 - 保存反馈：复用 ManualEvidenceSection、manualEvidenceDrafts、宿主 saveField 与当前字段版本；无变化按钮状态与写入短路一致，不把主值变化漏掉，不将旧值说明默认为新值依据。
 - 核对呈现：保留当前字段会话，分离单字段侧栏进度与整篇 Dialog；不扩大模型调用范围，沿用 field-input-v1 令牌和资料保护。
@@ -28,4 +28,4 @@ Issue：[#221](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/221)。当前�
 | FR-019、SC-005 | 局部缓存、请求触发与现有测试入口 | T008；固定草稿、契约、mutation、基线 |
 | FR-020、SC-001 | 文档、Issue、专属 Demo | T001—003；原字节守恒与链接 |
 
-遵守 mayuan、逐文件写入前核对分支、明确路径提交。科学字段标准及锁定摘要不变，无数据库迁移。只在未来实施阶段修改生产代码；当前不得把待办勾为已完成。
+遵守 mayuan、逐文件写入前核对分支、明确路径提交。科学字段标准及锁定摘要不变，无数据库迁移。本轮生产实现与技术任务按实际验证勾选，历史迁移证据保留原摘要。

@@ -1,5 +1,20 @@
 # 验收入口
 
-当前文档迁移：核对 migration-manifest.json、migrated-records.md、legacy/；逐段 SHA256 与迁入原字节一致，旧文档／Issue 只有统一引用，其他正文保持；相对链接与 Demo 资源可解析。#220 最新消红条款及 #221 引用双向一致，待实施项未勾完成。
+历史迁移证据：migration-manifest.json、migrated-records.md、legacy/ 及 verification/verify_migration.py。原始摘要不改写；默认校验历史归档及引用。`--check-current` 只对应建档迁移那次文档快照，后续正常实施编辑不冒充该旧快照。
 
-后续产品验收：四宿主分别检查字段设置／来源、人工资料、候选、保存按钮循环、侧栏内核对全过程、最终结论与失败理由、重开、技术失败和取消；运行字段／表单／mutation、受影响回归及构建，固定隔离草稿记录渲染、读取、扫描、请求和延迟。真实用户草稿不作为写入测试对象，模型／PDF 修改按原文定向验证要求执行。
+产品验收与限制见 [validation.md](validation.md#产品实现验收2026-11-05)，结构化结果见 assets/implementation.json。科学字段颜色仅引用 #220。
+
+在仓库根执行：
+
+```sh
+npm run test:field-contract --prefix frontend
+npm run test:form-contract --prefix frontend
+npm run test:form-contract:mutation --prefix frontend
+npm run build --prefix frontend
+```
+
+真实 Chrome 验证脚本为 tests/01_decentralized_uploading/sidebar-field-review-browser.mjs，使用 FRONTEND_URL、PLAYWRIGHT_MODULE、CHROMIUM_PATH、FIELD_REVIEW_BROWSER_OUTPUT；指向独立本地 Vite，所有业务 API 均由独立会话拦截，不写用户草稿。四宿主各执行通过、未通过、技术失败和取消。
+
+固定15卡200字段前后性能脚本为 tests/01_decentralized_uploading/sidebar-performance-browser.mjs；分别指向5198旧版和5199新版的隔离 Vite。PressureEditor 仅在浏览器拦截响应中加入计数，不改变工作树。源码副本路径须使用真实路径，两个 Vite 使用各自缓存，避免重复 React 或未经转换的 TSX 造成假失败。
+
+后端 test_sidebar_feedback.py 覆盖公开摘要流、真实文档工具、隔离 Redis 小投影及实际 worker 的结果存储往返、取消保护；科学语义还需参考真实 PDF 定向重核证据，不用夹具代替真实来源。

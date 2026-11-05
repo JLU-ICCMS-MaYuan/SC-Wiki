@@ -811,8 +811,10 @@ def job_control_key(job_id):
 
 
 def job_control(job):
+    from .review_progress import public_activity, public_history
     fields = ('id', 'owner', 'status', 'progress', 'error', 'completed_batches', 'total_batches', 'current_batch')
     return {**{k: job.get(k) for k in fields},
+            'activity': public_activity(job.get('activity')), 'activity_log': public_history(job.get('activity_log')),
             'snapshot': {k: (job.get('snapshot') or {}).get(k) for k in ('target', 'target_id')}}
 
 
@@ -1339,11 +1341,13 @@ def run_evidence_job(job_id: str):
             from . import manual_evidence
             with SessionLocal() as session:
                 human_context = manual_evidence.review_context(session, {**snapshot, 'records': batch_records})
+            from .review_progress import update_activity
+            progress = (lambda activity: update_activity(job_id, job['owner'], activity)) if job.get('purpose') == 'field' else None
             fresh = review_fields(batch_records, snapshot['chunks'], model_name=config.model,
                 cancelled=cancelled,
                 on_partial=evidence_stream_guard(job_id, job['owner'], started, deadline_seconds),
                 manifest=snapshot.get('pdf_manifest') or [], human_context=human_context,
-                review_started_at=job.get('review_started_at'))
+                review_started_at=job.get('review_started_at'), **({'on_activity': progress} if progress else {}))
             if human_context:
                 with SessionLocal.begin() as session:
                     refs = [image for value in human_context.values() for image in value.get('images', [])]
@@ -1358,6 +1362,8 @@ def run_evidence_job(job_id: str):
                         fresh[record['key']]['field_candidate'] = candidate
             if cancelled():
                 return
+            if progress:
+                progress({'stage': 'persist', 'message': '正在保存当前字段的核对结果'})
             persist_completed_results({**snapshot, 'records': batch_records}, fresh, job['owner'])
             results.update(fresh)
             update_job(job_id, results=results, completed_batches=index + 1)

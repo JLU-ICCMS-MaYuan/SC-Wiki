@@ -1,0 +1,186 @@
+[
+  {
+    "variant": "before",
+    "role": "upload",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "cardRenders": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 40.899999998509884,
+    "paintMaxMs": 40.899999998509884,
+    "doiMarked": true,
+    "markedAfterSave": true,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "GET",
+        "path": "/api/rag/evidence/draft-state"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "before",
+    "role": "revision",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "cardRenders": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 44.099999994039536,
+    "paintMaxMs": 44.099999994039536,
+    "doiMarked": true,
+    "markedAfterSave": true,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "GET",
+        "path": "/api/rag/evidence/draft-state"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "before",
+    "role": "admin",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "cardRenders": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 52,
+    "paintMaxMs": 52,
+    "doiMarked": true,
+    "markedAfterSave": true,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "before",
+    "role": "superadmin",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "cardRenders": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 48.29999999701977,
+    "paintMaxMs": 48.29999999701977,
+    "doiMarked": true,
+    "markedAfterSave": true,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "after",
+    "role": "upload",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "cardRenders": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 44.599999994039536,
+    "paintMaxMs": 44.599999994039536,
+    "doiMarked": true,
+    "markedAfterSave": true,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "GET",
+        "path": "/api/rag/evidence/draft-state"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "after",
+    "role": "revision",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "cardRenders": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 46.5,
+    "paintMaxMs": 46.5,
+    "doiMarked": true,
+    "markedAfterSave": true,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "GET",
+        "path": "/api/rag/evidence/draft-state"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "after",
+    "role": "admin",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "cardRenders": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 47.100000001490116,
+    "paintMaxMs": 47.100000001490116,
+    "doiMarked": true,
+    "markedAfterSave": true,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "after",
+    "role": "superadmin",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "cardRenders": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 47.29999999701977,
+    "paintMaxMs": 47.29999999701977,
+    "doiMarked": true,
+    "markedAfterSave": true,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  }
+]

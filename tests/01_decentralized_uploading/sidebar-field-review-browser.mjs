@@ -1,4 +1,4 @@
-// 正式上传路由与真实鼠标／键盘；业务 API 全部隔离，模型结果固定，不写用户草稿。
+// 四种正式宿主路由与真实鼠标／键盘；业务 API 全部隔离，模型结果固定，不写用户草稿。
 import assert from 'node:assert/strict'
 import {readFile,writeFile,mkdir} from 'node:fs/promises'
 const {chromium}=await import(process.env.PLAYWRIGHT_MODULE || 'playwright')
@@ -9,8 +9,8 @@ const definitions=JSON.parse(await readFile(new URL('../fixtures/issue176/form-d
 const task='177'.padEnd(32,'0'),item='a'.repeat(64),field='material_states[0].property_modules[0].records[0].payload.parameters.mu_star'
 const errors=[],checks=[]
 try {
- for(const outcome of ['supported','unsupported','failed','cancelled']){
-  const paper={title:'Isolated field review',year:2026,authors:[],paper_type:'theoretical',material_families:[]}
+ for(const role of ['upload','revision','admin','superadmin']) for(const outcome of ['supported','unsupported','failed','cancelled']){
+  const paper={id:177,review_status:role==='revision'?'rejected':'pending',uploaded_by_user_id:7,title:'Isolated field review',year:2026,authors:[],paper_type:'theoretical',material_families:[]}
   const property={record_key:'r',module_code:'superconductive_properties',record_type:'predicted_tc',property_code:'tc',
    definition_key:'record.superconductive_properties.predicted_tc.isotropic_eliashberg',definition_version:1,
    name_raw:'Tc',method_code:'isotropic_eliashberg',value_kind:'number',value_number:220,value_raw:'220',canonical_unit:'K',unit_raw:'K',
@@ -23,9 +23,9 @@ try {
   const record=()=>({key:item,item_key:item,field,fields:[field],record_field:'payload.parameters.mu_star',
    state_key:'s',module_key:'m',record_key:'r',label:'μ*',current_value:property.payload.parameters.mu_star,
    status:'uncertain',reason:'待核对',evidences:[],human_modified:true,required:true})
-  let manual={changed:true,reason:'',no_evidence_reason:'',items:[]},resolveJob,jobResult
+  let manual={changed:true,reason:'',no_evidence_reason:'',items:[]},resolveJob,jobResult,polls=0
   const jobWait=new Promise(resolve=>{resolveJob=resolve})
-  const order=[],user={id:7,username:'isolated',role:'user',is_approved:true,is_email_verified:true,account_status:'active'}
+  const order=[],user={id:7,username:'isolated',role:role==='superadmin'?'superadmin':role==='admin'?'admin':'user',is_admin:['admin','superadmin'].includes(role),is_approved:true,is_email_verified:true,account_status:'active'}
   const context=await browser.newContext({viewport:{width:1440,height:1000}})
   await context.addInitScript(user=>{
    localStorage.setItem('auth_token','isolated');localStorage.setItem('auth_user',JSON.stringify(user));localStorage.setItem('sc-wiki.language','zh')
@@ -34,6 +34,9 @@ try {
    const req=route.request(),path=new URL(req.url()).pathname
    const json=body=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(body)})
    if(path==='/api/auth/me')return json({user})
+   if(path==='/api/admin/papers/177')return json({...paper,material_states:draft.material_states})
+   if(path.endsWith('/open-workdraft'))return json({write_epoch:'isolated221',revision:1})
+   if(path.includes('/revision-draft'))return json({data:draft,revision_id:'revision221',draft_version:1})
    if(path==='/api/rag/llm/catalog')return json({data:{items:[]}})
    if(path==='/api/rag/llm/current')return json({data:{provider:'fixture',provider_name:'fixture',model:'isolated',source:'server'}})
    if(path.endsWith('/activity'))return json({ok:true})
@@ -68,6 +71,7 @@ try {
    }
    if(path.endsWith('/jobs/job177')){
     if(req.method()==='DELETE'){order.push('cancel');return json({status:'cancelled'})}
+    if(polls++===0)return json({id:'job177',status:'running',activity:{stage:'tool',message:'正在读取正文第2页',summary:'正在核实该结果的μ*配对'},activity_log:[{stage:'model',message:'开始核对当前字段'}]})
     await jobWait
     return json(jobResult)
    }
@@ -79,17 +83,29 @@ try {
    return json({items:[],jobs:[],data:[],space_groups:[],total:0})
   })
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message))
-  await page.goto((process.env.FRONTEND_URL || 'http://127.0.0.1:5173')+'/upload/tasks/'+task)
-  await page.getByRole('button',{name:'全部展开',exact:true}).first().click()
+  await page.goto((process.env.FRONTEND_URL || 'http://127.0.0.1:5173')+(role==='upload'?'/upload/tasks/'+task:role==='revision'?'/papers/177/revise':'/admin/papers/177/edit'))
+  await page.getByLabel('标题',{exact:true}).waitFor().catch(async error=>{console.error(await page.locator('body').innerText(),errors);await page.screenshot({path:output+'/failure.png'});throw error})
+  await page.locator('[data-property-module-toggle]').filter({hasText:'超导性质'}).first().click()
   await page.getByLabel('μ*',{exact:true}).fill('0.12')
   await page.locator('[data-evidence-key="'+item+'"]').first().click()
   await page.getByLabel('人工修改判断理由（必填）').fill('最新理由')
   await page.getByLabel('不提供证据',{exact:true}).check()
   await page.getByLabel('不提供证据的理由（必填）').fill('沿用原文')
+  const save=page.getByRole('button',{name:'保存',exact:true})
+  await save.click();await page.locator('[data-manual-save-state="saved"]').waitFor()
+  assert.equal(await save.isDisabled(),true)
+  await page.getByLabel('人工修改判断理由（必填）').fill('最新理由补充')
+  assert.equal(await save.isEnabled(),true)
+  await page.getByLabel('人工修改判断理由（必填）').fill('最新理由')
+  assert.equal(await save.isDisabled(),true)
   const queued=page.waitForRequest(r=>r.url().endsWith('/jobs') && r.method()==='POST')
   await page.getByRole('button',{name:'大模型核对',exact:true}).click();await queued
-  const dialog=page.getByRole('dialog').filter({has:page.getByRole('progressbar')})
+  const dialog=page.locator('.evidence-review-drawer')
   await dialog.waitFor()
+  await dialog.getByText('正在读取正文第2页',{exact:true}).waitFor()
+  await dialog.getByText('核对摘要：正在核实该结果的μ*配对',{exact:true}).waitFor()
+  assert.equal(await page.locator('[aria-labelledby="evidence-workflow-title"]').count(),0)
+  assert.equal(await page.getByLabel('人工修改判断理由（必填）').isDisabled(),true)
   let mouseBlocked=false
   try{await page.getByLabel('标题',{exact:true}).click({timeout:700})}catch{mouseBlocked=true}
   assert.equal(mouseBlocked,true)
@@ -98,24 +114,31 @@ try {
    assert.equal(await page.evaluate(()=>Boolean(document.activeElement?.closest('[role="dialog"]'))),true)
   }
   assert.equal(await page.getByLabel('标题',{exact:true}).inputValue(),'Isolated field review')
-  await page.screenshot({path:output+'/waiting-'+outcome+'.png'})
+  await page.screenshot({path:output+'/waiting-'+role+'-'+outcome+'.png'})
   if(outcome==='cancelled'){
    const cancelled=page.waitForResponse(r=>r.url().endsWith('/jobs/job177') && r.request().method()==='DELETE')
    await dialog.getByRole('button',{name:'取消',exact:true}).click()
    jobResult={id:'job177',status:'cancelled',records:[]};resolveJob()
    await cancelled
+   await dialog.getByText('本次核对已取消，输入已保留。',{exact:true}).waitFor()
   }else{
    jobResult=outcome==='failed'?{id:'job177',status:'failed',error:{message:'隔离模型技术错误'}}
     :{id:'job177',status:'completed',records:[{...record(),status:outcome,reason:outcome==='supported'?'依据成立':'当前 μ* 与原文不符',
       pending_review:false,stale:false}]}
    resolveJob()
-   if(outcome==='supported')await page.getByText('核对通过，结果已保存；内容和依据不变时，提交将直接复用。',{exact:true}).waitFor()
+   if(outcome==='supported')await page.getByText('核对通过（结果已保存）',{exact:true}).waitFor()
+   if(outcome==='unsupported')await dialog.getByText('核对未通过（结果已保存）',{exact:true}).waitFor()
    if(outcome==='unsupported')await page.getByText('当前 μ* 与原文不符',{exact:true}).first().waitFor()
    if(outcome==='failed')await page.getByText('隔离模型技术错误',{exact:true}).waitFor()
   }
   assert.deepEqual(order.slice(0,4),['value-save','manual-save','field-input','job'])
   assert.equal(order.filter(s=>s==='job').length,1)
-  checks.push({outcome,order,mouseBlocked,keyboardTrapped:true,otherValueUnchanged:true})
+  assert.equal(await dialog.getByRole('progressbar').count(),0)
+  assert.equal(await dialog.getByText('正在读取正文第2页',{exact:true}).count(),0)
+  assert.equal(await page.getByLabel('人工修改判断理由（必填）').inputValue(),'最新理由')
+  console.log(JSON.stringify({role,outcome,order}))
+  await page.screenshot({path:output+'/result-'+role+'-'+outcome+'.png'})
+  checks.push({role,outcome,order,mouseBlocked,keyboardTrapped:true,otherValueUnchanged:true})
   await context.close()
  }
  assert.deepEqual(errors,[])

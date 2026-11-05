@@ -1,0 +1,23 @@
+{
+  "baseline": "d3a7e53506cf221c35e663aed887af35782a7fd9",
+  "frontend_old_failure_names": [
+    "tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx > 保存响应和旧读取都不能清除在途请求期间的新输入",
+    "tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx > 拖拽/图片粘贴共用校验，普通文本粘贴不拦截，待上传图片可预览",
+    "tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx > 部分文件上传失败只保留失败项，重试不再上传已成功项",
+    "tests/01_decentralized_uploading/manual-evidence-editor.test.tsx > 主表单保存失败保留人工输入且不发送说明请求",
+    "tests/01_decentralized_uploading/manual-evidence-editor.test.tsx > 立即打开未保存字段即可填写说明，显式保存先保存主值并使用新版本",
+    "tests/01_decentralized_uploading/manual-upload-files.test.tsx > 三个指定区域拒绝错区和重复正文，保留原选择，选择时无请求",
+    "tests/01_decentralized_uploading/manual-upload-files.test.tsx > 完整 UploadPage 用三个区域创建一个任务，五个角色准确且仅三路并发",
+    "tests/01_decentralized_uploading/manual-upload-files.test.tsx > 没有正文时开始上传给出错误，不创建任务；正文批量拖入不静默选第一份",
+    "tests/01_decentralized_uploading/manual-upload-files.test.tsx > 清空只移除本地选择，源数据兼容命名有效",
+    "tests/01_decentralized_uploading/review-lifecycle.test.tsx > 删除组首点不撤销共用条件；剩余点的条件真正变化仍失效",
+    "tests/01_decentralized_uploading/source-review-presentation.test.tsx > admin 完整宿主不展开20条来源理由，侧栏仍保留完整说明与阻断",
+    "tests/01_decentralized_uploading/source-review-presentation.test.tsx > revision 完整宿主不展开20条来源理由，侧栏仍保留完整说明与阻断",
+    "tests/01_decentralized_uploading/source-review-presentation.test.tsx > upload 完整宿主不展开20条来源理由，侧栏仍保留完整说明与阻断",
+    "tests/01_decentralized_uploading/source-review-presentation.test.tsx > 未定位来源项保留独立入口和问题数，不生成正文警告",
+    "tests/01_decentralized_uploading/source-review-presentation.test.tsx > 真实保存错误继续提示，来源说明不会因此回到主表单",
+    "tests/01_decentralized_uploading/source-review-presentation.test.tsx > 非法数值仍就地显示，来源理由不会混进校验辅助文本"
+  ],
+  "backend_old_failure_names": [],
+  "note": "后端11项在改前改后均失败；前端16项同名旧失败保留，另一个缺少current_value的已提交记录夹具补齐并7项通过。未将旧失败报告为成功。"
+}

@@ -60,6 +60,8 @@ def detail(snapshot, cached):
         approval_state, message = 'exempt', '此字段无需审核，不阻止提交。'
     elif modified:
         approval_state, message = 'modification_required', '此字段已修改，请填写人工修改理由及证据或不提供证据的原因，并完成大模型核对；不能直接人工通过。'
+        if exact and previous.get('status') in {'unsupported', 'uncertain', 'missing'}:
+            message = '当前字段已经核对但尚未通过：' + display_reason(previous.get('reason')) + '；请修订当前内容或补充依据后再核对。'
     elif invalid_derived or previous.get('source_kind') == 'program' or not scope_matches(record, previous):
         approval_state, message = 'blocked', '此字段存在程序校验错误或适用范围变化，请先修正并核对；当前尚未通过。'
     else:

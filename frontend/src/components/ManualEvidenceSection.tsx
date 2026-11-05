@@ -4,7 +4,7 @@ import { api } from '../lib/api'
 import { useLanguage } from '../context/LanguageContext'
 import type { EvidenceRecord, EvidenceTarget } from './EvidenceWorkflow'
 import { createManualEvidenceDrafts, manualDraftKey, manualFieldIdentity,
-  type ManualEvidenceDrafts, type ManualItem, type ManualRecord, type PreparedManualEvidence } from '../lib/manualEvidenceDrafts'
+  manualValueIdentity, type ManualEvidenceDrafts, type ManualItem, type ManualRecord, type PreparedManualEvidence } from '../lib/manualEvidenceDrafts'
 import EvidenceReadableValue from './EvidenceReadableValue'
 
 function PendingImage({ file, alt }: { file: File; alt: string }) {
@@ -19,13 +19,14 @@ function PendingImage({ file, alt }: { file: File; alt: string }) {
 }
 
 export default function ManualEvidenceSection({ target, record, version, drafts, value = record.current_value,
-  localChanged = false, prepare, readOnly = false, showHistory = true, onRecords, saveBeforeReview, fieldScoped = false }: {
+  localChanged = false, valueDirty = false, prepare, readOnly = false, showHistory = true, onRecords, saveBeforeReview, fieldScoped = false }: {
   target?: EvidenceTarget
   record: EvidenceRecord
   version?: string
   drafts?: ManualEvidenceDrafts
   value?: unknown
   localChanged?: boolean
+  valueDirty?: boolean
   prepare?: () => Promise<PreparedManualEvidence>
   saveBeforeReview?: MutableRefObject<(() => Promise<boolean>) | null>
   fieldScoped?: boolean
@@ -54,7 +55,12 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
     if (!endpoint) { setLoading(false); return }
     const writes = store.read(key).writes
     void api.get<{ ok: boolean; data: ManualRecord }>(endpoint + (fieldScoped ? '?field_scope=true' : '')).then(response => {
-      if (active) store.hydrate(key, response.data, writes)
+      if (active) {
+        const data = response.data
+        // 未保存主值的读取仍对应服务器旧值，不能把其理由/附件用作新值依据。
+        const matches = !('after_value' in data) || manualValueIdentity(data.after_value) === manualValueIdentity(value)
+        store.hydrate(key, matches ? data : {changed: true, reason: '', no_evidence_reason: '', items: []}, writes)
+      }
     }).catch(error => { if (active) store.patch(key, { error: error.message || t('evidence.manualLoadFailed') }) })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
@@ -91,7 +97,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
   const save = async (uploadFiles = false) => {
     const input = store.read(key)
     if (input.busy) return
-    if (!input.dirty && !input.files.length) return
+    if (!input.dirty && !input.files.length && !valueDirty) return
     if (input.choice === 'none' && input.saved?.items.length) {
       store.patch(key, { error: t('evidence.removeEvidenceBeforeNoEvidence') }); return
     }
@@ -107,6 +113,11 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
       const ready = await context()
       const assertCurrent = () => { if (!ready.isCurrent()) throw new Error(t('evidence.changedDuringSave')) }
       assertCurrent()
+      if (!input.dirty && !input.files.length) {
+        store.patch(key, { notice: t('common.saved') })
+        ready.complete()
+        return
+      }
       stage = t('evidence.manualStageReason')
       const direct = (input.saved?.items || []).filter(item => item.kind === 'text' && item.text)
         .map(item => ({ text: item.text!, source_description: item.source_description }))
@@ -142,7 +153,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
     if (!saveBeforeReview) return
     const persist = async () => {
       if (store.read(key).busy) return false
-      if (store.read(key).dirty || store.read(key).files.length) await save(true)
+      if (store.read(key).dirty || store.read(key).files.length || valueDirty) await save(true)
       const current = store.read(key)
       return !current.dirty && !current.busy && !current.files.length && !current.error
     }
@@ -193,6 +204,8 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
       </Box>)}
     </Box>)}
   </Box>
+  const pendingSave = draft.dirty || files.length > 0 || valueDirty
+  const savedComplete = !pendingSave && Boolean(saved?.id || saved?.reason || notice === t('common.saved'))
   const changed = localChanged || saved?.changed || draft.dirty
   const previous = store.previous(manualFieldIdentity(target, record), key)
   return <Box sx={{ display: 'grid', gap: 1.5, mt: 1 }}>
@@ -244,7 +257,10 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
         {(saveBlockers().length > 0 || loading || busy) && <Box role="status" sx={{ color: 'text.secondary' }}>
           {loading ? t('evidence.manualLoading') : busy ? t('evidence.manualSaving') : saveBlockers().map(message => <Typography key={message} variant="body2">{message}</Typography>)}
         </Box>}
-        <Button type="button" size="small" variant="contained" disabled={loading || busy || saveBlockers().length > 0} onClick={() => void save(true)}>{busy ? t('evidence.manualSaving') : t('evidence.saveAndComplete')}</Button>
+        <Button type="button" size="small" variant="contained" disabled={readOnly || loading || busy || !pendingSave || saveBlockers().length > 0} onClick={() => void save(true)}>{busy ? t('evidence.manualSaving') : t('evidence.saveAndComplete')}</Button>
+        {!loading && !busy && <Typography role="status" data-manual-save-state={pendingSave ? 'unsaved' : savedComplete ? 'saved' : 'unchanged'} color="text.secondary">
+          {pendingSave ? t('evidence.manualUnsaved') : savedComplete ? t('common.saved') : t('evidence.noPendingChanges')}
+        </Typography>}
       </>}
     </>}
     {(saved?.items || []).map(item => <Box key={item.id} sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1 }}>
@@ -255,7 +271,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
       {(item.kind === 'image' || item.kind === 'pdf') && item.ai_read_status !== 'read' && <Typography variant="caption" display="block">{t('evidence.fileNotRead')}</Typography>}
     </Box>)}
     {previewView}
-    {notice && <Typography role="status" color="text.secondary">{notice}</Typography>}
+    {notice && notice !== t('common.saved') && <Typography role="status" color="text.secondary">{notice}</Typography>}
     {error && <Alert severity="error">{error}</Alert>}
     {error && !saved && <Button type="button" disabled={loading} onClick={() => { store.patch(key, { error: '' }); setReload(value => value + 1) }}>{t('evidence.manualRetryLoad')}</Button>}
     {showHistory && historyView}
