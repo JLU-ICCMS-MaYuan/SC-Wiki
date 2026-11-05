@@ -106,11 +106,13 @@ async def commit_review(session, body, user):
                 'evidences': deepcopy(old.get('evidences') or []), 'materialized_from': old.get('item_key')})
         checks = rebound
         await session.delete(staged)
+    from backend.ingest.field_sources import compact_contexts
     for record in checks:
+        packed = await session.run_sync(lambda sync: compact_contexts(sync, record))
         stmt = insert(models.ScientificEvidenceSource).values(paper_id=paper.id,
             paper_revision=paper.content_revision, item_key=record['item_key'], field_path=record['field'],
             content_hash=record['content_hash'], source_hash=record['source_hash'], rule_version=ev.RULE_VERSION,
-            result=json.loads(json.dumps(record, default=str)))
+            result=json.loads(json.dumps(packed, default=str)))
         await session.execute(stmt.on_duplicate_key_update(result=stmt.inserted.result,
             content_hash=stmt.inserted.content_hash, source_hash=stmt.inserted.source_hash))
     if draft.get('_spectrum_target_id'):

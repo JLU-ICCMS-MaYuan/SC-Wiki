@@ -92,11 +92,11 @@ def require_writer(session, paper, user, *, author=False):
 
 
 def snapshot_event(session, paper_id, snapshot_id):
-    row = session.scalar(select(models.PaperHistoryEvent).where(
+    ids = list(session.scalars(select(models.PaperHistoryEvent.id).where(
         models.PaperHistoryEvent.paper_id == paper_id,
         models.PaperHistoryEvent.classification_snapshot['handoff']['snapshot_id'].as_string() == snapshot_id,
-        models.PaperHistoryEvent.classification_snapshot['manuscript_snapshot'].is_not(None)
-    ).order_by(models.PaperHistoryEvent.id).limit(1))
+        models.PaperHistoryEvent.classification_snapshot['manuscript_snapshot'].is_not(None))))
+    row = session.get(models.PaperHistoryEvent, min(ids)) if ids else None
     if row is None or not (row.classification_snapshot or {}).get('manuscript_snapshot'):
         error('snapshot_missing', '交接快照不存在', 404)
     return row
@@ -164,7 +164,9 @@ def record_handoff(session, paper, user, *, action, draft, records, operation_id
         from backend.ingest.parsing_workflows import preserve_binding
         preserve_binding(payload['upload_submission'], draft)
     if not reused:
-        payload['manuscript_snapshot'] = {**content, 'files': _freeze_files(files)}
+        from backend.ingest.field_sources import compact_contexts
+        payload['manuscript_snapshot'] = compact_contexts(session,
+            {**content, 'files': _freeze_files(files)}, keys={'legacy_evidences','legacy_source_history','sources'})
     event = models.PaperHistoryEvent(paper_id=paper.id, paper_revision=paper.content_revision,
         event_type='uploaded' if action == 'submit' and initial else 'reviewed',
         review_status=None if action == 'submit' and initial else
@@ -180,6 +182,7 @@ def record_handoff(session, paper, user, *, action, draft, records, operation_id
         upload_work=row(session,'upload',paper.upload_task_id,True)
         if upload_work is not None:
             upload_work.document_key='closed:'+str(event.id)
+            upload_work.body={}  # 正式冻结成功且同事务提交后，关闭稿不再保留重复正文。
     return dict(handoff, event_id=event.id)
 
 
@@ -360,11 +363,10 @@ def author_working_copy(session, paper, author_id, draft, records):
 def public_snapshot(session, paper, user, snapshot_id):
     readable(paper, user)
     event = snapshot_event(session, paper.id, snapshot_id)
-    payload = deepcopy(event.classification_snapshot['manuscript_snapshot'])
+    from backend.ingest.field_sources import expand
+    payload = expand(session,event.classification_snapshot['manuscript_snapshot'])
     from backend.ingest.tc_contexts import map_draft
     payload['draft'] = map_draft(payload['draft'])
-    from backend.ingest.field_sources import expand
-    payload['records'] = expand(session,payload['records'])
     payload['files'] = [{k: v for k, v in f.items() if k != 'stored_path'} for f in payload['files']]
     return dict(snapshot_id=snapshot_id, snapshot_number=event.classification_snapshot['handoff']['snapshot_number'],
                 content=payload)

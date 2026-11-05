@@ -444,7 +444,8 @@ def load_result_history(session, snapshot, actor_id=None, include_stale=False):
             else:
                 remember_legacy(row)
             if r and (r['key'] not in found or found[r['key']].get('stale')) and row.content_hash == r['content_hash'] and row.source_hash == r['source_hash'] and row.rule_version in COMPATIBLE_RULES:
-                found[r['key']] = copy.deepcopy(row.result)
+                from .field_sources import expand
+                found[r['key']] = expand(session,row.result)
     for key, history in histories.items():
         if history and key not in found and next(r for r in snapshot['records'] if r['key'] == key).get('record_field'):
             found[key] = {'status': 'unchecked', 'reason': '当前版本的子项尚未独立核对；旧核对记录仅供历史参考', 'evidences': []}

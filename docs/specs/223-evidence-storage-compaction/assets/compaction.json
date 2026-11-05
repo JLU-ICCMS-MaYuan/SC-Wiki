@@ -1,0 +1,269 @@
+{
+  "paper_id": 1208,
+  "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+  "main_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+  "plan_digest": "83dd21717c44a3d7175dcff3bcab523d95aee686f3a0ad5a5c8f63aca43933ed",
+  "backup": {
+    "path": "/Users/mayuan/Codes/SC-Wiki/.local/storage-compaction/backup-1208",
+    "compressed_bytes": 12815489,
+    "sha256": "3bceaa7170cb4452ba6e0327aa201f5e0dc2299ec346572fb73edd72a7cd65d6",
+    "restored_in_isolated_mysql": true
+  },
+  "database_measured_scope": {
+    "before_bytes": 102380838,
+    "after_bytes": 43280218,
+    "saved_bytes": 59100620,
+    "note": "直接归属表、关联核对目标及可达目录；不含未改谱运行等间接子表、索引、日志、备份和空闲页，不是整篇全部占用"
+  },
+  "by_table_before": {
+    "chemical_systems": {
+      "rows": 1,
+      "content_bytes": 20
+    },
+    "material_states": {
+      "rows": 14,
+      "content_bytes": 1205
+    },
+    "paper_chunks": {
+      "rows": 107,
+      "content_bytes": 109740
+    },
+    "paper_document_blocks": {
+      "rows": 1115,
+      "content_bytes": 495258
+    },
+    "paper_document_parser_runs": {
+      "rows": 2,
+      "content_bytes": 1277036
+    },
+    "paper_evidence_locators": {
+      "rows": 234,
+      "content_bytes": 287232
+    },
+    "paper_evidences": {
+      "rows": 280,
+      "content_bytes": 326482
+    },
+    "paper_files": {
+      "rows": 2,
+      "content_bytes": 455
+    },
+    "paper_history_events": {
+      "rows": 5,
+      "content_bytes": 27942878
+    },
+    "paper_material_families": {
+      "rows": 1,
+      "content_bytes": 0
+    },
+    "paper_reference_extractions": {
+      "rows": 1,
+      "content_bytes": 20
+    },
+    "paper_references": {
+      "rows": 37,
+      "content_bytes": 11124
+    },
+    "paper_revision_drafts": {
+      "rows": 1,
+      "content_bytes": 98
+    },
+    "papers": {
+      "rows": 1,
+      "content_bytes": 4912
+    },
+    "property_modules": {
+      "rows": 4,
+      "content_bytes": 3409
+    },
+    "property_record_evidences": {
+      "rows": 254,
+      "content_bytes": 13459
+    },
+    "property_records": {
+      "rows": 5,
+      "content_bytes": 2970
+    },
+    "scientific_evidence_checks": {
+      "rows": 1867,
+      "content_bytes": 5881250
+    },
+    "scientific_evidence_sources": {
+      "rows": 791,
+      "content_bytes": 46537118
+    },
+    "scientific_field_source_uses": {
+      "rows": 2054,
+      "content_bytes": 398431
+    },
+    "scientific_manual_evidence": {
+      "rows": 4,
+      "content_bytes": 3868
+    },
+    "scientific_review_drafts": {
+      "rows": 1,
+      "content_bytes": 5966632
+    },
+    "scientific_source_items": {
+      "rows": 144,
+      "content_bytes": 1315078
+    },
+    "scientific_work_drafts": {
+      "rows": 3,
+      "content_bytes": 6156663
+    },
+    "spectrum_collections": {
+      "rows": 19,
+      "content_bytes": 20353
+    },
+    "structure_model_evidences": {
+      "rows": 21,
+      "content_bytes": 147
+    },
+    "structure_models": {
+      "rows": 11,
+      "content_bytes": 5624512
+    },
+    "superconductors": {
+      "rows": 5,
+      "content_bytes": 488
+    }
+  },
+  "by_table_after": {
+    "chemical_systems": {
+      "rows": 1,
+      "content_bytes": 20
+    },
+    "material_states": {
+      "rows": 14,
+      "content_bytes": 1205
+    },
+    "paper_chunks": {
+      "rows": 107,
+      "content_bytes": 109740
+    },
+    "paper_document_blocks": {
+      "rows": 1115,
+      "content_bytes": 495258
+    },
+    "paper_document_parser_runs": {
+      "rows": 2,
+      "content_bytes": 1277036
+    },
+    "paper_evidence_locators": {
+      "rows": 234,
+      "content_bytes": 287232
+    },
+    "paper_evidences": {
+      "rows": 280,
+      "content_bytes": 326482
+    },
+    "paper_files": {
+      "rows": 2,
+      "content_bytes": 455
+    },
+    "paper_history_events": {
+      "rows": 5,
+      "content_bytes": 11480375
+    },
+    "paper_material_families": {
+      "rows": 1,
+      "content_bytes": 0
+    },
+    "paper_reference_extractions": {
+      "rows": 1,
+      "content_bytes": 20
+    },
+    "paper_references": {
+      "rows": 37,
+      "content_bytes": 11124
+    },
+    "paper_revision_drafts": {
+      "rows": 1,
+      "content_bytes": 98
+    },
+    "papers": {
+      "rows": 1,
+      "content_bytes": 4912
+    },
+    "property_modules": {
+      "rows": 4,
+      "content_bytes": 3409
+    },
+    "property_record_evidences": {
+      "rows": 254,
+      "content_bytes": 13459
+    },
+    "property_records": {
+      "rows": 5,
+      "content_bytes": 2970
+    },
+    "scientific_evidence_checks": {
+      "rows": 1867,
+      "content_bytes": 5881250
+    },
+    "scientific_evidence_sources": {
+      "rows": 791,
+      "content_bytes": 4214784
+    },
+    "scientific_field_source_uses": {
+      "rows": 2054,
+      "content_bytes": 398431
+    },
+    "scientific_manual_evidence": {
+      "rows": 4,
+      "content_bytes": 3868
+    },
+    "scientific_review_drafts": {
+      "rows": 1,
+      "content_bytes": 5966632
+    },
+    "scientific_source_items": {
+      "rows": 159,
+      "content_bytes": 7155619
+    },
+    "scientific_work_drafts": {
+      "rows": 3,
+      "content_bytes": 339
+    },
+    "spectrum_collections": {
+      "rows": 19,
+      "content_bytes": 20353
+    },
+    "structure_model_evidences": {
+      "rows": 21,
+      "content_bytes": 147
+    },
+    "structure_models": {
+      "rows": 11,
+      "content_bytes": 5624512
+    },
+    "superconductors": {
+      "rows": 5,
+      "content_bytes": 488
+    }
+  },
+  "local_duplicate_removed": {
+    "deleted": true,
+    "bytes": 13755983,
+    "reason": "verified_readback"
+  },
+  "total_measured_saved_bytes": 72856603,
+  "changed_rows": 348,
+  "new_contexts": 15,
+  "idempotent": true,
+  "logical_equal": true,
+  "snapshot_records_deleted": 0,
+  "spectrum_runs_deleted": 0,
+  "active_drafts_changed": false,
+  "other_papers_updated": false,
+  "object_kept": {
+    "verified": true,
+    "key": "review_artifacts/2ccc1b39f11f4cda810b9fc0c147d6bc/submitted-1208-r1.json",
+    "size": 13755983,
+    "sha256": "e1ff14f6ceebf88adfef17fb070bd4adf7a64295fef9e4ded978386235fd4777"
+  },
+  "logical_comparison": "逐值及浮点相等；唯一例外是按授权清空已关闭上传正文",
+  "pushed": false,
+  "deployed_remote": false
+}

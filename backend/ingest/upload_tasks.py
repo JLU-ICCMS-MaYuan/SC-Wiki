@@ -675,6 +675,10 @@ def publish_artifact_path(task_id: str, *, submitted: bool = False) -> list[dict
         key = submitted_artifact_key(task_id, snapshot['paper_id'], snapshot['paper_revision'])
         with path.open("rb") as source:
             ref = create_storage().put(key, source, "application/json")
+        from .artifact_retention import release_submitted_artifact
+        cleanup = release_submitted_artifact(task_id, snapshot['paper_id'], snapshot['paper_revision'], local_path=path)
+        if not cleanup['deleted']:
+            log.info("保留本机审核产物 task=%s reason=%s", task_id, cleanup['reason'])
         return [item for item in state.get("artifact_manifest") or []
                 if item.get("logical_path") != logical] + [{
                     "logical_path": logical, "key": ref.key, "size": ref.size,

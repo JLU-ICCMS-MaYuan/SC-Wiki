@@ -250,7 +250,8 @@ def field_detail(target: str, target_id: str, item_key: str, history: bool = Fal
         query = select(table).where(or_(*targets), table.item_key == item_key).order_by(table.id.desc())
         if history:
             rows = list(session.scalars(query))
-            return {'history': [{**row.result, 'content_hash': row.content_hash, 'source_hash': row.source_hash} for row in rows]}
+            from backend.ingest.field_sources import expand
+            return {'history': [{**expand(session,row.result), 'content_hash': row.content_hash, 'source_hash': row.source_hash} for row in rows]}
     # 详情选当前字段版本；历史只在 history=true 的独立页签读取。
     snapshot, _ = _manual_snapshots(target, target_id, user, _manual_record_key(item_key))
     from backend.ingest.field_review import bind_support_versions

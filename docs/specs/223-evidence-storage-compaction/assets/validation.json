@@ -1,0 +1,56 @@
+{
+  "new_tests": 11,
+  "before": {
+    "failed": 10,
+    "passed": 1,
+    "failure_names": [
+      "tests/01_decentralized_uploading/test_storage_compaction.py::test_existing_fragment_refs_and_new_context_refs_expand_together",
+      "tests/01_decentralized_uploading/test_storage_compaction.py::test_local_artifact_removed_only_after_normal_verified_read[changed_local]",
+      "tests/01_decentralized_uploading/test_storage_compaction.py::test_local_artifact_removed_only_after_normal_verified_read[changed_remote]",
+      "tests/01_decentralized_uploading/test_storage_compaction.py::test_local_artifact_removed_only_after_normal_verified_read[invalid_json]",
+      "tests/01_decentralized_uploading/test_storage_compaction.py::test_local_artifact_removed_only_after_normal_verified_read[missing]",
+      "tests/01_decentralized_uploading/test_storage_compaction.py::test_local_artifact_removed_only_after_normal_verified_read[ok]",
+      "tests/01_decentralized_uploading/test_storage_compaction.py::test_local_artifact_removed_only_after_normal_verified_read[wrong_identity]",
+      "tests/01_decentralized_uploading/test_storage_compaction.py::test_missing_and_cyclic_contexts_never_fall_back_to_current_data",
+      "tests/01_decentralized_uploading/test_storage_compaction.py::test_new_snapshot_shares_structure_sources_and_closes_only_upload_body",
+      "tests/01_decentralized_uploading/test_storage_compaction.py::test_repeated_contexts_share_one_payload_and_restore_every_field"
+    ]
+  },
+  "focused_backend_passed": 39,
+  "isolated_mysql_passed": 7,
+  "model_and_pdf_passed": 45,
+  "storage_adjacent_passed": 19,
+  "storage_old_failure_names": [
+    "tests/01_decentralized_uploading/test_file_storage_workflows.py::test_review_artifact_storage_failure_is_desensitized",
+    "tests/01_decentralized_uploading/test_file_storage_workflows.py::test_submitted_review_snapshot_survives_state_expiry",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_pending_paper_transaction_matches_current_revision_schema",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_snapshot_failure_keeps_transient_recovery_data",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_successful_submit_cleans_transient_only_after_snapshot"
+  ],
+  "storage_old_failures_reproduced": true,
+  "review_history_old_failure_names": [
+    "tests/01_decentralized_uploading/test_review_history_size.py::test_approval_history_deduplicates_context_without_losing_field_decisions"
+  ],
+  "form_contract_passed": 188,
+  "field_contract": "通过，锁定摘要未改",
+  "mutation": {
+    "render": 8,
+    "red_marking": 4
+  },
+  "go_handlers": "通过",
+  "build": "通过",
+  "api_responses": 30,
+  "api_200": 28,
+  "api_existing_409": 2,
+  "source_files": {
+    "backend/api/evidence.py": "ba41a328d7c030dc39ada42bdbfa36f1127e08d491c8503cf560648acf5133e5",
+    "backend/ingest/field_sources.py": "d9dd495d4e72d0086089c5b5c220608968d0f3fe955bc88f24b1cfa590380cd4",
+    "backend/ingest/scientific_evidence.py": "ebcfc5c14b8079772b8d1e07a8beee9f86163d0a54d381b9eb9952f69afe4c4c",
+    "backend/ingest/upload_tasks.py": "5c42801cbf8ee0006721e4631a4f70cdbb67f17a760e23b1057d55e14970b0d3",
+    "backend/ingest/artifact_retention.py": "f16efce0649a019e06c8b6ed0ec136b4d158f9f213e1056521213c07ba2ab047",
+    "backend/services/field_review_commit.py": "6568a60107faeb8b2b2443cda39a16e63e06563e52f739a33d1017317ed20cc9",
+    "backend/services/manuscript_handoffs.py": "7879af20a69c2e9fd98c394f719b366a25345ce1f964295023b2689bb1d49071",
+    "scripts/compact_paper_storage.py": "bd56102ef7bc3804d5e1811bcb9384a613c412df463f2fcf2e43ae0524f27763",
+    "tests/01_decentralized_uploading/test_storage_compaction.py": "03194dd112b9970a32c6eb043f51800608804e933fae2178d44650a79b5acf58"
+  }
+}

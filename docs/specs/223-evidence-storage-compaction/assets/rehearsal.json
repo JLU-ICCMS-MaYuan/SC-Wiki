@@ -1,0 +1,1880 @@
+{
+  "changes": [
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14920,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14921,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14922,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14923,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14924,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14925,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14926,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14927,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14928,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14929,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14930,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14931,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14932,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14933,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14934,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14935,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14936,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14937,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14938,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14939,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14940,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14941,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14942,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14943,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14944,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14945,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14946,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14947,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14948,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14949,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14950,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14951,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14952,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14953,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14954,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14955,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14956,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14957,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14958,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14959,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14960,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14961,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14962,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14963,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14964,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14965,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14966,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14967,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14968,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14969,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14970,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14971,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14972,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14973,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14974,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14975,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14976,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14977,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14978,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14979,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14980,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14981,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14982,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14983,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14984,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14985,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14986,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14987,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14988,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14989,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14990,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14991,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14992,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14993,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14994,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14995,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14996,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14997,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14998,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 14999,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15000,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15001,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15002,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15003,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15004,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15005,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15006,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15007,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15008,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15009,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15010,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15011,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15012,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15013,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15014,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15015,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15016,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15017,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15018,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15019,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15020,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15021,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15022,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15023,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15024,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15025,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15026,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15027,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15028,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15029,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15030,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15031,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15032,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15033,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15034,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15035,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15036,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15037,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15038,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15039,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15040,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15041,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15042,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15043,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15044,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15045,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15046,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15047,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15048,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15049,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15050,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15051,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15052,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15053,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15054,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15055,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15056,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15057,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15058,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15059,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15060,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15061,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15062,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15063,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15064,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15065,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15066,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15067,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15068,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15069,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15070,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15071,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15072,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15073,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15074,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15075,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15076,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15077,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15078,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15079,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15080,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15081,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15082,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15083,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15084,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15085,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15086,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15087,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15088,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15089,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15090,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15091,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15092,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15093,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15094,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15095,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15096,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15097,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15098,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15099,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15100,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15101,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15102,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15103,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15104,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15105,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15106,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15107,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15108,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15109,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15110,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15111,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15112,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15113,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15114,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15115,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15116,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15117,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15118,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15119,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15120,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15121,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15122,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15123,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15124,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15125,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15126,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15127,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15128,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15129,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15130,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15131,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15132,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15133,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15134,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15135,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15136,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15137,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15138,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15139,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15140,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15141,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15142,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15143,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15144,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15145,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15146,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15147,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15148,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15149,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15150,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15151,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15152,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15153,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15154,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15155,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15156,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15157,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15158,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15159,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15160,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15161,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15162,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15163,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15164,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15165,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15166,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15167,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15168,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15169,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15170,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15171,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15172,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15173,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15174,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15175,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15176,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15177,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15178,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15179,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15180,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15181,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15182,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15183,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15184,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15185,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15186,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15187,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15188,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15189,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15190,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15191,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15192,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15193,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15194,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15195,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15196,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15197,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15198,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15199,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15200,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15201,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15202,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15203,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15204,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15205,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15206,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15207,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15208,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15209,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15210,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15211,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15212,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15213,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15214,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15215,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15216,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15217,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15218,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15219,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15220,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15221,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15222,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15223,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15224,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15225,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15226,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15227,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15228,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15229,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15230,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15231,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15232,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15233,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15234,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15235,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15236,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15237,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15238,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15239,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15240,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15241,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15242,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15243,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15244,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15245,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15246,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15247,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15248,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15249,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15250,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15251,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15252,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15313,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15391,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15446,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15478,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15510,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15542,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15574,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15606,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15638,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15670,
+      "contexts": 1
+    },
+    {
+      "table": "scientific_evidence_sources",
+      "id": 15702,
+      "contexts": 1
+    },
+    {
+      "table": "paper_history_events",
+      "id": 425,
+      "contexts": 11
+    },
+    {
+      "table": "paper_history_events",
+      "id": 427,
+      "contexts": 11
+    },
+    {
+      "table": "paper_history_events",
+      "id": 428,
+      "contexts": 11
+    },
+    {
+      "table": "scientific_work_drafts",
+      "id": "950ae99698494ac7a3418e5b9cab30c9",
+      "closed_body": true
+    }
+  ],
+  "new_context_ids": [
+    "0a896f1a1f87a1a1ac635860db03a124dbd26da220ce8ddbec611c3069e5b1a6",
+    "46567135f8ef2d27a001058a3226daa36bca7bbb98557c19d3f9b09e539eb1e7",
+    "9e6bbfe9d6d1c7b1d931eeb4722c47f0b52b087eb7205753fddbdd0058742f4f",
+    "6c43a156b0ccb7c1d5f53623f659c5db9644c512fd3baabd6393aa33b6f93f7f",
+    "8a9b219ae4faa1f13fb1de60f4662710733d91cb3e9be366918329069d3a4974",
+    "644c7d015ace406235a2bb5b97ace11ead547045fe0822ac63e3bb4dc6549a71",
+    "de0ef59236afba2c34cdc37a6652d905f88482f774bd18fcc9a816a59dd0f7d5",
+    "26fd24dbb6498b87b184e2134696a676bafe3f88a34b15c7d02653fa65d48968",
+    "ca7a6d7234f61cba1a938cf7b48258d91b0a6eee122800891e36186e9617b583",
+    "ac0d2b5ffad9747242115f6f84fe58be004c50c2310a07373a636d6c5845af63",
+    "c75bd1885f2d5fd3943f7e9931c1bf6e3c80a59325767ecf31cc282bbb50c9e2",
+    "17b2769bf88bc0710fbaf5c13603affdf49016e27431ee9bfb04b8d0648dd2d4",
+    "dc0c75bb3c483d3fd5be1f29413292c9df8e4a90d80c4a52a7a1a17b8916b2b9",
+    "a5826fdc2a70de66f55633a35ed394934c10dd14527e853e39e93dc9f0419dde",
+    "ca02e461f772c76a29d3cc6fa0c8a9e6593064c4d68ff3a2a41fbe740baa0660"
+  ],
+  "changed_rows": 348,
+  "idempotent": true,
+  "sizes_after": {
+    "chemical_systems": {
+      "rows": 1,
+      "content_bytes": 20
+    },
+    "material_states": {
+      "rows": 14,
+      "content_bytes": 1205
+    },
+    "paper_chunks": {
+      "rows": 107,
+      "content_bytes": 109740
+    },
+    "paper_document_blocks": {
+      "rows": 1115,
+      "content_bytes": 495258
+    },
+    "paper_document_parser_runs": {
+      "rows": 2,
+      "content_bytes": 1277040
+    },
+    "paper_evidence_locators": {
+      "rows": 234,
+      "content_bytes": 287232
+    },
+    "paper_evidences": {
+      "rows": 280,
+      "content_bytes": 326482
+    },
+    "paper_files": {
+      "rows": 2,
+      "content_bytes": 455
+    },
+    "paper_history_events": {
+      "rows": 5,
+      "content_bytes": 11480375
+    },
+    "paper_material_families": {
+      "rows": 1,
+      "content_bytes": 0
+    },
+    "paper_reference_extractions": {
+      "rows": 1,
+      "content_bytes": 20
+    },
+    "paper_references": {
+      "rows": 37,
+      "content_bytes": 11124
+    },
+    "paper_revision_drafts": {
+      "rows": 1,
+      "content_bytes": 98
+    },
+    "papers": {
+      "rows": 1,
+      "content_bytes": 4912
+    },
+    "property_modules": {
+      "rows": 4,
+      "content_bytes": 3409
+    },
+    "property_record_evidences": {
+      "rows": 254,
+      "content_bytes": 13459
+    },
+    "property_records": {
+      "rows": 5,
+      "content_bytes": 2970
+    },
+    "scientific_evidence_checks": {
+      "rows": 1867,
+      "content_bytes": 5881250
+    },
+    "scientific_evidence_sources": {
+      "rows": 791,
+      "content_bytes": 4214784
+    },
+    "scientific_field_source_uses": {
+      "rows": 2054,
+      "content_bytes": 398431
+    },
+    "scientific_manual_evidence": {
+      "rows": 4,
+      "content_bytes": 3868
+    },
+    "scientific_review_drafts": {
+      "rows": 1,
+      "content_bytes": 5966632
+    },
+    "scientific_source_items": {
+      "rows": 159,
+      "content_bytes": 7155619
+    },
+    "scientific_work_drafts": {
+      "rows": 3,
+      "content_bytes": 339
+    },
+    "spectrum_collections": {
+      "rows": 19,
+      "content_bytes": 20353
+    },
+    "structure_model_evidences": {
+      "rows": 21,
+      "content_bytes": 147
+    },
+    "structure_models": {
+      "rows": 11,
+      "content_bytes": 5624556
+    },
+    "superconductors": {
+      "rows": 5,
+      "content_bytes": 488
+    }
+  },
+  "restored": true,
+  "logical_equal": true,
+  "plan_digest": "83dd21717c44a3d7175dcff3bcab523d95aee686f3a0ad5a5c8f63aca43933ed"
+}
