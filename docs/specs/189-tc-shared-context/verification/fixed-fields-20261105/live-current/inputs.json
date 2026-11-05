@@ -1,0 +1,953 @@
+{
+  "states": [
+    {
+      "material": "LaH8",
+      "pressure_value_gpa": 300,
+      "reported_space_group_number": 12,
+      "reported_space_group_symbol": "C2/m",
+      "state_kind": "theoretical",
+      "structure_optimization": "classical_static",
+      "state_key": "state-1",
+      "schema_version": 2,
+      "material_dimensionality": "unknown",
+      "structure_families": [],
+      "crystal_system": "monoclinic",
+      "element_count": 2,
+      "property_modules": [
+        {
+          "module_code": "superconductive_properties",
+          "module_key": "isolated-method-module",
+          "records": [
+            {
+              "record_key": "assembled-0-superconductive_properties-0",
+              "module_code": "superconductive_properties",
+              "record_type": "predicted_tc",
+              "property_code": "tc",
+              "custom_property_key": null,
+              "definition_key": "record.superconductive_properties.predicted_tc.mcmillan",
+              "definition_version": 2,
+              "name_raw": "Tc",
+              "value_kind": "range",
+              "value_raw": "114–131",
+              "value_number": null,
+              "value_min": 114.0,
+              "value_max": 131.0,
+              "value_text": null,
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "K",
+              "canonical_unit": "K",
+              "method_code": "mcmillan",
+              "method_raw": "McMillan equation",
+              "criterion_code": null,
+              "criterion_raw": null,
+              "structure_key": null,
+              "payload": {
+                "calculation_conditions": {
+                  "calculation_code": null,
+                  "electronic_method": null,
+                  "epw": null,
+                  "exchange_correlation_functional": null,
+                  "phonon_method": null,
+                  "qe": null,
+                  "sscha": null,
+                  "vibrational_treatment": "harmonic"
+                },
+                "method_variant_status": null,
+                "parameters": {
+                  "extensions": [
+                    {
+                      "evidences": [
+                        {
+                          "block_id": "91548fe55c59771fa9fcf6b7eb538a5cf91792227eccef21b1787b5049346c05",
+                          "file_id": "c92dfed811754b8abb37e692cafabdaf",
+                          "pdf_page": 4,
+                          "quote": null,
+                          "quote_id": "91548fe55c59771fa9fcf6b7eb538a5cf91792227eccef21b1787b5049346c05"
+                        }
+                      ],
+                      "key": "mu_star_reported_range",
+                      "reported": true,
+                      "unit_raw": "1",
+                      "value_boolean": null,
+                      "value_kind": "range",
+                      "value_max": 0.13,
+                      "value_min": 0.1,
+                      "value_number": null,
+                      "value_raw": "0 . 1 – 0 . 1 3",
+                      "value_text": null
+                    }
+                  ],
+                  "lambda_ep": 1.12
+                }
+              },
+              "evidences": [
+                {
+                  "file_id": "c92dfed811754b8abb37e692cafabdaf",
+                  "source_version": 1,
+                  "pdf_page": 3,
+                  "printed_page": null,
+                  "block_id": "5d3fa5c7c27e7a2097efde9cac9cdd7c5577d794ebd4a5f0b3701317a5c17df2",
+                  "bbox": [
+                    298.3280548095703,
+                    342.9478780517578,
+                    547.5197241210938,
+                    367.2204447631836
+                  ],
+                  "polygon": null,
+                  "quote": "The calculated electron-coupling parameter for Laß \\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "ocr",
+                  "table_id": null,
+                  "figure_id": null,
+                  "page": 3
+                },
+                {
+                  "file_id": "c92dfed811754b8abb37e692cafabdaf",
+                  "source_version": 1,
+                  "pdf_page": 4,
+                  "printed_page": null,
+                  "block_id": "91548fe55c59771fa9fcf6b7eb538a5cf91792227eccef21b1787b5049346c05",
+                  "bbox": [
+                    34.512461242675776,
+                    402.45481579589847,
+                    284.8740444946289,
+                    436.9062008056641
+                  ],
+                  "polygon": null,
+                  "quote": "assuming \\mu ^ { * } = 0 . 1 – 0 . 1 3 (Eq. 1). That result encouraged us to calculate the T _ { c } of \\mathrm { L a H _ { 1 0 } } . Previous theoretical studies also found that sodalite-structured hydrides (e.g., \\mathrm { C a H _ { 6 } } and \\mathrm { Y H _ { 6 } ) } were associated",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "ocr",
+                  "table_id": null,
+                  "figure_id": null,
+                  "page": 4
+                },
+                {
+                  "file_id": "c92dfed811754b8abb37e692cafabdaf",
+                  "source_version": 1,
+                  "pdf_page": 2,
+                  "printed_page": null,
+                  "block_id": "02b98c8f65f7d17607ee27a246ca8d207e85498d11dddb82285c6208b33a0254",
+                  "bbox": [
+                    293.64839904785157,
+                    688.2447141723633,
+                    544.0099822998047,
+                    729.7429733886719
+                  ],
+                  "polygon": null,
+                  "quote": "Electron-coupling calculations for LaH4 give a relatively small λ of 0.43. The estimated T _ { c } \\mathrm { ~ i s ~ } 5 \\mathrm { - 1 0 } K at 300 GPa with the typical choice of the Coulomb potential of \\mu ^ { * }   =   0 . 1  –  0 . 1 3 . Using the McMillan equation (44), we calculated T _ { c } using the spectral",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "ocr",
+                  "table_id": null,
+                  "figure_id": null,
+                  "page": 2
+                },
+                {
+                  "file_id": "c92dfed811754b8abb37e692cafabdaf",
+                  "source_version": 1,
+                  "pdf_page": 3,
+                  "printed_page": null,
+                  "block_id": "5c42754c6ed5d7766c4502f919141bddb26215e091950bf3f6ebe62e96b25f31",
+                  "bbox": [
+                    39.77707397460938,
+                    342.1648920288086,
+                    288.9687432861328,
+                    375.833291015625
+                  ],
+                  "polygon": null,
+                  "quote": "function [ \\alpha ^ { 2 } F ( \\omega ) ] , again with \\mu ^ { * } = 0 . 1  –  0 . 1 3 , as previously used in superconductivity calculations for Y (15), La (45, 46), SH3 (24), CaH6 (17), YH6 (30), and other superconductors.",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "ocr",
+                  "table_id": null,
+                  "figure_id": null,
+                  "page": 3
+                },
+                {
+                  "file_id": "c92dfed811754b8abb37e692cafabdaf",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "9886389c2c29434921e516ae0908569a337a5ebf1fab3dc9ea6e77469dd3e793",
+                  "bbox": [
+                    297.74309783935547,
+                    299.10066076660155,
+                    548.6896380615234,
+                    380.5312071533203
+                  ],
+                  "polygon": null,
+                  "quote": "consistent with previous theoretical (15) and experimental studies ( T _ { c } = 1 7 \\; \\dot { \\bf K } at 89 GPa) (49).All of our calculations were carried out using the harmonic approximation. It is well known that in many hydrides anharmonicity tends to lower \\overline { { [ T _ { c } ] ( 5 0 ) } } . For the well-studied \\overline { { \\mathrm { S H } _ { 3 } } } system, however, such an effect is weak: T _ { c } is lowered from its harmonic 204 K value (24) only to 194 K (21) at 250 GPa, and both are close to the reported experiment T _ { c } at that pressure (20).",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "ocr",
+                  "table_id": null,
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "quote": "LaH8\n300\n1.12\n1,591\n131\n114\n150\n138"
+                }
+              ],
+              "is_representative": true,
+              "basis_kind": "paper_quote"
+            },
+            {
+              "record_key": "assembled-0-superconductive_properties-1",
+              "module_code": "superconductive_properties",
+              "record_type": "predicted_tc",
+              "property_code": "tc",
+              "custom_property_key": null,
+              "definition_key": "record.superconductive_properties.predicted_tc.mcmillan",
+              "definition_version": 2,
+              "name_raw": "Tc",
+              "value_kind": "number",
+              "value_raw": "131",
+              "value_number": 131.0,
+              "value_min": null,
+              "value_max": null,
+              "value_text": null,
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "K",
+              "canonical_unit": "K",
+              "method_code": "mcmillan",
+              "method_raw": "McMillan",
+              "criterion_code": null,
+              "criterion_raw": null,
+              "structure_key": null,
+              "payload": {
+                "calculation_conditions": {
+                  "calculation_code": null,
+                  "electronic_method": null,
+                  "epw": null,
+                  "exchange_correlation_functional": null,
+                  "phonon_method": null,
+                  "qe": null,
+                  "sscha": null,
+                  "vibrational_treatment": null
+                },
+                "method_variant_status": null,
+                "parameters": {
+                  "extensions": [
+                    {
+                      "key": "omega_log_reported",
+                      "value_kind": "text",
+                      "value_raw": "1,591",
+                      "unit_raw": "K",
+                      "reported": {
+                        "evidences": null,
+                        "reported": true,
+                        "unit_raw": "K",
+                        "value_boolean": null,
+                        "value_kind": "number",
+                        "value_max": null,
+                        "value_min": null,
+                        "value_number": 1591,
+                        "value_raw": "1,591",
+                        "value_text": null
+                      }
+                    }
+                  ],
+                  "lambda_ep": 1.12,
+                  "mu_star": 0.1,
+                  "omega_log": 1591.0
+                },
+                "table_row_ref": {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "group": null,
+                  "row_index": 2,
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d"
+                }
+              },
+              "evidences": [
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "e2e14245b620a96e3b8b54817ec33ffa5a033a25d540acb5836cb33966946e38",
+                  "bbox": [
+                    278.1951789399999,
+                    547.7675836,
+                    290.56997409999985,
+                    554.5266336544
+                  ],
+                  "polygon": null,
+                  "quote": "131",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "5a4002e31d59eae984e8bd2c05e154294a1a13c4cc635ba6cb9e4e27c5d402f3",
+                  "bbox": [
+                    259.99375,
+                    511.8809836,
+                    308.8103231999999,
+                    528.6178736544
+                  ],
+                  "polygon": null,
+                  "quote": "Tc, K; μ* = 0.1 McMillan",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1",
+                  "bbox": [
+                    190.37537763999998,
+                    547.7675836,
+                    204.76830597999995,
+                    554.5266336544
+                  ],
+                  "polygon": null,
+                  "quote": "1.12",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c",
+                  "bbox": [
+                    223.08841239999995,
+                    547.7675836,
+                    241.60652151999992,
+                    554.5266336544
+                  ],
+                  "polygon": null,
+                  "quote": "1,591",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77",
+                  "bbox": [
+                    220.42142,
+                    521.8589836,
+                    244.3336014,
+                    529.3505111439999
+                  ],
+                  "polygon": null,
+                  "quote": "wlog, K",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "quote": "LaH8\n300\n1.12\n1,591\n131\n114\n150\n138"
+                }
+              ],
+              "is_representative": false,
+              "basis_kind": "paper_quote"
+            },
+            {
+              "record_key": "assembled-0-superconductive_properties-2",
+              "module_code": "superconductive_properties",
+              "record_type": "predicted_tc",
+              "property_code": "tc",
+              "custom_property_key": null,
+              "definition_key": "record.superconductive_properties.predicted_tc.mcmillan",
+              "definition_version": 2,
+              "name_raw": "Tc",
+              "value_kind": "number",
+              "value_raw": "114",
+              "value_number": 114.0,
+              "value_min": null,
+              "value_max": null,
+              "value_text": null,
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "K",
+              "canonical_unit": "K",
+              "method_code": "mcmillan",
+              "method_raw": "McMillan",
+              "criterion_code": null,
+              "criterion_raw": null,
+              "structure_key": null,
+              "payload": {
+                "calculation_conditions": {
+                  "calculation_code": null,
+                  "electronic_method": null,
+                  "epw": null,
+                  "exchange_correlation_functional": null,
+                  "phonon_method": null,
+                  "qe": null,
+                  "sscha": null,
+                  "vibrational_treatment": null
+                },
+                "method_variant_status": null,
+                "parameters": {
+                  "extensions": [
+                    {
+                      "key": "omega_log_reported",
+                      "value_kind": "text",
+                      "value_raw": "1,591",
+                      "unit_raw": "K",
+                      "reported": {
+                        "evidences": null,
+                        "reported": true,
+                        "unit_raw": "K",
+                        "value_boolean": null,
+                        "value_kind": "number",
+                        "value_max": null,
+                        "value_min": null,
+                        "value_number": 1591,
+                        "value_raw": "1,591",
+                        "value_text": null
+                      }
+                    }
+                  ],
+                  "lambda_ep": 1.12,
+                  "mu_star": 0.13,
+                  "omega_log": 1591.0
+                },
+                "table_row_ref": {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "group": null,
+                  "row_index": 2,
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d"
+                }
+              },
+              "evidences": [
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "9cb9e351e48f2a773bb2b8e4a5b8f0e2c7241881b6fc6498c5bee77abd7b5537",
+                  "bbox": [
+                    344.7532261599999,
+                    547.7675836,
+                    357.1272741399998,
+                    554.5266336544
+                  ],
+                  "polygon": null,
+                  "quote": "114",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "44dc0e21158730dc4fae03cdeebf99c4aa27d0338a7f19700948897cfe81e7f4",
+                  "bbox": [
+                    324.45254,
+                    511.8809836,
+                    377.4505967999999,
+                    528.6178736544
+                  ],
+                  "polygon": null,
+                  "quote": "Tc, K; μ* = 0.13 McMillan",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1",
+                  "bbox": [
+                    190.37537763999998,
+                    547.7675836,
+                    204.76830597999995,
+                    554.5266336544
+                  ],
+                  "polygon": null,
+                  "quote": "1.12",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c",
+                  "bbox": [
+                    223.08841239999995,
+                    547.7675836,
+                    241.60652151999992,
+                    554.5266336544
+                  ],
+                  "polygon": null,
+                  "quote": "1,591",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77",
+                  "bbox": [
+                    220.42142,
+                    521.8589836,
+                    244.3336014,
+                    529.3505111439999
+                  ],
+                  "polygon": null,
+                  "quote": "wlog, K",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "quote": "LaH8\n300\n1.12\n1,591\n131\n114\n150\n138"
+                }
+              ],
+              "is_representative": false,
+              "basis_kind": "paper_quote"
+            },
+            {
+              "record_key": "assembled-0-superconductive_properties-3",
+              "module_code": "superconductive_properties",
+              "record_type": "predicted_tc",
+              "property_code": "tc",
+              "custom_property_key": null,
+              "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+              "definition_version": 2,
+              "name_raw": "Tc",
+              "value_kind": "number",
+              "value_raw": "150",
+              "value_number": 150.0,
+              "value_min": null,
+              "value_max": null,
+              "value_text": null,
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "K",
+              "canonical_unit": "K",
+              "method_code": "unknown",
+              "method_raw": "Eliashberg",
+              "criterion_code": null,
+              "criterion_raw": null,
+              "structure_key": null,
+              "payload": {
+                "calculation_conditions": {
+                  "calculation_code": null,
+                  "electronic_method": null,
+                  "epw": null,
+                  "exchange_correlation_functional": null,
+                  "phonon_method": null,
+                  "qe": null,
+                  "sscha": null,
+                  "vibrational_treatment": null
+                },
+                "method_variant_status": "Eliashberg variant not specified",
+                "parameters": {
+                  "extensions": [
+                    {
+                      "key": "omega_log_reported",
+                      "value_kind": "text",
+                      "value_raw": "1,591",
+                      "unit_raw": "K",
+                      "reported": {
+                        "evidences": null,
+                        "reported": true,
+                        "unit_raw": "K",
+                        "value_boolean": null,
+                        "value_kind": "number",
+                        "value_max": null,
+                        "value_min": null,
+                        "value_number": 1591,
+                        "value_raw": "1,591",
+                        "value_text": null
+                      }
+                    }
+                  ],
+                  "lambda_ep": 1.12,
+                  "mu_star": 0.1,
+                  "omega_log": 1591.0
+                },
+                "table_row_ref": {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "group": null,
+                  "row_index": 2,
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d"
+                }
+              },
+              "evidences": [
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "ece04a868506252ca92c0f12aafa7ca9e0f050ef2f4c2f0c75c0c0047c50c6ef",
+                  "bbox": [
+                    411.3673118799999,
+                    547.7675836,
+                    423.74210703999984,
+                    554.5266336544
+                  ],
+                  "polygon": null,
+                  "quote": "150",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "d45b0dcc07b94e8556739700c3d0dc1c66dd7d16866582c9e3b543c0f19ba1d5",
+                  "bbox": [
+                    393.10701,
+                    511.8809836,
+                    441.92522319999995,
+                    528.6178736544
+                  ],
+                  "polygon": null,
+                  "quote": "Tc, K; μ* = 0.1 Eliashberg",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1",
+                  "bbox": [
+                    190.37537763999998,
+                    547.7675836,
+                    204.76830597999995,
+                    554.5266336544
+                  ],
+                  "polygon": null,
+                  "quote": "1.12",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c",
+                  "bbox": [
+                    223.08841239999995,
+                    547.7675836,
+                    241.60652151999992,
+                    554.5266336544
+                  ],
+                  "polygon": null,
+                  "quote": "1,591",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77",
+                  "bbox": [
+                    220.42142,
+                    521.8589836,
+                    244.3336014,
+                    529.3505111439999
+                  ],
+                  "polygon": null,
+                  "quote": "wlog, K",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "quote": "LaH8\n300\n1.12\n1,591\n131\n114\n150\n138"
+                },
+                {
+                  "file_id": "c92dfed811754b8abb37e692cafabdaf",
+                  "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17)."
+                },
+                {
+                  "file_id": "c92dfed811754b8abb37e692cafabdaf",
+                  "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17)."
+                }
+              ],
+              "is_representative": false,
+              "basis_kind": "paper_quote"
+            },
+            {
+              "record_key": "assembled-0-superconductive_properties-4",
+              "module_code": "superconductive_properties",
+              "record_type": "predicted_tc",
+              "property_code": "tc",
+              "custom_property_key": null,
+              "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+              "definition_version": 2,
+              "name_raw": "Tc",
+              "value_kind": "number",
+              "value_raw": "138",
+              "value_number": 138.0,
+              "value_min": null,
+              "value_max": null,
+              "value_text": null,
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "K",
+              "canonical_unit": "K",
+              "method_code": "unknown",
+              "method_raw": "Eliashberg",
+              "criterion_code": null,
+              "criterion_raw": null,
+              "structure_key": null,
+              "payload": {
+                "calculation_conditions": {
+                  "calculation_code": null,
+                  "electronic_method": null,
+                  "epw": null,
+                  "exchange_correlation_functional": null,
+                  "phonon_method": null,
+                  "qe": null,
+                  "sscha": null,
+                  "vibrational_treatment": null
+                },
+                "method_variant_status": "Eliashberg variant not specified",
+                "parameters": {
+                  "extensions": [
+                    {
+                      "key": "omega_log_reported",
+                      "value_kind": "text",
+                      "value_raw": "1,591",
+                      "unit_raw": "K",
+                      "reported": {
+                        "evidences": null,
+                        "reported": true,
+                        "unit_raw": "K",
+                        "value_boolean": null,
+                        "value_kind": "number",
+                        "value_max": null,
+                        "value_min": null,
+                        "value_number": 1591,
+                        "value_raw": "1,591",
+                        "value_text": null
+                      }
+                    }
+                  ],
+                  "lambda_ep": 1.12,
+                  "mu_star": 0.13,
+                  "omega_log": 1591.0
+                },
+                "table_row_ref": {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "group": null,
+                  "row_index": 2,
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d"
+                }
+              },
+              "evidences": [
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "ce687467010f7eae81de035f2776dd3211c5f758b34e0eea12696e8916b78e7b",
+                  "bbox": [
+                    477.92535909999987,
+                    547.7675836,
+                    490.2994070799998,
+                    554.5266336544
+                  ],
+                  "polygon": null,
+                  "quote": "138",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "f1e436e873308a14c247f80e4a6089796f7e78314cec76dcee6cc258e7d18429",
+                  "bbox": [
+                    457.62423,
+                    511.8809836,
+                    510.5655167999999,
+                    528.6178736544
+                  ],
+                  "polygon": null,
+                  "quote": "Tc, K; μ* = 0.13 Eliashberg",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1",
+                  "bbox": [
+                    190.37537763999998,
+                    547.7675836,
+                    204.76830597999995,
+                    554.5266336544
+                  ],
+                  "polygon": null,
+                  "quote": "1.12",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c",
+                  "bbox": [
+                    223.08841239999995,
+                    547.7675836,
+                    241.60652151999992,
+                    554.5266336544
+                  ],
+                  "polygon": null,
+                  "quote": "1,591",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "source_version": 1,
+                  "pdf_page": 5,
+                  "printed_page": null,
+                  "block_id": "0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77",
+                  "bbox": [
+                    220.42142,
+                    521.8589836,
+                    244.3336014,
+                    529.3505111439999
+                  ],
+                  "polygon": null,
+                  "quote": "wlog, K",
+                  "parser": "complementary",
+                  "parser_version": "1",
+                  "source_kind": "text_layer",
+                  "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+                  "figure_id": null,
+                  "page": 5
+                },
+                {
+                  "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+                  "quote": "LaH8\n300\n1.12\n1,591\n131\n114\n150\n138"
+                }
+              ],
+              "is_representative": false,
+              "basis_kind": "paper_quote"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "file_id": "c92dfed811754b8abb37e692cafabdaf",
+      "file_role": "main",
+      "source_name": "2017 LaHn YHn-刘寒雨.pdf",
+      "content": "{\"file_id\": \"c92dfed811754b8abb37e692cafabdaf\", \"source_sha256\": \"bf06c039e4a673454f1240a7febb8f14b5a9cb1762f89bbfd517bb09d0a117e8\", \"source_version\": 1, \"parser\": {\"name\": \"complementary\", \"version\": \"1\", \"mode\": \"ocr\", \"components\": {\"mineru\": {\"name\": \"mineru\", \"version\": \"4.0.6\", \"mode\": \"ocr\"}, \"marker\": {\"name\": \"marker\", \"version\": \"2.0.0\", \"mode\": \"vlm\"}}}, \"pages\": [{\"geometry\": {\"pdf_page\": 2, \"printed_page\": null, \"width\": 584.9569702148438, \"height\": 782.9860229492188}, \"blocks\": [{\"block_id\": \"f5e4eb6adcaaef011ae5e11ffca4746e2853279a16c260f12fa4c106cc4adf0c\", \"block_type\": \"paragraph\", \"pdf_page\": 2, \"text\": \"ow  eee o en q eeoozo\", \"bbox\": [8.774354553222656, 696.8575604248047, 15.793838195800781, 779.0710928344727], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"4b51f7650ab5fcf625603ce6411733a928cd1765c25477367fb732aa76849a48\", \"block_type\": \"heading\", \"pdf_page\": 2, \"text\": \"Results\", \"bbox\": [36.26733215332031, 50.111105468750004, 69.02492248535155, 60.289923767089846], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"066edf05067e24d200468da9050263f48d3158ca38c0e64682e4df688efa4996\", \"block_type\": \"paragraph\", \"pdf_page\": 2, \"text\": \"We began with structure searches at ambient pressure for \\\\mathrm { L a H } _ { 2 } . The fcc structure is found to be stable at low pressure, in agreement with experiment. Thinking the high-pressure regime would be most productive for new stoichiometries, we moved directly to 150 and 300 GPa. We first performed structure pre-diction at 150 and 300 GPa for LaHx \\\\hat { ( } x = 1 { - } 1 2 ) . LaH2, LaH3, LaH4, LaH5, LaH8, and \\\\mathrm { L a H _ { 1 0 } } are found to be stable at 150 GPa (Fig. 1). Note that this figure is plotted with LaH2 as the lanthanum-richendpoint, because this composition has the most negative enthalpy/atom at every pressure considered. Fig. 2 shows the computed geometries for the most stable phases we found at each stoichiometry, for n = 2 – 8 . Interestingly, the stable phase predicted for \\\\mathrm { L a H _ { 6 } } is not sodalite-type but an R-3m structure.The convex hull shows that Lal \\\\mathrm { I _ { 6 } } is not stable from 150 to 300 GPa (Fig. S1); LaH5 in a P { - } 1 structure is stable from 150 to 200 GPa. LaH2 adopts a C 2 / m structure with a H-H distance of 1.53 Å, LaH3 adopts a Cmcm structure with H-H distance of 1.42 Å,andLaH8has a C2/m structure with H–H distance of 1.02 Å (all at 300 GPa).\", \"bbox\": [34.512461242675776, 62.638881835937504, 285.45900146484377, 253.68747143554688], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"b52bece5aa0a6ec27d150b0bfd5e0399e8bcf3b64e169561af14894c59cd9131\", \"block_type\": \"paragraph\", \"pdf_page\": 2, \"text\": \"Most interestingly, we find that \\\\mathrm { L a H _ { 1 0 } } adopts a sodalite-like structure with the La atoms arrayed on an fcc rather than a bcc lattice (Fig. 3). To illustrate the difference between fcc \\\\mathrm { L a H _ { 1 0 } } and previous sodalite-like bcc \\\\mathrm{CaH_{6}/YH_{6}} structure, Fig. 3B shows the sodalite-like \\\\mathrm { L a H _ { 6 } } structure. The \\\\mathrm { f c c { - } L a H _ { 1 0 } } structure contains [ 4 ^ { 6 } 6 ^ { 1 2 } ] polyhedra which contain hydrogen cubes ( \\\\mathrm { F i g . } ~ 3   A and C ) , , whereas conventional sodalite is built up of [ \\\\grave { 4 } ^ { 6 } \\\\grave { 6 } ^ { 8 } ] polyhedra (Fig. 3 B and D ) . The H network, made of different atoms, is known in the clathrate and zeolite\", \"bbox\": [34.512461242675776, 252.12149938964845, 285.45900146484377, 344.51385009765625], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"914c990c2a217164b2cffd7ff3125a345eed7db36ec9ca2fd82af72553eeb874\", \"block_type\": \"figure\", \"pdf_page\": 2, \"text\": \"\", \"bbox\": [66.68509460449219, 367.2204447631836, 251.5314971923828, 520.6857052612305], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"e7a86a63f1aa486fc28c0d517b7ee04b288c70cefc0718a70153301131636cad\", \"block_type\": \"figure\", \"pdf_page\": 2, \"text\": \"\", \"bbox\": [67.85500854492187, 523.0346633300782, 252.7014111328125, 678.0658958740235], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"279d879be6d399282ef8733aef6233c19edeae1dbff43807cdb173080482fb0f\", \"block_type\": \"caption\", \"pdf_page\": 2, \"text\": \"Fig. 1. Formation enthalpy of predicted structures in the La-H system at (A) 150 GPa, (B) 300 GPa. The x axis is the concentration of hydrogen pairs in the stoichiometric compositions considered as described by the generic formula ( \\\\mathsf{H}_2 )_{\\\\mathsf{x}} ( \\\\mathsf{LaH}_2 )_{1-\\\\mathsf{x}} ( 0 < \\\\mathsf{x} < 1 ) . The enthalpies are shown relative to the ground states of \\\\mathsf { H } _ { 2 } and \\\\mathsf { L a H _ { 2 } } at each pressure.\", \"bbox\": [35.097418212890624, 682.7638120117188, 284.8740444946289, 729.7429733886719], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"730626f400bffedad65182aae211a9affed0b9a2a9346ea0fdcecbbb413cdaa7\", \"block_type\": \"paragraph\", \"pdf_page\": 2, \"text\": \"community as AST (41). The La atoms sit at the 4b Wyckoff position ( { \\\\dot { 0 } } ,   0 ,   0 ) , the H atoms at the 32f position (0.12, 0.38, \\\\underline { { \\\\underline { { 0 . 1 2 } } } } and 8c position (0.25, 0.25, 0.75).The shortest H–H distance is 1.1 Å (250 GPa), which is close to H–H distance pre-dicted for atomic metallic hydrogen near 500 GPa (1 Å) (1). In contrast, the H-H distance in sodalite-type \\\\mathrm { C a H _ { 6 } } is 1.24 Å at 150 GPa.\", \"bbox\": [293.0634420776367, 50.111105468750004, 544.5949392700196, 120.57984753417969], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"2db5ea964d76ba2f22b8f2567a41be2aa8d6ecb2581d863785428d5a3114e881\", \"block_type\": \"paragraph\", \"pdf_page\": 2, \"text\": \"The above structures of \\\\mathrm { L a H _ { 1 0 } } encouraged us to explore the Y-H system at similar pressures (Fig. S2). Previously, YH3 was predicted to adopt an fcc structure of Y,with atomic H located in the tetrahedral and octahedral interstitial sites. The compound was predicted to be superconducting with a maximum T _ { c } is 40 K near 18 GPa ( \\\\underline { { \\\\mu ^ { * } = 0 . 1 } } ) (16). Another theoretical study suggested two energetically competing hydrogen-rich polymorphs \\\\mathrm { Y H _ { 4 } } and \\\\mathrm{YH_{6}^{\\\\bar{}}(30)} . At 120 GPa, both are predicted to be superconductors with maximum T _ { c } of 95K and 264 K for \\\\mathrm { Y H _ { 4 } } and \\\\mathrm { Y H _ { 6 } } , respectively. Our calculations indicate that \\\\mathrm { Y H _ { 6 } } is stable in the sodalite structure up to 300 GPa (Fig. 4 and Fig. S2). As expected, \\\\mathrm { Y H _ { 1 0 } } adopts the same structure as \\\\underline { { \\\\mathrm { L a H _ { 1 0 } } } } over a range of pressures.We predict that \\\\mathrm { Y H _ { 1 0 } } is the energetically stable phase from 250 to 300 GPa, and is dynamically stable down to 220 GPa.\", \"bbox\": [293.0634420776367, 120.57984753417969, 544.5949392700196, 270.13017791748047], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"33b37320af23b7aa57714149a66330d2d3534929360cd2739d73b0a04fae60af\", \"block_type\": \"paragraph\", \"pdf_page\": 2, \"text\": \"Fig. 5 shows computed \\\\mathrm { Y H } _ { n } geometries for the most stable phases found at each stoichiometry, for n = 2 , 3 , 4 , 6 , 8 , and 12. The \\\\underset { \\\\sim } { \\\\mathrm { Y H } _ { 2 } } adopts a P6/mmm structure with H-H distances of 1.46 Å at 300 GPa. The \\\\mathrm { Y H } _ { 3 } is stable from 150 to 250 GPa and adopts a Pnma structure with H–H distances of 1.54 Å at 300 GPa ( \\\\mathrm { F i g . ~ S 2 } ) The \\\\mathrm { Y H _ { 4 } } adopts an I4/mmm structure with H–H distances of 1.37 Å at 300 GPa. It is interesting to see that \\\\mathrm { Y H _ { 6 } } has the same sodalite structure as \\\\mathrm { C a H _ { 6 } } from 150 to 300 GPa with H–H distances of 1.19 Å at 300 \\\\mathrm { G P a } and is stable from 150 to 300 GPa. We found YH8 is unstable from 150 to 300 GPa with a Cc structure (Fig. S2). The \\\\mathrm { Y H } _ { 1 2 } is stable from 50 to 250 GPa and is a C2/c structure with shortest H–H distances of 0.79 Å at 250 GPa.\", \"bbox\": [293.0634420776367, 269.34719189453125, 544.0099822998047, 400.10585772705076], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"7a8ef4a9d057c62e7024e334b465cfa98ed5753555a9e2968aca4c797a4fcc9f\", \"block_type\": \"paragraph\", \"pdf_page\": 2, \"text\": \"Before calculating possible superconducting properties we analyze the electronic band structures of the C2/m - \\\\mathrm{LaH_8} and fcc-\\\\mathrm { L a H _ { 1 0 } } structures. The band dispersion shows the metallic character of both structures at these pressures (Fig. 6).The fcc \\\\mathrm { L a H _ { 1 0 } } is a good metal with several bands crossing the Fermi level along many directions.This fact manifests itself in a noticeable density of electronic states at the Fermi level:10.0 states/Ry,which is a factor of 1.4 higher than that previously found in SH3(42) at an optimal pressure of 200 GPa (Fig. S3). Remarkably, not only the \\\\bar { d } electrons of La and s electrons of H contribute to \\\\underline { { \\\\mathbf { N } ( \\\\mathbf { E } _ { \\\\mathrm { f } } ) } } but also f electrons of La;moreover, the latter contribution is dominant. This is due to the fact that external pressure destabilizes La 6s and La 5d orbitals to a greater extent than La 4f: the first two have five and two nodes in their radial wave functions, respectively, whereas the latter has none. This is in sharp contrast with the \\\\overline { { \\\\mathrm { Y H _ { 1 0 } } } } system, where only the d electrons of Y and s electrons of H are the main contributors to \\\\mathrm { N ( E _ { f } ) } . Phonon calculations reveal no imaginary frequencies for \\\\mathrm { L a H _ { 8 } } and LaH10 over a wide pressure range, indicating dynamic stability. Specifically, we find that the structure shown for \\\\underline { { \\\\mathrm { L a H _ { 1 0 } } } } is dynamically stable down to 210 GPa. The EPC calculations for different phonon modes indicate that there are no significant contributions in particular directions (Fig. 6 \\\\; C and D ) . Note that there are no high-frequency vibrations, consistent with the absence of molecular \\\\mathbf { H } _ { 2 } entities. The highest frequency for the structure here ( 2 , 0 0 0 \\\\; \\\\mathrm { c m ^ { - 1 } } ) can be compared to the 2 , 6 0 0 \\\\; \\\\mathrm { c m } ^ { - 1 } calculated for atomic metallic hydrogen in the Cs-IV structure at 500 GPa (43); the lower frequency for the former suggests still weaker H-H interactions in the hydride.\", \"bbox\": [292.4784851074219, 398.5398856811523, 545.1798962402344, 689.0277001953125], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"02b98c8f65f7d17607ee27a246ca8d207e85498d11dddb82285c6208b33a0254\", \"block_type\": \"paragraph\", \"pdf_page\": 2, \"text\": \"Electron-coupling calculations for LaH4 give a relatively small λ of 0.43. The estimated T _ { c } \\\\mathrm { ~ i s ~ } 5 \\\\mathrm { - 1 0 } K at 300 GPa with the typical choice of the Coulomb potential of \\\\mu ^ { * }   =   0 . 1  –  0 . 1 3 . Using the McMillan equation (44), we calculated T _ { c } using the spectral\", \"bbox\": [293.64839904785157, 688.2447141723633, 544.0099822998047, 729.7429733886719], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"2e16fbfb12246ba7919f6e96c8cd29606e45ac580b9e9d6654e67a6a791b3067\", \"block_type\": \"paragraph\", \"pdf_page\": 2, \"text\": \"PHYSICS\", \"bbox\": [559.2188635253906, 290.48781451416016, 567.4082611083984, 317.8923253173828], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"992e1674d2de880c2e4f211d9b88e3aac52ff5cdd65614d65e7e3fdc55d8c3e3\", \"block_type\": \"paragraph\", \"pdf_page\": 2, \"text\": \"Liu et al.\", \"bbox\": [36.26733215332031, 743.8367218017578, 66.10013763427735, 754.0155401000976], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"b8690744b4671cc727b1f5eae91374a58708432599aa12f7a9e90ef9f3da24c9\", \"block_type\": \"paragraph\", \"pdf_page\": 2, \"text\": \"PNAS | July 3, 2017 vol. 114 |no. 27\", \"bbox\": [380.22203063964844, 743.0537357788086, 515.9320477294922, 754.0155401000976], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"5b57af38fa8f74ef9a4dcb5a218acf53387a46f7ce13f3404784ac3586a00fe6\", \"block_type\": \"paragraph\", \"pdf_page\": 2, \"text\": \"6991\", \"bbox\": [526.4612731933594, 744.619707824707, 542.840068359375, 753.2325540771484], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}], \"tables\": []}, {\"geometry\": {\"pdf_page\": 3, \"printed_page\": null, \"width\": 584.9569702148438, \"height\": 782.9860229492188}, \"blocks\": [{\"block_id\": \"d26fe6dbf680e9887ce87e70f282d9974cccceb3a4eb301b174d06831763ec4e\", \"block_type\": \"paragraph\", \"pdf_page\": 3, \"text\": \"ow  ee o e q eeoozo\", \"bbox\": [8.774354553222656, 696.8575604248047, 15.793838195800781, 779.0710928344727], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"737cd1b75d83b5bb48de443c7676983a5b2aafa87476a81f14d061b0d70a773a\", \"block_type\": \"figure\", \"pdf_page\": 3, \"text\": \"\", \"bbox\": [97.10285705566407, 49.32811944580078, 199.47032684326174, 154.2482465209961], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"0c37c3a6e4000c4736405a271f4d24bd30711b50bdd1db7ec3eb6176c4350408\", \"block_type\": \"figure\", \"pdf_page\": 3, \"text\": \"\", \"bbox\": [212.92433715820312, 48.54513342285156, 326.40598937988284, 179.3037992553711], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"78b0062c753be0e1c77c2e763d3d209e4a88287a42784506ac241d50f14dbe92\", \"block_type\": \"figure\", \"pdf_page\": 3, \"text\": \"\", \"bbox\": [98.8577279663086, 158.1631766357422, 195.96058502197266, 310.06246508789064], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"611727098dec93978ad776dd4cf2e54b8f8baa9a6aae8ffc144a9e7adad87c8b\", \"block_type\": \"caption\", \"pdf_page\": 3, \"text\": \"F\", \"bbox\": [352.14409606933594, 183.2187293701172, 362.67332153320314, 196.5294917602539], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"7b0c1db5bf83660ebcccd7c8a4b9733f0868eb3c792a057331b5452f32a3c51c\", \"block_type\": \"figure\", \"pdf_page\": 3, \"text\": \"\", \"bbox\": [212.33938018798827, 183.2187293701172, 346.87948333740235, 308.4964930419922], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"e3f06f609a7eaf1aa5e58523a51f5e7a508a9d3fe1a405ff2316929153075458\", \"block_type\": \"caption\", \"pdf_page\": 3, \"text\": \"Fig. 2. Predicted lanthanum hydride structures. (A) LaH₂, (B) LaH3, (C) LaH₄, (D) LaH₅, (E) LaH₆, and (F) LaH8g. Large and small spheres represent La and H atoms.\", \"bbox\": [39.77707397460938, 315.54336724853516, 546.9347671508789, 326.5051715698242], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"5c42754c6ed5d7766c4502f919141bddb26215e091950bf3f6ebe62e96b25f31\", \"block_type\": \"paragraph\", \"pdf_page\": 3, \"text\": \"function [ \\\\alpha ^ { 2 } F ( \\\\omega ) ] , again with \\\\mu ^ { * } = 0 . 1  –  0 . 1 3 , as previously used in superconductivity calculations for Y (15), La (45, 46), SH3 (24), CaH6 (17), YH6 (30), and other superconductors.\", \"bbox\": [39.77707397460938, 342.1648920288086, 288.9687432861328, 375.833291015625], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"6974bd4e68635344b0dd88df54274ab813fa1762cc08a4587d5187b8e4bea793\", \"block_type\": \"formula\", \"pdf_page\": 3, \"text\": \"T_{c} = \\\\frac{\\\\omega_{log}}{1.2} \\\\exp \\\\left( \\\\frac{-1.04(1 + \\\\lambda)}{\\\\lambda - \\\\mu^*(1 + 0.62\\\\lambda)} \\\\right)\", \"bbox\": [99.44268493652345, 386.7950953369141, 226.9633044433594, 414.98259216308594], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"d229db73a280d095a6c609e64a14a206fbe882959d764fee8d2fd3896d57d1ad\", \"block_type\": \"figure\", \"pdf_page\": 3, \"text\": \"\", \"bbox\": [351.55913909912107, 49.32811944580078, 468.5505331420899, 166.77602288818358], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"a4c34635cd3e27f037d6274c027f809be0fc08363cfdb7c8e9de158dfa34efb1\", \"block_type\": \"paragraph\", \"pdf_page\": 3, \"text\": \"[1]\", \"bbox\": [275.5147329711914, 394.62495556640624, 287.7988293457031, 407.15273193359377], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"8cccc94e6551e00e3b8de2000185e377880b0ac278f5b18488562f181a7f15af\", \"block_type\": \"paragraph\", \"pdf_page\": 3, \"text\": \"Here, λis the first reciprocal moment of \\\\alpha ^ { 2 } F ( \\\\omega )\", \"bbox\": [40.36203094482422, 423.5954384155274, 230.47304626464845, 435.34022875976564], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"50bc60f5d57b6854c9af2e920462f28df574e403415d09c558438ad466ce3cb1\", \"block_type\": \"formula\", \"pdf_page\": 3, \"text\": \"\\\\lambda   =   2 \\\\int _ { 0 } ^ { \\\\infty }   \\\\frac { \\\\alpha ^ { 2 } F ( \\\\omega ) } { \\\\omega } d \\\\omega   \\\\approx   \\\\sum _ { q j } \\\\lambda _ { q j } \\\\omega ( \\\\pmb { q } ) ,\\\\tag{[2]}\", \"bbox\": [97.10285705566407, 450.99994921875, 287.7988293457031, 478.4044600219726], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"507b6cae277ed692b3f257704db04f428adfe88fe03a3ee9e0e44d1125b4e2d6\", \"block_type\": \"figure\", \"pdf_page\": 3, \"text\": \"\", \"bbox\": [354.4839239501953, 194.18053369140625, 490.7788980102539, 300.6666328125], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"1140ecdb031215a81591c94a8c3fb4fbcaf945f4023df7c392ee009d8cff09ac\", \"block_type\": \"paragraph\", \"pdf_page\": 3, \"text\": \"and \\\\omega ( \\\\boldsymbol { q } ) is the weight of a q (wave vector of crystal vibrations) point in the first BZ. The EPC spectral function \\\\alpha ^ { 2 } F ( \\\\omega ) is expressed in terms of the phonon linewidth \\\\gamma _ { q j } arising from EPC,\", \"bbox\": [39.19211700439453, 487.8002922973633, 290.72361419677736, 530.0815375366211], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"c7ada48ba55f84076d2238d9f5b78d350c18c899ecb26eee92869e7d5cd329b7\", \"block_type\": \"formula\", \"pdf_page\": 3, \"text\": \"\\\\alpha ^ { 2 } F ( \\\\omega )   =   \\\\frac { 1 } { 2 \\\\pi N _ { f } } \\\\sum _ { q j } \\\\frac { \\\\gamma _ { q j } } { \\\\omega _ { q j } } \\\\delta ( \\\\omega   -   \\\\omega _ { q j } ) \\\\omega ( \\\\pmb { q } ) .\\\\tag{[3]}\", \"bbox\": [90.08337341308594, 542.6093139038086, 287.7988293457031, 568.4478526611327], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"f7f42fe93ac4410e278bea004a0e085f22bb1f3cb41af32417f5329d1943ddaa\", \"block_type\": \"paragraph\", \"pdf_page\": 3, \"text\": \"In this equation, N _ { f } is the electronic density of electron states at the Fermi level. The linewidth \\\\gamma _ { q j } of a phonon mode j at wave vector q, arising from EPC is given by\", \"bbox\": [38.60716003417969, 577.8436849365235, 289.55370025634767, 609.9461118774415], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"7b38f865db4e494c0e9dc3dd75f1dceecdc7e54ccf400d6d60760ae1750cb6e7\", \"block_type\": \"formula\", \"pdf_page\": 3, \"text\": \"\\\\gamma _ { q j }   =   2 \\\\pi \\\\omega _ { q j } \\\\sum _ { n m } \\\\int d ^ { 3 } k   \\\\big /   \\\\Omega _ { b z } \\\\big | g _ { k n , k + q m } ^ { j } \\\\big | ^ { 2 }   \\\\times   \\\\delta \\\\big ( \\\\xi _ { k n } - \\\\xi _ { F } \\\\big )   \\\\times   \\\\delta \\\\big ( \\\\xi _ { k + q m } - \\\\xi _ { F } \\\\big ) ,\\\\tag{[4]}\", \"bbox\": [40.94698791503907, 623.2568742675782, 287.7988293457031, 660.8402033691406], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"9c6c4d299aafcbc1e955c644f84416dfa0afef7e7885ebecaee5ab266069f03d\", \"block_type\": \"paragraph\", \"pdf_page\": 3, \"text\": \"where the sum is over the first BZ, with \\\\Omega _ { \\\\mathrm { B Z } } as the volume of the BZ, and \\\\xi _ { k n } are the energies of bands measured with respect to the Fermi \\\\xi _ { F } level at point k. Here, g _ { k n , k + q m } ^ { j } is the electronphonon matrix element for scattering from an electron in band n at wave vector k state to band m at wave vector k + q via a phonon with wave vector q.\", \"bbox\": [39.77707397460938, 667.8870775756836, 289.55370025634767, 729.7429733886719], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"5d3fa5c7c27e7a2097efde9cac9cdd7c5577d794ebd4a5f0b3701317a5c17df2\", \"block_type\": \"paragraph\", \"pdf_page\": 3, \"text\": \"The calculated electron-coupling parameter for Laß \\\\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\\\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,\", \"bbox\": [298.3280548095703, 342.9478780517578, 547.5197241210938, 367.2204447631836], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"f99e5003805e5ad0f3b1223b2555c7f911e327b581cbcfaacdbafc0c1c2b3567\", \"block_type\": \"caption\", \"pdf_page\": 3, \"text\": \"B\", \"bbox\": [421.75397552490233, 386.01210931396486, 431.6982440185547, 398.5398856811523], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"2d0eee3210324aac5cac79c9bf3baef46475dfcb6de216adc925e02c658e6889\", \"block_type\": \"figure\", \"pdf_page\": 3, \"text\": \"\", \"bbox\": [302.42275360107425, 384.4461372680664, 428.1885021972656, 580.9756290283203], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"1040d6c4feb2fad5c1e5257834d6a88c111504a0740a837536f634da11d83e66\", \"block_type\": \"figure\", \"pdf_page\": 3, \"text\": \"\", \"bbox\": [431.6982440185547, 388.3610673828125, 546.3498101806641, 573.1457687988282], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"5d3936aef6e47d71df4d469222f84405adf50bc8b2c2faa72b2fbf0b166e226e\", \"block_type\": \"caption\", \"pdf_page\": 3, \"text\": \"C\", \"bbox\": [305.34753845214846, 576.277712890625, 317.04667785644534, 588.8054892578125], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"b4aff9027b3052bec0c8ebc84c6b53985307b163993ee94bde2b94becc29815f\", \"block_type\": \"figure\", \"pdf_page\": 3, \"text\": \"\", \"bbox\": [314.70684997558595, 578.6266709594727, 425.2637173461914, 694.508602355957], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"4c3eb2f525bccf76a9043c101ecfd44fb6008d47a4b92aa7f884492ce05a88ae\", \"block_type\": \"caption\", \"pdf_page\": 3, \"text\": \"D\", \"bbox\": [443.9823403930664, 576.277712890625, 455.0965228271485, 588.0225032348633], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"13fa72fde82d44d0efc5e7fbd34f26c71ff44537c0947e71f0d593bd387eb9a2\", \"block_type\": \"figure\", \"pdf_page\": 3, \"text\": \"\", \"bbox\": [443.3973834228516, 583.324587097168, 534.0657138061524, 671.8020076904297], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"74b6f55b80c49b122c78a43c8f5753a6e4c0384e858641055e9efd028a012331\", \"block_type\": \"caption\", \"pdf_page\": 3, \"text\": \"Fig. 3. Crystal structure of sodalite-like \\\\mathsf { L a H } _ { 1 0 } \\\\left( A \\\\right) and LaH6 (B) at 300 GPa. In the \\\\mathsf { L a H _ { 1 0 } } structure, the red circle highlights the cube hydrogen units. The bottom shows the [46612] (C) and [4668] (D) hydrogen polyhedra in these structures.\", \"bbox\": [298.3280548095703, 700.7724905395507, 548.1046810913086, 728.9599873657227], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"5582319dbe2154ffbe865ae8cbc73e4718bd52d5b720d20894205c08d8b56292\", \"block_type\": \"paragraph\", \"pdf_page\": 3, \"text\": \"6992\", \"bbox\": [40.94698791503907, 744.619707824707, 58.495697021484375, 753.2325540771484], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"a6b0937063d7cbbf009539949204def69eb7cf7e38a40d64aa1fb51b26969c56\", \"block_type\": \"paragraph\", \"pdf_page\": 3, \"text\": \"www.pnas.org/cgi/doi/10.1073/pnas.1704505114\", \"bbox\": [67.85500854492187, 743.8367218017578, 214.67920806884766, 754.0155401000976], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"2e8efa6c10376acd1dd62c5814a6d2f114813396cf71f584836165067eb724ce\", \"block_type\": \"paragraph\", \"pdf_page\": 3, \"text\": \"Liu et al.\", \"bbox\": [518.2718756103516, 744.619707824707, 546.9347671508789, 753.2325540771484], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}], \"tables\": []}], \"table_contexts\": []}"
+    },
+    {
+      "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+      "file_role": "supplementary",
+      "source_name": "2017 LaHn 刘寒雨-Supplimentary.pdf",
+      "content": "{\"file_id\": \"24c6c4619d5440fca85f4ca3871bdc4a\", \"source_sha256\": \"5b1b8e740c08cf69d973a712c6058e9fa2b9306098fcab39dc632bf998a33624\", \"source_version\": 1, \"parser\": {\"name\": \"complementary\", \"version\": \"1\", \"mode\": \"ocr\", \"components\": {\"mineru\": {\"name\": \"mineru\", \"version\": \"4.0.6\", \"mode\": \"ocr\"}, \"docling\": {\"name\": \"docling\", \"version\": \"2.130.0\", \"mode\": \"text\"}, \"marker\": {\"name\": \"marker\", \"version\": \"2.0.0\", \"mode\": \"vlm\"}}}, \"pages\": [{\"geometry\": {\"pdf_page\": 1, \"printed_page\": null, \"width\": 584.9569702148438, \"height\": 782.9860229492188}, \"blocks\": [{\"block_id\": \"6f60f889a9864a8dbbffe0cfd9fb2aadf92126c1669df47224efdeb55be5b9d6\", \"block_type\": \"heading\", \"pdf_page\": 1, \"text\": \"Supporting Information\", \"bbox\": [35.68237518310547, 49.32811944580078, 254.45628204345704, 74.38367218017578], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"770f01416abcb3992a3f7a87ccd6f8cf9d92e7790f6dbeba9d8cc5202bd29e2d\", \"block_type\": \"heading\", \"pdf_page\": 1, \"text\": \"Liu et al. 10.1073/pnas.1704505114\", \"bbox\": [35.097418212890624, 84.56249047851563, 236.3226159667969, 98.65623889160156], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"d3313a6cb2a564dcfbcd3dc5ed8de2e84f11f354f78ad9c1f26a422da7f81dca\", \"block_type\": \"heading\", \"pdf_page\": 1, \"text\": \"SI Text\", \"bbox\": [35.68237518310547, 103.35415502929688, 69.02492248535155, 114.31595935058593], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"ea500a521525caf739d5edae88ebc07149304b3d68602ed295e036d68b982b0a\", \"block_type\": \"paragraph\", \"pdf_page\": 1, \"text\": \"Table S1 presents calculated { T _ { c } } \\\\mathbf { s } of \\\\mathrm { L a H _ { n } }   ( n = 4 ,   8 , and 10) and \\\\mathrm { Y H _ { 1 0 } } at high pressures for different models and parameters. It is seen that the McMillan and Eliashberg equations lead to similar results for small λ. For larger λ, however, the Eliashberg equation predicts higher Tc values. Table S2 contains the lattice parameters and atomic coordinates for the predicted structures.\", \"bbox\": [35.097418212890624, 115.09894537353514, 285.45900146484377, 176.17185516357424], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"f4145b332df75e778ce333151339372f77f1b471f908edd58f8d283291e99339\", \"block_type\": \"paragraph\", \"pdf_page\": 1, \"text\": \"We compare the calculated density of states (DOS) for \\\\mathrm { L a H _ { 1 0 } , } \\\\mathbf { Y H } _ { 1 0 } , and \\\\mathbf { \\\\bar { S } H } _ { 3 } in Fig. S3. In the case of \\\\mathrm { S H } _ { 3 , } we found a DOS at the Fermi level of 7.1 states/Ry which is close to the value of 6.93 states/Ry found in the previous work (42). The calculated N ( E _ { f } ) of \\\\mathrm { L a \\\\dot { H } _ { 1 0 } } and \\\\mathrm { Y H _ { 1 0 } } at 250 GPa is larger than that of \\\\mathrm { S H } _ { 3 }\", \"bbox\": [35.097418212890624, 175.388869140625, 285.45900146484377, 227.84893267822264], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"ecfb26f691388558bc695490552af76ee8f3b94855e6fb149507bd7d649f7cea\", \"block_type\": \"figure\", \"pdf_page\": 1, \"text\": \"\", \"bbox\": [130.44540435791015, 256.03642950439456, 290.72361419677736, 389.92703942871094], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"e24f3bffe21c94b9be130daf3d99ea695bc63910b374a079cf68123c09bac3dc\", \"block_type\": \"figure\", \"pdf_page\": 1, \"text\": \"\", \"bbox\": [129.27549041748048, 393.0589835205078, 291.3085711669922, 526.9495934448242], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"636f7dc089fa6078207680d0ae28af4a07cf791b5c1634ec4d49e67322400f0e\", \"block_type\": \"paragraph\", \"pdf_page\": 1, \"text\": \"at 200 GPa. For \\\\mathrm { L a H _ { 1 0 } , } both the d and f electrons of \\\\mathrm { L a } as well as the s electrons of H contribute to N ( E _ { \\\\mathrm { f } } ) . Indeed, the f-electron contribution is dominant, which is in sharp contrast with the \\\\mathrm { Y H _ { 1 0 } } system, where only the d electrons of Y and s electrons of H are the main contributors to N ( E _ { \\\\mathrm { f } } ) 1\", \"bbox\": [297.74309783935547, 102.57116900634766, 548.6896380615234, 159.72914868164062], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"657fbdc2322bae5de974105843b466cb1172d968eac9a4720b91eacde3da8b3e\", \"block_type\": \"paragraph\", \"pdf_page\": 1, \"text\": \"The distances between H atoms in \\\\mathrm { L a H _ { 1 0 } } as a function of pressure are shown in Fig. S4. Each La atom is coordinated with 12 hydrogen atoms. H atoms are 4-coordinated, with bond distances of 1.08 and 1.15 Å (see also Fig. 3). Finally, the formation enthalpy of predicted La-H and Y-H structures at 300 GPa including ZPE is shown in Fig. S5.\", \"bbox\": [297.74309783935547, 158.9461626586914, 548.6896380615234, 227.84893267822264], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"298f55cc053f7a98bea64c004db492959d9021aa70b82de0bf0f2e683f7854a1\", \"block_type\": \"figure\", \"pdf_page\": 1, \"text\": \"\", \"bbox\": [291.89352813720706, 257.602401550293, 452.7566949462891, 391.4930114746094], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"530bc1e804a9fe606e9d1b3b4705b1f416518baed5dfebe6bead355eca11cf07\", \"block_type\": \"figure\", \"pdf_page\": 1, \"text\": \"\", \"bbox\": [290.72361419677736, 393.841969543457, 454.5115658569336, 528.5155654907227], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"3fdeabdd342eb9124aff5898fbadc4fbe41149890b839e7c6ac5cc7cd1d2bc92\", \"block_type\": \"caption\", \"pdf_page\": 1, \"text\": \"Fig. S1. Formation enthalpy of predicted structures in the La–H system at (A) 150, (B) 200, (C) 250, and (D) 300 GPa. The x axis is the concentration of hydrogen pairs in the stoichiometric compositions considered as described by the generic formula ( \\\\mathsf{H}_2 )_{\\\\mathsf{x}} ( \\\\mathsf{LaH}_2 )_{1-\\\\mathsf{x}} ( 0 < \\\\mathsf{x} < 1 ) The enthalpies are shown relative to the ground states of H₂ and LaH₂ at each pressure.\", \"bbox\": [34.512461242675776, 533.9964676513672, 548.1046810913086, 562.9669505004882], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"1b26c9c4ee5e2a615f22298638da239bace99ac0b957135ba44ff3de2ca48058\", \"block_type\": \"paragraph\", \"pdf_page\": 1, \"text\": \"Liu et al. www.pnas.org/cgi/content/short/1704505114\", \"bbox\": [36.26733215332031, 743.8367218017578, 201.81015472412108, 754.0155401000976], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"4caa0d662afe399e78cd9652a229585eb23240a06b5fa357cd5133275a94fe3a\", \"block_type\": \"paragraph\", \"pdf_page\": 1, \"text\": \"1 of 8\", \"bbox\": [527.0462301635743, 744.619707824707, 548.1046810913086, 754.0155401000976], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}], \"tables\": []}, {\"geometry\": {\"pdf_page\": 5, \"printed_page\": null, \"width\": 584.957, \"height\": 782.9860229492188}, \"blocks\": [{\"block_id\": \"349657a66fc49357b4b43fa46ceba53bf3ab9dd0a6eb3ae87443b2131e245314\", \"block_type\": \"figure\", \"pdf_page\": 5, \"text\": \"\", \"bbox\": [170.80743530273438, 50.111105468750004, 414.7344918823242, 252.12149938964845], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"56ae4d78903a0cc45445fb57b7f97b86fe207d78a0d901901da69eb6cd378569\", \"block_type\": \"figure\", \"pdf_page\": 5, \"text\": \"\", \"bbox\": [167.88265045166014, 256.03642950439456, 414.7344918823242, 456.4808513793945], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"577880e40558cc5a3ce737a33ca01a538ce1b0c74696c70e79619c21a1d68314\", \"block_type\": \"caption\", \"pdf_page\": 5, \"text\": \"Fig. S5. Formation enthalpy of predicted structures in the (A) La-H and (B) Y-H system at 300 GPa including ZPE.\", \"bbox\": [102.95242675781249, 461.961753540039, 480.2496725463867, 472.9235578613281], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"03af162ade6ea902a656cad404d2cf56cb5c9c0c067b77500dff34e1ff906f00\", \"block_type\": \"caption\", \"pdf_page\": 5, \"text\": \"Table S1. T _ { c } of La-H and Y-H systems at different pressures calculated using the McMillan and Eliashberg equations\", \"bbox\": [71.36475036621094, 494.84716650390624, 506.5727362060547, 505.80897082519533], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"block_type\": \"table\", \"pdf_page\": 5, \"text\": \"\", \"bbox\": [73.12707074172843, 509.30678090912295, 511.0931975265112, 607.622802533263], \"parent_block_id\": null, \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\"}}, {\"block_id\": \"77c6ac034774a971c28ca254106f04383a34bfacec6bb08c4e2cf236c643f73e\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"Compound\", \"bbox\": [74.211, 521.8589836, 112.49276730000007, 528.6180336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"9cb7a1c6a86eab49bde396de071efb6563ac5df2d0f07da79da2adcea2900efe\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"Pressure, GPa\", \"bbox\": [128.12750880000007, 521.8589836, 174.68429459999996, 528.6180336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"27bb8a418d64d73a5afc95f69707fc9a76b4109894e02972a62cf09abdc62a57\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"λ\", \"bbox\": [195.87357, 522.0084196, 199.2134646, 527.1938488], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"wlog, K\", \"bbox\": [220.42142, 521.8589836, 244.3336014, 529.3505111439999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"5a4002e31d59eae984e8bd2c05e154294a1a13c4cc635ba6cb9e4e27c5d402f3\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"Tc, K; μ* = 0.1 McMillan\", \"bbox\": [259.99375, 511.8809836, 308.8103231999999, 528.6178736544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"44dc0e21158730dc4fae03cdeebf99c4aa27d0338a7f19700948897cfe81e7f4\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"Tc, K; μ* = 0.13 McMillan\", \"bbox\": [324.45254, 511.8809836, 377.4505967999999, 528.6178736544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"d45b0dcc07b94e8556739700c3d0dc1c66dd7d16866582c9e3b543c0f19ba1d5\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"Tc, K; μ* = 0.1 Eliashberg\", \"bbox\": [393.10701, 511.8809836, 441.92522319999995, 528.6178736544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"f1e436e873308a14c247f80e4a6089796f7e78314cec76dcee6cc258e7d18429\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"Tc, K; μ* = 0.13 Eliashberg\", \"bbox\": [457.62423, 511.8809836, 510.5655167999999, 528.6178736544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"6171144f7ae538635b679da6a18bbc31eaf007668988d63317976a912c9773ff\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"LaH4\", \"bbox\": [74.21239, 537.7894536, 90.57039759999999, 545.281211144], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"c0133158f7daece5cad0eb59e3671a684c1e641a2b618080d3ec81b665712360\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"300\", \"bbox\": [145.2472, 537.7896836, 157.6205008, 544.5487336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"6ed33600fba6c5c4e93db5506b005b7ca8dc2843798118e877a14d7404322236\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"0.43\", \"bbox\": [190.37388328, 537.7896836, 204.76531726, 544.5487336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"a6e9354ecbc4fab5b4f7fc39c78ccee469f98bc46c60557a3ac176c786e9805f\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"1,624\", \"bbox\": [223.08542368, 537.7896836, 241.60129125999998, 544.5487336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"eb6efd80138bbeac150d14d87b7180a06aa1b13a3fc113b1422a1e0ce3263af8\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"10\", \"bbox\": [282.3285787, 537.7896836, 290.57744589999993, 544.5487336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"6c840b33141f98a374c6dcfab72dc8ffe9d0019157713ab46afdb81d8502f13f\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"5\", \"bbox\": [353.0237615799999, 537.7896836, 357.1481951799999, 544.5487336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"ce6865ecb372e076f3613a6a2193fed17a6423b196054496d753523a31f9721f\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"10\", \"bbox\": [415.4424315999999, 537.7896836, 423.69129879999986, 544.5487336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"877e10506fc77bbbde0fb181393154f3cfecad2ba82ef26e0e51d318c0f89971\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"5\", \"bbox\": [486.13761447999985, 537.7896836, 490.26204807999983, 544.5487336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"edc4256aba31b4f2277d2dc7e502c98c766df730bdf78a94d520109cfe1af349\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"LaH8\", \"bbox\": [74.2113, 547.7675236, 90.57039759999999, 555.259211144], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"9d66d7724d072170cad67affb3a7f2e519925100e047f53c146999056127fe96\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"300\", \"bbox\": [145.2472, 547.7675836, 157.62199515999998, 554.5266336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"1.12\", \"bbox\": [190.37537763999998, 547.7675836, 204.76830597999995, 554.5266336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"1,591\", \"bbox\": [223.08841239999995, 547.7675836, 241.60652151999992, 554.5266336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"e2e14245b620a96e3b8b54817ec33ffa5a033a25d540acb5836cb33966946e38\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"131\", \"bbox\": [278.1951789399999, 547.7675836, 290.56997409999985, 554.5266336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"9cb9e351e48f2a773bb2b8e4a5b8f0e2c7241881b6fc6498c5bee77abd7b5537\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"114\", \"bbox\": [344.7532261599999, 547.7675836, 357.1272741399998, 554.5266336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"ece04a868506252ca92c0f12aafa7ca9e0f050ef2f4c2f0c75c0c0047c50c6ef\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"150\", \"bbox\": [411.3673118799999, 547.7675836, 423.74210703999984, 554.5266336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"ce687467010f7eae81de035f2776dd3211c5f758b34e0eea12696e8916b78e7b\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"138\", \"bbox\": [477.92535909999987, 547.7675836, 490.2994070799998, 554.5266336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"4d358c340a32067344f9b1c5525195072d3b46bcc5226a4688d4bcb1d9e8567a\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"LaH10\", \"bbox\": [74.2113, 557.7454236, 93.66313482, 565.237111144], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"5beac73e0a7546713ed8fb6b6c5c3d1acd1d190f330bd4b0e5d81d5421f038a0\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"210\", \"bbox\": [145.2472, 557.7455835999999, 157.62199515999998, 564.5046336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"25842cc856d00c92f35f2365384c0ace5a9c92469e609b4cac575a81a46ed88f\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"3.41\", \"bbox\": [190.37537763999998, 557.7455835999999, 204.76830597999995, 564.5046336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"e6ae6e646c093b10ce1c3f849bd20fa20db587ff8f8d60926bc0d6968c368b8f\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"848\", \"bbox\": [229.26759099999995, 557.7455835999999, 241.64238615999994, 564.5046336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"a9fb3065c58c6293534386d992f0e4d2bb8253d576b589a62f66af4ee3c7bad5\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"238\", \"bbox\": [278.1936845799999, 557.7455835999999, 290.5684797399999, 564.5046336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"91b58f365d39ce18f806419712b385472a4cb0dd969dd0b7650fa3fbd25090a8\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"219\", \"bbox\": [344.7517317999999, 557.7455835999999, 357.12577977999985, 564.5046336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"4c487edee0ff09f1b47f87488a7a28eebb9dc2d379e88083fb4473a444998111\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"286\", \"bbox\": [411.36581751999984, 557.7455835999999, 423.7406126799998, 564.5046336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"a8f827ce5f675b51ec2e3397ffb794c7db8f10e1e6433c6d5832e754e1565b92\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"274\", \"bbox\": [477.92386473999983, 557.7455835999999, 490.2979127199998, 564.5046336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"f05fedfebb1e95cbace3b88f088661ff4b460c0fbf078cc45a7063ceb40195fb\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"LaH10\", \"bbox\": [74.2113, 567.6666436, 93.66313482, 575.158411144], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"31ea52ba60cf7a31ac584bd1f58a88af7e21c5d953d9b0e6567b38e7c2615b7a\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"250\", \"bbox\": [145.2472, 567.6667835999999, 157.62199515999998, 574.4258336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"99bd423fae3b794e7efb93a012ccb5e79b7e0fb166823a6e0779152995dd3a38\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"2.29\", \"bbox\": [190.37537763999998, 567.6667835999999, 204.76830597999995, 574.4258336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"77462f79c8582763c576fecaccce5720f549bc17f3cf9518d8a246ec06ffbba8\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"1,253\", \"bbox\": [223.08841239999995, 567.6667835999999, 241.60652151999992, 574.4258336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"f9e9f7015f05a741cbb21cb8645a738120c7215b7331c1b1efbbb9da2c12837f\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"232\", \"bbox\": [278.1951789399999, 567.6667835999999, 290.56997409999985, 574.4258336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"2da5b5a9cc6f003068da73cffbc0088c2d840daebad7745bac7d70d71229fc2b\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"212\", \"bbox\": [344.7532261599999, 567.6667835999999, 357.1272741399998, 574.4258336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"a4b501387029dfffc1cf1df05068f2078180501c78982b48aca3de22b4f3471e\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"274\", \"bbox\": [411.3673118799999, 567.6667835999999, 423.74210703999984, 574.4258336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"f5220a4f84fc68f69db83d2f0900a3774f963d6af9a68927b728151d27cf854f\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"257\", \"bbox\": [477.92535909999987, 567.6667835999999, 490.2994070799998, 574.4258336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"38e149444fb5b2639f54ac48d32d2044a681ecd9f0ba4ca6735586e45e29fa7d\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"LaH10\", \"bbox\": [74.2113, 577.6446235999999, 93.66313482, 585.136311144], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"3a192e0e0570735b0acae79c16640331cc82dcc1c201acdf664702b59a4b0460\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"300\", \"bbox\": [145.2472, 577.6447836, 157.62199515999998, 584.4038336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"725f4e2319ca5cb7d3c335476bf65283e991ad6b014f2a4722911f42244a85e4\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"1.78\", \"bbox\": [190.37537763999998, 577.6447836, 204.76830597999995, 584.4038336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"587c1312fca54749868503a42003d8d2c2e47c1b14ff25f4a7ff67cff4164736\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"1,488\", \"bbox\": [223.08841239999995, 577.6447836, 241.60652151999992, 584.4038336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"e3e4bf711fee09427a185b9fbcd4bc7f0a4a0e99e7eccb308d1397a90f114e18\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"215\", \"bbox\": [278.1951789399999, 577.6447836, 290.56997409999985, 584.4038336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"698ed9772aa26ca6d3505449644cdaf9ff90ec45970b7c7e4c6c410d154f2be5\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"196\", \"bbox\": [344.7532261599999, 577.6447836, 357.1272741399998, 584.4038336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"1d4947053b2fb6d970691935ea876d000e8a9383442b3ac9c8cb33bf3a99eab1\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"254\", \"bbox\": [411.3673118799999, 577.6447836, 423.74210703999984, 584.4038336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"f44f9df6a0858f9598d7b1dcd249f910006ce17f4b96eb350ead8477fa1e7d3b\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"241\", \"bbox\": [477.92535909999987, 577.6447836, 490.2994070799998, 584.4038336543999], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"47a9149633d0c013516999bd0adafd9c26f39899f8eb4ae8773c42a449be6c68\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"YH10\", \"bbox\": [74.2113, 587.6226236, 90.77183482000001, 595.114211144], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"c26a3ec90235dc43dee8d3d12600b04b71ad6ea9fe069a924c8ae3eb05ec2c09\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"250\", \"bbox\": [145.2472, 587.6226836, 157.62199515999998, 594.3817336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"2e718606e09ce254ec508f512c3d71e4169e08cba1f79ac2d3574fe5c70ec546\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"2.58\", \"bbox\": [190.37537763999998, 587.6226836, 204.76830597999995, 594.3817336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"e0615905052033856a0d6425e4ebd1573e66055c2780929529f67b308cdfcc2d\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"1,282\", \"bbox\": [223.08841239999995, 587.6226836, 241.60652151999992, 594.3817336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"3378b4102ef129d4d22d4f6bf4a0a4f23effaed70aa58399e94b7bb5ec015bb5\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"265\", \"bbox\": [278.1951789399999, 587.6226836, 290.56997409999985, 594.3817336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"9b649fcbe4e5cb06691900e2d84e9da014d7afb895f59e6ab678017b07d595e2\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"244\", \"bbox\": [344.7532261599999, 587.6226836, 357.1272741399998, 594.3817336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"92de2b0b9eaf6053005e41b3f93cff40f3a50ea083e1560f1a2cd7a6bd128cd9\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"326\", \"bbox\": [411.3673118799999, 587.6226836, 423.74210703999984, 594.3817336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"18e46bae9863a235986b1dc78ef8cd75ad1370338d91480fd865ba1487018885\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"305\", \"bbox\": [477.92535909999987, 587.6226836, 490.2994070799998, 594.3817336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"3d7cbafd9dcd78a516441a7b3de3ae79cf5128661388451e15cc7fe7a9c52581\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"YH10\", \"bbox\": [74.2113, 597.6005236, 90.77183482000001, 605.092211144], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"4b7b632668b2791d5d9a80284c23fab199d9d43c5bec3918e6d3990b678f58e1\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"300\", \"bbox\": [145.2472, 597.6005835999999, 157.62199515999998, 604.3596336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"fccb81e4b02817ab36435bb7b49dbd88206528157eb5f96ecb6ac4375086f07f\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"2.06\", \"bbox\": [190.37537763999998, 597.6005835999999, 204.76830597999995, 604.3596336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"54f657f3d7815f1fc8c717c4d50222afecbdb899b1509f0b6e20d91aa14992ff\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"1,511\", \"bbox\": [223.08841239999995, 597.6005835999999, 241.60652151999992, 604.3596336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"4caaf0b20ae1c68f4fa1d0e75b3212f3fcb86542b6e75a08e60c0d3f2d12202b\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"255\", \"bbox\": [278.1951789399999, 597.6005835999999, 290.56997409999985, 604.3596336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"2f0b36a0ee2eb4c8a4d2bc39ae598b3b9c87c785e4ed64740cfdbf7edffbed6b\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"233\", \"bbox\": [344.7532261599999, 597.6005835999999, 357.1272741399998, 604.3596336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"d41fc1dd90ea43b66a3ea4947847c6991bbcee0165e388b2141b2285384f4bb6\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"308\", \"bbox\": [411.3673118799999, 597.6005835999999, 423.74210703999984, 604.3596336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"d14f63e8edea1f607d2ed76b96af7197b15a5dfbd103a7f89fe67a66d75e2ae6\", \"block_type\": \"table_cell\", \"pdf_page\": 5, \"text\": \"286\", \"bbox\": [477.92535909999987, 597.6005835999999, 490.2994070799998, 604.3596336544], \"parent_block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\", \"row_span\": 1, \"column_span\": 1}}, {\"block_id\": \"8e7d809a693aa03d9382bce0803bb0f1d904892f8a9e7c08bfea37167628da43\", \"block_type\": \"paragraph\", \"pdf_page\": 5, \"text\": \"Liu et al. www.pnas.org/cgi/content/short/1704505114\", \"bbox\": [36.26733215332031, 743.8367218017578, 201.81015472412108, 754.0155401000976], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"addd23f40121b2a775e677c6b9e6a75b7fb0653faca9f4df0ef8ba61a803f18a\", \"block_type\": \"paragraph\", \"pdf_page\": 5, \"text\": \"5 of 8\", \"bbox\": [526.4612731933594, 744.619707824707, 548.1046810913086, 753.2325540771484], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}], \"tables\": [{\"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"pdf_page\": 5, \"block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"row_count\": 8, \"column_count\": 8, \"cells\": [{\"cell_id\": \"77c6ac034774a971c28ca254106f04383a34bfacec6bb08c4e2cf236c643f73e\", \"block_id\": \"77c6ac034774a971c28ca254106f04383a34bfacec6bb08c4e2cf236c643f73e\", \"row_index\": 0, \"column_index\": 0, \"bbox\": [74.211, 521.8589836, 112.49276730000007, 528.6180336544]}, {\"cell_id\": \"9cb7a1c6a86eab49bde396de071efb6563ac5df2d0f07da79da2adcea2900efe\", \"block_id\": \"9cb7a1c6a86eab49bde396de071efb6563ac5df2d0f07da79da2adcea2900efe\", \"row_index\": 0, \"column_index\": 1, \"bbox\": [128.12750880000007, 521.8589836, 174.68429459999996, 528.6180336544]}, {\"cell_id\": \"27bb8a418d64d73a5afc95f69707fc9a76b4109894e02972a62cf09abdc62a57\", \"block_id\": \"27bb8a418d64d73a5afc95f69707fc9a76b4109894e02972a62cf09abdc62a57\", \"row_index\": 0, \"column_index\": 2, \"bbox\": [195.87357, 522.0084196, 199.2134646, 527.1938488]}, {\"cell_id\": \"0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77\", \"block_id\": \"0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77\", \"row_index\": 0, \"column_index\": 3, \"bbox\": [220.42142, 521.8589836, 244.3336014, 529.3505111439999]}, {\"cell_id\": \"5a4002e31d59eae984e8bd2c05e154294a1a13c4cc635ba6cb9e4e27c5d402f3\", \"block_id\": \"5a4002e31d59eae984e8bd2c05e154294a1a13c4cc635ba6cb9e4e27c5d402f3\", \"row_index\": 0, \"column_index\": 4, \"bbox\": [259.99375, 511.8809836, 308.8103231999999, 528.6178736544]}, {\"cell_id\": \"44dc0e21158730dc4fae03cdeebf99c4aa27d0338a7f19700948897cfe81e7f4\", \"block_id\": \"44dc0e21158730dc4fae03cdeebf99c4aa27d0338a7f19700948897cfe81e7f4\", \"row_index\": 0, \"column_index\": 5, \"bbox\": [324.45254, 511.8809836, 377.4505967999999, 528.6178736544]}, {\"cell_id\": \"d45b0dcc07b94e8556739700c3d0dc1c66dd7d16866582c9e3b543c0f19ba1d5\", \"block_id\": \"d45b0dcc07b94e8556739700c3d0dc1c66dd7d16866582c9e3b543c0f19ba1d5\", \"row_index\": 0, \"column_index\": 6, \"bbox\": [393.10701, 511.8809836, 441.92522319999995, 528.6178736544]}, {\"cell_id\": \"f1e436e873308a14c247f80e4a6089796f7e78314cec76dcee6cc258e7d18429\", \"block_id\": \"f1e436e873308a14c247f80e4a6089796f7e78314cec76dcee6cc258e7d18429\", \"row_index\": 0, \"column_index\": 7, \"bbox\": [457.62423, 511.8809836, 510.5655167999999, 528.6178736544]}, {\"cell_id\": \"6171144f7ae538635b679da6a18bbc31eaf007668988d63317976a912c9773ff\", \"block_id\": \"6171144f7ae538635b679da6a18bbc31eaf007668988d63317976a912c9773ff\", \"row_index\": 1, \"column_index\": 0, \"bbox\": [74.21239, 537.7894536, 90.57039759999999, 545.281211144]}, {\"cell_id\": \"c0133158f7daece5cad0eb59e3671a684c1e641a2b618080d3ec81b665712360\", \"block_id\": \"c0133158f7daece5cad0eb59e3671a684c1e641a2b618080d3ec81b665712360\", \"row_index\": 1, \"column_index\": 1, \"bbox\": [145.2472, 537.7896836, 157.6205008, 544.5487336543999]}, {\"cell_id\": \"6ed33600fba6c5c4e93db5506b005b7ca8dc2843798118e877a14d7404322236\", \"block_id\": \"6ed33600fba6c5c4e93db5506b005b7ca8dc2843798118e877a14d7404322236\", \"row_index\": 1, \"column_index\": 2, \"bbox\": [190.37388328, 537.7896836, 204.76531726, 544.5487336543999]}, {\"cell_id\": \"a6e9354ecbc4fab5b4f7fc39c78ccee469f98bc46c60557a3ac176c786e9805f\", \"block_id\": \"a6e9354ecbc4fab5b4f7fc39c78ccee469f98bc46c60557a3ac176c786e9805f\", \"row_index\": 1, \"column_index\": 3, \"bbox\": [223.08542368, 537.7896836, 241.60129125999998, 544.5487336543999]}, {\"cell_id\": \"eb6efd80138bbeac150d14d87b7180a06aa1b13a3fc113b1422a1e0ce3263af8\", \"block_id\": \"eb6efd80138bbeac150d14d87b7180a06aa1b13a3fc113b1422a1e0ce3263af8\", \"row_index\": 1, \"column_index\": 4, \"bbox\": [282.3285787, 537.7896836, 290.57744589999993, 544.5487336543999]}, {\"cell_id\": \"6c840b33141f98a374c6dcfab72dc8ffe9d0019157713ab46afdb81d8502f13f\", \"block_id\": \"6c840b33141f98a374c6dcfab72dc8ffe9d0019157713ab46afdb81d8502f13f\", \"row_index\": 1, \"column_index\": 5, \"bbox\": [353.0237615799999, 537.7896836, 357.1481951799999, 544.5487336543999]}, {\"cell_id\": \"ce6865ecb372e076f3613a6a2193fed17a6423b196054496d753523a31f9721f\", \"block_id\": \"ce6865ecb372e076f3613a6a2193fed17a6423b196054496d753523a31f9721f\", \"row_index\": 1, \"column_index\": 6, \"bbox\": [415.4424315999999, 537.7896836, 423.69129879999986, 544.5487336543999]}, {\"cell_id\": \"877e10506fc77bbbde0fb181393154f3cfecad2ba82ef26e0e51d318c0f89971\", \"block_id\": \"877e10506fc77bbbde0fb181393154f3cfecad2ba82ef26e0e51d318c0f89971\", \"row_index\": 1, \"column_index\": 7, \"bbox\": [486.13761447999985, 537.7896836, 490.26204807999983, 544.5487336543999]}, {\"cell_id\": \"edc4256aba31b4f2277d2dc7e502c98c766df730bdf78a94d520109cfe1af349\", \"block_id\": \"edc4256aba31b4f2277d2dc7e502c98c766df730bdf78a94d520109cfe1af349\", \"row_index\": 2, \"column_index\": 0, \"bbox\": [74.2113, 547.7675236, 90.57039759999999, 555.259211144]}, {\"cell_id\": \"9d66d7724d072170cad67affb3a7f2e519925100e047f53c146999056127fe96\", \"block_id\": \"9d66d7724d072170cad67affb3a7f2e519925100e047f53c146999056127fe96\", \"row_index\": 2, \"column_index\": 1, \"bbox\": [145.2472, 547.7675836, 157.62199515999998, 554.5266336544]}, {\"cell_id\": \"3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1\", \"block_id\": \"3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1\", \"row_index\": 2, \"column_index\": 2, \"bbox\": [190.37537763999998, 547.7675836, 204.76830597999995, 554.5266336544]}, {\"cell_id\": \"d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c\", \"block_id\": \"d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c\", \"row_index\": 2, \"column_index\": 3, \"bbox\": [223.08841239999995, 547.7675836, 241.60652151999992, 554.5266336544]}, {\"cell_id\": \"e2e14245b620a96e3b8b54817ec33ffa5a033a25d540acb5836cb33966946e38\", \"block_id\": \"e2e14245b620a96e3b8b54817ec33ffa5a033a25d540acb5836cb33966946e38\", \"row_index\": 2, \"column_index\": 4, \"bbox\": [278.1951789399999, 547.7675836, 290.56997409999985, 554.5266336544]}, {\"cell_id\": \"9cb9e351e48f2a773bb2b8e4a5b8f0e2c7241881b6fc6498c5bee77abd7b5537\", \"block_id\": \"9cb9e351e48f2a773bb2b8e4a5b8f0e2c7241881b6fc6498c5bee77abd7b5537\", \"row_index\": 2, \"column_index\": 5, \"bbox\": [344.7532261599999, 547.7675836, 357.1272741399998, 554.5266336544]}, {\"cell_id\": \"ece04a868506252ca92c0f12aafa7ca9e0f050ef2f4c2f0c75c0c0047c50c6ef\", \"block_id\": \"ece04a868506252ca92c0f12aafa7ca9e0f050ef2f4c2f0c75c0c0047c50c6ef\", \"row_index\": 2, \"column_index\": 6, \"bbox\": [411.3673118799999, 547.7675836, 423.74210703999984, 554.5266336544]}, {\"cell_id\": \"ce687467010f7eae81de035f2776dd3211c5f758b34e0eea12696e8916b78e7b\", \"block_id\": \"ce687467010f7eae81de035f2776dd3211c5f758b34e0eea12696e8916b78e7b\", \"row_index\": 2, \"column_index\": 7, \"bbox\": [477.92535909999987, 547.7675836, 490.2994070799998, 554.5266336544]}, {\"cell_id\": \"4d358c340a32067344f9b1c5525195072d3b46bcc5226a4688d4bcb1d9e8567a\", \"block_id\": \"4d358c340a32067344f9b1c5525195072d3b46bcc5226a4688d4bcb1d9e8567a\", \"row_index\": 3, \"column_index\": 0, \"bbox\": [74.2113, 557.7454236, 93.66313482, 565.237111144]}, {\"cell_id\": \"5beac73e0a7546713ed8fb6b6c5c3d1acd1d190f330bd4b0e5d81d5421f038a0\", \"block_id\": \"5beac73e0a7546713ed8fb6b6c5c3d1acd1d190f330bd4b0e5d81d5421f038a0\", \"row_index\": 3, \"column_index\": 1, \"bbox\": [145.2472, 557.7455835999999, 157.62199515999998, 564.5046336544]}, {\"cell_id\": \"25842cc856d00c92f35f2365384c0ace5a9c92469e609b4cac575a81a46ed88f\", \"block_id\": \"25842cc856d00c92f35f2365384c0ace5a9c92469e609b4cac575a81a46ed88f\", \"row_index\": 3, \"column_index\": 2, \"bbox\": [190.37537763999998, 557.7455835999999, 204.76830597999995, 564.5046336544]}, {\"cell_id\": \"e6ae6e646c093b10ce1c3f849bd20fa20db587ff8f8d60926bc0d6968c368b8f\", \"block_id\": \"e6ae6e646c093b10ce1c3f849bd20fa20db587ff8f8d60926bc0d6968c368b8f\", \"row_index\": 3, \"column_index\": 3, \"bbox\": [229.26759099999995, 557.7455835999999, 241.64238615999994, 564.5046336544]}, {\"cell_id\": \"a9fb3065c58c6293534386d992f0e4d2bb8253d576b589a62f66af4ee3c7bad5\", \"block_id\": \"a9fb3065c58c6293534386d992f0e4d2bb8253d576b589a62f66af4ee3c7bad5\", \"row_index\": 3, \"column_index\": 4, \"bbox\": [278.1936845799999, 557.7455835999999, 290.5684797399999, 564.5046336544]}, {\"cell_id\": \"91b58f365d39ce18f806419712b385472a4cb0dd969dd0b7650fa3fbd25090a8\", \"block_id\": \"91b58f365d39ce18f806419712b385472a4cb0dd969dd0b7650fa3fbd25090a8\", \"row_index\": 3, \"column_index\": 5, \"bbox\": [344.7517317999999, 557.7455835999999, 357.12577977999985, 564.5046336544]}, {\"cell_id\": \"4c487edee0ff09f1b47f87488a7a28eebb9dc2d379e88083fb4473a444998111\", \"block_id\": \"4c487edee0ff09f1b47f87488a7a28eebb9dc2d379e88083fb4473a444998111\", \"row_index\": 3, \"column_index\": 6, \"bbox\": [411.36581751999984, 557.7455835999999, 423.7406126799998, 564.5046336544]}, {\"cell_id\": \"a8f827ce5f675b51ec2e3397ffb794c7db8f10e1e6433c6d5832e754e1565b92\", \"block_id\": \"a8f827ce5f675b51ec2e3397ffb794c7db8f10e1e6433c6d5832e754e1565b92\", \"row_index\": 3, \"column_index\": 7, \"bbox\": [477.92386473999983, 557.7455835999999, 490.2979127199998, 564.5046336544]}, {\"cell_id\": \"f05fedfebb1e95cbace3b88f088661ff4b460c0fbf078cc45a7063ceb40195fb\", \"block_id\": \"f05fedfebb1e95cbace3b88f088661ff4b460c0fbf078cc45a7063ceb40195fb\", \"row_index\": 4, \"column_index\": 0, \"bbox\": [74.2113, 567.6666436, 93.66313482, 575.158411144]}, {\"cell_id\": \"31ea52ba60cf7a31ac584bd1f58a88af7e21c5d953d9b0e6567b38e7c2615b7a\", \"block_id\": \"31ea52ba60cf7a31ac584bd1f58a88af7e21c5d953d9b0e6567b38e7c2615b7a\", \"row_index\": 4, \"column_index\": 1, \"bbox\": [145.2472, 567.6667835999999, 157.62199515999998, 574.4258336544]}, {\"cell_id\": \"99bd423fae3b794e7efb93a012ccb5e79b7e0fb166823a6e0779152995dd3a38\", \"block_id\": \"99bd423fae3b794e7efb93a012ccb5e79b7e0fb166823a6e0779152995dd3a38\", \"row_index\": 4, \"column_index\": 2, \"bbox\": [190.37537763999998, 567.6667835999999, 204.76830597999995, 574.4258336544]}, {\"cell_id\": \"77462f79c8582763c576fecaccce5720f549bc17f3cf9518d8a246ec06ffbba8\", \"block_id\": \"77462f79c8582763c576fecaccce5720f549bc17f3cf9518d8a246ec06ffbba8\", \"row_index\": 4, \"column_index\": 3, \"bbox\": [223.08841239999995, 567.6667835999999, 241.60652151999992, 574.4258336544]}, {\"cell_id\": \"f9e9f7015f05a741cbb21cb8645a738120c7215b7331c1b1efbbb9da2c12837f\", \"block_id\": \"f9e9f7015f05a741cbb21cb8645a738120c7215b7331c1b1efbbb9da2c12837f\", \"row_index\": 4, \"column_index\": 4, \"bbox\": [278.1951789399999, 567.6667835999999, 290.56997409999985, 574.4258336544]}, {\"cell_id\": \"2da5b5a9cc6f003068da73cffbc0088c2d840daebad7745bac7d70d71229fc2b\", \"block_id\": \"2da5b5a9cc6f003068da73cffbc0088c2d840daebad7745bac7d70d71229fc2b\", \"row_index\": 4, \"column_index\": 5, \"bbox\": [344.7532261599999, 567.6667835999999, 357.1272741399998, 574.4258336544]}, {\"cell_id\": \"a4b501387029dfffc1cf1df05068f2078180501c78982b48aca3de22b4f3471e\", \"block_id\": \"a4b501387029dfffc1cf1df05068f2078180501c78982b48aca3de22b4f3471e\", \"row_index\": 4, \"column_index\": 6, \"bbox\": [411.3673118799999, 567.6667835999999, 423.74210703999984, 574.4258336544]}, {\"cell_id\": \"f5220a4f84fc68f69db83d2f0900a3774f963d6af9a68927b728151d27cf854f\", \"block_id\": \"f5220a4f84fc68f69db83d2f0900a3774f963d6af9a68927b728151d27cf854f\", \"row_index\": 4, \"column_index\": 7, \"bbox\": [477.92535909999987, 567.6667835999999, 490.2994070799998, 574.4258336544]}, {\"cell_id\": \"38e149444fb5b2639f54ac48d32d2044a681ecd9f0ba4ca6735586e45e29fa7d\", \"block_id\": \"38e149444fb5b2639f54ac48d32d2044a681ecd9f0ba4ca6735586e45e29fa7d\", \"row_index\": 5, \"column_index\": 0, \"bbox\": [74.2113, 577.6446235999999, 93.66313482, 585.136311144]}, {\"cell_id\": \"3a192e0e0570735b0acae79c16640331cc82dcc1c201acdf664702b59a4b0460\", \"block_id\": \"3a192e0e0570735b0acae79c16640331cc82dcc1c201acdf664702b59a4b0460\", \"row_index\": 5, \"column_index\": 1, \"bbox\": [145.2472, 577.6447836, 157.62199515999998, 584.4038336543999]}, {\"cell_id\": \"725f4e2319ca5cb7d3c335476bf65283e991ad6b014f2a4722911f42244a85e4\", \"block_id\": \"725f4e2319ca5cb7d3c335476bf65283e991ad6b014f2a4722911f42244a85e4\", \"row_index\": 5, \"column_index\": 2, \"bbox\": [190.37537763999998, 577.6447836, 204.76830597999995, 584.4038336543999]}, {\"cell_id\": \"587c1312fca54749868503a42003d8d2c2e47c1b14ff25f4a7ff67cff4164736\", \"block_id\": \"587c1312fca54749868503a42003d8d2c2e47c1b14ff25f4a7ff67cff4164736\", \"row_index\": 5, \"column_index\": 3, \"bbox\": [223.08841239999995, 577.6447836, 241.60652151999992, 584.4038336543999]}, {\"cell_id\": \"e3e4bf711fee09427a185b9fbcd4bc7f0a4a0e99e7eccb308d1397a90f114e18\", \"block_id\": \"e3e4bf711fee09427a185b9fbcd4bc7f0a4a0e99e7eccb308d1397a90f114e18\", \"row_index\": 5, \"column_index\": 4, \"bbox\": [278.1951789399999, 577.6447836, 290.56997409999985, 584.4038336543999]}, {\"cell_id\": \"698ed9772aa26ca6d3505449644cdaf9ff90ec45970b7c7e4c6c410d154f2be5\", \"block_id\": \"698ed9772aa26ca6d3505449644cdaf9ff90ec45970b7c7e4c6c410d154f2be5\", \"row_index\": 5, \"column_index\": 5, \"bbox\": [344.7532261599999, 577.6447836, 357.1272741399998, 584.4038336543999]}, {\"cell_id\": \"1d4947053b2fb6d970691935ea876d000e8a9383442b3ac9c8cb33bf3a99eab1\", \"block_id\": \"1d4947053b2fb6d970691935ea876d000e8a9383442b3ac9c8cb33bf3a99eab1\", \"row_index\": 5, \"column_index\": 6, \"bbox\": [411.3673118799999, 577.6447836, 423.74210703999984, 584.4038336543999]}, {\"cell_id\": \"f44f9df6a0858f9598d7b1dcd249f910006ce17f4b96eb350ead8477fa1e7d3b\", \"block_id\": \"f44f9df6a0858f9598d7b1dcd249f910006ce17f4b96eb350ead8477fa1e7d3b\", \"row_index\": 5, \"column_index\": 7, \"bbox\": [477.92535909999987, 577.6447836, 490.2994070799998, 584.4038336543999]}, {\"cell_id\": \"47a9149633d0c013516999bd0adafd9c26f39899f8eb4ae8773c42a449be6c68\", \"block_id\": \"47a9149633d0c013516999bd0adafd9c26f39899f8eb4ae8773c42a449be6c68\", \"row_index\": 6, \"column_index\": 0, \"bbox\": [74.2113, 587.6226236, 90.77183482000001, 595.114211144]}, {\"cell_id\": \"c26a3ec90235dc43dee8d3d12600b04b71ad6ea9fe069a924c8ae3eb05ec2c09\", \"block_id\": \"c26a3ec90235dc43dee8d3d12600b04b71ad6ea9fe069a924c8ae3eb05ec2c09\", \"row_index\": 6, \"column_index\": 1, \"bbox\": [145.2472, 587.6226836, 157.62199515999998, 594.3817336544]}, {\"cell_id\": \"2e718606e09ce254ec508f512c3d71e4169e08cba1f79ac2d3574fe5c70ec546\", \"block_id\": \"2e718606e09ce254ec508f512c3d71e4169e08cba1f79ac2d3574fe5c70ec546\", \"row_index\": 6, \"column_index\": 2, \"bbox\": [190.37537763999998, 587.6226836, 204.76830597999995, 594.3817336544]}, {\"cell_id\": \"e0615905052033856a0d6425e4ebd1573e66055c2780929529f67b308cdfcc2d\", \"block_id\": \"e0615905052033856a0d6425e4ebd1573e66055c2780929529f67b308cdfcc2d\", \"row_index\": 6, \"column_index\": 3, \"bbox\": [223.08841239999995, 587.6226836, 241.60652151999992, 594.3817336544]}, {\"cell_id\": \"3378b4102ef129d4d22d4f6bf4a0a4f23effaed70aa58399e94b7bb5ec015bb5\", \"block_id\": \"3378b4102ef129d4d22d4f6bf4a0a4f23effaed70aa58399e94b7bb5ec015bb5\", \"row_index\": 6, \"column_index\": 4, \"bbox\": [278.1951789399999, 587.6226836, 290.56997409999985, 594.3817336544]}, {\"cell_id\": \"9b649fcbe4e5cb06691900e2d84e9da014d7afb895f59e6ab678017b07d595e2\", \"block_id\": \"9b649fcbe4e5cb06691900e2d84e9da014d7afb895f59e6ab678017b07d595e2\", \"row_index\": 6, \"column_index\": 5, \"bbox\": [344.7532261599999, 587.6226836, 357.1272741399998, 594.3817336544]}, {\"cell_id\": \"92de2b0b9eaf6053005e41b3f93cff40f3a50ea083e1560f1a2cd7a6bd128cd9\", \"block_id\": \"92de2b0b9eaf6053005e41b3f93cff40f3a50ea083e1560f1a2cd7a6bd128cd9\", \"row_index\": 6, \"column_index\": 6, \"bbox\": [411.3673118799999, 587.6226836, 423.74210703999984, 594.3817336544]}, {\"cell_id\": \"18e46bae9863a235986b1dc78ef8cd75ad1370338d91480fd865ba1487018885\", \"block_id\": \"18e46bae9863a235986b1dc78ef8cd75ad1370338d91480fd865ba1487018885\", \"row_index\": 6, \"column_index\": 7, \"bbox\": [477.92535909999987, 587.6226836, 490.2994070799998, 594.3817336544]}, {\"cell_id\": \"3d7cbafd9dcd78a516441a7b3de3ae79cf5128661388451e15cc7fe7a9c52581\", \"block_id\": \"3d7cbafd9dcd78a516441a7b3de3ae79cf5128661388451e15cc7fe7a9c52581\", \"row_index\": 7, \"column_index\": 0, \"bbox\": [74.2113, 597.6005236, 90.77183482000001, 605.092211144]}, {\"cell_id\": \"4b7b632668b2791d5d9a80284c23fab199d9d43c5bec3918e6d3990b678f58e1\", \"block_id\": \"4b7b632668b2791d5d9a80284c23fab199d9d43c5bec3918e6d3990b678f58e1\", \"row_index\": 7, \"column_index\": 1, \"bbox\": [145.2472, 597.6005835999999, 157.62199515999998, 604.3596336544]}, {\"cell_id\": \"fccb81e4b02817ab36435bb7b49dbd88206528157eb5f96ecb6ac4375086f07f\", \"block_id\": \"fccb81e4b02817ab36435bb7b49dbd88206528157eb5f96ecb6ac4375086f07f\", \"row_index\": 7, \"column_index\": 2, \"bbox\": [190.37537763999998, 597.6005835999999, 204.76830597999995, 604.3596336544]}, {\"cell_id\": \"54f657f3d7815f1fc8c717c4d50222afecbdb899b1509f0b6e20d91aa14992ff\", \"block_id\": \"54f657f3d7815f1fc8c717c4d50222afecbdb899b1509f0b6e20d91aa14992ff\", \"row_index\": 7, \"column_index\": 3, \"bbox\": [223.08841239999995, 597.6005835999999, 241.60652151999992, 604.3596336544]}, {\"cell_id\": \"4caaf0b20ae1c68f4fa1d0e75b3212f3fcb86542b6e75a08e60c0d3f2d12202b\", \"block_id\": \"4caaf0b20ae1c68f4fa1d0e75b3212f3fcb86542b6e75a08e60c0d3f2d12202b\", \"row_index\": 7, \"column_index\": 4, \"bbox\": [278.1951789399999, 597.6005835999999, 290.56997409999985, 604.3596336544]}, {\"cell_id\": \"2f0b36a0ee2eb4c8a4d2bc39ae598b3b9c87c785e4ed64740cfdbf7edffbed6b\", \"block_id\": \"2f0b36a0ee2eb4c8a4d2bc39ae598b3b9c87c785e4ed64740cfdbf7edffbed6b\", \"row_index\": 7, \"column_index\": 5, \"bbox\": [344.7532261599999, 597.6005835999999, 357.1272741399998, 604.3596336544]}, {\"cell_id\": \"d41fc1dd90ea43b66a3ea4947847c6991bbcee0165e388b2141b2285384f4bb6\", \"block_id\": \"d41fc1dd90ea43b66a3ea4947847c6991bbcee0165e388b2141b2285384f4bb6\", \"row_index\": 7, \"column_index\": 6, \"bbox\": [411.3673118799999, 597.6005835999999, 423.74210703999984, 604.3596336544]}, {\"cell_id\": \"d14f63e8edea1f607d2ed76b96af7197b15a5dfbd103a7f89fe67a66d75e2ae6\", \"block_id\": \"d14f63e8edea1f607d2ed76b96af7197b15a5dfbd103a7f89fe67a66d75e2ae6\", \"row_index\": 7, \"column_index\": 7, \"bbox\": [477.92535909999987, 597.6005835999999, 490.2994070799998, 604.3596336544]}]}]}], \"table_contexts\": [{\"file_id\": \"24c6c4619d5440fca85f4ca3871bdc4a\", \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"pdf_page\": 5, \"rows\": [{\"row_index\": 0, \"cells\": [{\"cell_id\": \"77c6ac034774a971c28ca254106f04383a34bfacec6bb08c4e2cf236c643f73e\", \"block_id\": \"77c6ac034774a971c28ca254106f04383a34bfacec6bb08c4e2cf236c643f73e\", \"row_index\": 0, \"column_index\": 0, \"bbox\": [74.211, 521.8589836, 112.49276730000007, 528.6180336544]}, {\"cell_id\": \"9cb7a1c6a86eab49bde396de071efb6563ac5df2d0f07da79da2adcea2900efe\", \"block_id\": \"9cb7a1c6a86eab49bde396de071efb6563ac5df2d0f07da79da2adcea2900efe\", \"row_index\": 0, \"column_index\": 1, \"bbox\": [128.12750880000007, 521.8589836, 174.68429459999996, 528.6180336544]}, {\"cell_id\": \"27bb8a418d64d73a5afc95f69707fc9a76b4109894e02972a62cf09abdc62a57\", \"block_id\": \"27bb8a418d64d73a5afc95f69707fc9a76b4109894e02972a62cf09abdc62a57\", \"row_index\": 0, \"column_index\": 2, \"bbox\": [195.87357, 522.0084196, 199.2134646, 527.1938488]}, {\"cell_id\": \"0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77\", \"block_id\": \"0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77\", \"row_index\": 0, \"column_index\": 3, \"bbox\": [220.42142, 521.8589836, 244.3336014, 529.3505111439999]}, {\"cell_id\": \"5a4002e31d59eae984e8bd2c05e154294a1a13c4cc635ba6cb9e4e27c5d402f3\", \"block_id\": \"5a4002e31d59eae984e8bd2c05e154294a1a13c4cc635ba6cb9e4e27c5d402f3\", \"row_index\": 0, \"column_index\": 4, \"bbox\": [259.99375, 511.8809836, 308.8103231999999, 528.6178736544]}, {\"cell_id\": \"44dc0e21158730dc4fae03cdeebf99c4aa27d0338a7f19700948897cfe81e7f4\", \"block_id\": \"44dc0e21158730dc4fae03cdeebf99c4aa27d0338a7f19700948897cfe81e7f4\", \"row_index\": 0, \"column_index\": 5, \"bbox\": [324.45254, 511.8809836, 377.4505967999999, 528.6178736544]}, {\"cell_id\": \"d45b0dcc07b94e8556739700c3d0dc1c66dd7d16866582c9e3b543c0f19ba1d5\", \"block_id\": \"d45b0dcc07b94e8556739700c3d0dc1c66dd7d16866582c9e3b543c0f19ba1d5\", \"row_index\": 0, \"column_index\": 6, \"bbox\": [393.10701, 511.8809836, 441.92522319999995, 528.6178736544]}, {\"cell_id\": \"f1e436e873308a14c247f80e4a6089796f7e78314cec76dcee6cc258e7d18429\", \"block_id\": \"f1e436e873308a14c247f80e4a6089796f7e78314cec76dcee6cc258e7d18429\", \"row_index\": 0, \"column_index\": 7, \"bbox\": [457.62423, 511.8809836, 510.5655167999999, 528.6178736544]}]}, {\"row_index\": 1, \"cells\": [{\"cell_id\": \"6171144f7ae538635b679da6a18bbc31eaf007668988d63317976a912c9773ff\", \"block_id\": \"6171144f7ae538635b679da6a18bbc31eaf007668988d63317976a912c9773ff\", \"row_index\": 1, \"column_index\": 0, \"bbox\": [74.21239, 537.7894536, 90.57039759999999, 545.281211144]}, {\"cell_id\": \"c0133158f7daece5cad0eb59e3671a684c1e641a2b618080d3ec81b665712360\", \"block_id\": \"c0133158f7daece5cad0eb59e3671a684c1e641a2b618080d3ec81b665712360\", \"row_index\": 1, \"column_index\": 1, \"bbox\": [145.2472, 537.7896836, 157.6205008, 544.5487336543999]}, {\"cell_id\": \"6ed33600fba6c5c4e93db5506b005b7ca8dc2843798118e877a14d7404322236\", \"block_id\": \"6ed33600fba6c5c4e93db5506b005b7ca8dc2843798118e877a14d7404322236\", \"row_index\": 1, \"column_index\": 2, \"bbox\": [190.37388328, 537.7896836, 204.76531726, 544.5487336543999]}, {\"cell_id\": \"a6e9354ecbc4fab5b4f7fc39c78ccee469f98bc46c60557a3ac176c786e9805f\", \"block_id\": \"a6e9354ecbc4fab5b4f7fc39c78ccee469f98bc46c60557a3ac176c786e9805f\", \"row_index\": 1, \"column_index\": 3, \"bbox\": [223.08542368, 537.7896836, 241.60129125999998, 544.5487336543999]}, {\"cell_id\": \"eb6efd80138bbeac150d14d87b7180a06aa1b13a3fc113b1422a1e0ce3263af8\", \"block_id\": \"eb6efd80138bbeac150d14d87b7180a06aa1b13a3fc113b1422a1e0ce3263af8\", \"row_index\": 1, \"column_index\": 4, \"bbox\": [282.3285787, 537.7896836, 290.57744589999993, 544.5487336543999]}, {\"cell_id\": \"6c840b33141f98a374c6dcfab72dc8ffe9d0019157713ab46afdb81d8502f13f\", \"block_id\": \"6c840b33141f98a374c6dcfab72dc8ffe9d0019157713ab46afdb81d8502f13f\", \"row_index\": 1, \"column_index\": 5, \"bbox\": [353.0237615799999, 537.7896836, 357.1481951799999, 544.5487336543999]}, {\"cell_id\": \"ce6865ecb372e076f3613a6a2193fed17a6423b196054496d753523a31f9721f\", \"block_id\": \"ce6865ecb372e076f3613a6a2193fed17a6423b196054496d753523a31f9721f\", \"row_index\": 1, \"column_index\": 6, \"bbox\": [415.4424315999999, 537.7896836, 423.69129879999986, 544.5487336543999]}, {\"cell_id\": \"877e10506fc77bbbde0fb181393154f3cfecad2ba82ef26e0e51d318c0f89971\", \"block_id\": \"877e10506fc77bbbde0fb181393154f3cfecad2ba82ef26e0e51d318c0f89971\", \"row_index\": 1, \"column_index\": 7, \"bbox\": [486.13761447999985, 537.7896836, 490.26204807999983, 544.5487336543999]}]}, {\"row_index\": 2, \"cells\": [{\"cell_id\": \"edc4256aba31b4f2277d2dc7e502c98c766df730bdf78a94d520109cfe1af349\", \"block_id\": \"edc4256aba31b4f2277d2dc7e502c98c766df730bdf78a94d520109cfe1af349\", \"row_index\": 2, \"column_index\": 0, \"bbox\": [74.2113, 547.7675236, 90.57039759999999, 555.259211144]}, {\"cell_id\": \"9d66d7724d072170cad67affb3a7f2e519925100e047f53c146999056127fe96\", \"block_id\": \"9d66d7724d072170cad67affb3a7f2e519925100e047f53c146999056127fe96\", \"row_index\": 2, \"column_index\": 1, \"bbox\": [145.2472, 547.7675836, 157.62199515999998, 554.5266336544]}, {\"cell_id\": \"3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1\", \"block_id\": \"3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1\", \"row_index\": 2, \"column_index\": 2, \"bbox\": [190.37537763999998, 547.7675836, 204.76830597999995, 554.5266336544]}, {\"cell_id\": \"d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c\", \"block_id\": \"d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c\", \"row_index\": 2, \"column_index\": 3, \"bbox\": [223.08841239999995, 547.7675836, 241.60652151999992, 554.5266336544]}, {\"cell_id\": \"e2e14245b620a96e3b8b54817ec33ffa5a033a25d540acb5836cb33966946e38\", \"block_id\": \"e2e14245b620a96e3b8b54817ec33ffa5a033a25d540acb5836cb33966946e38\", \"row_index\": 2, \"column_index\": 4, \"bbox\": [278.1951789399999, 547.7675836, 290.56997409999985, 554.5266336544]}, {\"cell_id\": \"9cb9e351e48f2a773bb2b8e4a5b8f0e2c7241881b6fc6498c5bee77abd7b5537\", \"block_id\": \"9cb9e351e48f2a773bb2b8e4a5b8f0e2c7241881b6fc6498c5bee77abd7b5537\", \"row_index\": 2, \"column_index\": 5, \"bbox\": [344.7532261599999, 547.7675836, 357.1272741399998, 554.5266336544]}, {\"cell_id\": \"ece04a868506252ca92c0f12aafa7ca9e0f050ef2f4c2f0c75c0c0047c50c6ef\", \"block_id\": \"ece04a868506252ca92c0f12aafa7ca9e0f050ef2f4c2f0c75c0c0047c50c6ef\", \"row_index\": 2, \"column_index\": 6, \"bbox\": [411.3673118799999, 547.7675836, 423.74210703999984, 554.5266336544]}, {\"cell_id\": \"ce687467010f7eae81de035f2776dd3211c5f758b34e0eea12696e8916b78e7b\", \"block_id\": \"ce687467010f7eae81de035f2776dd3211c5f758b34e0eea12696e8916b78e7b\", \"row_index\": 2, \"column_index\": 7, \"bbox\": [477.92535909999987, 547.7675836, 490.2994070799998, 554.5266336544]}]}, {\"row_index\": 3, \"cells\": [{\"cell_id\": \"4d358c340a32067344f9b1c5525195072d3b46bcc5226a4688d4bcb1d9e8567a\", \"block_id\": \"4d358c340a32067344f9b1c5525195072d3b46bcc5226a4688d4bcb1d9e8567a\", \"row_index\": 3, \"column_index\": 0, \"bbox\": [74.2113, 557.7454236, 93.66313482, 565.237111144]}, {\"cell_id\": \"5beac73e0a7546713ed8fb6b6c5c3d1acd1d190f330bd4b0e5d81d5421f038a0\", \"block_id\": \"5beac73e0a7546713ed8fb6b6c5c3d1acd1d190f330bd4b0e5d81d5421f038a0\", \"row_index\": 3, \"column_index\": 1, \"bbox\": [145.2472, 557.7455835999999, 157.62199515999998, 564.5046336544]}, {\"cell_id\": \"25842cc856d00c92f35f2365384c0ace5a9c92469e609b4cac575a81a46ed88f\", \"block_id\": \"25842cc856d00c92f35f2365384c0ace5a9c92469e609b4cac575a81a46ed88f\", \"row_index\": 3, \"column_index\": 2, \"bbox\": [190.37537763999998, 557.7455835999999, 204.76830597999995, 564.5046336544]}, {\"cell_id\": \"e6ae6e646c093b10ce1c3f849bd20fa20db587ff8f8d60926bc0d6968c368b8f\", \"block_id\": \"e6ae6e646c093b10ce1c3f849bd20fa20db587ff8f8d60926bc0d6968c368b8f\", \"row_index\": 3, \"column_index\": 3, \"bbox\": [229.26759099999995, 557.7455835999999, 241.64238615999994, 564.5046336544]}, {\"cell_id\": \"a9fb3065c58c6293534386d992f0e4d2bb8253d576b589a62f66af4ee3c7bad5\", \"block_id\": \"a9fb3065c58c6293534386d992f0e4d2bb8253d576b589a62f66af4ee3c7bad5\", \"row_index\": 3, \"column_index\": 4, \"bbox\": [278.1936845799999, 557.7455835999999, 290.5684797399999, 564.5046336544]}, {\"cell_id\": \"91b58f365d39ce18f806419712b385472a4cb0dd969dd0b7650fa3fbd25090a8\", \"block_id\": \"91b58f365d39ce18f806419712b385472a4cb0dd969dd0b7650fa3fbd25090a8\", \"row_index\": 3, \"column_index\": 5, \"bbox\": [344.7517317999999, 557.7455835999999, 357.12577977999985, 564.5046336544]}, {\"cell_id\": \"4c487edee0ff09f1b47f87488a7a28eebb9dc2d379e88083fb4473a444998111\", \"block_id\": \"4c487edee0ff09f1b47f87488a7a28eebb9dc2d379e88083fb4473a444998111\", \"row_index\": 3, \"column_index\": 6, \"bbox\": [411.36581751999984, 557.7455835999999, 423.7406126799998, 564.5046336544]}, {\"cell_id\": \"a8f827ce5f675b51ec2e3397ffb794c7db8f10e1e6433c6d5832e754e1565b92\", \"block_id\": \"a8f827ce5f675b51ec2e3397ffb794c7db8f10e1e6433c6d5832e754e1565b92\", \"row_index\": 3, \"column_index\": 7, \"bbox\": [477.92386473999983, 557.7455835999999, 490.2979127199998, 564.5046336544]}]}, {\"row_index\": 4, \"cells\": [{\"cell_id\": \"f05fedfebb1e95cbace3b88f088661ff4b460c0fbf078cc45a7063ceb40195fb\", \"block_id\": \"f05fedfebb1e95cbace3b88f088661ff4b460c0fbf078cc45a7063ceb40195fb\", \"row_index\": 4, \"column_index\": 0, \"bbox\": [74.2113, 567.6666436, 93.66313482, 575.158411144]}, {\"cell_id\": \"31ea52ba60cf7a31ac584bd1f58a88af7e21c5d953d9b0e6567b38e7c2615b7a\", \"block_id\": \"31ea52ba60cf7a31ac584bd1f58a88af7e21c5d953d9b0e6567b38e7c2615b7a\", \"row_index\": 4, \"column_index\": 1, \"bbox\": [145.2472, 567.6667835999999, 157.62199515999998, 574.4258336544]}, {\"cell_id\": \"99bd423fae3b794e7efb93a012ccb5e79b7e0fb166823a6e0779152995dd3a38\", \"block_id\": \"99bd423fae3b794e7efb93a012ccb5e79b7e0fb166823a6e0779152995dd3a38\", \"row_index\": 4, \"column_index\": 2, \"bbox\": [190.37537763999998, 567.6667835999999, 204.76830597999995, 574.4258336544]}, {\"cell_id\": \"77462f79c8582763c576fecaccce5720f549bc17f3cf9518d8a246ec06ffbba8\", \"block_id\": \"77462f79c8582763c576fecaccce5720f549bc17f3cf9518d8a246ec06ffbba8\", \"row_index\": 4, \"column_index\": 3, \"bbox\": [223.08841239999995, 567.6667835999999, 241.60652151999992, 574.4258336544]}, {\"cell_id\": \"f9e9f7015f05a741cbb21cb8645a738120c7215b7331c1b1efbbb9da2c12837f\", \"block_id\": \"f9e9f7015f05a741cbb21cb8645a738120c7215b7331c1b1efbbb9da2c12837f\", \"row_index\": 4, \"column_index\": 4, \"bbox\": [278.1951789399999, 567.6667835999999, 290.56997409999985, 574.4258336544]}, {\"cell_id\": \"2da5b5a9cc6f003068da73cffbc0088c2d840daebad7745bac7d70d71229fc2b\", \"block_id\": \"2da5b5a9cc6f003068da73cffbc0088c2d840daebad7745bac7d70d71229fc2b\", \"row_index\": 4, \"column_index\": 5, \"bbox\": [344.7532261599999, 567.6667835999999, 357.1272741399998, 574.4258336544]}, {\"cell_id\": \"a4b501387029dfffc1cf1df05068f2078180501c78982b48aca3de22b4f3471e\", \"block_id\": \"a4b501387029dfffc1cf1df05068f2078180501c78982b48aca3de22b4f3471e\", \"row_index\": 4, \"column_index\": 6, \"bbox\": [411.3673118799999, 567.6667835999999, 423.74210703999984, 574.4258336544]}, {\"cell_id\": \"f5220a4f84fc68f69db83d2f0900a3774f963d6af9a68927b728151d27cf854f\", \"block_id\": \"f5220a4f84fc68f69db83d2f0900a3774f963d6af9a68927b728151d27cf854f\", \"row_index\": 4, \"column_index\": 7, \"bbox\": [477.92535909999987, 567.6667835999999, 490.2994070799998, 574.4258336544]}]}, {\"row_index\": 5, \"cells\": [{\"cell_id\": \"38e149444fb5b2639f54ac48d32d2044a681ecd9f0ba4ca6735586e45e29fa7d\", \"block_id\": \"38e149444fb5b2639f54ac48d32d2044a681ecd9f0ba4ca6735586e45e29fa7d\", \"row_index\": 5, \"column_index\": 0, \"bbox\": [74.2113, 577.6446235999999, 93.66313482, 585.136311144]}, {\"cell_id\": \"3a192e0e0570735b0acae79c16640331cc82dcc1c201acdf664702b59a4b0460\", \"block_id\": \"3a192e0e0570735b0acae79c16640331cc82dcc1c201acdf664702b59a4b0460\", \"row_index\": 5, \"column_index\": 1, \"bbox\": [145.2472, 577.6447836, 157.62199515999998, 584.4038336543999]}, {\"cell_id\": \"725f4e2319ca5cb7d3c335476bf65283e991ad6b014f2a4722911f42244a85e4\", \"block_id\": \"725f4e2319ca5cb7d3c335476bf65283e991ad6b014f2a4722911f42244a85e4\", \"row_index\": 5, \"column_index\": 2, \"bbox\": [190.37537763999998, 577.6447836, 204.76830597999995, 584.4038336543999]}, {\"cell_id\": \"587c1312fca54749868503a42003d8d2c2e47c1b14ff25f4a7ff67cff4164736\", \"block_id\": \"587c1312fca54749868503a42003d8d2c2e47c1b14ff25f4a7ff67cff4164736\", \"row_index\": 5, \"column_index\": 3, \"bbox\": [223.08841239999995, 577.6447836, 241.60652151999992, 584.4038336543999]}, {\"cell_id\": \"e3e4bf711fee09427a185b9fbcd4bc7f0a4a0e99e7eccb308d1397a90f114e18\", \"block_id\": \"e3e4bf711fee09427a185b9fbcd4bc7f0a4a0e99e7eccb308d1397a90f114e18\", \"row_index\": 5, \"column_index\": 4, \"bbox\": [278.1951789399999, 577.6447836, 290.56997409999985, 584.4038336543999]}, {\"cell_id\": \"698ed9772aa26ca6d3505449644cdaf9ff90ec45970b7c7e4c6c410d154f2be5\", \"block_id\": \"698ed9772aa26ca6d3505449644cdaf9ff90ec45970b7c7e4c6c410d154f2be5\", \"row_index\": 5, \"column_index\": 5, \"bbox\": [344.7532261599999, 577.6447836, 357.1272741399998, 584.4038336543999]}, {\"cell_id\": \"1d4947053b2fb6d970691935ea876d000e8a9383442b3ac9c8cb33bf3a99eab1\", \"block_id\": \"1d4947053b2fb6d970691935ea876d000e8a9383442b3ac9c8cb33bf3a99eab1\", \"row_index\": 5, \"column_index\": 6, \"bbox\": [411.3673118799999, 577.6447836, 423.74210703999984, 584.4038336543999]}, {\"cell_id\": \"f44f9df6a0858f9598d7b1dcd249f910006ce17f4b96eb350ead8477fa1e7d3b\", \"block_id\": \"f44f9df6a0858f9598d7b1dcd249f910006ce17f4b96eb350ead8477fa1e7d3b\", \"row_index\": 5, \"column_index\": 7, \"bbox\": [477.92535909999987, 577.6447836, 490.2994070799998, 584.4038336543999]}]}, {\"row_index\": 6, \"cells\": [{\"cell_id\": \"47a9149633d0c013516999bd0adafd9c26f39899f8eb4ae8773c42a449be6c68\", \"block_id\": \"47a9149633d0c013516999bd0adafd9c26f39899f8eb4ae8773c42a449be6c68\", \"row_index\": 6, \"column_index\": 0, \"bbox\": [74.2113, 587.6226236, 90.77183482000001, 595.114211144]}, {\"cell_id\": \"c26a3ec90235dc43dee8d3d12600b04b71ad6ea9fe069a924c8ae3eb05ec2c09\", \"block_id\": \"c26a3ec90235dc43dee8d3d12600b04b71ad6ea9fe069a924c8ae3eb05ec2c09\", \"row_index\": 6, \"column_index\": 1, \"bbox\": [145.2472, 587.6226836, 157.62199515999998, 594.3817336544]}, {\"cell_id\": \"2e718606e09ce254ec508f512c3d71e4169e08cba1f79ac2d3574fe5c70ec546\", \"block_id\": \"2e718606e09ce254ec508f512c3d71e4169e08cba1f79ac2d3574fe5c70ec546\", \"row_index\": 6, \"column_index\": 2, \"bbox\": [190.37537763999998, 587.6226836, 204.76830597999995, 594.3817336544]}, {\"cell_id\": \"e0615905052033856a0d6425e4ebd1573e66055c2780929529f67b308cdfcc2d\", \"block_id\": \"e0615905052033856a0d6425e4ebd1573e66055c2780929529f67b308cdfcc2d\", \"row_index\": 6, \"column_index\": 3, \"bbox\": [223.08841239999995, 587.6226836, 241.60652151999992, 594.3817336544]}, {\"cell_id\": \"3378b4102ef129d4d22d4f6bf4a0a4f23effaed70aa58399e94b7bb5ec015bb5\", \"block_id\": \"3378b4102ef129d4d22d4f6bf4a0a4f23effaed70aa58399e94b7bb5ec015bb5\", \"row_index\": 6, \"column_index\": 4, \"bbox\": [278.1951789399999, 587.6226836, 290.56997409999985, 594.3817336544]}, {\"cell_id\": \"9b649fcbe4e5cb06691900e2d84e9da014d7afb895f59e6ab678017b07d595e2\", \"block_id\": \"9b649fcbe4e5cb06691900e2d84e9da014d7afb895f59e6ab678017b07d595e2\", \"row_index\": 6, \"column_index\": 5, \"bbox\": [344.7532261599999, 587.6226836, 357.1272741399998, 594.3817336544]}, {\"cell_id\": \"92de2b0b9eaf6053005e41b3f93cff40f3a50ea083e1560f1a2cd7a6bd128cd9\", \"block_id\": \"92de2b0b9eaf6053005e41b3f93cff40f3a50ea083e1560f1a2cd7a6bd128cd9\", \"row_index\": 6, \"column_index\": 6, \"bbox\": [411.3673118799999, 587.6226836, 423.74210703999984, 594.3817336544]}, {\"cell_id\": \"18e46bae9863a235986b1dc78ef8cd75ad1370338d91480fd865ba1487018885\", \"block_id\": \"18e46bae9863a235986b1dc78ef8cd75ad1370338d91480fd865ba1487018885\", \"row_index\": 6, \"column_index\": 7, \"bbox\": [477.92535909999987, 587.6226836, 490.2994070799998, 594.3817336544]}]}, {\"row_index\": 7, \"cells\": [{\"cell_id\": \"3d7cbafd9dcd78a516441a7b3de3ae79cf5128661388451e15cc7fe7a9c52581\", \"block_id\": \"3d7cbafd9dcd78a516441a7b3de3ae79cf5128661388451e15cc7fe7a9c52581\", \"row_index\": 7, \"column_index\": 0, \"bbox\": [74.2113, 597.6005236, 90.77183482000001, 605.092211144]}, {\"cell_id\": \"4b7b632668b2791d5d9a80284c23fab199d9d43c5bec3918e6d3990b678f58e1\", \"block_id\": \"4b7b632668b2791d5d9a80284c23fab199d9d43c5bec3918e6d3990b678f58e1\", \"row_index\": 7, \"column_index\": 1, \"bbox\": [145.2472, 597.6005835999999, 157.62199515999998, 604.3596336544]}, {\"cell_id\": \"fccb81e4b02817ab36435bb7b49dbd88206528157eb5f96ecb6ac4375086f07f\", \"block_id\": \"fccb81e4b02817ab36435bb7b49dbd88206528157eb5f96ecb6ac4375086f07f\", \"row_index\": 7, \"column_index\": 2, \"bbox\": [190.37537763999998, 597.6005835999999, 204.76830597999995, 604.3596336544]}, {\"cell_id\": \"54f657f3d7815f1fc8c717c4d50222afecbdb899b1509f0b6e20d91aa14992ff\", \"block_id\": \"54f657f3d7815f1fc8c717c4d50222afecbdb899b1509f0b6e20d91aa14992ff\", \"row_index\": 7, \"column_index\": 3, \"bbox\": [223.08841239999995, 597.6005835999999, 241.60652151999992, 604.3596336544]}, {\"cell_id\": \"4caaf0b20ae1c68f4fa1d0e75b3212f3fcb86542b6e75a08e60c0d3f2d12202b\", \"block_id\": \"4caaf0b20ae1c68f4fa1d0e75b3212f3fcb86542b6e75a08e60c0d3f2d12202b\", \"row_index\": 7, \"column_index\": 4, \"bbox\": [278.1951789399999, 597.6005835999999, 290.56997409999985, 604.3596336544]}, {\"cell_id\": \"2f0b36a0ee2eb4c8a4d2bc39ae598b3b9c87c785e4ed64740cfdbf7edffbed6b\", \"block_id\": \"2f0b36a0ee2eb4c8a4d2bc39ae598b3b9c87c785e4ed64740cfdbf7edffbed6b\", \"row_index\": 7, \"column_index\": 5, \"bbox\": [344.7532261599999, 597.6005835999999, 357.1272741399998, 604.3596336544]}, {\"cell_id\": \"d41fc1dd90ea43b66a3ea4947847c6991bbcee0165e388b2141b2285384f4bb6\", \"block_id\": \"d41fc1dd90ea43b66a3ea4947847c6991bbcee0165e388b2141b2285384f4bb6\", \"row_index\": 7, \"column_index\": 6, \"bbox\": [411.3673118799999, 597.6005835999999, 423.74210703999984, 604.3596336544]}, {\"cell_id\": \"d14f63e8edea1f607d2ed76b96af7197b15a5dfbd103a7f89fe67a66d75e2ae6\", \"block_id\": \"d14f63e8edea1f607d2ed76b96af7197b15a5dfbd103a7f89fe67a66d75e2ae6\", \"row_index\": 7, \"column_index\": 7, \"bbox\": [477.92535909999987, 597.6005835999999, 490.2994070799998, 604.3596336544]}]}], \"context_candidates\": [{\"block_id\": \"349657a66fc49357b4b43fa46ceba53bf3ab9dd0a6eb3ae87443b2131e245314\", \"block_type\": \"figure\", \"pdf_page\": 5, \"text\": \"\", \"bbox\": [170.80743530273438, 50.111105468750004, 414.7344918823242, 252.12149938964845], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"56ae4d78903a0cc45445fb57b7f97b86fe207d78a0d901901da69eb6cd378569\", \"block_type\": \"figure\", \"pdf_page\": 5, \"text\": \"\", \"bbox\": [167.88265045166014, 256.03642950439456, 414.7344918823242, 456.4808513793945], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"577880e40558cc5a3ce737a33ca01a538ce1b0c74696c70e79619c21a1d68314\", \"block_type\": \"caption\", \"pdf_page\": 5, \"text\": \"Fig. S5. Formation enthalpy of predicted structures in the (A) La-H and (B) Y-H system at 300 GPa including ZPE.\", \"bbox\": [102.95242675781249, 461.961753540039, 480.2496725463867, 472.9235578613281], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"03af162ade6ea902a656cad404d2cf56cb5c9c0c067b77500dff34e1ff906f00\", \"block_type\": \"caption\", \"pdf_page\": 5, \"text\": \"Table S1. T _ { c } of La-H and Y-H systems at different pressures calculated using the McMillan and Eliashberg equations\", \"bbox\": [71.36475036621094, 494.84716650390624, 506.5727362060547, 505.80897082519533], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"block_type\": \"table\", \"pdf_page\": 5, \"text\": \"\", \"bbox\": [73.12707074172843, 509.30678090912295, 511.0931975265112, 607.622802533263], \"parent_block_id\": null, \"table_id\": \"1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d\", \"metadata\": {\"source_parser\": \"docling\"}}, {\"block_id\": \"8e7d809a693aa03d9382bce0803bb0f1d904892f8a9e7c08bfea37167628da43\", \"block_type\": \"paragraph\", \"pdf_page\": 5, \"text\": \"Liu et al. www.pnas.org/cgi/content/short/1704505114\", \"bbox\": [36.26733215332031, 743.8367218017578, 201.81015472412108, 754.0155401000976], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}, {\"block_id\": \"addd23f40121b2a775e677c6b9e6a75b7fb0653faca9f4df0ef8ba61a803f18a\", \"block_type\": \"paragraph\", \"pdf_page\": 5, \"text\": \"5 of 8\", \"bbox\": [526.4612731933594, 744.619707824707, 548.1046810913086, 753.2325540771484], \"parent_block_id\": null, \"table_id\": null, \"metadata\": {\"source_parser\": \"mineru\"}}], \"association_status\": \"requires_source_reading\"}]}"
+    }
+  ]
+}

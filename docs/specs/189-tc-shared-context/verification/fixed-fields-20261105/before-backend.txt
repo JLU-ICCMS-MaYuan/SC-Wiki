@@ -1,0 +1,111 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_______ test_filling_uses_existing_reason_and_rejects_added_method_name ________
+backend/rag/structured_output.py:35: in validate_output
+    Draft202012Validator(schema).validate(value)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/jsonschema/validators.py:450: in validate
+    raise error
+E   jsonschema.exceptions.ValidationError: 'method_name' is a required property
+E
+E   Failed validating 'required' in schema['properties']['records']['items']:
+E       {'type': 'object',
+E        'properties': {'candidate_ids': {'type': 'array',
+E                                         'items': {'type': 'string'}},
+E                       'group': {'type': 'string'},
+E                       'method': {'type': 'string'},
+E                       'method_name': {'anyOf': [{'type': 'string'},
+E                                                 {'type': 'null'}]},
+E                       'values': {'type': 'object',
+E                                  'properties': {'value_number': {'anyOf': [{'type': 'number'},
+E                                                                            {'type': 'null'}]},
+E                                                 'value_min': {'anyOf': [{'type': 'number'},
+E                                                                         {'type': 'null'}]},
+E                                                 'value_max': {'anyOf': [{'type': 'number'},
+E                                                                         {'type': 'null'}]},
+E                                                 'uncertainty': {'anyOf': [{'type': 'number'},
+E                                                                           {'type': 'null'}]},
+E                                                 'value_text': {'anyOf': [{'type': 'string'},
+E                                                                          {'type': 'null'}]},
+E                                                 'method_raw': {'anyOf': [{'type': 'string'},
+E                                                                          {'type': 'null'}]},
+E                                                 'unit_raw': {'anyOf': [{'type': 'string'},
+E                                                                        {'type': 'null'}]},
+E                                                 'canonical_unit': {'anyOf': [{'type': 'string'},
+E                                                                              {'type': 'null'}]},
+E                                                 'value_kind': {'type': 'string',
+E                                                                'enum': ['number',
+E                                                                         'range',
+E                                                                         'text',
+E                                                                         'boolean']},
+E                                                 'value_raw': {'type': 'string'},
+E                                                 'method_code': {'anyOf': [{'type': 'string'},
+E                                                                           {'type': 'null'}]},
+E                                                 'value_boolean': {'anyOf': [{'type': 'boolean'},
+E                                                                             {'type': 'null'}]},
+E                                                 'parameters': {'anyOf': [{'$ref': '#/$defs/ScientificParameters'},
+E                                                                          {'type': 'null'}]},
+E                                                 'calculation_conditions': {'anyOf': [{'$ref': '#/$defs/ScientificConditions'},
+E                                                                                      {'type': 'null'}]}},
+E                                  'required': ['value_number',
+E                                               'value_min',
+E                                               'value_max',
+E                                               'uncertainty',
+E                                               'value_text',
+E                                               'method_raw',
+E                                               'unit_raw',
+E                                               'canonical_unit',
+E                                               'value_kind',
+E                                               'value_raw',
+E                                               'method_code',
+E                                               'value_boolean',
+E                                               'parameters',
+E                                               'calculation_conditions'],
+E                                  'additionalProperties': False},
+E                       'source_ids': {'type': 'array',
+E                                      'items': {'type': 'string'}},
+E                       'reason': {'type': 'string'}},
+E        'required': ['candidate_ids',
+E                     'group',
+E                     'method',
+E                     'method_name',
+E                     'values',
+E                     'source_ids',
+E                     'reason'],
+E        'additionalProperties': False}
+E
+E   On instance['records'][0]:
+E       {'candidate_ids': [],
+E        'group': 'x',
+E        'method': 'x',
+E        'values': {'value_number': None,
+E                   'value_min': None,
+E                   'value_max': None,
+E                   'uncertainty': None,
+E                   'value_text': None,
+E                   'method_raw': None,
+E                   'unit_raw': None,
+E                   'canonical_unit': None,
+E                   'value_kind': 'number',
+E                   'value_raw': 'x',
+E                   'method_code': None,
+E                   'value_boolean': None,
+E                   'parameters': None,
+E                   'calculation_conditions': None},
+E        'source_ids': [],
+E        'reason': '原文及表格支持这两个 Tc／μ* 点属于同一方法；原文写法各自保留。'}
+
+The above exception was the direct cause of the following exception:
+backend/tests/test_strict_scientific_output.py:78: in test_filling_uses_existing_reason_and_rejects_added_method_name
+    validate_output(value, schema)
+backend/rag/structured_output.py:39: in validate_output
+    raise StructuredOutputError(f"模型输出未遵守固定字段结构：{path}（{exc.validator}）") from exc
+E   backend.rag.structured_output.StructuredOutputError: 模型输出未遵守固定字段结构：records.0（required）
+_ test_added_method_name_is_rejected_by_formal_processing_not_hidden_as_metadata _
+tests/01_decentralized_uploading/test_scientific_form_filling.py:62: in test_added_method_name_is_rejected_by_formal_processing_not_hidden_as_metadata
+    with pytest.raises(ValueError, match='字段'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError
+=========================== short test summary info ============================
+FAILED backend/tests/test_strict_scientific_output.py::test_filling_uses_existing_reason_and_rejects_added_method_name
+FAILED tests/01_decentralized_uploading/test_scientific_form_filling.py::test_added_method_name_is_rejected_by_formal_processing_not_hidden_as_metadata
+2 failed, 36 deselected in 0.54s

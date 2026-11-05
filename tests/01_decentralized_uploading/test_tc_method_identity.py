@@ -57,12 +57,19 @@ def test_explicit_nonstandard_method_keeps_own_spellings_and_common_description_
 @pytest.mark.parametrize('code', ['other', 'unknown'])
 def test_equal_generic_code_does_not_establish_same_method(code):
     wrong = custom_module(code, explicit=False)
-    assert any(i[1] == 'tc_method_group_conflict' for i in tc_collection_issues(wrong['records']))
-    with pytest.raises(ValueError, match='方法'):
-        compact_module(wrong)
     wrong['records'][1]['payload']['tc_group']['method_key'] = 'separate-method'
     assert not tc_collection_issues(wrong['records'])
     assert len(next(iter(compact_module(wrong)['metadata']['tc_contexts']['methods'].values()))) == 2
+    assert [r['method_raw'] for r in expand_module(compact_module(wrong))['records']] == [r['method_raw'] for r in wrong['records']]
+
+
+@pytest.mark.parametrize('code', ['other', 'unknown'])
+def test_existing_explicit_relation_preserves_spellings_without_added_method_name(code):
+    original = custom_module(code, explicit=False)
+    assert not tc_collection_issues(original['records'])
+    stored = compact_module(original)
+    assert expand_module(stored) == {**original, 'metadata': original.get('metadata', {})}
+    assert all('method_name' not in m for group in stored['metadata']['tc_contexts']['methods'].values() for m in group.values())
 
 
 def test_real_method_conflict_names_both_results():

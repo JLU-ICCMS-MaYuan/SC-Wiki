@@ -53,6 +53,30 @@ def test_real_four_candidates_become_one_group_two_points_with_all_origins():
     assert state == original
 
 
+def test_added_method_name_is_rejected_by_formal_processing_not_hidden_as_metadata():
+    from backend.ingest.scientific_form_filling import apply_plan
+    state, sources = fixture()
+    plan = response(sources)
+    plan['records'][0]['method_name'] = 'unrequested description'
+    before = deepcopy(state)
+    with pytest.raises(ValueError, match='字段'):
+        apply_plan([state], sources, plan)
+    assert state == before
+
+
+def test_method_explanation_stays_in_existing_reason_not_form_payload():
+    from backend.ingest.scientific_form_filling import apply_plan
+    state, sources = fixture()
+    plan = response(sources)
+    reason = '同一方法在不同 μ* 下的两个 Tc；具体原文及定位由 source_ids 保留。'
+    plan['records'][0]['reason'] = reason
+    result, audit = apply_plan([state], sources, plan)
+    assert any(reason in x.get('reasons', []) for x in audit['candidate_dispositions'].values())
+    for record in result[0]['property_modules'][0]['records']:
+        assert 'method_name' not in record['payload']['tc_group']
+        assert record['evidences']
+
+
 @pytest.mark.parametrize('bad', ['missing_candidate', 'unknown_source', 'mixed_method', 'invented_candidate', 'lost_parameter'])
 def test_invalid_plan_cannot_drop_or_misplace_results(bad):
     from backend.ingest.scientific_form_filling import apply_plan

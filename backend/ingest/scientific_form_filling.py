@@ -7,7 +7,7 @@ import json
 from .scientific_context import build_context, fingerprint
 from .property_modules import THEORETICAL_METHODS, EXPERIMENTAL_METHODS, validate_record
 
-VERSION = "scientific-form-filling-v6-method-identity"
+VERSION = "scientific-form-filling-v7-fixed-method-fields"
 SUPPORTED = {"tc", "dos_fermi"}
 VALUE_FIELDS = {"value_number", "value_min", "value_max", "value_text", "value_boolean"}
 PATCH_FIELDS = VALUE_FIELDS | {"value_kind", "value_raw", "method_code", "method_raw",
@@ -26,9 +26,9 @@ Do not guess a specific Eliashberg variant. unknown means not established, NOT a
 Keep distinct methods and their own Tc/mu_star points. Share a group only if lambda_ep, omega_log,
 calculation conditions and approximation agree. Use one method label per method row within that group.
 method_raw preserves EACH result's actual reported spelling, not a shared normalized name. Keep its
-own source_ids. If different spellings denote one other/unknown method, supply the SAME method_name
-beside group/method on each entry, explain the equivalence in reason and cite its supporting sources.
-method_name describes that shared method; it is relationship metadata, NEVER a values field.
+own source_ids. Explain method identity, wording differences and their source support in the EXISTING
+reason field. Reuse group/method ONLY when the read sources establish that relationship. Do not add
+method_name, method_description, or any new scientific field, including under relationship metadata.
 Equal other/unknown codes alone NEVER establish the same method. Keep unsupported relations separate.
 IMPORTANT FORM MEANING: group is a COMMON-PARAMETER GROUP, NOT a result point. Tc and mu_star
 MUST NOT be part of the group identity. If ONLY Tc/mu_star differs, reuse the EXACT SAME group string
@@ -187,6 +187,8 @@ def apply_plan(states, sources, response):
     dispositions, outputs, issues = {}, [], []
     keys = set()
     for entry in response.get("records", []):
+        if set(entry) - {'candidate_ids', 'group', 'method', 'values', 'source_ids', 'reason'}:
+            raise ValueError('结果字段无效，方法解释只能填写既有 reason')
         ids = entry.get("candidate_ids")
         if not isinstance(ids, list) or not ids or len(set(ids)) != len(ids) or any(i not in original for i in ids):
             raise ValueError("结果缺少有效的原候选身份")
@@ -246,11 +248,6 @@ def apply_plan(states, sources, response):
             identity = fingerprint([VERSION, si, mi, sorted(ids), values])[:24]
             group_metadata = {"version": 1, "group_key": "fill-" + fingerprint([si, mi, group])[:24],
                               "method_key": "fill-" + fingerprint([si, mi, group, method])[:24]}
-            if entry.get('method_name') is not None:
-                name = entry['method_name']
-                if not isinstance(name, str) or not name.strip() or len(name) > 180:
-                    raise ValueError('Tc 共同方法名称无效')
-                group_metadata['method_name'] = name
             if record["value_kind"] == "number":
                 group_metadata["point_key"] = identity
         elif record.get("record_type") == "measured_tc" and record.get("method_code") not in EXPERIMENTAL_METHODS:

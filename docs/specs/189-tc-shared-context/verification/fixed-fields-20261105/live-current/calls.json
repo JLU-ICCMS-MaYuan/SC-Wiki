@@ -1,0 +1,110 @@
+[
+  {
+    "thinking": "provider_default",
+    "usage": {
+      "completion_tokens": 83,
+      "prompt_tokens": 30372,
+      "total_tokens": 30455,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 17,
+        "rejected_prediction_tokens": null
+      },
+      "prompt_tokens_details": null
+    },
+    "finish_reason": "stop",
+    "phase": "",
+    "model": "gpt-6.1-sol",
+    "prompt_hash": "c9f3f783df054fed56161c89e4ccb73617157a7154e015b8c15f51e48b903374",
+    "attempt": 1,
+    "status": "completed",
+    "elapsed_seconds": 7.551829083000484,
+    "input_chars": 76059,
+    "output_chars": 286,
+    "tokens": null,
+    "input_tokens_estimate": 19015,
+    "output_tokens_estimate": 72
+  },
+  {
+    "thinking": "provider_default",
+    "usage": {
+      "completion_tokens": 3212,
+      "prompt_tokens": 30414,
+      "total_tokens": 33626,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 118,
+        "rejected_prediction_tokens": null
+      },
+      "prompt_tokens_details": null
+    },
+    "finish_reason": "stop",
+    "phase": "",
+    "model": "gpt-6.1-sol",
+    "prompt_hash": "c9f3f783df054fed56161c89e4ccb73617157a7154e015b8c15f51e48b903374",
+    "attempt": 1,
+    "status": "completed",
+    "elapsed_seconds": 69.57625400000688,
+    "input_chars": 76139,
+    "output_chars": 9346,
+    "tokens": null,
+    "input_tokens_estimate": 19035,
+    "output_tokens_estimate": 2337
+  },
+  {
+    "thinking": "provider_default",
+    "usage": {
+      "completion_tokens": 3111,
+      "prompt_tokens": 30379,
+      "total_tokens": 33490,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 145,
+        "rejected_prediction_tokens": null
+      },
+      "prompt_tokens_details": null
+    },
+    "finish_reason": "stop",
+    "phase": "",
+    "model": "gpt-6.1-sol",
+    "prompt_hash": "c9f3f783df054fed56161c89e4ccb73617157a7154e015b8c15f51e48b903374",
+    "attempt": 1,
+    "status": "completed",
+    "elapsed_seconds": 66.2555663749954,
+    "input_chars": 76068,
+    "output_chars": 8846,
+    "tokens": null,
+    "input_tokens_estimate": 19017,
+    "output_tokens_estimate": 2212
+  },
+  {
+    "thinking": "provider_default",
+    "usage": {
+      "completion_tokens": 3215,
+      "prompt_tokens": 30379,
+      "total_tokens": 33594,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 168,
+        "rejected_prediction_tokens": null
+      },
+      "prompt_tokens_details": null
+    },
+    "finish_reason": "stop",
+    "phase": "",
+    "model": "gpt-6.1-sol",
+    "prompt_hash": "c9f3f783df054fed56161c89e4ccb73617157a7154e015b8c15f51e48b903374",
+    "attempt": 1,
+    "status": "completed",
+    "elapsed_seconds": 67.61475100000098,
+    "input_chars": 76068,
+    "output_chars": 9132,
+    "tokens": null,
+    "input_tokens_estimate": 19017,
+    "output_tokens_estimate": 2283
+  }
+]

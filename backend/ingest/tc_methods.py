@@ -17,8 +17,14 @@ def method_identity(record):
     name = group.get('method_name')
     if name is not None and (not isinstance(name, str) or not name.strip() or len(name) > 180):
         raise ValueError('Tc 共同方法名称无效')
-    # 标准方法已有明确语义；其他／未知需要既有整理明确的共同描述，旧请求按具体名称区分。
-    return code, (name if name is not None else record.get('method_raw')) if code in {'other', 'unknown'} else None
+    # 有明确组/方法引用时，归属由已有整理及来源核对建立，不再按原文写法重新判同。
+    # 历史共同名称保持可读；无显式身份的旧记录仍保留各自名称，不能因枚举相同合并。
+    explicit = bool(group.get('group_key') and group.get('method_key'))
+    if code not in {'other', 'unknown'}:
+        return code, None
+    if name is not None:
+        return code, name
+    return code, None if explicit else record.get('method_raw')
 
 
 def method_review_identity(record):

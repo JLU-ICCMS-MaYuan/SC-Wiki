@@ -1,0 +1,13 @@
+{
+  "passed": false,
+  "model": "gpt-6.1-sol",
+  "scope": "LaH8 300GPa，McMillan／Eliashberg方法与5条原候选",
+  "reused": "原文字IR及未修改的数值提取候选",
+  "rerun": "本轮受影响方法关系AI整理、来源定位、防遗漏与隔离SQL保存重读",
+  "error": {
+    "type": "AssertionError",
+    "message": "方法整理未完成"
+  },
+  "original_task_unchanged": true,
+  "elapsed_seconds": 211.58439707756042
+}

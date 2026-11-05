@@ -66,6 +66,21 @@ def _value(schema, root):
     return {"array": [], "null": None, "string": "x", "number": 1.0, "integer": 1, "boolean": False}[kind]
 
 
+def test_filling_uses_existing_reason_and_rejects_added_method_name():
+    from backend.ingest.scientific_output_schema import filling_schema
+    from backend.rag.structured_output import validate_output, StructuredOutputError
+    schema = filling_schema()
+    value = _value(schema, schema)
+    record = _value(schema['properties']['records']['items'], schema)
+    record.pop('method_name', None)
+    record['reason'] = '原文及表格支持这两个 Tc／μ* 点属于同一方法；原文写法各自保留。'
+    value['records'] = [record]
+    validate_output(value, schema)
+    record['method_name'] = 'unrequested description'
+    with pytest.raises(StructuredOutputError):
+        validate_output(value, schema)
+
+
 @pytest.mark.parametrize("path", [
     ["description"], ["pressure_ambiguity"], ["calculation_conditions", "extensions"],
     ["calculation_conditions", "qe", "invented_cutoff"],

@@ -194,7 +194,7 @@ def filling_schema():
                    "value_raw": TEXT, "method_code": nullable(TEXT), "value_boolean": nullable(BOOLEAN),
                    "parameters": nullable({"$ref": "#/$defs/ScientificParameters"}),
                    "calculation_conditions": nullable({"$ref": "#/$defs/ScientificConditions"})})
-    record = obj({"candidate_ids": array(TEXT), "group": TEXT, "method": TEXT, "method_name": nullable(TEXT), "values": obj(fields),
+    record = obj({"candidate_ids": array(TEXT), "group": TEXT, "method": TEXT, "values": obj(fields),
                   "source_ids": array(TEXT), "reason": TEXT})
     disposition = obj({"candidate_id": TEXT, "category": TEXT, "source_ids": array(TEXT), "reason": TEXT})
     return obj({"done": BOOLEAN, "read_source_ids": array(TEXT), "search": array(TEXT),

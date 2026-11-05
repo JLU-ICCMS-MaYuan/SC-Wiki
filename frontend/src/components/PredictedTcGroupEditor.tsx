@@ -72,8 +72,6 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
       const members = records.filter(r => tcMethodKey(r) === method), first = members[0]
       const points = members.flatMap(tcPointViews)
       const metadata = tcGroupMeta(first)
-      const showDescription = first.method_code === 'other' || first.method_code === 'unknown'
-        && (Object.prototype.hasOwnProperty.call(metadata || {}, 'method_name') || Boolean(first.method_raw))
       return <Box key={method} role="group" data-record-key={first.record_key} aria-label={`第${methodIndex + 1}种预测方法`}>
         <PropertyRecordRow actions={readOnly ? undefined : <Tooltip title="删除本方法及其全部组合"><IconButton color="error" size="small" aria-label={`删除第${methodIndex + 1}种方法`}
           onClick={() => onChange(records.filter(r => tcMethodKey(r) !== method))}><DeleteIcon /></IconButton></Tooltip>}>
@@ -85,8 +83,7 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
                 {Object.entries(names).map(([code, label]) => <MenuItem key={code} value={code}>{label}</MenuItem>)}
               </Select>
             </FormControl>
-            {showDescription && <TextField size="small" label={first.method_code === 'other' ? '具体方法名称' : '方法描述'} value={metadata?.method_name ?? first.method_raw ?? ''}
-              helperText={first.method_code === 'unknown' ? '不据此推断原文未说明的具体类别。' : undefined}
+            {first.method_code === 'other' && <TextField size="small" label="具体方法名称" value={metadata?.method_name ?? first.method_raw ?? ''}
               disabled={readOnly} sx={{ width: 220 }} data-issue-field={`${path(first)}.method_raw`}
               onChange={event => onChange(records.map(record => tcMethodKey(record) === method
                 ? setTcMethodValue(record, 'method_raw', event.target.value) : record))} />}

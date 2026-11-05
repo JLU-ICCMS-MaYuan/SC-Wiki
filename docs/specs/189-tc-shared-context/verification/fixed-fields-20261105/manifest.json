@@ -1,0 +1,21 @@
+{
+  "baseline_commit": "d3a7e53506cf221c35e663aed887af35782a7fd9",
+  "current_head": "d3a7e53506cf221c35e663aed887af35782a7fd9",
+  "scope": "固定字段纠偏；LaH8 300GPa 两方法四结果的来源验证，不代表整篇解析或业务审批",
+  "source_files": {
+    "backend/ingest/scientific_form_filling.py": "2839d8d0b96b2b8f907349ab99dac00be91ebafb4de12142cd296e311b27b6bd",
+    "backend/ingest/scientific_output_schema.py": "0e0c77d27c87c0f30f10e9ab08608af6790493da740168fcac5f1741b78ba3e2",
+    "backend/ingest/tc_methods.py": "e192030fa5f476c16d4d1de35f51b7b5ebf67d3c94a3b1c7057272bd63119eb0",
+    "frontend/src/components/PredictedTcGroupEditor.tsx": "d92b35b6d225b62b1c0d53c58ffbb6900d74ed53992d90edb7bf581d5ecd8c25"
+  },
+  "checks": {
+    "backend_passed": 63,
+    "targeted_frontend_passed": 13,
+    "host_form_contract_passed": 163,
+    "mutations_detected": 12,
+    "field_contract_passed": true,
+    "build_passed": true,
+    "live_methods_passed": true,
+    "original_task_unchanged": true
+  }
+}

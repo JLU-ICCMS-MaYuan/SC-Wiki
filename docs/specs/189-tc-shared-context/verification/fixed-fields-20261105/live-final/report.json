@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "model": "gpt-6.1-sol",
+  "scope": "LaH8／300GPa的McMillan及Eliashberg四条方法结果",
+  "model_called_this_continuation": false,
+  "reused": "本轮新模型原始整理响应；未修改数值候选和材料状态已有来源",
+  "not_run": "业务草稿修改、整篇解析与人工审批",
+  "validated_claims": 5,
+  "roundtrip_equal": true,
+  "reasons_preserved": true,
+  "points": [
+    [
+      "mcmillan",
+      131,
+      0.1,
+      "McMillan"
+    ],
+    [
+      "mcmillan",
+      114,
+      0.13,
+      "McMillan"
+    ],
+    [
+      "unknown",
+      150,
+      0.1,
+      "Eliashberg"
+    ],
+    [
+      "unknown",
+      138,
+      0.13,
+      "Eliashberg"
+    ]
+  ],
+  "original_task_unchanged": true
+}

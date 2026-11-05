@@ -1,0 +1,1873 @@
+[
+  {
+    "claim_id": "ce75c5ff6158050da6f1dd82e7c659ae2b6e215f242e8c59bba576d8dcdae967",
+    "target_path": "material_states[0]",
+    "value": {
+      "material": "LaH8",
+      "pressure_value_gpa": 300,
+      "state_kind": "theoretical",
+      "structure_optimization": "classical_static",
+      "reported_space_group_number": 12,
+      "reported_space_group_symbol": "C2/m",
+      "material_dimensionality": "unknown",
+      "structure_families": []
+    },
+    "raw_value": {
+      "material": "LaH8",
+      "pressure_value_gpa": 300,
+      "state_kind": "theoretical",
+      "structure_optimization": "classical_static",
+      "reported_space_group_number": 12,
+      "reported_space_group_symbol": "C2/m",
+      "material_dimensionality": "unknown",
+      "structure_families": []
+    },
+    "basis_kind": "paper_quote",
+    "source_kind": "text_layer",
+    "status": "uncertain",
+    "confidence": null,
+    "rule_version": "2",
+    "content_hash": null,
+    "evidences": []
+  },
+  {
+    "claim_id": "ecb69f731fedf5866bc1a569b90e651c62b36fed5002e2611c6cda78f7f9a374",
+    "target_path": "material_states[0].property_modules[0].records[0]",
+    "value": {
+      "record_key": "fill-97594d8412ce45c5e70e460b6c31",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "property_code": "tc",
+      "custom_property_key": null,
+      "definition_key": "record.superconductive_properties.predicted_tc.mcmillan",
+      "definition_version": 2,
+      "name_raw": "Tc",
+      "value_kind": "number",
+      "value_raw": "131",
+      "value_number": 131,
+      "value_min": null,
+      "value_max": null,
+      "value_text": null,
+      "value_boolean": null,
+      "uncertainty": null,
+      "unit_raw": "K",
+      "canonical_unit": "K",
+      "method_code": "mcmillan",
+      "method_raw": "McMillan",
+      "criterion_code": null,
+      "criterion_raw": null,
+      "structure_key": null,
+      "payload": {
+        "calculation_conditions": {
+          "calculation_code": "Quantum-ESPRESSO",
+          "electronic_method": "DFT",
+          "epw": null,
+          "exchange_correlation_functional": null,
+          "phonon_method": "density functional perturbation theory",
+          "qe": {
+            "atoms": null,
+            "charge_density_cutoff": null,
+            "convergence_energy": null,
+            "convergence_force": null,
+            "energy_cutoff": {
+              "evidences": null,
+              "reported": true,
+              "unit_raw": "Ry",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 80,
+              "value_raw": "80",
+              "value_text": null
+            },
+            "k_broadening": null,
+            "k_grid": null,
+            "q_grid": null,
+            "q_grid_interpolated": null,
+            "supercell": null,
+            "temperature_k": null
+          },
+          "sscha": null,
+          "vibrational_treatment": "harmonic"
+        },
+        "method_variant_status": null,
+        "parameters": {
+          "extensions": [
+            {
+              "key": "omega_log_reported",
+              "value_kind": "text",
+              "value_raw": "1,591",
+              "unit_raw": "K",
+              "reported": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "K",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 1591,
+                "value_raw": "1,591",
+                "value_text": null
+              }
+            }
+          ],
+          "lambda_ep": 1.12,
+          "mu_star": 0.1,
+          "omega_log": 1591.0
+        },
+        "table_row_ref": {
+          "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+          "group": null,
+          "row_index": 2,
+          "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d"
+        },
+        "tc_group": {
+          "version": 1,
+          "group_key": "fill-2535c6149559f666c5842b89",
+          "method_key": "fill-a80ce17ad91cdf75a8de7d96",
+          "point_key": "16944af6ab42b240eb08763c"
+        }
+      },
+      "is_representative": false
+    },
+    "raw_value": {
+      "record_key": "fill-97594d8412ce45c5e70e460b6c31",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "property_code": "tc",
+      "custom_property_key": null,
+      "definition_key": "record.superconductive_properties.predicted_tc.mcmillan",
+      "definition_version": 2,
+      "name_raw": "Tc",
+      "value_kind": "number",
+      "value_raw": "131",
+      "value_number": 131,
+      "value_min": null,
+      "value_max": null,
+      "value_text": null,
+      "value_boolean": null,
+      "uncertainty": null,
+      "unit_raw": "K",
+      "canonical_unit": "K",
+      "method_code": "mcmillan",
+      "method_raw": "McMillan",
+      "criterion_code": null,
+      "criterion_raw": null,
+      "structure_key": null,
+      "payload": {
+        "calculation_conditions": {
+          "calculation_code": "Quantum-ESPRESSO",
+          "electronic_method": "DFT",
+          "epw": null,
+          "exchange_correlation_functional": null,
+          "phonon_method": "density functional perturbation theory",
+          "qe": {
+            "atoms": null,
+            "charge_density_cutoff": null,
+            "convergence_energy": null,
+            "convergence_force": null,
+            "energy_cutoff": {
+              "evidences": null,
+              "reported": true,
+              "unit_raw": "Ry",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 80,
+              "value_raw": "80",
+              "value_text": null
+            },
+            "k_broadening": null,
+            "k_grid": null,
+            "q_grid": null,
+            "q_grid_interpolated": null,
+            "supercell": null,
+            "temperature_k": null
+          },
+          "sscha": null,
+          "vibrational_treatment": "harmonic"
+        },
+        "method_variant_status": null,
+        "parameters": {
+          "extensions": [
+            {
+              "key": "omega_log_reported",
+              "value_kind": "text",
+              "value_raw": "1,591",
+              "unit_raw": "K",
+              "reported": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "K",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 1591,
+                "value_raw": "1,591",
+                "value_text": null
+              }
+            }
+          ],
+          "lambda_ep": 1.12,
+          "mu_star": 0.1,
+          "omega_log": 1591.0
+        },
+        "table_row_ref": {
+          "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+          "group": null,
+          "row_index": 2,
+          "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d"
+        },
+        "tc_group": {
+          "version": 1,
+          "group_key": "fill-2535c6149559f666c5842b89",
+          "method_key": "fill-a80ce17ad91cdf75a8de7d96",
+          "point_key": "16944af6ab42b240eb08763c"
+        }
+      },
+      "is_representative": false
+    },
+    "basis_kind": "paper_quote",
+    "source_kind": "ocr",
+    "status": "validated",
+    "confidence": null,
+    "rule_version": "2",
+    "content_hash": null,
+    "evidences": [
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 2,
+        "printed_page": null,
+        "block_id": "02b98c8f65f7d17607ee27a246ca8d207e85498d11dddb82285c6208b33a0254",
+        "bbox": [
+          293.64839904785157,
+          688.2447141723633,
+          544.0099822998047,
+          729.7429733886719
+        ],
+        "polygon": null,
+        "quote": "Electron-coupling calculations for LaH4 give a relatively small λ of 0.43. The estimated T _ { c } \\mathrm { ~ i s ~ } 5 \\mathrm { - 1 0 } K at 300 GPa with the typical choice of the Coulomb potential of \\mu ^ { * }   =   0 . 1  –  0 . 1 3 . Using the McMillan equation (44), we calculated T _ { c } using the spectral",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 3,
+        "printed_page": null,
+        "block_id": "5c42754c6ed5d7766c4502f919141bddb26215e091950bf3f6ebe62e96b25f31",
+        "bbox": [
+          39.77707397460938,
+          342.1648920288086,
+          288.9687432861328,
+          375.833291015625
+        ],
+        "polygon": null,
+        "quote": "function [ \\alpha ^ { 2 } F ( \\omega ) ] , again with \\mu ^ { * } = 0 . 1  –  0 . 1 3 , as previously used in superconductivity calculations for Y (15), La (45, 46), SH3 (24), CaH6 (17), YH6 (30), and other superconductors.",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 3,
+        "printed_page": null,
+        "block_id": "6974bd4e68635344b0dd88df54274ab813fa1762cc08a4587d5187b8e4bea793",
+        "bbox": [
+          99.44268493652345,
+          386.7950953369141,
+          226.9633044433594,
+          414.98259216308594
+        ],
+        "polygon": null,
+        "quote": "T_{c} = \\frac{\\omega_{log}}{1.2} \\exp \\left( \\frac{-1.04(1 + \\lambda)}{\\lambda - \\mu^*(1 + 0.62\\lambda)} \\right)",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 3,
+        "printed_page": null,
+        "block_id": "5d3fa5c7c27e7a2097efde9cac9cdd7c5577d794ebd4a5f0b3701317a5c17df2",
+        "bbox": [
+          298.3280548095703,
+          342.9478780517578,
+          547.5197241210938,
+          367.2204447631836
+        ],
+        "polygon": null,
+        "quote": "The calculated electron-coupling parameter for Laß \\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 4,
+        "printed_page": null,
+        "block_id": "91548fe55c59771fa9fcf6b7eb538a5cf91792227eccef21b1787b5049346c05",
+        "bbox": [
+          34.512461242675776,
+          402.45481579589847,
+          284.8740444946289,
+          436.9062008056641
+        ],
+        "polygon": null,
+        "quote": "assuming \\mu ^ { * } = 0 . 1 – 0 . 1 3 (Eq. 1). That result encouraged us to calculate the T _ { c } of \\mathrm { L a H _ { 1 0 } } . Previous theoretical studies also found that sodalite-structured hydrides (e.g., \\mathrm { C a H _ { 6 } } and \\mathrm { Y H _ { 6 } ) } were associated",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "9886389c2c29434921e516ae0908569a337a5ebf1fab3dc9ea6e77469dd3e793",
+        "bbox": [
+          297.74309783935547,
+          299.10066076660155,
+          548.6896380615234,
+          380.5312071533203
+        ],
+        "polygon": null,
+        "quote": "consistent with previous theoretical (15) and experimental studies ( T _ { c } = 1 7 \\; \\dot { \\bf K } at 89 GPa) (49).All of our calculations were carried out using the harmonic approximation. It is well known that in many hydrides anharmonicity tends to lower \\overline { { [ T _ { c } ] ( 5 0 ) } } . For the well-studied \\overline { { \\mathrm { S H } _ { 3 } } } system, however, such an effect is weak: T _ { c } is lowered from its harmonic 204 K value (24) only to 194 K (21) at 250 GPa, and both are close to the reported experiment T _ { c } at that pressure (20).",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 1,
+        "printed_page": null,
+        "block_id": "ea500a521525caf739d5edae88ebc07149304b3d68602ed295e036d68b982b0a",
+        "bbox": [
+          35.097418212890624,
+          115.09894537353514,
+          285.45900146484377,
+          176.17185516357424
+        ],
+        "polygon": null,
+        "quote": "Table S1 presents calculated { T _ { c } } \\mathbf { s } of \\mathrm { L a H _ { n } }   ( n = 4 ,   8 , and 10) and \\mathrm { Y H _ { 1 0 } } at high pressures for different models and parameters. It is seen that the McMillan and Eliashberg equations lead to similar results for small λ. For larger λ, however, the Eliashberg equation predicts higher Tc values. Table S2 contains the lattice parameters and atomic coordinates for the predicted structures.",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "03af162ade6ea902a656cad404d2cf56cb5c9c0c067b77500dff34e1ff906f00",
+        "bbox": [
+          71.36475036621094,
+          494.84716650390624,
+          506.5727362060547,
+          505.80897082519533
+        ],
+        "polygon": null,
+        "quote": "Table S1. T _ { c } of La-H and Y-H systems at different pressures calculated using the McMillan and Eliashberg equations",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77",
+        "bbox": [
+          220.42142,
+          521.8589836,
+          244.3336014,
+          529.3505111439999
+        ],
+        "polygon": null,
+        "quote": "wlog, K",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "5a4002e31d59eae984e8bd2c05e154294a1a13c4cc635ba6cb9e4e27c5d402f3",
+        "bbox": [
+          259.99375,
+          511.8809836,
+          308.8103231999999,
+          528.6178736544
+        ],
+        "polygon": null,
+        "quote": "Tc, K; μ* = 0.1 McMillan",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "edc4256aba31b4f2277d2dc7e502c98c766df730bdf78a94d520109cfe1af349",
+        "bbox": [
+          74.2113,
+          547.7675236,
+          90.57039759999999,
+          555.259211144
+        ],
+        "polygon": null,
+        "quote": "LaH8",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "9d66d7724d072170cad67affb3a7f2e519925100e047f53c146999056127fe96",
+        "bbox": [
+          145.2472,
+          547.7675836,
+          157.62199515999998,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "300",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1",
+        "bbox": [
+          190.37537763999998,
+          547.7675836,
+          204.76830597999995,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "1.12",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c",
+        "bbox": [
+          223.08841239999995,
+          547.7675836,
+          241.60652151999992,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "1,591",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "e2e14245b620a96e3b8b54817ec33ffa5a033a25d540acb5836cb33966946e38",
+        "bbox": [
+          278.1951789399999,
+          547.7675836,
+          290.56997409999985,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "131",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      }
+    ]
+  },
+  {
+    "claim_id": "c049990bc97f35523bec501a3ddfaa4a42eaa90090ec7d4e506e1c7adf141d42",
+    "target_path": "material_states[0].property_modules[0].records[1]",
+    "value": {
+      "record_key": "fill-f64bc1a2c55e025fd64fe09ec52f",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "property_code": "tc",
+      "custom_property_key": null,
+      "definition_key": "record.superconductive_properties.predicted_tc.mcmillan",
+      "definition_version": 2,
+      "name_raw": "Tc",
+      "value_kind": "number",
+      "value_raw": "114",
+      "value_number": 114,
+      "value_min": null,
+      "value_max": null,
+      "value_text": null,
+      "value_boolean": null,
+      "uncertainty": null,
+      "unit_raw": "K",
+      "canonical_unit": "K",
+      "method_code": "mcmillan",
+      "method_raw": "McMillan",
+      "criterion_code": null,
+      "criterion_raw": null,
+      "structure_key": null,
+      "payload": {
+        "calculation_conditions": {
+          "calculation_code": "Quantum-ESPRESSO",
+          "electronic_method": "DFT",
+          "epw": null,
+          "exchange_correlation_functional": null,
+          "phonon_method": "density functional perturbation theory",
+          "qe": {
+            "atoms": null,
+            "charge_density_cutoff": null,
+            "convergence_energy": null,
+            "convergence_force": null,
+            "energy_cutoff": {
+              "evidences": null,
+              "reported": true,
+              "unit_raw": "Ry",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 80,
+              "value_raw": "80",
+              "value_text": null
+            },
+            "k_broadening": null,
+            "k_grid": null,
+            "q_grid": null,
+            "q_grid_interpolated": null,
+            "supercell": null,
+            "temperature_k": null
+          },
+          "sscha": null,
+          "vibrational_treatment": "harmonic"
+        },
+        "method_variant_status": null,
+        "parameters": {
+          "extensions": [
+            {
+              "key": "omega_log_reported",
+              "value_kind": "text",
+              "value_raw": "1,591",
+              "unit_raw": "K",
+              "reported": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "K",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 1591,
+                "value_raw": "1,591",
+                "value_text": null
+              }
+            }
+          ],
+          "lambda_ep": 1.12,
+          "mu_star": 0.13,
+          "omega_log": 1591.0
+        },
+        "table_row_ref": {
+          "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+          "group": null,
+          "row_index": 2,
+          "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d"
+        },
+        "tc_group": {
+          "version": 1,
+          "group_key": "fill-2535c6149559f666c5842b89",
+          "method_key": "fill-a80ce17ad91cdf75a8de7d96",
+          "point_key": "eed044d1545d629705b2d006"
+        }
+      },
+      "is_representative": false
+    },
+    "raw_value": {
+      "record_key": "fill-f64bc1a2c55e025fd64fe09ec52f",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "property_code": "tc",
+      "custom_property_key": null,
+      "definition_key": "record.superconductive_properties.predicted_tc.mcmillan",
+      "definition_version": 2,
+      "name_raw": "Tc",
+      "value_kind": "number",
+      "value_raw": "114",
+      "value_number": 114,
+      "value_min": null,
+      "value_max": null,
+      "value_text": null,
+      "value_boolean": null,
+      "uncertainty": null,
+      "unit_raw": "K",
+      "canonical_unit": "K",
+      "method_code": "mcmillan",
+      "method_raw": "McMillan",
+      "criterion_code": null,
+      "criterion_raw": null,
+      "structure_key": null,
+      "payload": {
+        "calculation_conditions": {
+          "calculation_code": "Quantum-ESPRESSO",
+          "electronic_method": "DFT",
+          "epw": null,
+          "exchange_correlation_functional": null,
+          "phonon_method": "density functional perturbation theory",
+          "qe": {
+            "atoms": null,
+            "charge_density_cutoff": null,
+            "convergence_energy": null,
+            "convergence_force": null,
+            "energy_cutoff": {
+              "evidences": null,
+              "reported": true,
+              "unit_raw": "Ry",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 80,
+              "value_raw": "80",
+              "value_text": null
+            },
+            "k_broadening": null,
+            "k_grid": null,
+            "q_grid": null,
+            "q_grid_interpolated": null,
+            "supercell": null,
+            "temperature_k": null
+          },
+          "sscha": null,
+          "vibrational_treatment": "harmonic"
+        },
+        "method_variant_status": null,
+        "parameters": {
+          "extensions": [
+            {
+              "key": "omega_log_reported",
+              "value_kind": "text",
+              "value_raw": "1,591",
+              "unit_raw": "K",
+              "reported": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "K",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 1591,
+                "value_raw": "1,591",
+                "value_text": null
+              }
+            }
+          ],
+          "lambda_ep": 1.12,
+          "mu_star": 0.13,
+          "omega_log": 1591.0
+        },
+        "table_row_ref": {
+          "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+          "group": null,
+          "row_index": 2,
+          "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d"
+        },
+        "tc_group": {
+          "version": 1,
+          "group_key": "fill-2535c6149559f666c5842b89",
+          "method_key": "fill-a80ce17ad91cdf75a8de7d96",
+          "point_key": "eed044d1545d629705b2d006"
+        }
+      },
+      "is_representative": false
+    },
+    "basis_kind": "paper_quote",
+    "source_kind": "ocr",
+    "status": "validated",
+    "confidence": null,
+    "rule_version": "2",
+    "content_hash": null,
+    "evidences": [
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 2,
+        "printed_page": null,
+        "block_id": "02b98c8f65f7d17607ee27a246ca8d207e85498d11dddb82285c6208b33a0254",
+        "bbox": [
+          293.64839904785157,
+          688.2447141723633,
+          544.0099822998047,
+          729.7429733886719
+        ],
+        "polygon": null,
+        "quote": "Electron-coupling calculations for LaH4 give a relatively small λ of 0.43. The estimated T _ { c } \\mathrm { ~ i s ~ } 5 \\mathrm { - 1 0 } K at 300 GPa with the typical choice of the Coulomb potential of \\mu ^ { * }   =   0 . 1  –  0 . 1 3 . Using the McMillan equation (44), we calculated T _ { c } using the spectral",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 3,
+        "printed_page": null,
+        "block_id": "5c42754c6ed5d7766c4502f919141bddb26215e091950bf3f6ebe62e96b25f31",
+        "bbox": [
+          39.77707397460938,
+          342.1648920288086,
+          288.9687432861328,
+          375.833291015625
+        ],
+        "polygon": null,
+        "quote": "function [ \\alpha ^ { 2 } F ( \\omega ) ] , again with \\mu ^ { * } = 0 . 1  –  0 . 1 3 , as previously used in superconductivity calculations for Y (15), La (45, 46), SH3 (24), CaH6 (17), YH6 (30), and other superconductors.",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 3,
+        "printed_page": null,
+        "block_id": "6974bd4e68635344b0dd88df54274ab813fa1762cc08a4587d5187b8e4bea793",
+        "bbox": [
+          99.44268493652345,
+          386.7950953369141,
+          226.9633044433594,
+          414.98259216308594
+        ],
+        "polygon": null,
+        "quote": "T_{c} = \\frac{\\omega_{log}}{1.2} \\exp \\left( \\frac{-1.04(1 + \\lambda)}{\\lambda - \\mu^*(1 + 0.62\\lambda)} \\right)",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 3,
+        "printed_page": null,
+        "block_id": "5d3fa5c7c27e7a2097efde9cac9cdd7c5577d794ebd4a5f0b3701317a5c17df2",
+        "bbox": [
+          298.3280548095703,
+          342.9478780517578,
+          547.5197241210938,
+          367.2204447631836
+        ],
+        "polygon": null,
+        "quote": "The calculated electron-coupling parameter for Laß \\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 4,
+        "printed_page": null,
+        "block_id": "91548fe55c59771fa9fcf6b7eb538a5cf91792227eccef21b1787b5049346c05",
+        "bbox": [
+          34.512461242675776,
+          402.45481579589847,
+          284.8740444946289,
+          436.9062008056641
+        ],
+        "polygon": null,
+        "quote": "assuming \\mu ^ { * } = 0 . 1 – 0 . 1 3 (Eq. 1). That result encouraged us to calculate the T _ { c } of \\mathrm { L a H _ { 1 0 } } . Previous theoretical studies also found that sodalite-structured hydrides (e.g., \\mathrm { C a H _ { 6 } } and \\mathrm { Y H _ { 6 } ) } were associated",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "9886389c2c29434921e516ae0908569a337a5ebf1fab3dc9ea6e77469dd3e793",
+        "bbox": [
+          297.74309783935547,
+          299.10066076660155,
+          548.6896380615234,
+          380.5312071533203
+        ],
+        "polygon": null,
+        "quote": "consistent with previous theoretical (15) and experimental studies ( T _ { c } = 1 7 \\; \\dot { \\bf K } at 89 GPa) (49).All of our calculations were carried out using the harmonic approximation. It is well known that in many hydrides anharmonicity tends to lower \\overline { { [ T _ { c } ] ( 5 0 ) } } . For the well-studied \\overline { { \\mathrm { S H } _ { 3 } } } system, however, such an effect is weak: T _ { c } is lowered from its harmonic 204 K value (24) only to 194 K (21) at 250 GPa, and both are close to the reported experiment T _ { c } at that pressure (20).",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 1,
+        "printed_page": null,
+        "block_id": "ea500a521525caf739d5edae88ebc07149304b3d68602ed295e036d68b982b0a",
+        "bbox": [
+          35.097418212890624,
+          115.09894537353514,
+          285.45900146484377,
+          176.17185516357424
+        ],
+        "polygon": null,
+        "quote": "Table S1 presents calculated { T _ { c } } \\mathbf { s } of \\mathrm { L a H _ { n } }   ( n = 4 ,   8 , and 10) and \\mathrm { Y H _ { 1 0 } } at high pressures for different models and parameters. It is seen that the McMillan and Eliashberg equations lead to similar results for small λ. For larger λ, however, the Eliashberg equation predicts higher Tc values. Table S2 contains the lattice parameters and atomic coordinates for the predicted structures.",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "03af162ade6ea902a656cad404d2cf56cb5c9c0c067b77500dff34e1ff906f00",
+        "bbox": [
+          71.36475036621094,
+          494.84716650390624,
+          506.5727362060547,
+          505.80897082519533
+        ],
+        "polygon": null,
+        "quote": "Table S1. T _ { c } of La-H and Y-H systems at different pressures calculated using the McMillan and Eliashberg equations",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77",
+        "bbox": [
+          220.42142,
+          521.8589836,
+          244.3336014,
+          529.3505111439999
+        ],
+        "polygon": null,
+        "quote": "wlog, K",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "44dc0e21158730dc4fae03cdeebf99c4aa27d0338a7f19700948897cfe81e7f4",
+        "bbox": [
+          324.45254,
+          511.8809836,
+          377.4505967999999,
+          528.6178736544
+        ],
+        "polygon": null,
+        "quote": "Tc, K; μ* = 0.13 McMillan",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "edc4256aba31b4f2277d2dc7e502c98c766df730bdf78a94d520109cfe1af349",
+        "bbox": [
+          74.2113,
+          547.7675236,
+          90.57039759999999,
+          555.259211144
+        ],
+        "polygon": null,
+        "quote": "LaH8",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "9d66d7724d072170cad67affb3a7f2e519925100e047f53c146999056127fe96",
+        "bbox": [
+          145.2472,
+          547.7675836,
+          157.62199515999998,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "300",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1",
+        "bbox": [
+          190.37537763999998,
+          547.7675836,
+          204.76830597999995,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "1.12",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c",
+        "bbox": [
+          223.08841239999995,
+          547.7675836,
+          241.60652151999992,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "1,591",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "9cb9e351e48f2a773bb2b8e4a5b8f0e2c7241881b6fc6498c5bee77abd7b5537",
+        "bbox": [
+          344.7532261599999,
+          547.7675836,
+          357.1272741399998,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "114",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      }
+    ]
+  },
+  {
+    "claim_id": "023c68725c9a5125ab10da5149c6b3ef8b05991d0d28c1da127572a7fc83b87a",
+    "target_path": "material_states[0].property_modules[0].records[2]",
+    "value": {
+      "record_key": "fill-3b5af113cc473be4091961bb3d43",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "property_code": "tc",
+      "custom_property_key": null,
+      "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+      "definition_version": 2,
+      "name_raw": "Tc",
+      "value_kind": "number",
+      "value_raw": "150",
+      "value_number": 150,
+      "value_min": null,
+      "value_max": null,
+      "value_text": null,
+      "value_boolean": null,
+      "uncertainty": null,
+      "unit_raw": "K",
+      "canonical_unit": "K",
+      "method_code": "unknown",
+      "method_raw": "Eliashberg",
+      "criterion_code": null,
+      "criterion_raw": null,
+      "structure_key": null,
+      "payload": {
+        "calculation_conditions": {
+          "calculation_code": "Quantum-ESPRESSO",
+          "electronic_method": "DFT",
+          "epw": null,
+          "exchange_correlation_functional": null,
+          "phonon_method": "density functional perturbation theory",
+          "qe": {
+            "atoms": null,
+            "charge_density_cutoff": null,
+            "convergence_energy": null,
+            "convergence_force": null,
+            "energy_cutoff": {
+              "evidences": null,
+              "reported": true,
+              "unit_raw": "Ry",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 80,
+              "value_raw": "80",
+              "value_text": null
+            },
+            "k_broadening": null,
+            "k_grid": null,
+            "q_grid": null,
+            "q_grid_interpolated": null,
+            "supercell": null,
+            "temperature_k": null
+          },
+          "sscha": null,
+          "vibrational_treatment": "harmonic"
+        },
+        "method_variant_status": "Eliashberg variant not specified",
+        "parameters": {
+          "extensions": [
+            {
+              "key": "omega_log_reported",
+              "value_kind": "text",
+              "value_raw": "1,591",
+              "unit_raw": "K",
+              "reported": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "K",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 1591,
+                "value_raw": "1,591",
+                "value_text": null
+              }
+            }
+          ],
+          "lambda_ep": 1.12,
+          "mu_star": 0.1,
+          "omega_log": 1591.0
+        },
+        "table_row_ref": {
+          "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+          "group": null,
+          "row_index": 2,
+          "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d"
+        },
+        "tc_group": {
+          "version": 1,
+          "group_key": "fill-2535c6149559f666c5842b89",
+          "method_key": "fill-29fa0cd62fe5311d95a42c09",
+          "point_key": "ac32ddecaa1354da183d3123"
+        }
+      },
+      "is_representative": false
+    },
+    "raw_value": {
+      "record_key": "fill-3b5af113cc473be4091961bb3d43",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "property_code": "tc",
+      "custom_property_key": null,
+      "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+      "definition_version": 2,
+      "name_raw": "Tc",
+      "value_kind": "number",
+      "value_raw": "150",
+      "value_number": 150,
+      "value_min": null,
+      "value_max": null,
+      "value_text": null,
+      "value_boolean": null,
+      "uncertainty": null,
+      "unit_raw": "K",
+      "canonical_unit": "K",
+      "method_code": "unknown",
+      "method_raw": "Eliashberg",
+      "criterion_code": null,
+      "criterion_raw": null,
+      "structure_key": null,
+      "payload": {
+        "calculation_conditions": {
+          "calculation_code": "Quantum-ESPRESSO",
+          "electronic_method": "DFT",
+          "epw": null,
+          "exchange_correlation_functional": null,
+          "phonon_method": "density functional perturbation theory",
+          "qe": {
+            "atoms": null,
+            "charge_density_cutoff": null,
+            "convergence_energy": null,
+            "convergence_force": null,
+            "energy_cutoff": {
+              "evidences": null,
+              "reported": true,
+              "unit_raw": "Ry",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 80,
+              "value_raw": "80",
+              "value_text": null
+            },
+            "k_broadening": null,
+            "k_grid": null,
+            "q_grid": null,
+            "q_grid_interpolated": null,
+            "supercell": null,
+            "temperature_k": null
+          },
+          "sscha": null,
+          "vibrational_treatment": "harmonic"
+        },
+        "method_variant_status": "Eliashberg variant not specified",
+        "parameters": {
+          "extensions": [
+            {
+              "key": "omega_log_reported",
+              "value_kind": "text",
+              "value_raw": "1,591",
+              "unit_raw": "K",
+              "reported": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "K",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 1591,
+                "value_raw": "1,591",
+                "value_text": null
+              }
+            }
+          ],
+          "lambda_ep": 1.12,
+          "mu_star": 0.1,
+          "omega_log": 1591.0
+        },
+        "table_row_ref": {
+          "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+          "group": null,
+          "row_index": 2,
+          "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d"
+        },
+        "tc_group": {
+          "version": 1,
+          "group_key": "fill-2535c6149559f666c5842b89",
+          "method_key": "fill-29fa0cd62fe5311d95a42c09",
+          "point_key": "ac32ddecaa1354da183d3123"
+        }
+      },
+      "is_representative": false
+    },
+    "basis_kind": "paper_quote",
+    "source_kind": "ocr",
+    "status": "validated",
+    "confidence": null,
+    "rule_version": "2",
+    "content_hash": null,
+    "evidences": [
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "9886389c2c29434921e516ae0908569a337a5ebf1fab3dc9ea6e77469dd3e793",
+        "bbox": [
+          297.74309783935547,
+          299.10066076660155,
+          548.6896380615234,
+          380.5312071533203
+        ],
+        "polygon": null,
+        "quote": "consistent with previous theoretical (15) and experimental studies ( T _ { c } = 1 7 \\; \\dot { \\bf K } at 89 GPa) (49).All of our calculations were carried out using the harmonic approximation. It is well known that in many hydrides anharmonicity tends to lower \\overline { { [ T _ { c } ] ( 5 0 ) } } . For the well-studied \\overline { { \\mathrm { S H } _ { 3 } } } system, however, such an effect is weak: T _ { c } is lowered from its harmonic 204 K value (24) only to 194 K (21) at 250 GPa, and both are close to the reported experiment T _ { c } at that pressure (20).",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 1,
+        "printed_page": null,
+        "block_id": "ea500a521525caf739d5edae88ebc07149304b3d68602ed295e036d68b982b0a",
+        "bbox": [
+          35.097418212890624,
+          115.09894537353514,
+          285.45900146484377,
+          176.17185516357424
+        ],
+        "polygon": null,
+        "quote": "Table S1 presents calculated { T _ { c } } \\mathbf { s } of \\mathrm { L a H _ { n } }   ( n = 4 ,   8 , and 10) and \\mathrm { Y H _ { 1 0 } } at high pressures for different models and parameters. It is seen that the McMillan and Eliashberg equations lead to similar results for small λ. For larger λ, however, the Eliashberg equation predicts higher Tc values. Table S2 contains the lattice parameters and atomic coordinates for the predicted structures.",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "03af162ade6ea902a656cad404d2cf56cb5c9c0c067b77500dff34e1ff906f00",
+        "bbox": [
+          71.36475036621094,
+          494.84716650390624,
+          506.5727362060547,
+          505.80897082519533
+        ],
+        "polygon": null,
+        "quote": "Table S1. T _ { c } of La-H and Y-H systems at different pressures calculated using the McMillan and Eliashberg equations",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77",
+        "bbox": [
+          220.42142,
+          521.8589836,
+          244.3336014,
+          529.3505111439999
+        ],
+        "polygon": null,
+        "quote": "wlog, K",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "d45b0dcc07b94e8556739700c3d0dc1c66dd7d16866582c9e3b543c0f19ba1d5",
+        "bbox": [
+          393.10701,
+          511.8809836,
+          441.92522319999995,
+          528.6178736544
+        ],
+        "polygon": null,
+        "quote": "Tc, K; μ* = 0.1 Eliashberg",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "edc4256aba31b4f2277d2dc7e502c98c766df730bdf78a94d520109cfe1af349",
+        "bbox": [
+          74.2113,
+          547.7675236,
+          90.57039759999999,
+          555.259211144
+        ],
+        "polygon": null,
+        "quote": "LaH8",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "9d66d7724d072170cad67affb3a7f2e519925100e047f53c146999056127fe96",
+        "bbox": [
+          145.2472,
+          547.7675836,
+          157.62199515999998,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "300",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1",
+        "bbox": [
+          190.37537763999998,
+          547.7675836,
+          204.76830597999995,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "1.12",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c",
+        "bbox": [
+          223.08841239999995,
+          547.7675836,
+          241.60652151999992,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "1,591",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "ece04a868506252ca92c0f12aafa7ca9e0f050ef2f4c2f0c75c0c0047c50c6ef",
+        "bbox": [
+          411.3673118799999,
+          547.7675836,
+          423.74210703999984,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "150",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      }
+    ]
+  },
+  {
+    "claim_id": "029a6d41c7c2427043507fb1ad7ac5d9f7b231c89ef0bdb2aa13cc0bf2590517",
+    "target_path": "material_states[0].property_modules[0].records[3]",
+    "value": {
+      "record_key": "fill-5f39df46ca676dfef41bbc856bcf",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "property_code": "tc",
+      "custom_property_key": null,
+      "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+      "definition_version": 2,
+      "name_raw": "Tc",
+      "value_kind": "number",
+      "value_raw": "138",
+      "value_number": 138,
+      "value_min": null,
+      "value_max": null,
+      "value_text": null,
+      "value_boolean": null,
+      "uncertainty": null,
+      "unit_raw": "K",
+      "canonical_unit": "K",
+      "method_code": "unknown",
+      "method_raw": "Eliashberg",
+      "criterion_code": null,
+      "criterion_raw": null,
+      "structure_key": null,
+      "payload": {
+        "calculation_conditions": {
+          "calculation_code": "Quantum-ESPRESSO",
+          "electronic_method": "DFT",
+          "epw": null,
+          "exchange_correlation_functional": null,
+          "phonon_method": "density functional perturbation theory",
+          "qe": {
+            "atoms": null,
+            "charge_density_cutoff": null,
+            "convergence_energy": null,
+            "convergence_force": null,
+            "energy_cutoff": {
+              "evidences": null,
+              "reported": true,
+              "unit_raw": "Ry",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 80,
+              "value_raw": "80",
+              "value_text": null
+            },
+            "k_broadening": null,
+            "k_grid": null,
+            "q_grid": null,
+            "q_grid_interpolated": null,
+            "supercell": null,
+            "temperature_k": null
+          },
+          "sscha": null,
+          "vibrational_treatment": "harmonic"
+        },
+        "method_variant_status": "Eliashberg variant not specified",
+        "parameters": {
+          "extensions": [
+            {
+              "key": "omega_log_reported",
+              "value_kind": "text",
+              "value_raw": "1,591",
+              "unit_raw": "K",
+              "reported": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "K",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 1591,
+                "value_raw": "1,591",
+                "value_text": null
+              }
+            }
+          ],
+          "lambda_ep": 1.12,
+          "mu_star": 0.13,
+          "omega_log": 1591.0
+        },
+        "table_row_ref": {
+          "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+          "group": null,
+          "row_index": 2,
+          "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d"
+        },
+        "tc_group": {
+          "version": 1,
+          "group_key": "fill-2535c6149559f666c5842b89",
+          "method_key": "fill-29fa0cd62fe5311d95a42c09",
+          "point_key": "85420c08a8c3410edc151e09"
+        }
+      },
+      "is_representative": false
+    },
+    "raw_value": {
+      "record_key": "fill-5f39df46ca676dfef41bbc856bcf",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "property_code": "tc",
+      "custom_property_key": null,
+      "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+      "definition_version": 2,
+      "name_raw": "Tc",
+      "value_kind": "number",
+      "value_raw": "138",
+      "value_number": 138,
+      "value_min": null,
+      "value_max": null,
+      "value_text": null,
+      "value_boolean": null,
+      "uncertainty": null,
+      "unit_raw": "K",
+      "canonical_unit": "K",
+      "method_code": "unknown",
+      "method_raw": "Eliashberg",
+      "criterion_code": null,
+      "criterion_raw": null,
+      "structure_key": null,
+      "payload": {
+        "calculation_conditions": {
+          "calculation_code": "Quantum-ESPRESSO",
+          "electronic_method": "DFT",
+          "epw": null,
+          "exchange_correlation_functional": null,
+          "phonon_method": "density functional perturbation theory",
+          "qe": {
+            "atoms": null,
+            "charge_density_cutoff": null,
+            "convergence_energy": null,
+            "convergence_force": null,
+            "energy_cutoff": {
+              "evidences": null,
+              "reported": true,
+              "unit_raw": "Ry",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 80,
+              "value_raw": "80",
+              "value_text": null
+            },
+            "k_broadening": null,
+            "k_grid": null,
+            "q_grid": null,
+            "q_grid_interpolated": null,
+            "supercell": null,
+            "temperature_k": null
+          },
+          "sscha": null,
+          "vibrational_treatment": "harmonic"
+        },
+        "method_variant_status": "Eliashberg variant not specified",
+        "parameters": {
+          "extensions": [
+            {
+              "key": "omega_log_reported",
+              "value_kind": "text",
+              "value_raw": "1,591",
+              "unit_raw": "K",
+              "reported": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "K",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 1591,
+                "value_raw": "1,591",
+                "value_text": null
+              }
+            }
+          ],
+          "lambda_ep": 1.12,
+          "mu_star": 0.13,
+          "omega_log": 1591.0
+        },
+        "table_row_ref": {
+          "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+          "group": null,
+          "row_index": 2,
+          "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d"
+        },
+        "tc_group": {
+          "version": 1,
+          "group_key": "fill-2535c6149559f666c5842b89",
+          "method_key": "fill-29fa0cd62fe5311d95a42c09",
+          "point_key": "85420c08a8c3410edc151e09"
+        }
+      },
+      "is_representative": false
+    },
+    "basis_kind": "paper_quote",
+    "source_kind": "ocr",
+    "status": "validated",
+    "confidence": null,
+    "rule_version": "2",
+    "content_hash": null,
+    "evidences": [
+      {
+        "file_id": "c92dfed811754b8abb37e692cafabdaf",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "9886389c2c29434921e516ae0908569a337a5ebf1fab3dc9ea6e77469dd3e793",
+        "bbox": [
+          297.74309783935547,
+          299.10066076660155,
+          548.6896380615234,
+          380.5312071533203
+        ],
+        "polygon": null,
+        "quote": "consistent with previous theoretical (15) and experimental studies ( T _ { c } = 1 7 \\; \\dot { \\bf K } at 89 GPa) (49).All of our calculations were carried out using the harmonic approximation. It is well known that in many hydrides anharmonicity tends to lower \\overline { { [ T _ { c } ] ( 5 0 ) } } . For the well-studied \\overline { { \\mathrm { S H } _ { 3 } } } system, however, such an effect is weak: T _ { c } is lowered from its harmonic 204 K value (24) only to 194 K (21) at 250 GPa, and both are close to the reported experiment T _ { c } at that pressure (20).",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 1,
+        "printed_page": null,
+        "block_id": "ea500a521525caf739d5edae88ebc07149304b3d68602ed295e036d68b982b0a",
+        "bbox": [
+          35.097418212890624,
+          115.09894537353514,
+          285.45900146484377,
+          176.17185516357424
+        ],
+        "polygon": null,
+        "quote": "Table S1 presents calculated { T _ { c } } \\mathbf { s } of \\mathrm { L a H _ { n } }   ( n = 4 ,   8 , and 10) and \\mathrm { Y H _ { 1 0 } } at high pressures for different models and parameters. It is seen that the McMillan and Eliashberg equations lead to similar results for small λ. For larger λ, however, the Eliashberg equation predicts higher Tc values. Table S2 contains the lattice parameters and atomic coordinates for the predicted structures.",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "03af162ade6ea902a656cad404d2cf56cb5c9c0c067b77500dff34e1ff906f00",
+        "bbox": [
+          71.36475036621094,
+          494.84716650390624,
+          506.5727362060547,
+          505.80897082519533
+        ],
+        "polygon": null,
+        "quote": "Table S1. T _ { c } of La-H and Y-H systems at different pressures calculated using the McMillan and Eliashberg equations",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "0d08a777e3126f4301e87647d6417d60ca275fc170b637c64f884654199d7d77",
+        "bbox": [
+          220.42142,
+          521.8589836,
+          244.3336014,
+          529.3505111439999
+        ],
+        "polygon": null,
+        "quote": "wlog, K",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "f1e436e873308a14c247f80e4a6089796f7e78314cec76dcee6cc258e7d18429",
+        "bbox": [
+          457.62423,
+          511.8809836,
+          510.5655167999999,
+          528.6178736544
+        ],
+        "polygon": null,
+        "quote": "Tc, K; μ* = 0.13 Eliashberg",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "edc4256aba31b4f2277d2dc7e502c98c766df730bdf78a94d520109cfe1af349",
+        "bbox": [
+          74.2113,
+          547.7675236,
+          90.57039759999999,
+          555.259211144
+        ],
+        "polygon": null,
+        "quote": "LaH8",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "9d66d7724d072170cad67affb3a7f2e519925100e047f53c146999056127fe96",
+        "bbox": [
+          145.2472,
+          547.7675836,
+          157.62199515999998,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "300",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "3d47b16fe7eae37ad6722a9293d192bc9438bc5af91c9aaeb2053a4e987fdcb1",
+        "bbox": [
+          190.37537763999998,
+          547.7675836,
+          204.76830597999995,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "1.12",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "d09da712ba0604c8398cf79ba0cc7277bb6a6fe3c4433c89cfcc984bc1711b9c",
+        "bbox": [
+          223.08841239999995,
+          547.7675836,
+          241.60652151999992,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "1,591",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      },
+      {
+        "file_id": "24c6c4619d5440fca85f4ca3871bdc4a",
+        "source_version": 1,
+        "pdf_page": 5,
+        "printed_page": null,
+        "block_id": "ce687467010f7eae81de035f2776dd3211c5f758b34e0eea12696e8916b78e7b",
+        "bbox": [
+          477.92535909999987,
+          547.7675836,
+          490.2994070799998,
+          554.5266336544
+        ],
+        "polygon": null,
+        "quote": "138",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "1b842152d9094bbb5ee6032169aaaa4fdf204867dd4a2d412d7b7fb7b4c95b9d",
+        "figure_id": null
+      }
+    ]
+  }
+]

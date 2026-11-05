@@ -89,7 +89,7 @@ def compact_module(module):
         if shared_associations:group['source_associations']=deepcopy(shared_associations)
         code,name=method_identity(record)
         method={'method_code':code}
-        if code in {'other','unknown'}:
+        if code in {'other','unknown'} and 'method_name' in identity:
             method['method_name']=name
         elif 'method_name' in identity:
             method['method_name']=identity['method_name']

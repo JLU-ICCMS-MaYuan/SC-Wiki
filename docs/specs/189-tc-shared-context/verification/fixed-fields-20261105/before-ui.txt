@@ -1,0 +1,80 @@
+
+> sc-wiki-frontend@1.0.0 test:upload-ui
+> vitest run --config ../vitest.config.ts tests/01_decentralized_uploading/tc-method-identity.test.tsx
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v2.1.9 /Users/mayuan/Codes/SC-Wiki
+
+ ❯ tests/01_decentralized_uploading/tc-method-identity.test.tsx (7 tests | 2 failed) 724ms
+   × 未知具体类别的1个温度不新增方法描述输入，历史资料不丢 91ms
+     → expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <input
+  aria-describedby="_r_2p_-helper-text"
+  aria-invalid="false"
+  class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+  id="_r_2p_"
+  type="text"
+  value="Eliashberg equations, variant unspecified"
+/> instead
+   × 未知具体类别的2个温度不新增方法描述输入，历史资料不丢 62ms
+     → expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <input
+  aria-describedby="_r_40_-helper-text"
+  aria-invalid="false"
+  class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+  id="_r_40_"
+  type="text"
+  value="Eliashberg equations, variant unspecified"
+/> instead
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/01_decentralized_uploading/tc-method-identity.test.tsx > 未知具体类别的1个温度不新增方法描述输入，历史资料不丢
+Error: expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <input
+  aria-describedby="_r_2p_-helper-text"
+  aria-invalid="false"
+  class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+  id="_r_2p_"
+  type="text"
+  value="Eliashberg equations, variant unspecified"
+/> instead
+ ❯ tests/01_decentralized_uploading/tc-method-identity.test.tsx:37:47
+     35|   const change=vi.fn();render(<PropertyModuleEditor modules={[value]} …
+     36|   expect(await screen.findByRole('combobox',{name:'预测方法'})).toHave…
+     37|   expect(screen.queryByLabelText('方法描述')).not.toBeInTheDocument()
+       |                                               ^
+     38|   expect(screen.queryByDisplayValue('Eliashberg equations, variant uns…
+     39|   expect(screen.getByRole('combobox',{name:'预测方法'})).toHaveTextCon…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/01_decentralized_uploading/tc-method-identity.test.tsx > 未知具体类别的2个温度不新增方法描述输入，历史资料不丢
+Error: expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <input
+  aria-describedby="_r_40_-helper-text"
+  aria-invalid="false"
+  class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+  id="_r_40_"
+  type="text"
+  value="Eliashberg equations, variant unspecified"
+/> instead
+ ❯ tests/01_decentralized_uploading/tc-method-identity.test.tsx:37:47
+     35|   const change=vi.fn();render(<PropertyModuleEditor modules={[value]} …
+     36|   expect(await screen.findByRole('combobox',{name:'预测方法'})).toHave…
+     37|   expect(screen.queryByLabelText('方法描述')).not.toBeInTheDocument()
+       |                                               ^
+     38|   expect(screen.queryByDisplayValue('Eliashberg equations, variant uns…
+     39|   expect(screen.getByRole('combobox',{name:'预测方法'})).toHaveTextCon…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 passed (7)
+   Start at  13:04:13
+   Duration  1.58s (transform 162ms, setup 0ms, collect 510ms, tests 724ms, environment 130ms, prepare 42ms)

@@ -1,0 +1,20 @@
+...............................................................          [100%]
+=============================== warnings summary ===============================
+backend/tests/test_strict_scientific_output.py::test_filling_structure_error_keeps_candidates_without_another_call
+backend/tests/test_strict_scientific_output.py::test_filling_structure_error_keeps_candidates_without_another_call
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+backend/tests/test_strict_scientific_output.py::test_filling_structure_error_keeps_candidates_without_another_call
+backend/tests/test_strict_scientific_output.py::test_filling_structure_error_keeps_candidates_without_another_call
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+backend/tests/test_strict_scientific_output.py::test_filling_structure_error_keeps_candidates_without_another_call
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+backend/tests/test_strict_scientific_output.py: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+63 passed, 535 warnings in 2.14s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
