@@ -166,3 +166,77 @@ def test_upload_structure_callback_checks_cancellation_without_using_state_truth
     def cancelled(_): raise upload_jobs.UploadCancelled()
     monkeypatch.setattr(upload_jobs, '_ensure_not_cancelled', cancelled)
     with pytest.raises(upload_jobs.UploadCancelled): upload_jobs._structure_reading_cancelled('live')
+
+
+def _tool_action(name, page, index):
+    import json
+    arguments={'file_id':'actual-pdf',**({'page':page}if page is not None else {})}
+    return {'action':{'name':name,'arguments':arguments},'_tool_call':{'id':f'original-read-{index}',
+        'type':'function','function':{'name':name,'arguments':json.dumps(arguments)}}}
+
+
+def test_original_page_is_one_action_and_prior_native_receipts_and_image_identity_survive(tmp_path):
+    import json
+    import pymupdf
+    from backend.ingest.structure_reading import extract_structure_candidates
+    pdf=tmp_path/'three-pages.pdf'
+    with pymupdf.open() as doc:
+        for page in range(1,4):doc.new_page().insert_text((40,40),f'Page {page}: actual source row')
+        doc.save(pdf)
+    actions=[('read_original_page',3),('read_document',None),('read_original_page',1)]
+    count=0
+    def model(system,payload,**options):
+        nonlocal count
+        request=json.loads(payload);index=count;count+=1
+        assert request['remaining_actions']==12-index,'每个原生只读请求只能计费一次'
+        if index:
+            history=options['tool_history'];assert len(history)==2*index,'先前成功读取的原生回执不得丢失'
+            for i in range(index):assert history[2*i]['tool_calls'][0]['id']==history[2*i+1]['tool_call_id']==f'original-read-{i}'
+            pages=[3]if index<3 else [3,1]
+            assert [r['pdf_page']for r in request['attached_page_images']]==pages
+            assert [r['image_index']for r in request['attached_page_images']]==list(range(1,len(pages)+1))
+            assert all(r['file_id']=='actual-pdf'and r['source_sha256']==hashlib.sha256(pdf.read_bytes()).hexdigest()for r in request['attached_page_images'])
+            assert len(options['images'])==len(pages)
+        if index<len(actions):return _tool_action(*actions[index],index)
+        return {'action':{'name':'report_structures','arguments':{'structures':[],'uncertainties':['本用例只验证读取协议，未判断有无结构'],'reason':'保留未完成结构判断'}}}
+    result=extract_structure_candidates('',source={**source(),'sha256':hashlib.sha256(pdf.read_bytes()).hexdigest()},pdf_path=pdf,model=model)
+    assert count==4 and result and all(r['status']=='blocked'for r in result)
+
+
+def test_real_seventh_native_read_sequence_fits_existing_budget_without_faking_geometry(tmp_path):
+    import json
+    import pymupdf
+    from backend.ingest.structure_reading import extract_structure_candidates
+    pdf=tmp_path/'eight-pages.pdf'
+    with pymupdf.open() as doc:
+        for page in range(1,9):doc.new_page().insert_text((40,40),f'Page {page} original source')
+        doc.save(pdf)
+    # 真实第七轮的八次原生请求；不将旧模型几何答案冒充新的提取。
+    actions=[('read_document',None),('read_original_page',6),('read_original_page',7),('read_original_page',8),
+             ('read_document',None),('read_original_page',6),('read_document',None),('read_original_page',6)]
+    calls=0
+    def model(system,payload,**options):
+        nonlocal calls
+        index=calls;calls+=1
+        if index<len(actions):return _tool_action(*actions[index],index)
+        assert json.loads(payload)['remaining_actions']==4
+        return {'action':{'name':'report_structures','arguments':{'structures':[],'uncertainties':['固定失败序列重放，未提供科学几何结论'],'reason':'仅验证真实读取序列不会被双计费拦截'}}}
+    result=extract_structure_candidates('',source={**source(),'sha256':hashlib.sha256(pdf.read_bytes()).hexdigest()},pdf_path=pdf,model=model)
+    assert calls==9 and all(r['status']=='blocked'for r in result)
+
+
+def test_native_read_budget_still_stops_at_twelve_actions(tmp_path):
+    import pymupdf
+    from backend.ingest.document_agent import AgentStopped
+    from backend.ingest.structure_reading import extract_structure_candidates
+    pdf=tmp_path/'bounded.pdf'
+    with pymupdf.open()as doc:
+        doc.new_page().insert_text((40,40),'Original page');doc.save(pdf)
+    calls=0
+    def model(*args,**options):
+        nonlocal calls
+        index=calls;calls+=1
+        return _tool_action('read_original_page',1,index)
+    with pytest.raises(AgentStopped,match='agent_budget_exhausted'):
+        extract_structure_candidates('',source={**source(),'sha256':hashlib.sha256(pdf.read_bytes()).hexdigest()},pdf_path=pdf,model=model)
+    assert calls==13,'12次合法行动后，第13次被拒绝，未扩大预算或吞掉失败'

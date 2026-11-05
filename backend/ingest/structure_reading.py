@@ -239,6 +239,9 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
             'filename': source.get('filename'), 'pages': [p.pdf_page for p in ir.pages], 'sha256': source['sha256']},
             'sources': list(read.values()), 'source_index': [{k: v for k, v in row.items() if k != 'content'} |
                 ({} if key in read else {'preview': row['content'][:100]}) for key, row in catalog.items()],
+            'attached_page_images': [{'image_index': index, 'file_id': source['file_id'],
+                'pdf_page': page, 'source_sha256': source['sha256']}
+                for index, page in enumerate(page_images, 1)],
             'observation': observation, 'remaining_actions': tools.budget.max_actions - tools.budget.actions}
         event = {'iteration': iteration, 'request': request, 'tool_history': history,
                  'image_pages': list(page_images), 'image_count': len(page_images)}
@@ -285,7 +288,7 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
             if set(arguments) != {'file_id', 'page'} or arguments['file_id'] != source['file_id']:
                 raise ValueError('结构原页不属于当前PDF')
             page = arguments['page']
-            tools.budget.consume(name)
+            # 原页工具内部读取文字只算同一次行动，不能与read_page重复计费。
             observation = tools.call('read_page', arguments)
             import pymupdf
             import base64
@@ -299,7 +302,7 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
         for block in observation.get('blocks', []):
             key = block.get('metadata', {}).get('source_id')
             if key in catalog: read[key] = catalog[key]
-        history = ([{'role': 'assistant', 'content': None, 'tool_calls': [native]},
-                    {'role': 'tool', 'tool_call_id': native['id'], 'content': json.dumps(observation, ensure_ascii=False)}]
-                   if native else [])
+        if native:
+            history.extend([{'role': 'assistant', 'content': None, 'tool_calls': [native]},
+                {'role': 'tool', 'tool_call_id': native['id'], 'content': json.dumps(observation, ensure_ascii=False)}])
     raise ValueError('结构读取预算已耗尽，未将未读内容当作没有结构')
