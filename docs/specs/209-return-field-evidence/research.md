@@ -11,12 +11,12 @@
 | 退回后90 Ry等未变值来源版本改变 | #192有效结果交接、#183资料版本、#207持久化职责 | 旧要求漏接；重建时完整来源清单和归纳出处需要一致继承 |
 | 无字段证据时显示整包旧资料 | #183 FR-004/005/014 | 展示实现违背已有归属约束；取消兜底，不删除后台原始资料 |
 | 蓝底提示、重复理由和内层旧框 | 本轮用户明确界面要求 | 已确认展示修改，不改审核职责 |
-| 无字段引句能否取证 | #147/#177/#194统一字段核对 | 沿完整正文／SI取证，结果绑定字段；查看侧栏零模型 |
+| 无字段引句能否取证 | #147/#177/#194统一字段核对 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 |
 | 最后入库会否再次科学裁决 | #207 | 仅完整／可读／版本门，不恢复逐字匹配或另一轮模型 |
 
 ## 已核对代码链
 
-property_evidence.complete_snapshot／paper_snapshot、scientific_context.bind_snapshot_source_documents、field_source_metadata、field_input、field_review、scientific_evidence.load_results／transfer_result／save_results；api.evidence.snapshot_for与summary/detail/jobs；manuscript_handoffs.current_review_content／author_working_copy／capture；field_review_commit；paper_revisions读取／提交；property_field_review字段分配、field_sources目录、model_review完整来源取证；EvidenceWorkflow、EvidenceRegion、EvidenceReviewSummary和四宿主。
+property_field_review字段分配、field_sources目录、model_review完整来源取证； 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 设计选择
 

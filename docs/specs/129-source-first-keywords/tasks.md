@@ -20,7 +20,7 @@
 ## 阶段 4：来源与校对（US3）
 
 - [x] T007 [US3] 在 `backend/ingest/scientific_evidence.py`、`backend/ingest/property_evidence.py` 与上传草稿 API 接入当前值匹配的来源分析，防止人工改值复用旧证明。（FR-006/007，SC-003）
-- [x] T008 [US3] 在 `frontend/src/components/EvidenceWorkflow.tsx` 及中英文文案中明确显示作者原列、AI 全文提炼和待核对状态。（FR-006，SC-003）
+- [x] T008 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 阶段 5：收敛
 
@@ -32,5 +32,5 @@
 
 - [x] T010 [US4] 在 `backend/tests/test_keyword_extraction.py` 增加全文结果含具体材料/现象/方法理由、缺理由、空泛理由及作者原列直取的回归。（FR-008～009、SC-005～006）
 - [x] T011 [US4] 在 `backend/ingest/keyword_extraction.py` 的最终模型输出与校验中保存具体选择理由，保留窗口覆盖和引句门槛。（FR-008）
-- [x] T012 [US4] 按 #109 共用契约核对 `keyword_assessment.reason` 与当前词列表版本，在 `frontend/src/components/EvidenceWorkflow.tsx` 验证 AI 理由、作者原列和失效提示。（FR-009）
+- [x] T012 [US4] 按 #109 共用契约核对 `keyword_assessment.reason` 与当前词列表版本， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [ ] T013 [US4] 用 H3S 与作者列表夹具核验上传、刷新、正式来源及管理员重读，记录验证边界并按 Overview/Issue 流程收尾。（SC-005～006）

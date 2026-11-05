@@ -14,7 +14,7 @@
 
 - [x] T021 [US4,US5] 在 tests/01_decentralized_uploading/test_field_decisions_mysql.py 和 approval-state.test.tsx 复现未核对灰色、修改拒绝及确认后提交复用。
 - [x] T022 [US4,US5] 在 backend/ingest/field_decisions.py、backend/api/evidence.py 统一字段状态、未修改确认与修改拒绝原因。
-- [x] T023 [US4,US5] 在 frontend/src/components/EvidenceWorkflow.tsx、EvidenceReviewSummary.tsx 显示明确状态并验证真实浏览器交互及迟到响应。
+- [x] T023 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [x] T024 [US6] 在 scripts/repair-upload-review-baseline.py 实现固定目标清单、备份、版本保护、授权修正和幂等回读；backend/ingest/field_review.py 支持确认基线事件，并以隔离持久化验证。
 - [x] T025 [US6] 在隔离验证通过后，对指定 La–Sc–H 任务执行已授权修正，保存备份和前后核验，验证当前值/历史及其他任务不变。
 - [x] T026 [US7] 在 tests/01_decentralized_uploading 验证真实提交携带未采纳 α²F/phDOS 并重读；不改谱提取算法。
@@ -32,16 +32,16 @@
 - [x] T002 在backend/ingest/property_field_review.py、scientific_evidence.py、field_review.py实现独立键和稳定复用；增加tests/01_decentralized_uploading/test_two_stage_review.py。
 - [x] T003 [US1] 在backend/api/evidence.py及现有草稿存储实现统一局部保存、版本检查、原始输入、说明和定向读取。
 - [x] T004 [US3] 在backend/ingest/property_evidence.py、upload_jobs.py收拢解析并实现任务去重、逐字段科学判断、技术失败与一致性异常保护。
-- [x] T005 [US2] 在frontend/src/components/EvidenceWorkflow.tsx、EvidenceFieldMarkers.tsx拆开入口、摘要/历史与主动模型核对。
+- [x] T005 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [x] 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 - [x] T007 [US3] 在backend/api/rag.py、backend/services/paper_revisions.py和goserver/handlers/paper_evidence.go接入统一严格门禁及原子版本校验；前端提交冻结并自动完成。
 - [x] T008 在tests/01_decentralized_uploading覆盖全部SC，运行MySQL回滚、浏览器与447项性能验证，写validation.md。
 - [x] T009 用Overview技能回写已实现行为，README操作说明、Issue证据和任务范围本地提交；不推送。
-- [x] T010 [US2] 修复字段设置分项展示回归、μ* 设置字段定位和待审核状态冒充 AI 理由；使用真实设置组件路径补回归测试并追加验证记录。
+- [x] T010 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [x] T011 [US2,US3] 修复主动核对版本循环、保存当前人工依据并评价无证据理由，持久通过后提交复用；验证真实摘要/排队接口、并发拒绝、模型输入、依据版本及持久结果读取。证据见 validation.md 的主动核对回归节。
 - [x] T012 更新三个模型入口流程图与无理由人工认可规则；保留原话和旧选择替代记录，归档截图，同步 Issue 与 Spec。仅文档验收。
 - [x] T013 [US2,US3] 实施正式逐字段人工通过／不通过及版本绑定；认可分支无理由输入、零模型请求；处理本字段旧候选待选标记，保留历史（FR-011,015 / SC-006,010）。
-- [x] T014 [US1,US2] 将原文、AI 理由、审核按钮放在一起，人工修改记录中仅“保存”；明确来源加载中／失败／空／旧版本，保护同版本详情（FR-013,014 / SC-008,009）。
+- [x] T014 明确来源加载中／失败／空／旧版本，保护同版本详情（FR-013,014 / SC-008,009）。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [x] T015 [US3] 三入口统一识别人工通过、模型通过、免审、待核对修改、同版本失败和未处理问题；提交只在 LLM ② 条件下启动模型（FR-012 / SC-007）。
 - [x] T016 用真实页面、接口与持久化往返验收新流程；覆盖模型调用计数、无关字段隔离、并发和来源显示；通过后再更新当前功能总览，不把 T012 当实现完成。
 - [x] T017 补齐 FR-016—018 / SC-011—013 验收：96 项复用加 4 项修改只审核后者；原样不通过重复提交零新模型任务、技术失败可重试；人工记录缺项具体提示、未修改主动核对不索取修改理由；两类模型审核不通过均展示原因及依据。

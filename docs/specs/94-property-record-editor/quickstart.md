@@ -61,8 +61,7 @@ PLAYWRIGHT_MODULE 和 CHROMIUM_PATH 指定已有 Playwright/Chromium。TC_SCREEN
 - 114 项相关 Vitest 回归通过；先运行新增测试确认旧界面失败，再验证修复。
 - Chromium 的管理员、超级管理员、上传校对三条路径通过；卡片内容宽度 700/640/500/400/350px
   的列数与溢出检查通过。原始记录默认隐藏，只读仍可展开；实验条件保持整行。
-- 完整小数、临时指数、原生粘贴、清空、零值、代表标记、范围、保存重载均通过；两个材料状态
-  的结果独立。管理员核对侧栏展示当前 Tc，失败保留理由，重试成功后关闭且位置不变。
+- 完整小数、临时指数、原生粘贴、清空、零值、代表标记、范围、保存重载均通过；失败保留理由， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - 9 份浏览器成功保存请求经生产校验、SQLite 写入、重新读取和导出逐字段比对通过；
   另有 10 项现有后端回归通过，合计 11 项。
 - 完整工作树 TypeScript 与生产构建通过；既有 3Dmol eval 和产物体积告警仍存在。
@@ -135,7 +134,7 @@ evidenceFields、evidenceProposals、PressureEditor、EvidenceFieldMarkers；本
 - 前端 9 文件 113 项通过，覆盖当前 Tc、参数前置、两组 μ*、交换大小次序但不移动输入组、零值/清空/非法参数、类型切换、只读、详情参数摘要及核对定位。`tc-paired-parameters.test.tsx` 的真实表单回调载荷继续送入后端往返。
 - 后端 4 文件 22 项通过：已有模块与条件校验、参数有效性，以及真实前端载荷/12 份浏览器保存请求经生产 `persist_property_modules`、SQLite 写入、新会话读取和导出。该记录证明隔离 SQLite 链路，不等同于本轮 MySQL 或生产环境验收。
 - Chrome 在管理员、超级管理员、上传三入口各完成 4 次隔离保存；页面错误均为零。测量输入在 700/640/500/400/350px、预测输入在 1100/700/375px 检查单行与局部滚动。两组底色均为 RGB(244,243,255)，分组边框为 0px，保存/重载后 μ* 与 Tc 仍对应；上传只读态的 Tc/μ* 禁用。
-- 现有核对侧栏已在 #138 中取消 JSON 展示，本轮浏览器检查改为识别当前人工编辑、保存失败保留理由、成功完成后关闭及位置保持；不是依赖已退役的 JSON 文案。上传夹具没有待核对记录时 `needs_check=false`，不发起模型任务。
+- 本轮浏览器检查改为识别当前人工编辑、保存失败保留理由、成功完成后关闭及位置保持；上传夹具没有待核对记录时 `needs_check=false`，不发起模型任务。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - TypeScript 和生产构建通过；既有 3Dmol eval、分包体积及依赖弃用告警仍存在。
 - 所有浏览器 API 请求均被隔离夹具拦截，未操作真实论文、调用真实模型、执行数据库迁移或部署；未推送，新版 Spec 的远程链接保持待验证，Issue 不关闭。
 
@@ -258,7 +257,7 @@ AGENTS.md 将“数据库结构变更”列为高风险操作。取得授权后�
 ## 2026-10-16：US15 独立 Demo 评审准备
 
 - 只读核对原任务历史备份：167 GPa 有三条 18.76 DOS，仅 record_key 不同，其中两条 record-copy-；证据完全相同。审计文件为 assets/fermi-dos-duplicate-audit.json，不据此宣称最新 Redis 已审计或已修复。
-- 独立 HTML Demo 的浏览器检查覆盖：相同副本一行且无复制/重复新增；不同值待选择；选择后两候选保留；四输入与候选操作只读；空值；另一压强；来源侧栏；模块折叠后保留编辑。8 组观察均符合预期，控制台 error 为 0，默认 1280×720 无整页横向溢出。
+- 不同值待选择；选择后两候选保留；四输入与候选操作只读；空值； 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - 截图 assets/fermi-dos-singleton-demo.png，记录 assets/fermi-dos-demo-validation.json；两者仅证明交互演示。冲突候选 19.10 为演示数值。
 - Spec US15 是待评审草案，替代 US14 的直接实施流程。用户尚未认可本版 Demo/Issue 追加草案；本轮未修改正式代码、真实草稿、数据库或 Overview，未回退 e9d210a，未写入远端 Issue，未推送。
 
@@ -302,7 +301,7 @@ Overview 已同步实际按钮行为，#94 保持开放；本地 Spec/附件仍�
 - 独立候选从 HEAD 导出，只覆盖本次代码；property_evidence.py / upload_contracts.py 仅移植 DOS 增量，排除 #120 等已有未提交修改。候选目录：/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/scwiki-dos-candidate-t7e3wuyk。
 - 独立候选前端 5 文件、96 项通过，包括 DOS 9 项；后端 4 文件、31 项通过，包括 DOS 9 项及真实 SQLite 保存／重读、拒绝新增第二条、空当前值拒绝、归档校验与模型不能独自确认矛盾。工作树的相同后端目录有另外两项其他任务的未提交测试，共 33 项通过；不将它们计入独立提交证据。
 - TypeScript／生产构建在工作树和独立候选均通过。末次前端变更是有效人工确认提示及其过期回归，已在最终独立候选重新验证；日志 /tmp/scwiki-dos-candidate-ui-tests.log 与 /tmp/scwiki-dos-candidate-build.log。
-- [正式组件浏览器记录](assets/dos-implemented-validation.json) 的 9 组断言通过；[宽屏截图](assets/dos-implemented.png)、[窄屏截图](assets/dos-implemented-mobile.png) 使用真实共享组件、纯后端生成的隔离快照及受控 API 夹具，不是旧独立 HTML Demo。390px 页面与侧栏不溢出，返回聚焦原始值且页面位置保持；只读无返回编辑入口，修改后人工理由即时可见。
+- 返回聚焦原始值且页面位置保持；修改后人工理由即时可见。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - 浏览器可复核材料：[组件夹具入口](assets/dos-implemented-browser-harness.tsx)、[数据](assets/dos-implemented-fixtures.json)。入口复制到临时 Vite 根目录 main.tsx，数据复制为 dos-fixtures.json；src/node_modules 指向项目 frontend 同名目录。macOS 的临时目录逻辑路径和真实路径均需在 Vite fs.allow 中允许。仅表注来自已审计备份，19.10 明确为冲突演示值，不写真实草稿。
 - 测试使用 SQLite 内存库与进程内测试 JWT；最初缺少 DATABASE_URL／JWT_SECRET_KEY 的环境错误在设置隔离测试值后消除，不修改系统配置。构建仍有既有 3Dmol eval／分包提示，组件旧夹具有 MUI 选项提示；未计作失败。
 - 本轮没有业务数据库迁移、真实原任务 PUT、历史批量修复或远端部署／推送。旧重复正式记录由服务端拒绝隐式新增或删除，须明确处理；旧未提交草稿在转换与正常保存边界收敛，不执行全库扫描改写。#94 其他工作及远程链接门继续保持。

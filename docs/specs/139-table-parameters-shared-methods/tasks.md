@@ -63,7 +63,7 @@
 ### 实施与集成
 
 - [x] T014 [US3] 在 `backend/ingest/property_evidence.py`、`backend/ingest/evidence_proposals.py` 完善表格／Methods 联合来源核对及建议内容／来源 hash 绑定，来源未读或有冲突时不能 supported；保持现有权限与人工接受边界。（FR-007～010，SC-004～005）
-- [x] T015 [US3] 扩展 `tests/01_decentralized_uploading/issue139-parameters.test.tsx`，并在 `frontend/src/components/SchemaDrivenRecordForm.tsx`、`frontend/src/components/EvidenceWorkflow.tsx` 将来源关联显示到现有理由入口、阶段参数显示到现有扩展列表；不把元数据当作科学输入控件，不改布局。（FR-006、FR-008～010，SC-003～005）
+- [x] T015 不把元数据当作科学输入控件， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [x] T016 [US3] 在 `backend/ingest/property_modules.py`、`backend/ingest/upload_contracts.py` 和 `backend/ingest/scientific_drafts.py` 补齐来源关联元数据的记录校验与往返保留，使用服务端指纹防止旧解释绑定新值；只在真实提交／导出回归发现遗漏时定向修对应现有服务及 `backend/api/material_state_export.py`。（FR-004、FR-008、FR-010，SC-005）
 - [x] T017 [US3] 在 `tests/01_decentralized_uploading/test_issue139_persistence.py` 使用显式隔离 MySQL 依次核验草稿保存重开、正式提交、返修、证据核对结果、导出、版本冲突及权限，保留新元数据并确认无重复；SQLite 或只检查 JSON 字符串不能代替。（FR-004、FR-008～010，SC-005）
 

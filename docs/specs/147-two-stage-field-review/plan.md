@@ -20,7 +20,7 @@
 
 - 数据所有权不变：草稿及字段修改事件仍由上传存储保存，正式审核决定仍存于 ScientificEvidenceCheck；不把按钮颜色作为后端事实来源。
 - 后端 field_decisions 明确返回审核状态与拒绝原因。未修改待核对字段可确认当前版本；普通修改仍禁止跳过人工记录及模型核对。字段值、依据和范围令牌继续保护保存。
-- 前端 EvidenceWorkflow 区分“不能重复通过”和“尚有问题”：已解决/免审或临时操作保护使用禁用；未解决项允许发起操作并解释拒绝原因，保留人工修改区和主动模型入口。EvidenceReviewSummary 不将所有 pending 都称为已修改。
+- 保留人工修改区和主动模型入口。EvidenceReviewSummary 不将所有 pending 都称为已修改。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - 一次性脚本固定任务 ID，默认只盘点；核对冻结清单，备份 Redis 状态/草稿和 MySQL 相关审核及上传持久记录，目标锁内写入当前版本授权修正决定。追加 field_review_baseline 事件，不删除或改写旧 field_change；changed_keys 从最新确认基线开始比较，以支持以后的正常修改。该事件不是普通 API 的客户端输入。
 - 数据修正在数据库事务提交后同步 Redis，失败时依据已验证备份恢复或重试；以持久数据与 Redis 同步重读作为完成条件，不能只依据一次写入返回。
 - 谱结果继续走独立 bind_to_paper，不混入字段审核列表。用实际提交和 MySQL 回滚验证 pending 谱仍保存且可重读；既有正常行为不另加无意义绕过分支。
@@ -28,7 +28,7 @@
 
 | 需求/标准 | 数据与组件职责 | 任务 | 验证证据 |
 |---|---|---|---|
-| FR-027—030 / SC-022—024 | field_decisions、field_summary、EvidenceWorkflow、EvidenceReviewSummary | T021—T023 | 状态组件、真实 MySQL 决定往返、提交复用、浏览器 |
+| FR-027—030 / SC-022—024 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | T021—T023 | 状态组件、真实 MySQL 决定往返、提交复用、浏览器 |
 | FR-031—032 / SC-025 | 一次性脚本、changed_keys、上传持久状态和审核表 | T024—T025 | 隔离修正、固定清单/备份、真实目标回读、其他任务不变 |
 | FR-033 / SC-026 | 上传提交入口和独立谱绑定 | T026 | 未采纳双谱随论文提交并重读，其他字段失败仍拦截 |
 | 全部 | Spec/Overview/Issue | T027 | 文档和差异检查；任务专属本地提交 |
@@ -39,9 +39,10 @@
 
 ## 2026-10-22 最新修订（已实施）
 
-[最新流程](review-flow.md) 替代原“完成仅保存”的含糊入口：认可当前 AI 内容只点“人工审核通过”，无理由输入；不认可才进入人工修改记录并保存。三个模型入口分别是上传解析、点击提交后的必要字段审核、侧栏主动核对，不能在人工通过、保存或打开侧栏时另起任务。
+[最新流程](review-flow.md) 替代原“完成仅保存”的含糊入口：认可当前 AI 内容只点“人工审核通过”，无理由输入； 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
-T013—T017 实现采用：复用现有核对存储记录正式人工决定及其内容／来源版本；摘要、详情、提交门禁共同识别有效人工通过，不把普通保存当作通过。修改分支沿用现有字段草稿和人工证据保存。侧栏保留三个页签，将原文与 AI 理由及审核按钮放在一起，下方是人工修改记录。来源加载状态独立，摘要不能清空同版本详情。FR-011—015 / SC-006—010 的验证要求见 review-flow.md，实现与验证见 human-review-validation.md。
+T013—T017 实现采用：复用现有核对存储记录正式人工决定及其内容／来源版本；摘要、详情、提交门禁共同识别有效人工通过，不把普通保存当作通过。修改分支沿用现有字段草稿和人工证据保存。科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+来源加载状态独立，摘要不能清空同版本详情。FR-011—015 / SC-006—010 的验证要求见 review-flow.md，实现与验证见 human-review-validation.md。
 
 ## 摘要与技术上下文
 
@@ -65,7 +66,7 @@ T013—T017 实现采用：复用现有核对存储记录正式人工决定及�
 - backend/api/evidence.py：摘要、字段保存/说明/历史、任务与门禁接口。
 - backend/ingest/property_evidence.py、upload_jobs.py：解析收拢、任务处理和逐字段模型结果。
 - backend/api/rag.py、backend/services/paper_revisions.py、goserver/handlers/paper_evidence.go：三种提交路径。
-- frontend/src/components/EvidenceWorkflow.tsx、EvidenceFieldMarkers.tsx、UploadTaskEditor.tsx及共用表单：局部保存与独立展示。
+- 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 数据与实现顺序
 

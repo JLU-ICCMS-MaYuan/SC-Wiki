@@ -2,7 +2,8 @@
 
 ## 功能边界
 
-该功能负责研究者身份、贡献排行和科研交流：邮箱注册、JWT 会话、公开研究身份页，以及只读 AI 学术讨论、非评论站内通知和超级管理员内容治理。侧栏“社区”展开排行榜、Tc~X 演变、AI 学术讨论三个入口。图表组合的编辑入口在管理页；图表本身的行为记录在 [Tc 历史与压力图表](../03_Superconductivity_Data_Search_and_Database_Discovery/tc-history-and-pressure-charts.md)。
+该功能负责研究者身份、贡献排行和科研交流：邮箱注册、JWT 会话、公开研究身份页，以及只读 AI 学术讨论、非评论站内通知和超级管理员内容治理。科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../specs/221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+图表组合的编辑入口在管理页；图表本身的行为记录在 [Tc 历史与压力图表](../03_Superconductivity_Data_Search_and_Database_Discovery/tc-history-and-pressure-charts.md)。
 
 ## 小功能目录
 

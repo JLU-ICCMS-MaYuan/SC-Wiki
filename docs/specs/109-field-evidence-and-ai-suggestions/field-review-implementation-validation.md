@@ -1,14 +1,15 @@
 # US12 正式实施与原 PDF 验证
 
-关联 [Issue #109](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/109)，复用 #94 的紧凑科学字段设置。用户已认可三页签及折叠 Demo，并明确授权正式实施及原 PDF 功能验收。远程 Issue 继续开放；本记录不替代尚未确认的 Issue 正文追加稿，也不关闭其他用户故事。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+用户已认可三页签及折叠 Demo，并明确授权正式实施及原 PDF 功能验收。远程 Issue 继续开放；本记录不替代尚未确认的 Issue 正文追加稿，也不关闭其他用户故事。
 
 后续用户 IMG-006 证实本次验收遗漏了字段名称入口：当时只有核对标记接入三页签。下方保留此前实际验证范围，不能视为全部入口已通过；该遗漏的修复与完整上传编辑器补验见[字段名称入口修复](field-name-sidebar-fix.md)。
 
 ## 已落地行为
 
-- 侧栏分为“字段设置 / 来源核对 / 历史记录”。系统找到的原文首次展开，人工修改记录、AI 理由及历史记录首次收起，四块均独立折叠。切换页签保留已加载的原 PDF 与未应用设置。
+- 系统找到的原文首次展开， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - “超导转变温度 Tc”是普通标题。预测方法只核对方法自身；λ、ωlog、每个 Tc／μ*、固定计算条件和补充条件各自具有稳定审核身份、来源与历史。字段名继续负责设置，独立标记负责来源核对。
-- 侧栏末尾不再复制全部问题的红色按钮；问题总数和主页面独立“待处理项”导航保留，未定位项也有入口。
+- 问题总数和主页面独立“待处理项”导航保留， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - 新保存事件记录实际认证用户、UTC 时间、字段自身前后值及设置变更；真实 AI 调用记录实际模型与动作，核对与补空区分。普通改值、人工确认和正式批准保持各自语义。
 - 旧整条记录结论仅作折叠的历史参考，不能批量授予新子项通过资格。没有记录的作者、时间或时区明确显示缺失，不从任务所有者或数据库行创建时间推定。
 - 科学子项的建议、保存、返修、来源转接及导出沿原记录契约；整体科学校验、准备版本与主表单值一致性、理由和批准门禁保留。
@@ -24,7 +25,7 @@
 | 模型配置独立回归 | 11 项通过；进程不加载本机编号模型目录及业务 `.env`，不修改真实模型设置。原 PDF 与预检不依赖可用模型，用户认证仍必需。 |
 | 隔离 MySQL 3 个专项文件 | 8 项通过；旧整条结论不授信、服务端 AI 事件幂等及转接、人工确认、实际 JWT 登录的返修/管理员保存历史、同值不追加、客户端伪造日志拒绝、旧版本 409、Tc 组保存重开/返修/导出、科学条件持久化。数据库名限定 `scwiki_issue139_test_*`。 |
 | 独立候选生产构建 | TypeScript 与 Vite 构建通过；保留既有 3Dmol `eval` 和资源体积提示。 |
-| 独立 Chrome 浏览器 | [完整结果](assets/us12-implemented-browser.json)；正式组件、真实原 PDF、正式区域路由及渲染服务，JavaScript 异常 0。390px 侧栏实际宽度及滚动宽度均为 390px。 |
+| 独立 Chrome 浏览器 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 |
 
 定向后端文件：`test_property_field_review.py`、`test_pdf_region_fallback.py`、`test_scientific_drafts.py`、`test_upload_workflow.py`、`test_evidence_draft_version.py`、`test_property_evidence.py`、`test_evidence_proposals.py`、`test_scientific_evidence.py`、`test_issue139_scientific_context.py`、`test_issue139_workflow.py`、`test_issue114_native_pdf.py`、`test_issue109_manual_evidence.py`。MySQL 专项为 `test_field_review_mysql.py`、`test_tc_groups_mysql.py`、`test_issue139_persistence.py`。前端文件及逐项断言见本次测试改动与上述浏览器结果。
 

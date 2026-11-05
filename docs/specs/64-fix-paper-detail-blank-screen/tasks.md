@@ -14,8 +14,7 @@
   与 SPA 回退问题
 - [x] T003 [P] 读 `frontend/src/pages/PaperDetailPage.tsx`，确认已有 403/404/400 四路分流，
   推断异常在下游展示组件
-- [x] T004 [P] 全仓 `rg "ErrorBoundary|componentDidCatch"` —— 无结果，确认叶子异常会拖垮整树，
-  解释「连顶栏侧栏都消失」
+- [x] T004 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [x] T005 查 MySQL 确认 `papers` id=9 存在（`pending`、`uploaded_by_user_id=2`），
   排除数据缺失
 - [x] T006 查 `papers` 表 `keywords_tags` / `methodology` / `authors` 实际存储形态 ——
@@ -35,8 +34,7 @@
   非数组 JSON 五种输入（FR-004、FR-005）
 - [x] T010 [US1] `methodologyList` 改走 `toTextList` —— 原实现 `if (Array.isArray(raw))`
   之外直接 `return []`，遇字符串静默丢数据（FR-002）
-- [x] T011 [US1] 新增 `keywordList = toTextList(paper?.keywords_tags)`，侧栏关键词区改用
-  该变量，移除 `PaperEditView.tsx:389` 的 `paper.keywords_tags.map` 直接调用（FR-001）
+- [x] T011 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [x] T012 [US1] `setEditAuthors` 改为 `toTextList(data.authors).join('、')`，替换原
   `JSON.stringify(data.authors || [])`（FR-003）
 

@@ -8,7 +8,7 @@
 |---|---|
 | FR-011 / SC-006：无理由人工认可 | `field-decision` 独立接口，只接收字段身份、所查看结果令牌和通过／不通过；MySQL 回滚验证通过、重开、摘要刷新及提交复用，重复请求不重复事件。 |
 | FR-012 / SC-007：三个模型入口 | `enqueue_review` 提交只选择尚未核对的修改；100 项夹具中 96 项通过只排队其余 4 项；同版本失败不重问。 |
-| FR-013 / SC-008：不通过后修改保存 | 来源页原文与 AI 理由之后提供审核按钮；不通过展开人工记录，“保存”保留侧栏；浏览器及组件测试验证零模型任务。 |
+| FR-013 / SC-008：不通过后修改保存 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 |
 | FR-014 / SC-009：来源状态 | 详情按字段当前版本读取，加载／错误／历史／无来源分开；摘要与详情独立状态，组件测试验证慢请求、失败重试与摘要刷新不清空原文。 |
 | FR-015 / SC-010：旧候选待选 | 人工决定保留并标记解决该字段的候选事项；显式模型核对不再被旧“只保存新候选供人工比较”强制降级；保留其他错误与原始历史。 |
 | FR-016—018 / SC-011—013 | 汇总不重新审核内容；原样科学失败不重新排队；人工说明缺项阻止模型，真实不通过保留理由；超时等技术失败仍使用既有单独错误通道。 |
@@ -20,17 +20,17 @@
 - 前端：`two-stage-review.test.tsx`、`manual-evidence-section.test.tsx`，21 项通过。包含真实设置组件、拒绝后展开、保存语义、加载失败重试、摘要与原文详情隔离、提交复用。
 - Go：`TestFieldDecisionRequiresCurrentServerContract` 与 `TestValidatePaperEvidenceComplete*` 通过。只允许 Python 形成的同版本新人工决定；普通旧标记不能替代。
 - TypeScript 与生产构建通过；仅既有 3Dmol `eval` 与大分包提示。
-- 浏览器：`human-field-review-browser.mjs` 使用 Chrome 和生产 `/upload/tasks/:taskId` 路由，全部 API 拦截为隔离夹具。验证打开原文、慢加载不显示缺证、人工通过无理由、刷新重开、人工不通过展开、填写并保存不关闭侧栏；模型任务请求为 0，科学值无额外写入，页面错误为 0。截图和请求清单归档见下表。
+- 模型任务请求为 0，科学值无额外写入， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 浏览器材料
 
 | 材料 | 位置 |
 |---|---|
-| 人工认可侧栏 | `assets/human-review-approved-layout.png` |
-| 人工记录保存侧栏 | `assets/human-review-manual-save-layout.png` |
+| 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | `assets/human-review-approved-layout.png` |
+| 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | `assets/human-review-manual-save-layout.png` |
 | 生产路由隔离请求清单 | `assets/human-review-browser-result.json` |
 
-截图已视觉检查：右侧抽屉完整、三个页签保留、原文和 AI 理由及审核按钮相邻，认可时没有人工理由输入，保存后保留人工修改记录。
+认可时没有人工理由输入， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 真实草稿只读核验与边界
 

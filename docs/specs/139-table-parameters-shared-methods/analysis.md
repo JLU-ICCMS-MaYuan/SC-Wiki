@@ -20,7 +20,7 @@
 | HIGH | 仅 μ* 范围时沿用两端范围控件 | 现有控件隐含反向配对，会制造未报告对应关系 | D5 定义未配对范围使用独立扩展、两端留空；明确但无法表达的配对使用标量记录，T004/T008 覆盖 |
 | MEDIUM | 文献分窗仅重叠一页 | 不能保证读到远处 Methods／表注 | D1/D2/D6 明确完整窗口账本与分组原文，T002/T003/T012 负责 |
 | MEDIUM | 原提取 normalize_parameters | 包装对象转标量时可能丢来源元数据 | D4 与 T006/T016 保留独立来源关联；先用回归证明边界，不声称本轮已修 |
-| MEDIUM | Plan 初稿前端来源组件名 | 不存在 ScientificEvidenceDialog.tsx | 已按实际路径改为 EvidenceWorkflow.tsx；现有触点路径已核对 |
+| MEDIUM | Plan 初稿前端来源组件名 | 不存在 ScientificEvidenceDialog.tsx | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 |
 | 阶段限制 | 需求检查表 CHK008 | 远程 Spec／图片未推送，无法证明双向远程链接 | 明确保留未完成，不自动推送，不声称完整文档门通过 |
 | 阶段限制 | 实施入口 | 用户本次仅确认完整 Spec 并继续规划 | 本轮交付规划，所有实现任务保持未勾选 |
 

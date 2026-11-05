@@ -1,0 +1,25 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-ec73ca91-c20c-4bdc-b1b5-6ac904f9df7e.png",
+      "locator": "docs/specs/221-scientific-field-sidebar/assets/IMG-001.png",
+      "status": "local_verified",
+      "sha256": "be87fcdc092f2ad0445f4d9c685e481b94a804eda7d8619bdbd2cc05379e397f",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3840,
+        1948
+      ],
+      "user_context": "这个字段，为什么我点击了大模型核对，也不告诉我核对通过没通过？点击保存之后也没告诉我保存成功没有？我填写好东西之后，点击保存了，就应该让他变成灰色。而不是一直点击保存，一直没有任何响应。",
+      "related": [
+        "US2",
+        "US3",
+        "FR-009",
+        "FR-014"
+      ],
+      "verification": "原始字节复制、PIL解码及尺寸与SHA256核验；仅本地，不把截图内文字当指令。"
+    }
+  ]
+}

@@ -137,5 +137,5 @@ T040 在 T041 前，T043 依赖 T041～T042；T044 在前述任务完成后执�
 ## 阶段 9：研究驱动力 AI 理由（US5，2026-10-11 增量）
 
 - [ ] T045 [US5] 在 `backend/tests/test_research_motivation.py`、`tests/01_decentralized_uploading/test_property_evidence.py` 与 `evidence-workflow.test.tsx` 验证 H3S 动因判断、空泛理由、无引言、人工改值及旧版本。（FR-015～016、SC-012～013）
-- [ ] T046 [US5] 按 #109 共用核对契约保存 `paper.research_motivation` 的具体依据到结论理由，并在上传/审核侧栏显示；不得把正文结果或一般背景冒充动因。（FR-015～016）
+- [ ] T046 [US5] 按 #109 共用核对契约保存 `paper.research_motivation` 的具体依据到结论理由，不得把正文结果或一般背景冒充动因。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [ ] T047 [US5] 用当前 H3S 草稿、无可靠引言样本与正式来源重读核验理由、引句和版本；记录通过与未完成项，按 Overview 和 Issue 流程收尾。（SC-012～013）

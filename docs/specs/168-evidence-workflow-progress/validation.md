@@ -4,7 +4,7 @@
 ## 实现
 - backend/ingest/evidence_progress.py独立负责短期Redis准备状态、用户命名空间、原子取消墓碑与单调更新。
 - backend/api/evidence.py在实际字段检查、来源准备、排队边界上报，保留旧客户端和科学审核契约。
-- frontend/src/lib/evidenceProgress.ts负责有界轮询和迟到请求清理；共用EvidenceWorkflow绑定运行身份，按0/5/10/20–95/100展示。准备或状态读取卡住时取消可立即结束浏览器等待。
+- 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - 完成态立即填满进度条并保留400毫秒，避免MUI默认400毫秒动画尚未填满就关闭。
 - 中英文文案、窄屏换行和ARIA百分比保持一致，科学存疑不等同于任务失败或审核通过。
 

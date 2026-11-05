@@ -49,6 +49,6 @@ dos_fermi 的当前值继续保存在既有 value_* / unit_* 字段；payload.do
 
 ## US20 字段标注与侧栏暂存
 
-固定条件标注使用payload.calculation_conditions.field_settings[科学key]={name_raw,unit_raw}，原条件键和值不搬动。共享λ/ωlog标注使用payload.parameters.field_settings，各成员随共同参数一致保存；逐结果Tc/μ*标注使用payload.field_settings.tc / mu_star，身份属于对应科学记录。Tc和ωlog规范值仍K，标注不表示自动换算。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
-补充字段保留现有extensions与原key/field_key/evidences；侧栏的未应用草稿仅在组件状态，不写入持久层。固定schema类型不变，扩展改类型清除旧value_*槽位。既有开放payload保存/返修/导出包含上述字段，无数据库迁移；源值比较仍包含标注，修改后旧来源待核对。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。

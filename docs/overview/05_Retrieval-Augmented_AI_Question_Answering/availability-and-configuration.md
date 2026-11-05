@@ -16,9 +16,8 @@
 - 默认数据根指向仓库外的相邻数据集目录。
 - 健康检查分别判断数据库、向量库和聊天配置，检索可用与聊天可用不是同一状态。
 - 服务层在缺少数据或 LLM 时返回明确的不可用错误或降级信息。
-- 侧栏底部的“切换模型”可配置服务端默认、DeepSeek、Kimi、GLM、Qwen、OpenAI、Claude 或自定义的 OpenAI 兼容端点。展开时显示当前供应商与模型摘要，收起时通过图标提示查看完整名称，点击打开同一配置弹窗；该入口位于语言切换上方。
-  用户配置通过 `X-LLM-Provider`、`X-LLM-Base-URL`、`X-LLM-Model`、`X-LLM-Api-Key` 传递，
-  个人配置保存在浏览器 `localStorage`，调用时随请求头传给服务端。上传后台任务另以带 TTL 的 Redis 凭据键短暂传递配置，终态删除，详见[上传解析管线](../01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md)；服务端不把用户 API key 写入数据库或公开任务状态。
+- 展开时显示当前供应商与模型摘要，
+  个人配置保存在浏览器 `localStorage`， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../specs/221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - 个人 API Key 输入默认掩码；用户可在当前表单内显式显示或隐藏它，关闭面板后仍只以掩码摘要展示。
 
 ## 工作流程
@@ -32,9 +31,8 @@
 在此额度内输出正文，只能判为本次未验证成功，不自动增加额度或重试。
 Reranker 使用用户配置收到 401/403 时返回 `LLM_USER_CREDENTIAL_FAILED`，不吞掉认证失败，
 不改用服务端凭据；其他评分失败仍保留原始排序。重排和 JSON 重试日志、普通流式生成错误文本及
-RAG 通用内部错误响应不拼接上游异常原文，避免上游回显的密钥进入这些输出。
-`GET /api/rag/llm/current` 仅返回供应商显示名、模型名和来源（`server` / `browser`），供侧栏明确显示
-当前模型；响应不包含 Base URL、API key、请求头或密钥掩码。
+RAG 通用内部错误响应不拼接上游异常原文，避免上游回显的密钥进入这些输出。`GET /api/rag/llm/current` 仅返回供应商显示名、模型名和来源（`server` / `browser`）， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../specs/221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+
 部署可用 `LLM_PROVIDER_NAME` 显式标注网关上游，例如当前默认配置为 `OpenAI · gpt-5.6-sol`；不再仅按
 Base URL 推断。超级管理员可在工作台更新默认供应商、Base URL、模型和密钥，配置原子写入 API 与
 Worker 共用的 `/data/runtime/default_llm.json`，后续调用立即生效。仅超级管理员可读取或修改该配置，
@@ -61,19 +59,20 @@ Embedding 部署与真实运行验证：[Issue #146 验证记录](../../specs/14
 
 实现来源：[Issue #73：顶栏 AI 供应商切换](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/73)。
 
-入口布局更新：[Feature #101：全角色统一可收起侧栏](../../specs/101-unified-collapsible-sidebar/spec.md)。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../specs/221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 已知问题
 
 - 外部数据目录的部署和同步流程待核验。
 - [Issue #73](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/73) 的六家供应商真实兼容性、部署环境四条 AI 调用链路与上传 Worker 生命周期、生产数据库及应用/Nginx 日志密钥泄露审计和完整回归仍待验收。现有[专项验证记录](../../specs/73-user-llm-provider-switch/validation.md)使用假密钥与模拟上游响应，不能证明上述环境验收已通过。
-- #73 的旧验收脚本仍称“顶栏”；当前全局入口已由 #101 调整为侧栏底部的“切换模型”，实际页面核对应使用此入口。
+- 实际页面核对应使用此入口。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../specs/221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 编号服务端模型目录（#116）
 
 部署者可在私有 `.env` 配置 `LLM1_NAME/BASE_URL/MODEL/API_KEY`、`LLM2_*` 等组。编号可有间隔，按数字排序，无需数量变量；四项全空的组被忽略，半填写或非法配置会返回不含配置值的明确错误。`LLM_DEFAULT` 指定目录默认项，未填写时使用最小编号。
 
-已登录用户在原侧栏入口看到“服务端模型”选项，选择后浏览器只保存编号、显示名和型号，以 `X-LLM-Config-ID` 发送选择。目录接口需要真实有效登录，只返回 ID、名称与型号；服务端密钥和 URL 不进入浏览器目录。原个人供应商配置仍独立存在，其 URL 和密钥仍按 #73 的方式传递。
+选择后浏览器只保存编号、显示名和型号， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../specs/221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+目录接口需要真实有效登录，只返回 ID、名称与型号；服务端密钥和 URL 不进入浏览器目录。原个人供应商配置仍独立存在，其 URL 和密钥仍按 #73 的方式传递。
 
 启用编号目录后，显式服务端选择和默认服务端 LLM 调用都验证登录、账号状态和会话版本；匿名不能通过省略编号或空白个人字段绕过。公开健康状态、模型摘要、论文及统计列表继续保持只读访问。已删除编号会提示重新选择，不回退其他模型。
 

@@ -64,14 +64,16 @@ npm --prefix "frontend" run build
 
 FR-033 / SC-021 / T050—051：此前代码只在核对项被删除时关闭，普通成功仍打开；关闭 300 毫秒后全页面查找同 key 的首个入口，实际命中顶部新增的已接受按钮，浏览器 scrollY 从约 2700 跳至 0，无额外页面导航。另有接受列表增高造成 56 像素位移。
 
-现在当前组全部保存成功后统一关闭，失败保留输入。记录实际入口及字段位置，列表更新在绘制前抵消位移，关闭动画结束用 preventScroll 返回原字段；迟到请求不改变后来打开的侧栏。重新打开仍可查看理由和撤销接受。接口、数据库和批准流程未改。
+现在当前组全部保存成功后统一关闭，失败保留输入。科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+重新打开仍可查看理由和撤销接受。接口、数据库和批准流程未改。
 
 - Vitest：`evidence-drawer-close` 5、`evidence-workflow` 23、`pressure-review-editing` 14、`material-name-review` 6、`scientific-evidence-markers` 6，合计 54 项通过；新回归先复现失败后通过。
 - `npm run build` 通过，包含 `tsc -b`；仅有既有第三方 eval 和构建块大小警告。
 - Chromium `evidence-drawer-browser.mjs` 使用实际管理员编辑页末尾材料状态，管理员/超级管理员均通过完成、遮罩、Escape、关闭按钮、返回修改。关闭前后字段视口位置相同，完成全程逐帧采样偏移不超过 3 像素，无新增导航；顶部列表增高也不造成可见抖动。
 - 原 `pressure-review-browser.mjs`、`material-name-review-browser.mjs` 更新成功后自动关闭的预期并在两角色通过，含失败重试、删除与刷新恢复。全部 API 使用隔离夹具，零模型、零正式批准，不写真实 #29；本次为纯前端交互修复，未重复运行无变化的数据库回归。
 
-提交隔离检查：开工备份 `/tmp/scwiki-drawer-baseline-Cj4klQ`，本轮增量 `/tmp/scwiki-drawer-only.patch`。仅含 HEAD 的临时 index 上 `git apply --cached --check` 失败：共享侧栏已有未提交的主体实现，相关浏览器与压强回归文件尚未进入 index。完整修复无法与前序依赖安全分离，依照 AGENTS.md 未暂存或提交、未切分支或推送；T051 文档已同步，提交部分保持未完成。
+提交隔离检查：开工备份 `/tmp/scwiki-drawer-baseline-Cj4klQ`，本轮增量 `/tmp/scwiki-drawer-only.patch`。科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+完整修复无法与前序依赖安全分离，依照 AGENTS.md 未暂存或提交、未切分支或推送；T051 文档已同步，提交部分保持未完成。
 
 2026-09-16 材料名、空化学式与人工确认保存 500 的最新验收见 [保存闭环](material-name-save-flow.md)：31 项 Python、86 项不同前端回归、Go、构建及两角色 Chromium 验证通过；包含隔离方式、现有数据摘要和独立提交阻塞说明。
 
@@ -226,10 +228,11 @@ sc-wiki MySQL 外层事务回滚；TypeScript/Vite 生产构建通过。
 | Go | 全 handlers 通过；新增 Go → Python → 当前 MySQL 测试通过，覆盖无理由/旧版本拒绝、逐条裁决、来源保存、成功清理、幂等与失败回滚保留临时项 |
 | 前端 | 六个测试文件共 68 项通过：共享工作流、稳定身份定位、排序/补证不误失效、两个工作台与上传编辑回归；生产构建通过 |
 | 真实模型与 RQ | 对当前 #29 的物性项 61 定向重查，完整读取两组原文，任务完成并保存 uncertain 与五条可定位证据；删除本次任务的 Redis 结果/索引缓存后，预检查仍从 MySQL 恢复相同理由，没有再次调用模型 |
-| 真实浏览器 | 上传校对、管理员与超级管理员编辑页，以及两个工作台快速审核，共享科学视图和右侧覆盖抽屉；验证关闭重开、刷新恢复、默认折叠原文、Escape 焦点返回、三秒重查取消后保留标记 |
+| 真实浏览器 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 |
 | 来源与 RAG | 当前 #29 实际结构内容经解析后保存首次认证提交者，后续保存者不能覆盖；来源未知不能人工放行；正式来源转 RAG 内容及引用保留来源类型、提供者和论文未支持限定 |
 
-浏览器疑点由测试服务在现有 MySQL 的回滚事务内构造确定性模型判断，真实页面、权限、持久结果读取与抽屉交互均执行。测试服务结束已回滚并清理自己的 Redis 任务及原文副本。真实 LLM/RQ 验证单独执行，不把判断替身算作模型验证，也未通过浏览器真实批准 #29。实际截图保存在本次环境 `/tmp/scwiki-103-admin-drawer.png`、`/tmp/scwiki-103-superadmin-drawer.png`、`/tmp/scwiki-103-user-drawer.png`。
+浏览器疑点由测试服务在现有 MySQL 的回滚事务内构造确定性模型判断， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+测试服务结束已回滚并清理自己的 Redis 任务及原文副本。真实 LLM/RQ 验证单独执行，不把判断替身算作模型验证，也未通过浏览器真实批准 #29。实际截图保存在本次环境 `/tmp/scwiki-103-admin-drawer.png`、`/tmp/scwiki-103-superadmin-drawer.png`、`/tmp/scwiki-103-user-drawer.png`。
 
 全量 #29 核对曾完成首组后被验收流程取消；本轮真实模型完成证明限定为上述定向项。Qdrant 的来源类型与限定由发布、检索代码和来源契约测试验证，没有执行实际批准发布来改写现有向量索引。扩大运行的旧上传生命周期测试仍有旧表结构和替身签名不匹配问题，未纳入本轮专项通过数量。
 
@@ -249,18 +252,20 @@ Go 跨服务测试为 `TestCurrentMySQLScientificEvidenceTransaction`，要求 `
 
 Spec、Plan、Research、数据模型、接口、Tasks、Overview 和根 README 已同步新规则。迁移终点为 `20260915_0104`，运行环境已应用新增表；Go 和前端仍需按部署流程配套发布，不能把开发页面与源码验证当成已发布版本。
 
-本轮与开始时已有未提交修改在五个文件同一区块交叠：backend/api/evidence.py、backend/ingest/property_evidence.py、frontend/src/components/EvidenceWorkflow.tsx、frontend/src/components/UploadTaskEditor.tsx、tests/01_decentralized_uploading/evidence-workflow.test.tsx。按初始备份生成独立补丁并用临时 Git index 检查，无法直接应用到 HEAD；单独提交其余文件会留下依赖不完整的提交。依照用户的范围隔离要求，未暂存或提交，没有创建/切换分支或推送。Issue 保持开放记录这一交付阻塞。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+按初始备份生成独立补丁并用临时 Git index 检查，无法直接应用到 HEAD；单独提交其余文件会留下依赖不完整的提交。依照用户的范围隔离要求，未暂存或提交，没有创建/切换分支或推送。Issue 保持开放记录这一交付阻塞。
 
 ## 红点与建议验收（待执行）
 
-分别验证上传、管理员/超管编辑及快速审核：同框多问题一红点、抽屉顺序、键盘返回、保存/恢复建议、接受/撤销、仅存疑理由、独立按钮布局。断言核对结束不提交、提交失效结果不调模型。使用现有 MySQL 回滚覆盖草稿、最终值绑定、权限、并发与事务失败；保留 #29 Tc 回归，不实际批准。运行针对性 pytest、Go、Vitest 和前端构建；记录真实浏览器证据后才勾选新任务。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+断言核对结束不提交、提交失效结果不调模型。使用现有 MySQL 回滚覆盖草稿、最终值绑定、权限、并发与事务失败；保留 #29 Tc 回归，不实际批准。运行针对性 pytest、Go、Vitest 和前端构建；记录真实浏览器证据后才勾选新任务。
 
 ## 本轮红点与建议验收结果（2026-09-15）
 
 - Python：原来源、全科学核对、建议与真实 MySQL 回滚共 37 项通过；另 1 项用论文 #29 当前表单定义验证建议域约束通过（总计 38 个不同用例）。包括候选引句定位、冲突值不任选、缺来源禁止接受、人工理由、按用户恢复、撤销、迟到结果、同版本幂等、两段失败恢复及并发来源变更。
 - Vitest：建议应用、标记、工作流、快速审核及编辑页 5 文件 49 项通过；上传布局、分类及错误处理 3 文件 27 项通过（共 76 个不同用例）。后续针对修改过的共享界面进行了同组回归。
 - Go：handlers 全组通过；新增准备校验 HTTP 契约和人工决定序列化测试；真实 Go → Python → 现有 MySQL 批准/失败/重复事务测试通过，最外层全部回滚，发布端点仅本地接收器。
-- 前端 production build 通过。真实 Chromium 验收 admin/superadmin/upload：单红点、无三角形、覆盖抽屉及内容顺序、编辑、完成、刷新恢复、撤销、键盘焦点与顶部边界；两个快速审核入口同样通过。页面 #29 的科学保存和批准被拦截；全程未发起模型或真实批准请求。建议语义使用明确测试替身，来源定位、认证、MySQL 草稿写入与恢复走真实代码。
+- 页面 #29 的科学保存和批准被拦截；全程未发起模型或真实批准请求。来源定位、认证、MySQL 草稿写入与恢复走真实代码。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - 浏览器临时服务器的数据库事务已回滚，临时上传 Redis 状态和文件已清理。未创建临时数据库，未实际批准论文 #29；本轮未声称实测新的线上 LLM 建议质量。
 - 运行环境的 Vite、Python 和 Go 由既有热重载加载工作树；功能领先于 Git，不能据此关闭 Issue。
 - 日志：`/tmp/scwiki-103-ui-python-final.log`、`/tmp/scwiki-103-ui-domain-test.log`、`/tmp/scwiki-103-ui-vitest.log`、`/tmp/scwiki-103-ui-upload-tests.log`、`/tmp/scwiki-103-ui-go-final.log`、`/tmp/scwiki-103-ui-go-mysql.log`、`/tmp/scwiki-103-ui-browser-final.log`。页面截图位于 `/tmp/scwiki-103-ui-{admin,superadmin,upload}-drawer.png` 与管理员 page.png。
@@ -275,7 +280,8 @@ T032：6 项标记回归与 22 项共享工作流回归通过；TypeScript 与�
 
 当前 MySQL 上复现旧未核对保存 409 后增加回归；未核对草稿、无直接原文人工确认、空理由、上传越权、自审、版本变化、定点数 JSON 与 canonical 比较、RAG 人工归因均通过针对性测试。真实 Go → Python → 当前 MySQL 分别验证原文裁决和无引句人工裁决，批准、永久来源、历史、幂等及失败回滚通过；测试使用论文 #9 外层回滚，不实际批准 #29、不创建临时数据库。
 
-真实 Chromium 加载当前共享表单/抽屉与实际 Python API，以新建论文的当前 MySQL 外层回滚验证连续输入只发一次保存、一次 503 后不自动重复、显式重试保存最新输入、刷新恢复、完成、finalize 及提交门禁。无模型或真实批准请求；脚本 `/tmp/scwiki-103-human-browser.mjs`，截图 `/tmp/scwiki-103-human-browser-accepted.png`，服务器已退出且回滚。
+以新建论文的当前 MySQL 外层回滚验证连续输入只发一次保存、一次 503 后不自动重复、显式重试保存最新输入、刷新恢复、完成、finalize 及提交门禁。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+无模型或真实批准请求；脚本 `/tmp/scwiki-103-human-browser.mjs`，截图 `/tmp/scwiki-103-human-browser-accepted.png`，服务器已退出且回滚。
 
 #29 使用现有服务端默认 gpt-5.6-sol，任务 cd865e67520c4d4681ff6ae4b7f66515 完成 8/8 批，复用原八项并补齐剩余 26 项。当前 34/34 有版本匹配结果，0 项 unchecked，2 supported、19 uncertain、6 unsupported、7 missing。超级管理员原六条接受草稿仍可恢复；论文保持 pending、revision=1，未改科学值或批准。存疑/无出处不等于任务未完成；现在可逐条给出人工理由确认。
 
@@ -290,7 +296,7 @@ T032：6 项标记回归与 22 项共享工作流回归通过；TypeScript 与�
 
 | 验证范围 | 本轮结果与边界 |
 | --- | --- |
-| 前端完整回归 | 工作树和排除无关改动的候选树均为 49 文件、396 项通过；涵盖三状态审核、侧栏、元素数缓存、晶系未知联动、社区与共享科学表单 |
+| 前端完整回归 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 |
 | Python 专项 | 152 项通过、27 项因专用数据库门禁跳过；包括 Tc 的 9 份浏览器真实请求经 SQLite 生产持久化及导出重载；RAG 检索及发布另有 4 项通过 |
 | Go | 排除无关改动的候选树执行 `go test ./...` 全部通过；未启用当前 MySQL 集成门禁 |
 | 前端构建 | 候选树 TypeScript 与 Vite 生产构建通过，既有 3Dmol eval、产物体积及依赖弃用告警保留 |

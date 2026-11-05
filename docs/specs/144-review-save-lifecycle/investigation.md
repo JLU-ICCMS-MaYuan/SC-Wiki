@@ -20,7 +20,7 @@
 - `backend/ingest/evidence_proposals.py:schema_for` 默认将None推断为字符串；`valid_value`只允许显式nullable的None。
 - `editable_fields` 对扩展对象递归生成schema，`field_schema`只给最外层nullable。
 - `validate_values` 对整个扩展对象校验，触发截图同一报错。
-- `frontend/src/components/EvidenceWorkflow.tsx:valuesFor/saveProposal/accept` 将editable_fields当前值带入proposals保存。
+- 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 以上为服务函数边界复现；尚未证明截图请求体与全部浏览器调用顺序，不能宣称完整UI根因已验证。
 

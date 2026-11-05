@@ -2,7 +2,7 @@
 
 ## 已有设计
 
-workdraftAccess按ApiError.code识别；AdminPaperEditPage统一警告和禁写；WorkdraftRefresh/EvidenceWorkflow向宿主报告，非同一权限错误保留原展示。
+非同一权限错误保留原展示。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 拆分依据
 

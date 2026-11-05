@@ -4,4 +4,5 @@
 
 `POST /api/rag/evidence/preflight`、核对任务结果及正式来源响应继续使用现有字段路径 `paper.material_families`。模型归类返回 `check_mode=synthesis`、实际 `source_kind=paper_synthesis`、可定位本文 `evidences`、核对 `reason` 和当前版本的 `ai_reason`；理由简述原文材料线索如何映射到目录分类及适用边界。旧记录 `ai_reason` 为空时，仅同版本、具体的 `reason` 可作为当前解释；否则返回需重新核对状态，不能显示“原文直接记载”。
 
-新分类仅保留为 `pending`；无有效目录 ID、引句、理由或版本时不授予自动支持。上传者、管理员和超级管理员沿用既有权限，侧栏只读不触发模型；正式批准仍执行已有分类与人工裁决门禁。不增加 API 版本或数据库迁移。
+新分类仅保留为 `pending`；无有效目录 ID、引句、理由或版本时不授予自动支持。上传者、管理员和超级管理员沿用既有权限，正式批准仍执行已有分类与人工裁决门禁。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+不增加 API 版本或数据库迁移。

@@ -23,7 +23,7 @@
 | 5. 模型科学与语义判断 | LLM：数值是否对应原表、归纳/分类、局部例外、阶段与流程关系 | 超导类型、主要发现、Tc原表归属 | 保存动作不触发；首次/显式重核等单列审查 |
 | 6. 已确认条件/适用范围规则 | 程序校验模型给出的结构化依据：值、单位、软件、阶段、材料/物相、覆盖和例外；结果归属另检查 | QE参数不借VASP；采样/插值分开；Tc归属不能反向使旧条件失效 | 相关输入/来源/规则变时；当前版本凭证有效就复用 |
 | 7. 历史恢复 | 程序：当前版本无合适结论时，看旧claim与原文能否在已知兼容边界重验 | #144处理v1→v2内部表示变化 | 应只在确需恢复时发生，不应每次遍历整篇 |
-| 8. 人工说明与批准 | 人写理由/补来源，程序核对权限、版本绑定、记录是否完整 | 人工修改记录、管理员说明、最终批准 | 保存实际变更/新决定；不伪造人工身份 |
+| 8. 人工说明与批准 | 人写理由/补来源，程序核对权限、版本绑定、记录是否完整 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | 保存实际变更/新决定；不伪造人工身份 |
 
 第2、7、8类主要是状态与审计管理，不是又独立审读了一次论文。第6类中的“共用关联”和“规则凭证”当前还有不同代码入口，次数分别列，不把它们说成新的科学方法。
 
@@ -43,16 +43,16 @@
 2. 调用saveCurrent→UploadTaskEditor.saveDraft(false,false)。函数没有“未修改直接返回”短路，仍校验全草稿并PUT整篇草稿。
 3. restore→POST preflight。该次实测：构造3次上传快照、加载2次历史结果、进行2轮PDF当前来源校正、1轮人工修改完整性、1次公开状态组装。
 4. 对activeGroup每个项目顺序POST proposals。后台再次构造整篇快照，rows_for读取整篇历史并加锁；条件字段还执行整篇load_results，之后才写本项决定。
-5. 完成后关闭侧栏；期间manual/history等效果可能另发读取请求，不能把上面主路径请求数冒充整次点击的恒定次数。
+5. 不能把上面主路径请求数冒充整次点击的恒定次数。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ### 保存人工修改记录
 
-1. prepareManual先saveCurrent：即使值没变也保存整篇。
-2. restore再preflight。
-3. PUT manual字段说明。_manual_snapshots又调用snapshot_for，读取整篇结果/PDF；它取得cached却不使用，再从AI初始草稿构造一份baseline来判断修改。
-4. 附件每个再POST files，入口也会构造快照/基线；此处次数受附件数影响。
+1. 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+2. 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+3. 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+4. 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
-源码：frontend/src/components/EvidenceWorkflow.tsx的accept、prepareManual、restore；UploadTaskEditor.tsx的saveDraft；ManualEvidenceSection.tsx的save；backend/api/evidence.py的preflight、_manual_snapshots、proposal_operation；backend/ingest/evidence_proposals.py的save_draft。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 一次preflight的真实计数
 

@@ -6,14 +6,15 @@
 
 #212：`/upload/tasks/:taskId` 增加未匹配流程时的通用结果暂停视图，没有新增科学编辑表单。上传、返修和两种管理员角色共用 `ParsingWorkflowIdentity` 展示服务端流程/表单身份；绑定不属于可编辑科学字段，输入和普通保存不重新判断。四宿主及暂停停止轮询的覆盖见[验证记录](../212-typed-parsing-workflow/validation.md)。
 
-#219：四类科学宿主共享 PaperMaterialsSection 右侧大纲、稳定身份定位；本次全高及4px留白已重跑150项表单门、8项变异检出及生产构建浏览器测量，见[材料大纲验收](../219-material-state-outline/validation.md)。#218：管理员失权由页面汇总，EvidenceWorkflow 与 WorkdraftRefresh 报告错误标识，禁止写入但保留查看，见[权限提示验收](../218-workdraft-permission-feedback/validation.md)。#216的个人页检查区和独立工作区只改变列表分页与导航，不新增科学值输入入口。初始三项沿用53c32542的实际宿主/浏览器结果；#219后续全高布局的新运行另记，不冒称其他子项重新验收。
+#219：四类科学宿主共享 PaperMaterialsSection 右侧大纲、稳定身份定位；本次全高及4px留白已重跑150项表单门、8项变异检出及生产构建浏览器测量，见[材料大纲验收](../219-material-state-outline/validation.md)。禁止写入但保留查看，见[权限提示验收](../218-workdraft-permission-feedback/validation.md)。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+#216的个人页检查区和独立工作区只改变列表分页与导航，不新增科学值输入入口。初始三项沿用53c32542的实际宿主/浏览器结果；#219后续全高布局的新运行另记，不冒称其他子项重新验收。
 
 | 用户入口 | 主要代码 | 本轮覆盖状态 |
 | --- | --- | --- |
 | `/upload/tasks/:taskId` 上传校对 | UploadTaskPage、UploadTaskEditor、MaterialStatesEditor、PropertyModuleEditor | 完整宿主及大草稿浏览器验证通过 |
 | `/papers/:id/revise` 返修 | PaperRevisionPage、UploadTaskEditor | 完整宿主回归通过 |
 | `/admin/papers/:id/edit` 管理员与超级管理员编辑 | AdminPaperEditPage、MaterialStatesEditor | 两种角色分别完整宿主回归通过 |
-| 上述页面的来源与字段设置侧栏 | EvidenceWorkflow、EvidenceFieldMarkers、ReviewPaperTextField、ScientificFieldBox、ManualEvidenceSection、FieldAICandidate | 首轮科学表单验证范围 |
+| 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | 首轮科学表单验证范围 |
 | 上述页面的结构、谱图子区 | PaperStructuralWorkspace、StructureCandidatePanel、PropertySpectra | 首轮覆盖父表单更新的联动影响，不重写独立编辑器 |
 | `/upload` 三类文件选择及历史角色恢复 | UploadPage、MultiFileUploadPanel、UploadRoleReview（仅历史任务） | #179：三个指定区域、单正文/格式校验、五文件三并发、完整 UploadPage 与桌面/390px 隔离浏览器通过；未作全站性能验收 |
 | `/auth` 登录、注册与找回密码 | AuthPage 委托 AuthExperience 和 production auth 服务 | 已定位，未做本轮性能验收 |
@@ -37,7 +38,8 @@
 
 ## 科学表单依赖核查
 
-#201字段子项归属共享EvidenceFieldMarkers与EvidenceWorkflow，四类完整宿主、只读、未应用设置保护、扩展重排和单子项模型请求由field-sidebar-ownership纳入正式form-contract入口；本轮128项通过、变异8项检出。实际草稿只读副本验证11个子项均可达，未定位8→0；相邻35项旧失败在未修改HEAD独立复现，未计作通过。详见[验收记录](../201-field-sidebar-ownership/validation.md)，不宣称真实浏览器或整篇科学核对验收。
+四类完整宿主、只读、未应用设置保护、扩展重排和单子项模型请求由field-sidebar-ownership纳入正式form-contract入口； 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+实际草稿只读副本验证11个子项均可达，未定位8→0；相邻35项旧失败在未修改HEAD独立复现，未计作通过。详见[验收记录](../201-field-sidebar-ownership/validation.md)，不宣称真实浏览器或整篇科学核对验收。
 
 - 上传与返修共享 UploadTaskEditor；管理员及超级管理员共享 AdminPaperEditPage。两宿主均传入动态生成的 reviewFields。
 - 材料卡片环境比较包含全局 issues、reviewFields，导致数组引用变化能清空全部缓存。
@@ -50,7 +52,7 @@
 | --- | --- | --- |
 | 上传、返修 | UploadTaskEditor 的 draft；编辑记录变化，停顿自动保存／点击保存；提交才走必要审核 | FR-001–008；form-contract、graph-title-form、paper-field-settings、two-stage-review |
 | 两种管理员 | AdminPaperEditPage 的编辑草稿；点击保存与明确人工决定／批准各自执行 | FR-001–008；form-contract 四宿主、paper-field-settings、state-review-convergence |
-| 科学侧栏 | 主表单值与设置暂存分开，应用回写当前字段；来源按需加载、主动模型核对及人工决定分开 | FR-002–008；上述门禁与来源状态、最新值、删除重定位测试 |
+| 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | 主表单值与设置暂存分开，应用回写当前字段；来源按需加载、主动模型核对及人工决定分开 | FR-002–008；上述门禁与来源状态、最新值、删除重定位测试 |
 | 上传文件选择与历史角色恢复 | MultiFileUploadPanel 拥有唯一文件清单，三个区域直接赋予角色；选择/移除无请求，显式上传才创建任务；旧角色确认仅服务历史任务 | FR-001–003/005–009；#179 完整宿主、三并发和浏览器交互通过，详见验收记录 |
 | 登录、注册、账号安全 | AuthExperience／AccountSecurity 本地输入；提交及验证码按钮调用对应服务 | FR-001–003/006–009；不套用科学审核流程，未做本轮验收 |
 | 个人资料、用户名 | AccountPage 拥有资料编辑值，保存调用 PATCH；UsernameField 失焦后按需检查可用性 | FR-001–003/006–009；未做本轮性能或迟到响应验收 |
@@ -64,13 +66,17 @@
 
 ## #177 单字段核对增量
 
-上传、返修、管理员、超级管理员的科学侧栏使用同一字段限定保存回调。宿主仍拥有科学输入，人工依据由 ManualEvidenceSection 草稿持有；全部保存成功后获取字段输入令牌，侧栏核对只传一个稳定字段。其他本地输入不随核对操作保存，等待期间暂停整篇自动保存。真实值、依据、权限、取消及较新结果保护保留；整篇提交与全量复核继续自己的契约。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+宿主仍拥有科学输入，全部保存成功后获取字段输入令牌， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+其他本地输入不随核对操作保存，等待期间暂停整篇自动保存。真实值、依据、权限、取消及较新结果保护保留；整篇提交与全量复核继续自己的契约。
 
 test:form-contract 已加入 sidebar-field-save、sidebar-field-workflow、sidebar-field-hosts；本轮 79 项通过，mutation 仍为四宿主 8 项检出。MySQL／隔离 Redis 和浏览器验证及六项旧失败的独立基线见 [#177](../177-sidebar-field-review/validation.md)，不据此宣称全站或远端 CI 已验证。
 
 ## #180 撤回独立解析差异分类
 
-#172 分类面板及后续移入侧栏的设计已撤销。原始区域和备选文本保留在服务端账本；含历史 triage 的草稿可存取，不恢复分类入口或计算。正式表单契约入口以 `parsing-triage-removal` 替换退役的 `parsing-diagnostics` 套件，覆盖上传、返修、管理员及超级管理员的紧凑字段标记、来源侧栏、真实输入错误和保存行为。#177 单字段保存与核对入口继续保留。实际结果和隔离边界见 [#180 验收](../180-remove-parsing-triage/validation.md)。此前 #172 与 #147 的浏览器记录仅证明当时实现，不是当前恢复分类的依据。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+原始区域和备选文本保留在服务端账本；含历史 triage 的草稿可存取，不恢复分类入口或计算。正式表单契约入口以 `parsing-triage-removal` 替换退役的 `parsing-diagnostics` 套件， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+#177 单字段保存与核对入口继续保留。实际结果和隔离边界见 [#180 验收](../180-remove-parsing-triage/validation.md)。此前 #172 与 #147 的浏览器记录仅证明当时实现，不是当前恢复分类的依据。
 
 ## #179 用户指定上传文件身份
 
@@ -78,18 +84,20 @@ test:form-contract 已加入 sidebar-field-save、sidebar-field-workflow、sideb
 
 ## #181 方法语义与结构优化详情
 
-StructureOptimizationFields与既有CalculationConditionFields接入上传、返修、管理员及超级管理员。四类完整宿主验证四目标/几何约束、电子理论与数值分开显示、无变化零写、当前字段保存与来源侧栏；只读、中文组合输入及保存失败重试单列。正式表单入口增加physical-method-hosts，不删除旧回归。新JSON列只做隔离迁移/存取验证，业务库与部署未执行，实际结果及旧失败基线见[验收记录](../181-physical-method-scope/validation.md)。
+StructureOptimizationFields与既有CalculationConditionFields接入上传、返修、管理员及超级管理员。只读、中文组合输入及保存失败重试单列。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+正式表单入口增加physical-method-hosts，不删除旧回归。新JSON列只做隔离迁移/存取验证，业务库与部署未执行，实际结果及旧失败基线见[验收记录](../181-physical-method-scope/validation.md)。
 
 ## 正式交接只读入口（#192）
 
 - /manuscripts/:target/:targetId/handoffs：分页交接元信息列表，不载入全部整稿。
-- /papers/:id/snapshots/:snapshotId：共享完整科学表单的冻结只读宿主；字段侧栏两个页签，谱使用冻结曲线与文件，不访问当前工作稿或当前谱。
-- 上传、返修、管理员、超级管理员的标题入口已在完整宿主覆盖；独立列表→新标签整稿→只读侧栏和零写请求由 manuscript-handoff-browser.mjs 验证，冻结谱由 frozen-spectra.test.tsx 及实际 SQL 交接隔离回归覆盖。
+- /papers/:id/snapshots/:snapshotId：共享完整科学表单的冻结只读宿主； 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+- 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 
 ## #203/#204 本轮补充
 
-原有上传、返修、管理员、超级管理员入口继续由完整宿主覆盖；四宿主新增软件分组、直接声子方法、材料状态类型可见性检查。132项表单契约通过，故障注入8项均检出预期失败。结构控件复用原查看/来源侧栏，正式草稿改为每卡一份 structure，候选只作内存投影。真实原页面缺失状态类型的问题仍未复现，不能用宿主测试代替该现场验收。
+原有上传、返修、管理员、超级管理员入口继续由完整宿主覆盖；四宿主新增软件分组、直接声子方法、材料状态类型可见性检查。132项表单契约通过，故障注入8项均检出预期失败。科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+真实原页面缺失状态类型的问题仍未复现，不能用宿主测试代替该现场验收。
 
 ## #209 退回结果保留与字段原文展示
 

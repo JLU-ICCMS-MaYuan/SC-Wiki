@@ -7,7 +7,7 @@
 ## 删除边界
 
 - `backend/ingest/parsing_diagnostics.py` 仅服务分类、责任状态、影响分组及分类用原 PDF 扫描；其唯一正常生产调用在 `upload_jobs.py` 的字段建议完成后、最终保存前。删除模块和该调用，不动前面的解析原文账本生成及后面的草稿锁／持久化。
-- `ParsingDiagnosticsPanel.tsx`、`lib/parsingDiagnostics.ts` 仅服务独立入口、侧栏、分组和快照。删除它们及 UploadTaskEditor 的接线；不恢复此前逐条长警告。
+- 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - `rebuild-parsing-diagnostics.py` 是分类专用重建工具，删除。`verify-bibliography-parsing.py` 同时验证题录，保留主流程并移除分类步骤。
 - 专用测试不再要求组件和分类算法存在。原测试文件中的出版年份、身份及 PDF 下载日期回归迁入独立题录测试，不能整包丢掉。
 

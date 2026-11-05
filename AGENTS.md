@@ -136,6 +136,7 @@ description: 专业的软件工程师，严格遵循SOLID、KISS、DRY、YAGNI�
 ### 全站表单处理的强制约束
 
 - 科学表单字段提示规则统一维护于 [#220](docs/specs/220-field-red-marking/spec.md)；其他 Issue、Spec 与 Overview 仅引用，不再各自定义触发、消除或影响范围。后续变更须同步该入口及四宿主回归。
+- 科学字段右侧栏的功能与交互设计统一维护于 [#221](docs/specs/221-scientific-field-sidebar/spec.md)；旧处只保留引用，现行设计、已替代历史及待实施改动须分开记录。标红规则继续只引用 #220。
 
 - 本规则适用于全站现有及新增表单。科学表单首先按 [#174 规格](docs/specs/174-form-processing-contract/spec.md) 完整验收；其他入口按 [表单清单](docs/specs/174-form-processing-contract/form-inventory.md) 如实记录已验证与未验证范围。
 - 修改前对照受影响的既有 Issue、Spec 和 Overview，列清数据所有权、真实依赖与原验收条件。新增字段、来源核对、侧栏或谱图功能，不构成放弃 #96 渲染隔离、#102 提示正确性及当前保存／审核规则的授权。

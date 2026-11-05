@@ -25,7 +25,7 @@
 | 来源 | 强制要求 | 设计与验证 | 当前状态 |
 |---|---|---|---|
 | FR-001、FR-002、FR-005 | 全文贡献分类、失败留空 | 正文与附件输入，长文逐批综合；三类和空值测试 | 局部测试及真实 H3S 已通过 |
-| FR-003、FR-004、#109 | 来源可定位，归纳不冒充逐字事实 | 当前值及来源版本绑定；侧栏专用提示 | 来源、组件及已登录 H3S 页面验收已通过 |
+| FR-003、FR-004、#109 | 来源可定位，归纳不冒充逐字事实 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | 来源、组件及已登录 H3S 页面验收已通过 |
 | FR-006、AGENTS.md | 保护人工改值和其他核对 | 单任务锁、来源重读、字段级失效 | 定向重跑与局部测试已通过 |
 | FR-007、SC-003 | 提交及正式审核来源持久化 | 现有事务转接来源；仍需端到端核验 | **部分通过：真实正式路径待验收** |
 | AGENTS.md | 仅在 `mayuan` 分支提交本次文件 | 修改前查分支；逐文件暂存与复查 | 提交前复核 |
@@ -43,7 +43,7 @@
 | `backend/api/rag.py` | 草稿 PUT 保持服务端分析所有权；提交事务转接上传核对 |
 | `backend/ingest/property_evidence.py`、`backend/ingest/scientific_evidence.py` | 字段身份、支撑校验、核对保存与正式来源转接 |
 | `backend/services/paper_revisions.py` | 返修草稿拒绝客户端伪造的分析对象 |
-| `frontend/src/components/UploadTaskEditor.tsx`、`EvidenceWorkflow.tsx`、`frontend/src/pages/AdminPaperEditPage.tsx` | 编辑当前值、显示失败原因、代表片段与综合理由 |
+| 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | 编辑当前值、显示失败原因、代表片段与综合理由 |
 | `scripts/reclassify-theoretical-subtype.py` | 仅指定任务并核对文件名后重判旧草稿 |
 
 **结构选择**：分类、草稿写入、来源核对和 UI 分别沿用现有职责，不增设第二套分类表或新公开路由。
@@ -53,7 +53,7 @@
 | 来源 | 设计组件或契约 | 验证方式 |
 |---|---|---|
 | US1、FR-001、FR-002、FR-005、SC-001、SC-002 | `theoretical_subtype.py`、`upload_jobs.py` | H3S 真实模型、三类/空值和多批次测试 |
-| US2、FR-003、FR-004、SC-003 | 草稿分析、字段哈希、证据侧栏 | Methods-only/失配定位测试、组件与浏览器夹具 |
+| US2、FR-003、FR-004、SC-003 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | Methods-only/失配定位测试、组件与浏览器夹具 |
 | US3、FR-006、SC-004 | 单任务锁、原 AI 值比较、字段级来源版本 | 定向重跑、人工改值与其他字段哈希测试 |
 | FR-007、SC-003 | `transfer_result`、提交事务与正式来源 | 隔离转接测试已通过；正式路径验收仍待完成 |
 

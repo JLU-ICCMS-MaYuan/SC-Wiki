@@ -1,0 +1,34 @@
+[
+  {
+    "source": "docs/specs/148-sidebar-field-editing/assets/sidebar-demo.fragment.html",
+    "destination": "docs/specs/221-scientific-field-sidebar/legacy/issue148-sidebar-demo.fragment.html",
+    "redirected": true,
+    "tabChecks": 0,
+    "pageErrors": [],
+    "networkRequests": []
+  },
+  {
+    "source": "docs/specs/94-property-record-editor/assets/tc-field-sidebar-demo.html",
+    "destination": "docs/specs/221-scientific-field-sidebar/legacy/issue94-tc-field-sidebar-demo.html",
+    "redirected": true,
+    "tabChecks": 0,
+    "pageErrors": [],
+    "networkRequests": []
+  },
+  {
+    "source": "docs/specs/109-field-evidence-and-ai-suggestions/assets/field-review-history-demo.html",
+    "destination": "docs/specs/221-scientific-field-sidebar/legacy/issue109-field-review-history-demo.html",
+    "redirected": true,
+    "tabChecks": 0,
+    "pageErrors": [],
+    "networkRequests": []
+  },
+  {
+    "source": "docs/specs/109-field-evidence-and-ai-suggestions/assets/field-review-history-demo-v1.html",
+    "destination": "docs/specs/221-scientific-field-sidebar/legacy/issue109-field-review-history-demo-v1.html",
+    "redirected": true,
+    "tabChecks": 0,
+    "pageErrors": [],
+    "networkRequests": []
+  }
+]

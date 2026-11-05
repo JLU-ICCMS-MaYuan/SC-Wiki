@@ -15,7 +15,8 @@
 
 ## 新增来源可核验约束（待实施）
 
-对于系统原文与核对结论，现有 `records[].status/reason/evidences/source_kind/provenance/check_mode` 加上 `ai_reason/auto_filled` 足以表达 AI 判断、论文原文及派生来源，无须增加系统来源表。人工修改文件的独立记录见下节。侧栏不显示 `proposal.values` 或 `editable_fields`，主表单是唯一的当前值编辑入口。
+对于系统原文与核对结论，现有 `records[].status/reason/evidences/source_kind/provenance/check_mode` 加上 `ai_reason/auto_filled` 足以表达 AI 判断、论文原文及派生来源，无须增加系统来源表。人工修改文件的独立记录见下节。主表单是唯一的当前值编辑入口。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+
 
 - `paper_quote`：当前值为 `supported` 时，至少一条引句必须与当前文件、字段、材料及条件对应并可定位；文件名、引句及 PDF 页码或 TXT/MD 段落定位随结果及转接保留。
 - `synthesis`：值可以是对原文的忠实概括，不要求生成文字逐字出现在原文；关键论断仍需相关且可定位的原文片段。没有片段的 AI 理由只能作为待补证线索。
@@ -78,4 +79,4 @@ audit_events 含 id、item_key、field、label、actor、occurred_at、kind、su
 
 ## US13 前端展示职责
 
-不新增数据实体。校验消息和来源记录继续由各自原始数据持有；前端新增reviewFields仅表示当前稳定身份映射后的路径，用于材料／模块计数。reason不再进入表单校验错误，侧栏按原记录完整展示。
+不新增数据实体。校验消息和来源记录继续由各自原始数据持有；前端新增reviewFields仅表示当前稳定身份映射后的路径，用于材料／模块计数。科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。

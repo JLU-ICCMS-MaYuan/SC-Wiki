@@ -5609,5 +5609,11 @@
       "archive_char_start": 148135,
       "archive_char_length": 152
     }
-  ]
+  ],
+  "archive_path": "../221-scientific-field-sidebar/legacy/issue220-migrated-records.txt",
+  "archive_sha256": "4e38ce2007e080cb24e9067bc305fde88c0b024b6ac3a833c6aa79b0deb1efb7",
+  "archive_relocated_by": 221,
+  "historical_record_commit": "33cd0cbf6daa4a6cd3fb88a5e3583b3447fa14b4",
+  "later_design_migration_issue": 221,
+  "historical_note": "原验收记录描述当时的迁移；当前侧栏设计和后来文档变化以#221为准，旧索引不作为现行设计。"
 }

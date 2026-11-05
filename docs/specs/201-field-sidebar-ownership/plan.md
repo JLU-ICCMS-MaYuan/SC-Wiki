@@ -1,28 +1,19 @@
 # 实施计划
 
-Issue：[#201](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/201)；[规格](spec.md)。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 技术上下文与所有权
 
-React/TypeScript、MUI、Vitest与现有字段工作流；不新增存储或公共接口。所属归组只用于前端，科学状态与内容版本仍由原后端持有。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 实现
 
-1. frontend/src/lib/evidenceOwnership.ts统一设置父字段地址与稳定所属键，包含状态、模块、记录或共同组及扩展field_key。不按仅相同标签合并。
-2. 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
-3. EvidenceWorkflow在原侧栏增加轻量子项选择，按所属关系分组，来源和操作仍只读取activeRecord；切换时保护未应用设置，不发写入或模型请求。
-4. CalculationConditionFields对有method_scope的超导记录，将计算条件标题作为关系入口，保留现有电子结果关系选择控件；无数据不创造待核对项。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 需求映射与质量门
 
-FR-001/002→定位与稳定键→T002/T003→控件、重排与四宿主测试。
-FR-003/005→侧栏选择→T004→来源隔离、任务单字段与零写请求。
-FR-004→计算条件标题入口→T003→关系可达测试。
-FR-006→继承原事件与缓存→T005→完整宿主、form-contract与mutation。
-
-AGENTS/#174要求：先失败用例、四宿主、只改本任务、无输入模型；以生产组件交互验证，不能只测字符串。
-文档门：原话、图片、范围、依赖和任务已对照；远程Spec暂未发布，链接门保持未完成，不自行推送。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 依赖顺序
 
-先失败测试，再共用归属与定位，随后侧栏切换、宿主验证、文档回写及提交。共享文件串行修改。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。

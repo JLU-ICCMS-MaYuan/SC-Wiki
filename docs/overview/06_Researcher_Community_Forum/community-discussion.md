@@ -38,4 +38,5 @@ Go负责公开读取和首答治理，Python负责提问、队列、追加及追
 
 ## 详情导航
 
-AI问题、答案全文、其他回答、论文引用及作者主页以新标签打开；返回问题等返回动作维持原设计。侧栏通知入口新开，通知列表的“打开”仍在当前页进入目标。参见[#178验收记录](../../specs/178-search-results-navigation/validation.md)。
+AI问题、答案全文、其他回答、论文引用及作者主页以新标签打开；返回问题等返回动作维持原设计。科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../specs/221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+参见[#178验收记录](../../specs/178-search-results-navigation/validation.md)。

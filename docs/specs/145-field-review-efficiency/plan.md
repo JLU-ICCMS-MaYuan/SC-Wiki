@@ -6,7 +6,8 @@ Issue：[#145](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/145)。日期�
 
 本轮只完成只读盘点、计数、逐字段图和需求建档。后续技术方案须服从用户逐字段审查，不把下面的候选触点当作已确认实现架构。
 
-当前技术栈：Python/FastAPI/SQLAlchemy/MySQL/Redis，React/TypeScript。核对路径为EvidenceWorkflow、UploadTaskEditor、backend/api/evidence.py、evidence_proposals、scientific_evidence、condition_rules及manual_evidence。沿用权限、版本绑定与最终批准，科学值不因性能优化而自动改写。
+当前技术栈：Python/FastAPI/SQLAlchemy/MySQL/Redis，React/TypeScript。科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+沿用权限、版本绑定与最终批准，科学值不因性能优化而自动改写。
 
 ## 顺序
 

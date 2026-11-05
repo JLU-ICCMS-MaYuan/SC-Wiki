@@ -36,7 +36,7 @@ React 19、TypeScript 5.6、MUI 7 的现有上传表单增加一个 `ReviewPaper
 | --- | --- | --- | --- |
 | FR-001、002、007 / SC-001 | 控件直接读取 draft.paper，空值显示空文本，不填充默认标题 | T002、T003 | 有值、空值、缺失及窄屏 |
 | FR-003、006 / SC-002、004 | 复用 setPaperField、createFieldDraftSaver、保存错误与 revision.conflict | T002–T004 | PATCH 精确字段、重载、失败、只读与冲突 |
-| FR-004、005 / SC-003 | data-issue-field 精确绑定，复用 ReviewPaperTextField 与 EvidenceWorkflow | T002–T004 | 真组件定位、侧栏当前值与编辑失效 |
+| FR-004、005 / SC-003 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | T002–T004 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 |
 
 ## 阶段、依赖与复杂度
 

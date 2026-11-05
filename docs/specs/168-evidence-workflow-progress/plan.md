@@ -18,7 +18,7 @@ React 19/TypeScript 5.6/MUI 7，Python FastAPI、Redis/RQ及现有数据库。py
 - backend/ingest/evidence_progress.py：独立准备状态、取消与请求绑定。
 - backend/api/evidence.py：在summary/jobs/submit-check插入完成事件和进度读/取消路由。
 - frontend/src/lib/evidenceProgress.ts：准备请求轮询、流程百分比。
-- frontend/src/components/EvidenceWorkflow.tsx：绑定运行身份、渲染和终态。
+- 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - frontend/src/i18n/{zh,en}/evidence.ts：当前阶段与完成说明。
 - tests/01_decentralized_uploading/：行为和HTTP/浏览器验证。
 ## 设计

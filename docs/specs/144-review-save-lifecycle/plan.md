@@ -12,7 +12,8 @@ Issue：[144](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/144)。日期�
 
 ## 技术上下文与文件
 
-Python/FastAPI/SQLAlchemy/MySQL/Redis，前端React/TypeScript/Vite。验证工具为现有pytest、Vitest和Playwright浏览器脚本。优先修改backend/ingest/evidence_proposals.py、condition_rules.py、scientific_evidence.py及新增condition_lifecycle.py；若必要触及property_evidence.py仅提交本次增量。前端布局零改动；已单独获准修改evidenceFields.ts与EvidenceWorkflow.tsx中的共用字段定位及失效逻辑；其他任务已改文件先保留基线。
+Python/FastAPI/SQLAlchemy/MySQL/Redis，前端React/TypeScript/Vite。验证工具为现有pytest、Vitest和Playwright浏览器脚本。优先修改backend/ingest/evidence_proposals.py、condition_rules.py、scientific_evidence.py及新增condition_lifecycle.py；若必要触及property_evidence.py仅提交本次增量。前端布局零改动；其他任务已改文件先保留基线。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+
 
 ## 需求映射与质量门
 

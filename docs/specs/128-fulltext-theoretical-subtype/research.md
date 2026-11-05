@@ -18,7 +18,7 @@
 
 **备选方案**：沿用 `paper_quote` 和通用“无需推断”文案；会把分类冒充原文直接陈述，故未采用。
 
-**证据**：`backend/ingest/property_evidence.py` 校验贡献段落，`frontend/src/components/EvidenceWorkflow.tsx` 显示专用提示；相关组件与浏览器夹具覆盖来源文案。
+相关组件与浏览器夹具覆盖来源文案。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## R3：只使单字段旧核对过期
 

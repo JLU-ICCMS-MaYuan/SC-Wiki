@@ -5,7 +5,7 @@
 - `POST /preflight`：返回全部可浏览核对项，包括 `required=false` 的空字段。`needs_check` 仅针对需核对的当前断言。只读，不调用模型。
 - `POST /jobs`：增加 `purpose`，默认既有 `check`；`review_all` 仅用于管理员论文审核，清空本次跳过缓存并把已有判断、建议和证据送入复核。保留指定重试、进度、取消与版本验证。
 - 上传解析内部生成使用 `generate` 目的，不增加用户点击；有效推断或推测直接补入主表单，重建版本后页面读取同一核对结果契约。
-- `proposal`：内部候选沿用 `values/evidences/supported/basis_kind/explanation` 校验；所有声称的引句都由服务端复核，推断与推测不得声称直接支持。补入后当前结果保存 `adopted_basis/ai_reason/auto_filled/auto_filled_content_hash/auto_filled_source_hash`，不把候选值作为侧栏第二套表单展示。
+- 推断与推测不得声称直接支持。补入后当前结果保存 `adopted_basis/ai_reason/auto_filled/auto_filled_content_hash/auto_filled_source_hash`， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - `POST /proposals`、`prepare`、`finalize`：保留历史明确采用及管理员人工确认的版本契约；新上传的有效推断/推测在解析完成时已写入主表单，无须再次采用。管理员处理未获直接支持的值仍需理由。
 - 上传提交：服务端仅允许与当前内容和来源摘要匹配的自动填写推断/推测进入待审，不授予 `human_confirmed`。
 - `POST /prepare-review`：通用推测必须由服务端已保存、匹配当前版本的管理员逐项决定放行。Go 二次校验并持久化全部字段来源/建议；可选空项不作为有效断言批准。
@@ -14,7 +14,7 @@
 ## 当前值支持依据契约补充（代码实施中，待完整验收）
 
 - `POST /preflight` 和任务结果对同一字段分别返回当前值的 `status/reason`、已定位 `evidences`、来源类型及可选 `ai_reason`。`supported` 不得只由模型理由支撑；原文来源至少包含真实 `file_id`、可展示文件名、逐字引句与可用位置（PDF 页码，TXT/MD 章节或段落），派生来源须包含可复核输入和规则。
-- 侧栏读取现有结果，不因打开字段调用模型。首屏直接显示状态、支持理由及第一条可核验依据；更多上下文和 PDF 区域仍可展开。“AI 理由”不呈现主表单值副本。
+- 不因打开字段调用模型。“AI 理由”不呈现主表单值副本。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - 引句定位失败、来源区域图片不可用和规则版本过期分别表达；图片失败不抹掉已保存引句，旧结果不得冒充当前 `supported`。未核对、缺证和无替换建议是三种不同状态。
 - `POST /jobs` 的重查继续使用当前论文及附件、版本和权限约束；上传转论文与正式批准后仍可按稳定字段身份重读同一来源，不改写文件归属或人工决定。
 
@@ -49,7 +49,8 @@
 
 `POST /preflight`、`POST /jobs` 的结果及正式来源读取沿用现有字段身份与版本，不新增 API：模型归纳记录返回 `check_mode=synthesis`、实际 `source_kind`、`reason`、可定位 `evidences` 和当前版本的 `ai_reason`。`ai_reason` 为简短的“本文依据 → 当前判断 → 局限”，不重复表单值或原文整段。`supported` 仍需要可定位本文依据；缺少具体理由时降为需重核，不能只在前端替换显示文案。
 
-旧结果仅在内容与来源哈希仍匹配时可把具体 `reason` 用作当前 AI 理由；版本失效后只能列入历史。原文摘录、作者原列关键词、程序派生与人工改写按各自来源显示，不将核对理由误标为原文或人工决定。上传、返修及管理员/超级管理员共用此响应与侧栏规则。
+旧结果仅在内容与来源哈希仍匹配时可把具体 `reason` 用作当前 AI 理由；版本失效后只能列入历史。原文摘录、作者原列关键词、程序派生与人工改写按各自来源显示，不将核对理由误标为原文或人工决定。科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+
 
 
 ## US11 字段影响隔离补充（已实现，验证边界见 field-isolation-validation.md）
@@ -71,4 +72,5 @@
 
 ## US13 展示约束
 
-API、JSON与数据库不变。reason/status/stale仍按原契约返回；前端表单只消费输入校验消息，来源记录仅投影当前reviewFields供计数，不将reason伪装成schema_validation_failed。完整理由在当前字段侧栏正常文本展示，不能因隐藏重复正文清空状态、来源或人工资格。对应FR-053～057见[设计](../source-review-presentation.md)。
+API、JSON与数据库不变。reason/status/stale仍按原契约返回；前端表单只消费输入校验消息，来源记录仅投影当前reviewFields供计数，不将reason伪装成schema_validation_failed。不能因隐藏重复正文清空状态、来源或人工资格。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+对应FR-053～057见[设计](../source-review-presentation.md)。

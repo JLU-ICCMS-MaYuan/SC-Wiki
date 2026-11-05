@@ -6,7 +6,7 @@
 - [x] T002 在tests/01_decentralized_uploading/test_evidence_progress.py验证状态隔离、取消墓碑与阶段，然后实现backend/ingest/evidence_progress.py。
 ## 阶段3：US1（P1）
 - [x] T003 [US1] 在backend/api/evidence.py接入真实检查点与取消，并完成正式HTTP测试。
-- [x] T004 [US1] 在frontend/src/lib/evidenceProgress.ts、EvidenceWorkflow.tsx及双语evidence.ts接入确定进度，补充evidence-progress.test.tsx与相关回归。
+- [x] T004 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 ## 阶段4：收尾
 - [x] T005 运行相关测试和构建，完成隔离浏览器验证，记录validation.md及证据。
 - [x] T006 使用Overview Skill更新docs/overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md，核对差异后本地提交及更新Issue。

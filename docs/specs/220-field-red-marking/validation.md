@@ -1,5 +1,7 @@
 # 本地验收记录
 
+> 本页为 2026-11-04 基线结果；2026-11-05 新增 FR-011—014／SC-006—008 尚待实施，不由下列旧结果证明。右侧栏相关设计现统一见 [#221](../221-scientific-field-sidebar/spec.md)。
+
 日期：2026-11-04；Issue [#220](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/220)。最终摘要见 [validation-summary.json](assets/validation-summary.json)。本轮只实现字段提醒及文档归属，不写用户科学稿、不调用模型，不宣称完成 Eliashberg 提取遗漏的第二项调查。
 
 ## 故障证明与修复

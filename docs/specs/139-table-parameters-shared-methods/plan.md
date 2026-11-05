@@ -58,7 +58,7 @@ docs/specs/139-table-parameters-shared-methods/
 
 拟新增：`backend/ingest/scientific_context.py`、`tests/fixtures/issue139/expected-table.json`、`tests/01_decentralized_uploading/test_issue139_scientific_context.py`、`test_issue139_table_parameters.py`、`test_issue139_workflow.py`、`test_issue139_persistence.py`、`issue139-parameters.test.tsx`。测试文件均位于所列测试目录，当前未创建。
 
-主要现有触点：`backend/ingest/domain_extraction.py`、`scientific_contracts.py`、`tc_parameters.py`、`upload_jobs.py`、`upload_contracts.py`、`scientific_drafts.py`、`legacy_scientific_assembly.py`、`property_evidence.py`、`evidence_proposals.py`、`property_modules.py`；前端 `frontend/src/lib/tcParameters.ts`、`frontend/src/components/TcRecordFields.tsx`、`SchemaDrivenRecordForm.tsx`、`EvidenceWorkflow.tsx`；保存和导出复用 `backend/api/material_state_export.py` 及既有提交服务，必要改动由持久化回归决定。
+保存和导出复用 `backend/api/material_state_export.py` 及既有提交服务， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 **结构选择**：上下文阅读与关联生成集中在新模块；IR 表格包装仍由领域入口调用；模型输出、兼容转换、证据建议和业务存储的职责不交叉复制。只修现有表单绑定与理由呈现，不建立并行页面。
 

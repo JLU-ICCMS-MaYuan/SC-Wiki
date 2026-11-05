@@ -79,7 +79,7 @@ docs/overview/01_.../pdf-ingestion.md       [修改] 回写行为与变更记录
 1. 在 `PaperEditView.tsx` 增加组件级 `toTextList(value: unknown): string[]`，处理
    数组 / JSON 字符串 / null / 非法 JSON / 非数组 JSON 五种输入
 2. `methodologyList` 改走 `toTextList`（原实现遇字符串直接返回空数组，静默丢数据）
-3. 新增 `keywordList`，侧栏关键词区改用它，移除 `paper.keywords_tags.map` 直接调用
+3. 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 4. `setEditAuthors` 改为 `toTextList(data.authors).join('、')`
 5. 在 `paper-detail-route.test.tsx` 新增「详情页对 JSON 文本列字段的容错」describe，
    用 JSON 字符串 fixture 覆盖三个字段

@@ -57,4 +57,5 @@ Go 原 `review_request_id` 保证审核幂等；上传由任务身份和唯一 `
 
 上传草稿和 `PUT /api/rag/papers/{id}/scientific-draft` 接受 `material_states[].material_name`（可空字符串，最多 255 字符）。材料名和 material 至少一项非空；否则 HTTP 400、code=state_material_required、field=material_states[i].material_name。非法非空公式返回 400、code=invalid_chemical_formula 并定位 material；类型/长度错误也返回明确字段。详情和导出保留独立名称与空公式，不能用旧嵌套实体或 state_key 回填公式。
 
-preflight 的名称断言和相关上下文遵循相同稳定身份与版本规则。保存后已经删除的字段不再是人工确认或重新查找目标；抽屉关闭后可分别确认仍存在的名称。搜索额外返回 material_name；formula 字段仍为真实公式，化学式无匹配不放宽查询。见 [保存验收](../material-name-save-flow.md)。
+preflight 的名称断言和相关上下文遵循相同稳定身份与版本规则。保存后已经删除的字段不再是人工确认或重新查找目标； 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+搜索额外返回 material_name；formula 字段仍为真实公式，化学式无匹配不放宽查询。见 [保存验收](../material-name-save-flow.md)。

@@ -16,11 +16,10 @@
 
 ## 阶段 3：用户故事 US2——归纳来源（P1）
 
-**目标**：服务端持有分析，侧栏展示可定位的归纳理由。
-**独立验收**：Methods-only、人工改值、来源版本与前端侧栏测试。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 - [x] T003 [US2] 在 `backend/api/rag.py`、`backend/ingest/scientific_evidence.py`、`backend/services/paper_revisions.py` 保存服务端分析并阻止客户端伪造当前支持资格。
-- [x] T004 [US2] 在 `backend/ingest/property_evidence.py`、`backend/ingest/scientific_evidence.py`、`backend/rag/scientific_sources.py`、`frontend/src/components/EvidenceWorkflow.tsx`、`frontend/src/pages/AdminPaperEditPage.tsx` 接入定位引句、综合理由和正式来源归因。
+- [x] T004 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 阶段 4：用户故事 US3——当前 H3S 草稿（P1）
 
@@ -38,7 +37,7 @@
 
 - [x] T008 根据本次文档复核，在 `docs/specs/128-fulltext-theoretical-subtype/` 补齐可执行场景、技术上下文、研究备选方案、状态契约、准确任务路径、复跑命令与需求质量检查；不逐字存档用户原话。
 - [ ] T009 [US2] [部分验收] 在隔离数据库中通过 `tests/01_decentralized_uploading/test_fulltext_theoretical_subtype_mysql.py` 或等效端到端夹具，验证上传提交、正式来源持久化重读及审核后归因；将命令、数据回滚和结果写入 `docs/specs/128-fulltext-theoretical-subtype/quickstart.md`。原 T004/T006 的函数级转接测试不能代替此项。
-- [x] T010 [US3] 在已登录的实际 H3S 校对页只读核验刷新后的当前值、侧栏理由和定位来源，并在 `docs/specs/128-fulltext-theoretical-subtype/quickstart.md` 记录角色、页面与结果；原 T006 的 API 截获浏览器夹具不能代替此项。
+- [x] T010 原 T006 的 API 截获浏览器夹具不能代替此项。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ## 依赖与执行顺序
 
@@ -49,7 +48,7 @@ T001 → T002 → T003/T004 → T005；T006/T007 在主路径完成后验收和�
 | 来源 | 任务 | 验收信号 |
 |---|---|---|
 | US1、FR-001、FR-002、FR-005、SC-001、SC-002 | T002、T006 | 三类/空值、来源组全覆盖和 H3S 真实判断 |
-| US2、FR-003、FR-004、FR-007、SC-003 | T003、T004、T006、T009 | 服务端分析、侧栏、来源转接及正式路径重读 |
+| US2、FR-003、FR-004、FR-007、SC-003 | T003、T004、T006、T009 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 |
 | US3、FR-006、SC-004 | T005、T006、T010 | 人工值保护、单字段过期及真实页面刷新 |
 
 全部用户故事场景分别由以上行和 [quickstart.md](quickstart.md) 的验证矩阵覆盖；T009/T010 是尚待取得的端到端证据，不表示已实施功能失效。

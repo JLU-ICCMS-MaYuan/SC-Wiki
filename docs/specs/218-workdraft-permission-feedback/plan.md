@@ -4,7 +4,8 @@
 
 ## 摘要
 
-workdraftAccess按ApiError.code识别；AdminPaperEditPage统一警告和禁写；WorkdraftRefresh/EvidenceWorkflow向宿主报告，非同一权限错误保留原展示。
+非同一权限错误保留原展示。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+
 本项已随53c32542实现，本轮将设计与实施依据拆分归档；不安排新的业务代码开发。
 
 ## 技术上下文
@@ -35,7 +36,7 @@ spec.md、plan.md、research.md、tasks.md、quickstart.md、validation.md、con
 - `frontend/src/lib/workdraftAccess.ts`
 - `frontend/src/pages/AdminPaperEditPage.tsx`
 - `frontend/src/components/WorkdraftRefresh.tsx`
-- `frontend/src/components/EvidenceWorkflow.tsx`
+- 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 ### 复用但本轮原实现未改动的宿主
 
@@ -53,7 +54,7 @@ spec.md、plan.md、research.md、tasks.md、quickstart.md、validation.md、con
 
 | 需求 | 设计 | 任务 | 验证 |
 | --- | --- | --- | --- |
-| FR-001 / US1 | workdraftAccess按ApiError.code识别；AdminPaperEditPage统一警告和禁写；WorkdraftRefresh/EvidenceWorkflow向宿主报告，非同一权限错误保留原展示。 | T002、T003 | SC-001、SC-002与validation.md对应案例 |
+| FR-001 / US1 | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | T002、T003 | SC-001、SC-002与validation.md对应案例 |
 | FR-002 / US1 | 沿用本项组件职责，约束见spec.md对应FR | T002、T003 | SC-001、SC-002与validation.md对应案例 |
 | FR-003 / US1 | 沿用本项组件职责，约束见spec.md对应FR | T002、T003 | SC-001、SC-002与validation.md对应案例 |
 | FR-004 / US1 | 沿用本项组件职责，约束见spec.md对应FR | T002、T003 | SC-001、SC-002与validation.md对应案例 |

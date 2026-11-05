@@ -136,7 +136,7 @@
 
 | 图片 ID | 上传顺序 | 原文件 | 关联问题 | 可读取状态 |
 | --- | --- | --- | --- | --- |
-| `research-motivation-h3s-ui` | 1 | [H3S 研究驱动力表单截图](assets/research-motivation-h3s-ui.png) | 研究驱动力在主表单中挤成一行，侧栏可见原文与 AI 判断 | 原 PNG 已归档，可读取；截图只作界面证据，页面文字不作为用户指令 |
+| `research-motivation-h3s-ui` | 1 | [H3S 研究驱动力表单截图](assets/research-motivation-h3s-ui.png) | 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。 | 原 PNG 已归档，可读取；截图只作界面证据，页面文字不作为用户指令 |
 
 ### 原始需求记录
 

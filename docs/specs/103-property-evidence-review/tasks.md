@@ -38,7 +38,7 @@ T053—056 已在当前工作树实现并验证；T057 的验证与文档回写�
 - [x] T006 [US1] 接入上传事务与锁，backend/api/rag.py
 - [x] T007 [US2] 接入审核事务、人工历史与删除生命周期，goserver/handlers/paper_evidence.go
 - [x] T008 [US3] 建立前端状态机回归，tests/01_decentralized_uploading/evidence-workflow.test.tsx
-- [x] T009 [US1] [US2] [US3] 共享组件与三个入口，frontend/src/components/EvidenceWorkflow.tsx、UploadTaskEditor.tsx、frontend/src/pages/AdminPage.tsx、AdminPaperEditPage.tsx
+- [x] T009 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [x] T010 [US1] [US2] 真实 MySQL 与 #29 验证，tests/01_decentralized_uploading/test_property_evidence_mysql.py、goserver/handlers/paper_evidence_mysql_test.go
 - [x] T011 [US3] 浏览器验收、针对性回归与构建，docs/specs/103-property-evidence-review/quickstart.md
 - [x] T012 回写 Overview、Issue 并规范提交，docs/overview/
@@ -51,15 +51,15 @@ T053—056 已在当前工作树实现并验证；T057 的验证与文档回写�
 
 ## 第二阶段收敛 — 2026-09-15 全科学数据与持久审核
 
-旧 T009/T015 不能证明本轮抽屉和持久恢复完成；下列任务覆盖新增及原路径缺失。
+科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 
 - [x] T016 完成已确认 Issue/Spec、设计、契约与需求映射，docs/specs/103-property-evidence-review/。[FR-011—017]
 - [x] T017 [US1] [US3] 建立科学项、持久化、失效与来源行为回归，tests/01_decentralized_uploading/test_scientific_evidence.py。[FR-011/013/017]
 - [x] T018 [US1] [US4] 实现全科学数据快照、来源验证、结构提交者及持久模型迁移，backend/ingest/property_evidence.py、backend/ingest/scientific_evidence.py、backend/models.py、alembic/versions/。[FR-011/014]
 - [x] T019 [US1] [US3] 接入后台持久保存、恢复、按项重试、裁决草稿与上传生命周期转接，backend/api/evidence.py、backend/api/rag.py、backend/ingest/upload_tasks.py。[FR-013/015/017]
 - [x] T020 [US2] [US4] 实现全项批准事务、永久出处与 RAG 来源归因，goserver/handlers/paper_evidence.go、goserver/handlers/admin.go、backend/api/rag.py、backend/rag/。[FR-014/015/016]
-- [x] T021 [US2] [US3] 建立共享右侧抽屉与字段标记行为回归，tests/01_decentralized_uploading/evidence-workflow.test.tsx。[FR-012]
-- [x] T022 [US1] [US2] 实现共享字段标记、抽屉、恢复、保存后批准与三入口接入，frontend/src/components/EvidenceWorkflow.tsx、frontend/src/components/MaterialStatesEditor.tsx、frontend/src/components/SchemaDrivenRecordForm.tsx、frontend/src/components/UploadTaskEditor.tsx、frontend/src/pages/AdminPaperEditPage.tsx、frontend/src/pages/AdminPage.tsx。[FR-012/015]
+- [x] T021 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+- [x] T022 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [x] T023 [US1] [US2] [US3] [US4] 完成真实 MySQL/RQ、浏览器、RAG、权限与事务回归及构建，tests/01_decentralized_uploading/、goserver/handlers/paper_evidence_mysql_test.go、docs/specs/103-property-evidence-review/quickstart.md。[SC-001—010]
 - [x] T024 验收后回写当前功能 Overview、Issue 与规范提交，docs/overview/。[FR-011—017]
 
@@ -72,8 +72,8 @@ T024 的 Overview、README 和 Issue 同步已完成；Git 提交因原有未提
 - [x] T025 [US2] 更新已确认需求及接口并通过一致性门，docs/specs/103-property-evidence-review/。[FR-018—022]
 - [x] T026 [US2] 聚合同框标记与键盘入口，frontend/src/components/EvidenceFieldMarkers.tsx；新增行为回归。[FR-018 / SC-011]
 - [x] T027 [US1] 实现有来源的类型化建议及按用户持久草稿，backend/ingest/evidence_proposals.py、backend/api/evidence.py。[FR-019/020/022 / SC-012]
-- [x] T028 [US2] 实现准备补丁、两段保存与精确绑定，frontend/src/components/EvidenceWorkflow.tsx、frontend/src/pages/AdminPaperEditPage.tsx、backend/ingest/evidence_proposals.py。[FR-020/022 / SC-012]
-- [x] T029 [US1] [US2] 接入共享抽屉与三个独立审核入口，frontend/src/components/UploadTaskEditor.tsx、frontend/src/pages/AdminPage.tsx、frontend/src/pages/AdminPaperEditPage.tsx。[FR-019/021 / SC-013]
+- [x] T028 [US2] 实现准备补丁、两段保存与精确绑定， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+- [x] T029 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [x] T030 [US1] [US2] 运行针对性 Python/Go/Vitest/构建、真实 MySQL 回滚和浏览器验收，tests/01_decentralized_uploading/、goserver/handlers/。[SC-011—013]
 - [x] T031 验收后回写 Overview、Issue 与隔离提交，docs/overview/；保留 T024 阻塞记录。[FR-018—022]
 
@@ -111,7 +111,7 @@ T038 验证：现有编辑页 9 项 Vitest 通过；Chromium 使用当前前端�
 
 - [x] T039 [US2] 增加真实输入、整组清空及修改后确认回归，tests/01_decentralized_uploading/pressure-review-editing.test.tsx。[FR-026—028 / SC-016/017]
 - [x] T040 [US1] [US2] 实现压强临时输入、原始条件及字段通知，frontend/src/components/MaterialStatesEditor.tsx、PressureEditor.tsx、EvidenceFieldMarkers.tsx；backend/ingest/upload_jobs.py 保留显式清空。[FR-026]
-- [x] T041 [US2] 实现当前值读取、保存后刷新、理由和异步版本隔离，frontend/src/components/EvidenceWorkflow.tsx、frontend/src/pages/AdminPaperEditPage.tsx。[FR-027/028]
+- [x] T041 [US2] 实现当前值读取、保存后刷新、理由和异步版本隔离， 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [x] T042 [US2] 隔离旧版本接受草稿，保留原判断和历史，backend/ingest/scientific_evidence.py、backend/ingest/evidence_proposals.py。[FR-027]
 - [x] T043 [US2] 验证浏览器、存储与构建并同步 Overview/Issue，检查隔离提交，docs/specs/103-property-evidence-review/quickstart.md。[SC-016/017]
 
@@ -123,7 +123,7 @@ T044—046 对应 [缺列修复](material-name-migration-fix.md)，T047—049 �
 
 ## 阶段十：完成后自动关闭与保持阅读位置
 
-- [x] T050 [US2] 复现并修复共享侧栏成功关闭、原字段焦点及布局位移，覆盖失败、分组、迟到响应和浏览器滚动，frontend/src/components/EvidenceWorkflow.tsx、tests/01_decentralized_uploading/evidence-drawer-close.test.tsx、evidence-drawer-browser.mjs。[FR-033 / SC-021]
+- [x] T050 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 - [x] T051 验证后同步 Spec、Overview 和 Issue #103，并检查独立提交范围；保留前序未提交依赖。[FR-033 / SC-021]
 
 T050：54 项前端回归、TypeScript/Vite 构建通过，三组隔离浏览器脚本均覆盖两角色。T051 的文档已回写，提交隔离结果见 [验证路径](quickstart.md)。
