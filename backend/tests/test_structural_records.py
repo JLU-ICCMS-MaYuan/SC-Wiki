@@ -493,18 +493,63 @@ def test_independent_only_is_applied_before_count_and_pagination(client):
     assert client.post(path, json={}).json()["total"] == 1
     result = client.post(path, json={"independent_only": True, "limit": 1}).json()
     assert result == {"items": [], "total": 0}
-    assert client.post(path, json={"review_status": "pending"}).json()["total"] == 0
+    assert client.post(path, json={"review_status": "pending"}).json()["total"] == 1
 
 
 def test_independent_structure_family_filter_uses_current_paper_family(client):
     client, session, paper, app = client
     models.MaterialFamily.__table__.create(session.get_bind(), checkfirst=True)
     models.PaperMaterialFamily.__table__.create(session.get_bind(), checkfirst=True)
-    family = models.MaterialFamily(code="hydride", name_zh="氢化物", name_en="Hydride", normalized_name="hydride")
+    family = models.MaterialFamily(code="hydrogen_based", name_zh="氢基超导体", name_en="Hydrogen-based superconductor", normalized_name="氢基超导体")
+    models.MaterialFamilyAlias.__table__.create(session.get_bind(), checkfirst=True)
     session.add(family)
     session.flush()
+    session.add(models.MaterialFamilyAlias(material_family_id=family.id, alias="hydride", normalized_alias="hydride", language="en"))
     session.add(models.PaperMaterialFamily(paper_id=paper.id, paper_revision=paper.content_revision, material_family_id=family.id))
     session.commit()
     path = "/api/rag/structural-records/search"
     assert client.post(path, json={"superconductor_type": "hydride"}).json()["total"] == 1
     assert client.post(path, json={"superconductor_type": "cuprate"}).json()["total"] == 0
+    assert client.post(path, json={"material_family_id": family.id}).json()["total"] == 1
+    assert client.post(path, json={"material_family_id": family.id + 1}).json()["total"] == 0
+
+@pytest.mark.parametrize("role,approved", [(None,False),("user",True),("admin",True),("superadmin",True),("admin",False)])
+@pytest.mark.parametrize("status", ["pending","approved","rejected"])
+def test_search_role_scope_uses_authenticated_user(client, role, approved, status):
+    client, session, paper, app = client
+    app.dependency_overrides[get_current_user_optional] = lambda: None if role is None else SimpleNamespace(id=9,role=role,is_approved=approved)
+    paper.review_status=status
+    paper.approved_revision=1 if status=="approved" else None
+    session.commit()
+    privileged=role in {"admin","superadmin"} and approved
+    path="/api/rag/structural-records/search"
+    for selected in ["", "pending", "approved", "rejected"]:
+        response=client.post(path,json={"review_status":selected,"independent_only":True})
+        assert response.status_code==200, response.text
+        expected=int((not selected or selected==status) if privileged else status=="approved")
+        assert response.json()["total"]==expected
+    paper.content_revision=2
+    paper.approved_revision=2 if status=="approved" else None
+    session.commit()
+    assert client.post(path,json={}).json()["total"]==0
+
+
+@pytest.mark.parametrize("role,approved", [("user",True),("admin",True),("superadmin",True),("admin",False)])
+def test_search_bearer_identity_and_revoked_session(client, role, approved):
+    from backend.security import create_access_token
+    client, session, paper, app = client
+    app.dependency_overrides.pop(get_current_user_optional)
+    user=models.User(email="search@example.test",username="search_viewer",real_name="Search viewer",password_hash="unused",role=role,is_approved=approved,account_status="active")
+    session.add(user)
+    paper.review_status="pending"
+    paper.approved_revision=None
+    session.commit()
+    token=create_access_token({"sub":user.email,"sv":user.session_version})
+    headers={"Authorization":"Bearer "+token}
+    path="/api/rag/structural-records/search"
+    result=client.post(path,json={"review_status":"pending"},headers=headers)
+    assert result.status_code==200
+    assert result.json()["total"]==int(role in {"admin","superadmin"} and approved)
+    user.session_version+=1
+    session.commit()
+    assert client.post(path,json={"review_status":"pending"},headers=headers).json()["total"]==0

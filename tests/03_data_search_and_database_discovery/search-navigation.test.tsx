@@ -15,3 +15,13 @@ describe('检索地址与合法来源恢复',()=>{
   expect(next.get('view')).toBe('states');expect(next.get('elements')).toBe('Hg');expect(next.has('state_page')).toBe(false);expect(searchRequest(next)).not.toHaveProperty('keyword')
  })
 })
+
+it('catalog identity round trips while old aliases remain bounded legacy requests',()=>{
+ const p=new URLSearchParams('elements=H&superconductor_type=hydride&review_status=Pending')
+ expect(searchRequest(p)).toMatchObject({superconductor_type:'hydride'})
+ expect(searchRequest(p)).not.toHaveProperty('review_status')
+ expect(searchRequest(p,true)).toMatchObject({review_status:'pending'})
+ const next=updateFilters(p,{...searchFilters(p),type:'9'})
+ expect(next.get('material_family_id')).toBe('9');expect(next.has('superconductor_type')).toBe(false)
+ expect(searchRequest(next)).toHaveProperty('material_family_id',9)
+})

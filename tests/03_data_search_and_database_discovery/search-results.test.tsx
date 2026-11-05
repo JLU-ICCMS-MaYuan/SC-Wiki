@@ -3,9 +3,10 @@ import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
+vi.mock('../../frontend/src/context/AuthContext', () => ({useAuth:()=>({user:null,loading:false})}))
 import SearchPage from '../../frontend/src/pages/SearchPage'
 import { api } from '../../frontend/src/lib/api'
-vi.mock('../../frontend/src/lib/api', () => ({ api: { get: vi.fn(), post: vi.fn() } }))
+vi.mock('../../frontend/src/lib/api', () => ({ api: { get: vi.fn().mockResolvedValue({material_families:[]}), post: vi.fn() } }))
 afterEach(() => { cleanup(); vi.clearAllMocks() })
 it('defaults to papers and switches to stable states in the same result page', async () => {
   vi.mocked(api.post).mockImplementation(async (url, body: any) => url.includes('structural-records') ? {items:[],total:0} : ({

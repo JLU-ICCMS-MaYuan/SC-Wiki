@@ -69,14 +69,15 @@ class Search(BaseModel):
     year_min: int | None = None
     year_max: int | None = None
     independent_only: bool = False
+    material_family_id: int | None = Field(default=None, ge=1)
     superconductor_type: str = ""
-    review_status: str = ""
+    review_status: Literal["", "approved", "pending", "rejected"] = ""
     limit: int = Field(default=20, ge=1, le=100)
     offset: int = Field(default=0, ge=0)
 
 
 @router.post("/search")
-def search_records(body: Search, db: Session = Depends(get_db)):
+def search_records(body: Search, db: Session = Depends(get_db), user=Depends(get_current_user_optional)):
     from pymatgen.core import Composition, Element
 
     ready(db)
@@ -97,20 +98,37 @@ def search_records(body: Search, db: Session = Depends(get_db)):
             Record.retention == "retained",
             Record.kind == "model",
             Record.paper_revision == models.Paper.content_revision,
+        )
+    )
+    if admin(user):
+        query = query.where(models.Paper.review_status.in_(["approved", "pending", "rejected"]))
+        if body.review_status:
+            query = query.where(models.Paper.review_status == body.review_status)
+    else:
+        query = query.where(
             models.Paper.review_status == "approved",
             models.Paper.approved_revision == models.Paper.content_revision,
         )
-    )
-    if body.review_status and body.review_status.lower() != "approved":
-        query = query.where(Record.paper_id < 0)
-    if body.superconductor_type:
+    if body.material_family_id is not None or body.superconductor_type:
         family = select(models.PaperMaterialFamily.paper_id).join(
             models.MaterialFamily, models.MaterialFamily.id == models.PaperMaterialFamily.material_family_id
         ).where(
             models.PaperMaterialFamily.paper_id == models.Paper.id,
             models.PaperMaterialFamily.paper_revision == models.Paper.content_revision,
-            models.MaterialFamily.code == body.superconductor_type,
         )
+        if body.material_family_id is not None:
+            family = family.where(models.MaterialFamily.id == body.material_family_id)
+        else:
+            from backend.services.classification_catalog import normalize_classification_name
+            normalized = normalize_classification_name(body.superconductor_type)
+            aliases = select(models.MaterialFamilyAlias.material_family_id).where(
+                models.MaterialFamilyAlias.normalized_alias == normalized
+            )
+            family = family.where(or_(
+                models.MaterialFamily.code == body.superconductor_type,
+                models.MaterialFamily.normalized_name == normalized,
+                models.MaterialFamily.id.in_(aliases),
+            ))
         query = query.where(family.exists())
     if body.independent_only:
         query = query.where(or_(Record.state_key.is_(None), Record.state_key == ""))

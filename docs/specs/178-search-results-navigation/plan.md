@@ -63,3 +63,11 @@ spec.md、plan.md、research.md、data-model.md、quickstart.md、tasks.md、con
 ## 复杂度说明
 
 需要服务端集合是因为一页Tc记录不能保证去重数量或无Tc覆盖；需要显式return是因为新标签没有可靠的历史来路。除此之外复用现有状态、模型和权限，不新增业务表、模型调用或跨标签通信。
+
+## 2026-11-05：三项筛选实施增量
+
+- FR-021／SC-010 → SearchPage 读取既有分类目录并提交 material_family_id；Go 与 Python 按当前 paper_material_families 关联过滤。旧 superconductor_type 先精确匹配目录编码／别名，未知值返回空集。
+- FR-022～023／SC-011 → Go 复用经 OptionalAuth 校验的 current_user 及 paperAdmin，Python 复用 get_current_user_optional／admin；只对已批准管理角色解除 approved-only 条件，仍绑定当前 revision 与 retained model。普通用户传入其他状态不扩大权限。无状态参数的管理员使用全部三个正式状态。
+- FR-024／SC-012 → 只改名称、增加相邻说明与 aria-pressed，保持现有 EXISTS 代表 Tc 语义和独立结构排除 Tc 参数行为。
+- FR-025 → 目录失败重试；请求组件以身份为 key 重挂载，切换用户后不显示或采纳旧结果。全路径共享数据库目录与鉴权事实，不新增权限配置或数据库迁移。
+- T022～T027 串行：文档 → 先失败回归 → 服务与界面 → 回归／浏览器 → Overview → 本次范围提交。未推送远程 Spec 的检查继续保留，不阻止用户已明确授权的本地实现。

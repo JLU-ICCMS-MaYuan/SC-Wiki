@@ -1,0 +1,9 @@
+--- FAIL: TestSearchResultsUnits (0.01s)
+    search_results_test.go:127: map[items:[] limit:20 offset:0 papers_total:0 states_total:0 total:0 view:states]
+--- FAIL: TestSearchFilterCatalogIdentity (0.00s)
+    search_results_test.go:167: "superconductor_type":"hydride": map[items:[] limit:20 offset:0 papers_total:0 states_total:0 total:0 view:papers]
+--- FAIL: TestSearchFilterRoleScope (0.00s)
+    search_results_test.go:224: anonymous/pending: 200 {"items":[],"limit":20,"offset":0,"papers_total":0,"states_total":0,"total":0,"view":"states"}
+FAIL
+FAIL	scwiki/server/handlers	0.972s
+FAIL

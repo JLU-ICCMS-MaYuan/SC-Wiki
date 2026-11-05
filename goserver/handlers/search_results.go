@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"scwiki/server/database"
+	"scwiki/server/models"
 )
 
 type searchResultsRequest struct {
@@ -26,6 +27,7 @@ type searchResultsRequest struct {
 	TcMin              *float64 `json:"tc_min"`
 	TcMax              *float64 `json:"tc_max"`
 	ChartOnly          bool     `json:"chart_only"`
+	MaterialFamilyID   *uint    `json:"material_family_id"`
 	SuperconductorType string   `json:"superconductor_type"`
 	ReviewStatus       string   `json:"review_status"`
 }
@@ -55,7 +57,7 @@ type resultModel struct {
 }
 
 // 结果主体是材料状态；物性只用EXISTS约束，避免多条Tc复制状态。
-func resultCandidates(db *gorm.DB, b searchResultsRequest, keys []string, structural bool) *gorm.DB {
+func resultCandidates(db *gorm.DB, b searchResultsRequest, keys []string, structural, privileged bool) *gorm.DB {
 	key, pressure, material := "cs.system_key", "ms.pressure_value_gpa", "COALESCE(ms.material_name, sc.chemical_formula)"
 	var q *gorm.DB
 	if structural {
@@ -64,12 +66,16 @@ func resultCandidates(db *gorm.DB, b searchResultsRequest, keys []string, struct
 	} else {
 		q = db.Table("material_states AS ms").Joins("JOIN papers AS p ON p.id=ms.paper_id AND p.content_revision=ms.paper_revision").Joins("LEFT JOIN superconductors AS sc ON sc.id=ms.superconductor_id").Joins("LEFT JOIN chemical_systems AS cs ON cs.id=sc.chemical_system_id")
 	}
-	q = q.Where("p.review_status='approved' AND p.approved_revision=p.content_revision")
+	if privileged {
+		q = q.Where("p.review_status IN ?", []string{"approved", "pending", "rejected"})
+		if b.ReviewStatus != "" {
+			q = q.Where("p.review_status=?", b.ReviewStatus)
+		}
+	} else {
+		q = q.Where("p.review_status='approved' AND p.approved_revision=p.content_revision")
+	}
 	if len(b.Elements) > 0 || b.Formula != "" {
 		q = q.Where(key+" IN ?", keys)
-	}
-	if b.ReviewStatus != "" && b.ReviewStatus != "approved" {
-		q = q.Where("1=0")
 	}
 	if b.Keyword != "" {
 		like := "%" + b.Keyword + "%"
@@ -87,8 +93,15 @@ func resultCandidates(db *gorm.DB, b searchResultsRequest, keys []string, struct
 	if b.YearMax != nil {
 		q = q.Where("p.year<=?", *b.YearMax)
 	}
-	if b.SuperconductorType != "" {
-		q = q.Where("EXISTS (SELECT 1 FROM paper_material_families pmf JOIN material_families mf ON mf.id=pmf.material_family_id WHERE pmf.paper_id=p.id AND pmf.paper_revision=p.content_revision AND mf.code=?)", b.SuperconductorType)
+	if b.MaterialFamilyID != nil || b.SuperconductorType != "" {
+		family := db.Table("paper_material_families AS pmf").Select("1").Joins("JOIN material_families AS mf ON mf.id=pmf.material_family_id").Where("pmf.paper_id=p.id AND pmf.paper_revision=p.content_revision")
+		if b.MaterialFamilyID != nil {
+			family = family.Where("mf.id=?", *b.MaterialFamilyID)
+		} else {
+			normalized := normalizeClassificationName(b.SuperconductorType)
+			family = family.Where("mf.code=? OR mf.normalized_name=? OR EXISTS (SELECT 1 FROM material_family_aliases mfa WHERE mfa.material_family_id=mf.id AND mfa.normalized_alias=?)", b.SuperconductorType, normalized, normalized)
+		}
+		q = q.Where("EXISTS (?)", family)
 	}
 	if !structural && (b.TcMin != nil || b.TcMax != nil || b.ChartOnly) {
 		tc := db.Table("property_records AS pr").Select("1").Where("pr.material_state_id=ms.id AND pr.paper_id=ms.paper_id AND pr.paper_revision=ms.paper_revision AND pr.property_code='tc'")
@@ -142,6 +155,13 @@ func SearchResults(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "检索参数无效"})
 		return
 	}
+	if (b.MaterialFamilyID != nil && *b.MaterialFamilyID == 0) || (b.ReviewStatus != "" && b.ReviewStatus != "approved" && b.ReviewStatus != "pending" && b.ReviewStatus != "rejected") {
+		c.JSON(400, gin.H{"error": "检索筛选无效"})
+		return
+	}
+	value, _ := c.Get("current_user")
+	user, _ := value.(*models.User)
+	privileged := paperAdmin(user)
 	if b.View != "states" {
 		b.View = "papers"
 	}
@@ -176,8 +196,8 @@ func SearchResults(c *gin.Context) {
 		searchResultError(c, err)
 		return
 	}
-	states := func() *gorm.DB { return resultCandidates(db, b, keys, false) }
-	records := func() *gorm.DB { return resultCandidates(db, b, keys, true) }
+	states := func() *gorm.DB { return resultCandidates(db, b, keys, false, privileged) }
+	records := func() *gorm.DB { return resultCandidates(db, b, keys, true, privileged) }
 	var stateTotal, paperTotal int64
 	if err = states().Count(&stateTotal).Error; err != nil {
 		searchResultError(c, err)

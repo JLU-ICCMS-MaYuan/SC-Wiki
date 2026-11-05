@@ -71,3 +71,34 @@
 截图是隔离夹具的实现验收图，与原六张用户截图分开。源码字节及基线见[source-manifest.json](assets/source-manifest.json)，各项计数见[implementation-checks.json](assets/implementation-checks.json)。已同步Overview、根README、表单清单和旧Spec约束，并在[#15评论](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/15#issuecomment-6498567247)记录旧表格范围被#178取代；未关闭#15。
 
 除隔离验证外，额外只读核对当前本地原生实时环境，现有Go watcher已经自动加载新端点；La-Sc-H精确查询实际返回1论文／8状态，三元独立模型为0（已关联模型不重复），二元La-Sc独立模型为1。记录见[live-local-smoke.json](assets/live-local-smoke.json)。没有手动发布或重启业务Go进程，没有业务写入；未推送、未操作阿里云。远程Spec实际链接未核验，Issue保持OPEN。临时预览进程已停止，测试数据库和转码／安装产物按本次范围清理，业务数据及原始草稿保持。
+
+
+## 2026-11-05：三个筛选目标的实现与验收
+
+本次增量使用既有开放 Issue #178（唯一 type:feature），保留原始需求及调查图 IMG-178-07。用户逐项认可后要求直接实现；新增 FR-021～025、SC-010～012 和 T022～T027。原“所有身份均 approved-only”的搜索设计按本轮用户要求调整，仅向已批准管理员和超级管理员开放其他状态。
+
+### 已实现行为
+
+- 搜索分类从统一材料家族目录读取规范双语名称，新请求按目录 ID 匹配当前论文关联；旧 hydride 地址按目录别名精确兼容，未知项不会变成全部。自建家族有实际命中／分页回归；目录失败可重试。
+- 普通用户与访客不显示审核状态；Go 与 Python 均按服务端实际鉴权及审批状态过滤。两类管理员可以选择全部、待审、批准、拒绝，论文／状态／结构来源使用一致当前版本范围；普通身份修改参数不能扩大范围。
+- 原 chart_only 保留，显示“仅看有代表 Tc 的材料状态”及独立结构例外；中英文和 aria-pressed／说明关联均已验证。切换身份立即销毁旧结果生命周期，迟到的管理员响应不能覆盖普通身份结果。
+
+### 验证结果与边界
+
+| 检查 | 实际结果与证据 |
+| --- | --- |
+| 先失败 | 独立基线上的标准目录／权限 Go 用例失败，前端新用例 10 项失败，Python 家族与角色用例失败；见 [Go](assets/filters-go-before.log)、[前端](assets/filters-ui-before.log)、[Python](assets/filters-python-before.log) |
+| Go 查询与真实鉴权 | SQLite 下结果单位、正式目录／别名、自建家族、当前版本、四身份及未批准管理角色、结构来源与分页通过；[日志](assets/filters-go.log) |
+| 隔离 MySQL | 正式 GORM 查询和 OptionalAuth／真实签名 Token 验证通过；只写本轮 scwiki_issue178_test_ 前缀数据库，未改业务数据；[日志](assets/filters-mysql.log) |
+| 前端宿主 | 6 文件 44 项通过，含目录／自建项／错误重试、中英文、普通身份丢弃 URL 状态、两类管理员双 API 参数、身份切换与迟到响应、代表 Tc 不重查结构，以及既有导航／分页／独立结构回归；[日志](assets/filters-frontend.log) |
+| Python 实际 API／SQLAlchemy | 37 项通过；身份依赖矩阵之外另用真实 Bearer Token 验证管理角色、未批准角色和会话撤销。全文件另有下述 1 项既有失败；[日志](assets/filters-python.log) |
+| 真实浏览器 | 访客、普通用户、管理员、超级管理员分别通过 1400px／390px；正式 React 路由、Go Handler、OptionalAuth 及隔离 MySQL 返回真实结果；控件、ID 地址、参数篡改及代表 Tc 范围通过，无页面异常和新增横向溢出。目录及独立结构的浏览器响应使用夹具，Python 结构真实查询由上项分别验证，不冒称两后端完整联合浏览器验收；[请求记录](assets/filters-browser.json) |
+| 类型及构建 | TypeScript 和生产构建通过，保留既有包体积提示；[日志](assets/filters-build.log) |
+
+独立 Git 归档基线 `355c7a625f376c39e90402edcd155ffc4cbfc024` 与本次隔离源码，均在 `test_reextract_is_owner_authorized_hash_verified_preview_only` 失败，错误同为 `KeyError: structure_candidates`，发生在结构重提取预览草稿断言；[独立基线日志](assets/filters-python-existing-baseline.log)。本次未改变重提取实现、不放宽断言，不将此项计入通过数，不能宣称 Python 全文件绿色。
+
+没有修改科学表单、科学字段契约或共享科学编辑组件；本次搜索宿主与完整独立结构宿主的交互已覆盖，#174 清单同步实际范围，不冒称四科学编辑宿主或固定性能基准本轮重跑。未推送／触发远端 CI，不宣称远端合并保护已生效。
+
+归档日志仅清理行尾空格和文件末尾空行，保留实际诊断及结果。隔离源码及逐文件 SHA256、基线、本机只读旧别名／ID查询计数见 [验证摘要](assets/filters-validation.json)。[普通用户桌面](assets/filters-anonymous-desktop.png)与[管理员390px](assets/filters-admin-mobile.png)已实际打开核对；原始用户截图在既有 images.json 登记并重新解码核对。
+
+当前实现已使用 overview-maintainer 同步搜索功能和父级导航、#28／#49 后续边界及 #174 入口清单。复用目录、权限判断和版本关联，无数据库结构变更或科学数据写入。本次按明确路径自动本地提交；未推送、未部署。远程 Spec 链接继续待授权推送后实际核验，Issue 保持 OPEN。

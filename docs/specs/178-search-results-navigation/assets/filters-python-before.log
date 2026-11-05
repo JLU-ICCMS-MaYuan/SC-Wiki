@@ -1,0 +1,279 @@
+FF..FF.FF..F..FF.                                                        [100%]
+=================================== FAILURES ===================================
+________ test_reextract_is_owner_authorized_hash_verified_preview_only _________
+
+client = <starlette.testclient.TestClient object at 0x16ca26d50>
+tmp_path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-44/test_reextract_is_owner_author0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x16cacf470>
+
+    def test_reextract_is_owner_authorized_hash_verified_preview_only(client, tmp_path, monkeypatch):
+        import pymupdf
+        import hashlib
+        from backend.ingest import upload_tasks
+
+        client, session, paper, app = client
+        document = pymupdf.open()
+        page = document.new_page()
+        page.insert_text(
+            (20, 30),
+            "Table S1. Structural parameters at 50 GPa.\nAtomic coordinates (fractional)\nSi P1 a=3 b=3 c=3 alpha=90 beta=90 gamma=90\nSi (1a) 0 0 0",
+            fontsize=9,
+        )
+        path = tmp_path / "source.pdf"
+        document.save(path)
+        document.close()
+        state = dict(
+            status="ready",
+            user_id=1,
+            files=[
+                dict(
+                    file_id="source",
+                    role="main",
+                    original_filename="source.pdf",
+                    stored_path=str(path),
+                    size=path.stat().st_size,
+                    sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+                )
+            ],
+        )
+        draft = dict(material_states=[], structure_candidates=[])
+        monkeypatch.setattr(upload_tasks, "get_state", lambda _: state)
+        monkeypatch.setattr(upload_tasks, "get_draft", lambda _: draft)
+        monkeypatch.setattr(upload_tasks, "save_draft", lambda *_: pytest.fail("预览不能写草稿"))
+        before = len(service.current_items(session, paper))
+        first = client.post("/api/rag/structural-records/reextract", json=dict(target="upload", target_id="task"))
+        assert first.status_code == 200, first.text
+        assert first.json()["model_calls"] == 0 and len(first.json()["structure_candidates"]) == 1
+>       assert len(service.current_items(session, paper)) == before and not draft["structure_candidates"]
+                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'structure_candidates'
+
+backend/tests/test_structural_records.py:469: KeyError
+----------------------------- Captured stdout call -----------------------------
+warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.
+  [LLM] 请求或响应格式异常，1/2 次重试
+  [LLM] 请求或响应格式异常，2/2 次重试
+______ test_independent_structure_family_filter_uses_current_paper_family ______
+
+client = <starlette.testclient.TestClient object at 0x33738a4e0>
+
+    def test_independent_structure_family_filter_uses_current_paper_family(client):
+        client, session, paper, app = client
+        models.MaterialFamily.__table__.create(session.get_bind(), checkfirst=True)
+        models.PaperMaterialFamily.__table__.create(session.get_bind(), checkfirst=True)
+        family = models.MaterialFamily(code="hydrogen_based", name_zh="氢基超导体", name_en="Hydrogen-based superconductor", normalized_name="氢基超导体")
+        models.MaterialFamilyAlias.__table__.create(session.get_bind(), checkfirst=True)
+        session.add(family)
+        session.flush()
+        session.add(models.MaterialFamilyAlias(material_family_id=family.id, alias="hydride", normalized_alias="hydride", language="en"))
+        session.add(models.PaperMaterialFamily(paper_id=paper.id, paper_revision=paper.content_revision, material_family_id=family.id))
+        session.commit()
+        path = "/api/rag/structural-records/search"
+>       assert client.post(path, json={"superconductor_type": "hydride"}).json()["total"] == 1
+E       assert 0 == 1
+
+backend/tests/test_structural_records.py:511: AssertionError
+______ test_search_role_scope_uses_authenticated_user[pending-admin-True] ______
+
+client = <starlette.testclient.TestClient object at 0x33747b440>, role = 'admin'
+approved = True, status = 'pending'
+
+    @pytest.mark.parametrize("role,approved", [(None,False),("user",True),("admin",True),("superadmin",True),("admin",False)])
+    @pytest.mark.parametrize("status", ["pending","approved","rejected"])
+    def test_search_role_scope_uses_authenticated_user(client, role, approved, status):
+        client, session, paper, app = client
+        app.dependency_overrides[get_current_user_optional] = lambda: None if role is None else SimpleNamespace(id=9,role=role,is_approved=approved)
+        paper.review_status=status
+        paper.approved_revision=1 if status=="approved" else None
+        session.commit()
+        privileged=role in {"admin","superadmin"} and approved
+        path="/api/rag/structural-records/search"
+        for selected in ["", "pending", "approved", "rejected"]:
+            response=client.post(path,json={"review_status":selected,"independent_only":True})
+            assert response.status_code==200, response.text
+            expected=int((not selected or selected==status) if privileged else status=="approved")
+>           assert response.json()["total"]==expected
+E           assert 0 == 1
+
+backend/tests/test_structural_records.py:530: AssertionError
+___ test_search_role_scope_uses_authenticated_user[pending-superadmin-True] ____
+
+client = <starlette.testclient.TestClient object at 0x337562b70>
+role = 'superadmin', approved = True, status = 'pending'
+
+    @pytest.mark.parametrize("role,approved", [(None,False),("user",True),("admin",True),("superadmin",True),("admin",False)])
+    @pytest.mark.parametrize("status", ["pending","approved","rejected"])
+    def test_search_role_scope_uses_authenticated_user(client, role, approved, status):
+        client, session, paper, app = client
+        app.dependency_overrides[get_current_user_optional] = lambda: None if role is None else SimpleNamespace(id=9,role=role,is_approved=approved)
+        paper.review_status=status
+        paper.approved_revision=1 if status=="approved" else None
+        session.commit()
+        privileged=role in {"admin","superadmin"} and approved
+        path="/api/rag/structural-records/search"
+        for selected in ["", "pending", "approved", "rejected"]:
+            response=client.post(path,json={"review_status":selected,"independent_only":True})
+            assert response.status_code==200, response.text
+            expected=int((not selected or selected==status) if privileged else status=="approved")
+>           assert response.json()["total"]==expected
+E           assert 0 == 1
+
+backend/tests/test_structural_records.py:530: AssertionError
+_____ test_search_role_scope_uses_authenticated_user[approved-None-False] ______
+
+client = <starlette.testclient.TestClient object at 0x3375e7a70>, role = None
+approved = False, status = 'approved'
+
+    @pytest.mark.parametrize("role,approved", [(None,False),("user",True),("admin",True),("superadmin",True),("admin",False)])
+    @pytest.mark.parametrize("status", ["pending","approved","rejected"])
+    def test_search_role_scope_uses_authenticated_user(client, role, approved, status):
+        client, session, paper, app = client
+        app.dependency_overrides[get_current_user_optional] = lambda: None if role is None else SimpleNamespace(id=9,role=role,is_approved=approved)
+        paper.review_status=status
+        paper.approved_revision=1 if status=="approved" else None
+        session.commit()
+        privileged=role in {"admin","superadmin"} and approved
+        path="/api/rag/structural-records/search"
+        for selected in ["", "pending", "approved", "rejected"]:
+            response=client.post(path,json={"review_status":selected,"independent_only":True})
+            assert response.status_code==200, response.text
+            expected=int((not selected or selected==status) if privileged else status=="approved")
+>           assert response.json()["total"]==expected
+E           assert 0 == 1
+
+backend/tests/test_structural_records.py:530: AssertionError
+______ test_search_role_scope_uses_authenticated_user[approved-user-True] ______
+
+client = <starlette.testclient.TestClient object at 0x337681070>, role = 'user'
+approved = True, status = 'approved'
+
+    @pytest.mark.parametrize("role,approved", [(None,False),("user",True),("admin",True),("superadmin",True),("admin",False)])
+    @pytest.mark.parametrize("status", ["pending","approved","rejected"])
+    def test_search_role_scope_uses_authenticated_user(client, role, approved, status):
+        client, session, paper, app = client
+        app.dependency_overrides[get_current_user_optional] = lambda: None if role is None else SimpleNamespace(id=9,role=role,is_approved=approved)
+        paper.review_status=status
+        paper.approved_revision=1 if status=="approved" else None
+        session.commit()
+        privileged=role in {"admin","superadmin"} and approved
+        path="/api/rag/structural-records/search"
+        for selected in ["", "pending", "approved", "rejected"]:
+            response=client.post(path,json={"review_status":selected,"independent_only":True})
+            assert response.status_code==200, response.text
+            expected=int((not selected or selected==status) if privileged else status=="approved")
+>           assert response.json()["total"]==expected
+E           assert 0 == 1
+
+backend/tests/test_structural_records.py:530: AssertionError
+_____ test_search_role_scope_uses_authenticated_user[approved-admin-False] _____
+
+client = <starlette.testclient.TestClient object at 0x3377d2180>, role = 'admin'
+approved = False, status = 'approved'
+
+    @pytest.mark.parametrize("role,approved", [(None,False),("user",True),("admin",True),("superadmin",True),("admin",False)])
+    @pytest.mark.parametrize("status", ["pending","approved","rejected"])
+    def test_search_role_scope_uses_authenticated_user(client, role, approved, status):
+        client, session, paper, app = client
+        app.dependency_overrides[get_current_user_optional] = lambda: None if role is None else SimpleNamespace(id=9,role=role,is_approved=approved)
+        paper.review_status=status
+        paper.approved_revision=1 if status=="approved" else None
+        session.commit()
+        privileged=role in {"admin","superadmin"} and approved
+        path="/api/rag/structural-records/search"
+        for selected in ["", "pending", "approved", "rejected"]:
+            response=client.post(path,json={"review_status":selected,"independent_only":True})
+            assert response.status_code==200, response.text
+            expected=int((not selected or selected==status) if privileged else status=="approved")
+>           assert response.json()["total"]==expected
+E           assert 0 == 1
+
+backend/tests/test_structural_records.py:530: AssertionError
+_____ test_search_role_scope_uses_authenticated_user[rejected-admin-True] ______
+
+client = <starlette.testclient.TestClient object at 0x3379269f0>, role = 'admin'
+approved = True, status = 'rejected'
+
+    @pytest.mark.parametrize("role,approved", [(None,False),("user",True),("admin",True),("superadmin",True),("admin",False)])
+    @pytest.mark.parametrize("status", ["pending","approved","rejected"])
+    def test_search_role_scope_uses_authenticated_user(client, role, approved, status):
+        client, session, paper, app = client
+        app.dependency_overrides[get_current_user_optional] = lambda: None if role is None else SimpleNamespace(id=9,role=role,is_approved=approved)
+        paper.review_status=status
+        paper.approved_revision=1 if status=="approved" else None
+        session.commit()
+        privileged=role in {"admin","superadmin"} and approved
+        path="/api/rag/structural-records/search"
+        for selected in ["", "pending", "approved", "rejected"]:
+            response=client.post(path,json={"review_status":selected,"independent_only":True})
+            assert response.status_code==200, response.text
+            expected=int((not selected or selected==status) if privileged else status=="approved")
+>           assert response.json()["total"]==expected
+E           assert 0 == 1
+
+backend/tests/test_structural_records.py:530: AssertionError
+___ test_search_role_scope_uses_authenticated_user[rejected-superadmin-True] ___
+
+client = <starlette.testclient.TestClient object at 0x3379889e0>
+role = 'superadmin', approved = True, status = 'rejected'
+
+    @pytest.mark.parametrize("role,approved", [(None,False),("user",True),("admin",True),("superadmin",True),("admin",False)])
+    @pytest.mark.parametrize("status", ["pending","approved","rejected"])
+    def test_search_role_scope_uses_authenticated_user(client, role, approved, status):
+        client, session, paper, app = client
+        app.dependency_overrides[get_current_user_optional] = lambda: None if role is None else SimpleNamespace(id=9,role=role,is_approved=approved)
+        paper.review_status=status
+        paper.approved_revision=1 if status=="approved" else None
+        session.commit()
+        privileged=role in {"admin","superadmin"} and approved
+        path="/api/rag/structural-records/search"
+        for selected in ["", "pending", "approved", "rejected"]:
+            response=client.post(path,json={"review_status":selected,"independent_only":True})
+            assert response.status_code==200, response.text
+            expected=int((not selected or selected==status) if privileged else status=="approved")
+>           assert response.json()["total"]==expected
+E           assert 0 == 1
+
+backend/tests/test_structural_records.py:530: AssertionError
+=============================== warnings summary ===============================
+../../../../Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+backend/tests/test_structural_records.py: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+backend/tests/test_structural_records.py::test_reextract_is_owner_authorized_hash_verified_preview_only
+backend/tests/test_structural_records.py::test_reextract_is_owner_authorized_hash_verified_preview_only
+backend/tests/test_structural_records.py::test_reextract_is_owner_authorized_hash_verified_preview_only
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:438: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+backend/tests/test_structural_records.py: 70 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/cell.py:106: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error()
+
+backend/tests/test_structural_records.py::test_reextract_is_owner_authorized_hash_verified_preview_only
+backend/tests/test_structural_records.py::test_reextract_is_owner_authorized_hash_verified_preview_only
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+backend/tests/test_structural_records.py::test_reextract_is_owner_authorized_hash_verified_preview_only
+backend/tests/test_structural_records.py::test_reextract_is_owner_authorized_hash_verified_preview_only
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+backend/tests/test_structural_records.py::test_reextract_is_owner_authorized_hash_verified_preview_only
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_structural_records.py::test_reextract_is_owner_authorized_hash_verified_preview_only
+FAILED backend/tests/test_structural_records.py::test_independent_structure_family_filter_uses_current_paper_family
+FAILED backend/tests/test_structural_records.py::test_search_role_scope_uses_authenticated_user[pending-admin-True]
+FAILED backend/tests/test_structural_records.py::test_search_role_scope_uses_authenticated_user[pending-superadmin-True]
+FAILED backend/tests/test_structural_records.py::test_search_role_scope_uses_authenticated_user[approved-None-False]
+FAILED backend/tests/test_structural_records.py::test_search_role_scope_uses_authenticated_user[approved-user-True]
+FAILED backend/tests/test_structural_records.py::test_search_role_scope_uses_authenticated_user[approved-admin-False]
+FAILED backend/tests/test_structural_records.py::test_search_role_scope_uses_authenticated_user[rejected-admin-True]
+FAILED backend/tests/test_structural_records.py::test_search_role_scope_uses_authenticated_user[rejected-superadmin-True]
+9 failed, 8 passed, 17 deselected, 609 warnings in 6.65s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

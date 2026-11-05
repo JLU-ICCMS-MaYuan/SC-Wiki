@@ -120,6 +120,27 @@
       ],
       "verification": "2026-10-29：原字节复制后重新读取、SHA256一致，sips实际解码成功；尚未推送。",
       "ai_observation": "右上红框为展示方式切换位置"
+    },
+    {
+      "id": "IMG-178-07",
+      "upload_order": 7,
+      "original_name": "codex-clipboard-50613ff6-824a-417f-85fc-2b746e72273b.png",
+      "locator": "assets/IMG-178-07.png",
+      "status": "local_verified",
+      "user_context": "三个问题：\n\n1. 为什么超导类型用的是高压氢化物，我记得氢化物用的标签是：**氢基超导体**\n2. **审核状态没必要存在，因为所有可以被搜索到的材料，都是审核通过的。除非我做过其他设计，比如，超级管理员或者管理员可以搜索其他审核状态的材料**\n3. 仅看图表记录什么意思\n\n/investigator调查一下",
+      "related": [
+        "US5",
+        "FR-021",
+        "FR-022",
+        "FR-024"
+      ],
+      "sha256": "2317791155417abcb9e53f596fa50dec7016aadab8978ea29efcb97760c6745d",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3840,
+        1948
+      ],
+      "verification": "2026-11-05：原字节复制，重新读取并解码，SHA256一致；未推送。"
     }
   ]
 }

@@ -9,6 +9,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"scwiki/server/database"
+	"scwiki/server/middleware"
+	"scwiki/server/models"
 	"strings"
 	"testing"
 )
@@ -23,7 +25,8 @@ func resultFixture(t *testing.T, db *gorm.DB) *gin.Engine {
 		"CREATE TABLE material_states (id INTEGER PRIMARY KEY, paper_id INTEGER, paper_revision INTEGER, state_key VARCHAR(100), superconductor_id INTEGER, material_name VARCHAR(100), pressure_value_gpa REAL, reported_space_group_symbol VARCHAR(100), reported_space_group_number INTEGER, structure_optimization VARCHAR(32))",
 		"CREATE TABLE paper_structural_records (id VARCHAR(32) PRIMARY KEY, paper_id INTEGER, paper_revision INTEGER, record_key VARCHAR(100), kind VARCHAR(16), material VARCHAR(100), system_key VARCHAR(100), pressure_gpa REAL, state_key VARCHAR(100), retention VARCHAR(20))",
 		"CREATE TABLE property_records (id INTEGER PRIMARY KEY, material_state_id INTEGER, paper_id INTEGER, paper_revision INTEGER, property_code VARCHAR(100),value_number REAL,value_min REAL,value_max REAL,is_representative BOOLEAN)",
-		"CREATE TABLE material_families (id INTEGER PRIMARY KEY,code VARCHAR(64))",
+		"CREATE TABLE material_families (id INTEGER PRIMARY KEY,code VARCHAR(64),normalized_name VARCHAR(160))",
+		"CREATE TABLE material_family_aliases (material_family_id INTEGER,normalized_alias VARCHAR(160))",
 		"CREATE TABLE paper_material_families (paper_id INTEGER,paper_revision INTEGER,material_family_id INTEGER)",
 	}
 	for _, sql := range ddl {
@@ -35,7 +38,8 @@ func resultFixture(t *testing.T, db *gorm.DB) *gin.Engine {
 		"INSERT INTO papers VALUES (271,1,1,'approved','来源论文','10.1/example','PNAS',2024),(272,1,1,'approved','独立模型来源','10.1/model','PNAS',2023),(273,2,1,'approved','旧版本','10.1/old','PNAS',2025),(274,1,NULL,'pending','待审','10.1/pending','PNAS',2025)",
 		"INSERT INTO chemical_systems VALUES (1,'H-La-Sc'),(2,'La-Sc')",
 		"INSERT INTO superconductors VALUES (1,1,'LaSc2H24'),(2,2,'LaSc2')",
-		"INSERT INTO material_families VALUES (1,'hydride')",
+		"INSERT INTO material_families VALUES (1,'hydrogen_based','氢基超导体'),(2,'custom_test','自建家族')",
+		"INSERT INTO material_family_aliases VALUES (1,'hydride'),(1,'hydrogen based')",
 		"INSERT INTO paper_material_families VALUES (271,1,1)",
 		"INSERT INTO paper_structural_records VALUES ('model1',271,1,'m1','model','LaSc2H24','H-La-Sc',300,'s6','retained'),('independent',272,1,'i1','model','LaSc2','La-Sc',300,NULL,'retained'),('excluded',272,1,'i2','model','LaSc2H24','H-La-Sc',150,NULL,'excluded')",
 	}
@@ -132,7 +136,7 @@ func checkSearchResults(t *testing.T, r *gin.Engine) {
 		t.Fatal("cross-state pressure match", v)
 	}
 	v = callResults(t, r, "{"+b+`,"review_status":"pending"}`)
-	if v["total"] != float64(0) {
+	if v["states_total"] != float64(8) {
 		t.Fatal(v)
 	}
 }
@@ -152,4 +156,124 @@ func TestSearchResultsMySQL(t *testing.T) {
 		t.Fatal(err)
 	}
 	checkSearchResults(t, resultFixture(t, db))
+	if err := db.AutoMigrate(&models.User{}); err != nil {
+		t.Fatal(err)
+	}
+	checkSearchFilterRoleScope(t, db)
+}
+
+// 标准目录值及真实鉴权覆盖，不把旧别名误建成正式 code。
+func TestSearchFilterCatalogIdentity(t *testing.T) {
+	db := governanceTestDB(t)
+	r := resultFixture(t, db)
+	for _, filter := range []string{`"material_family_id":1`, `"superconductor_type":"hydride"`, `"superconductor_type":"hydrogen_based"`} {
+		v := callResults(t, r, `{"elements":["H","La","Sc"],`+filter+`}`)
+		if v["states_total"] != float64(8) {
+			t.Fatalf("%s: %v", filter, v)
+		}
+	}
+	for _, filter := range []string{`"material_family_id":2`, `"superconductor_type":"missing"`} {
+		v := callResults(t, r, `{`+filter+`}`)
+		if v["total"] != float64(0) {
+			t.Fatal(filter, v)
+		}
+	}
+}
+func TestSearchFilterCustomFamily(t *testing.T) {
+	db := governanceTestDB(t)
+	r := resultFixture(t, db)
+	db.Exec("INSERT INTO paper_material_families VALUES (275,1,2)")
+	v := callResults(t, r, `{"elements":["Fe"],"mode":"elements_exact_search","material_family_id":2,"view":"states","limit":1,"offset":20}`)
+	if v["states_total"] != float64(41) || len(v["items"].([]any)) != 1 {
+		t.Fatal(v)
+	}
+}
+func TestSearchFilterRoleScope(t *testing.T) {
+	db := governanceTestDB(t)
+	resultFixture(t, db)
+	checkSearchFilterRoleScope(t, db)
+}
+func checkSearchFilterRoleScope(t *testing.T, db *gorm.DB) {
+	db.Exec("INSERT INTO papers VALUES (276,1,NULL,'rejected','拒绝','10.1/rejected','PNAS',2025)")
+	db.Exec("INSERT INTO material_states VALUES (102,273,2,'current',1,NULL,200,'P6/mmm',191,'sscha'),(103,276,1,'rejected',1,NULL,200,'P6/mmm',191,'sscha')")
+	db.Exec("INSERT INTO paper_structural_records VALUES ('pending-model',274,1,'pm','model','LaSc2','La-Sc',200,NULL,'retained'),('rejected-model',276,1,'rm','model','LaSc2','La-Sc',200,NULL,'retained')")
+	middleware.InitJWT("search-filter-test-only")
+	r := gin.New()
+	r.POST("/results", middleware.OptionalAuth, SearchResults)
+	for _, role := range []string{"anonymous", "user", "admin", "superadmin", "unapproved"} {
+		token := ""
+		privileged := role == "admin" || role == "superadmin"
+		if role != "anonymous" {
+			actualRole := role
+			if role == "unapproved" {
+				actualRole = "admin"
+			}
+			u := createGovernanceUser(t, db, role, actualRole, "active")
+			if role == "unapproved" {
+				db.Model(&u).Update("is_approved", false)
+				u.IsApproved = false
+			}
+			token, _ = middleware.GenerateTokenForUser(u)
+		}
+		for _, status := range []string{"", "approved", "pending", "rejected"} {
+			body := `{"elements":["H","La","Sc"],"mode":"elements_exact_search","view":"states","review_status":"` + status + `"}`
+			req := httptest.NewRequest("POST", "/results", strings.NewReader(body))
+			req.Header.Set("Content-Type", "application/json")
+			if token != "" {
+				req.Header.Set("Authorization", "Bearer "+token)
+			}
+			w := httptest.NewRecorder()
+			r.ServeHTTP(w, req)
+			var v map[string]any
+			json.Unmarshal(w.Body.Bytes(), &v)
+			want := float64(8)
+			if privileged {
+				switch status {
+				case "":
+					want = 11
+				case "approved":
+					want = 9
+				default:
+					want = 1
+				}
+			}
+			if w.Code != 200 || v["states_total"] != want {
+				t.Fatalf("%s/%s: %d %s", role, status, w.Code, w.Body.String())
+			}
+			papers := float64(1)
+			if privileged && status == "" {
+				papers = 4
+			}
+			if privileged && status == "approved" {
+				papers = 2
+			}
+			if v["papers_total"] != papers {
+				t.Fatal(role, status, v)
+			}
+			modelBody := `{"elements":["La","Sc"],"mode":"elements_exact_search","review_status":"` + status + `","limit":1}`
+			modelReq := httptest.NewRequest("POST", "/results", strings.NewReader(modelBody))
+			modelReq.Header.Set("Content-Type", "application/json")
+			if token != "" {
+				modelReq.Header.Set("Authorization", "Bearer "+token)
+			}
+			modelW := httptest.NewRecorder()
+			r.ServeHTTP(modelW, modelReq)
+			var mv map[string]any
+			json.Unmarshal(modelW.Body.Bytes(), &mv)
+			modelWant := float64(1)
+			if privileged && status == "" {
+				modelWant = 3
+			}
+			if modelW.Code != 200 || mv["papers_total"] != modelWant || len(mv["items"].([]any)) != 1 {
+				t.Fatal(role, status, mv)
+			}
+			if privileged && status == "" {
+				for _, item := range v["items"].([]any) {
+					if item.(map[string]any)["state_id"] == float64(100) {
+						t.Fatal("旧版本泄漏", v)
+					}
+				}
+			}
+		}
+	}
 }

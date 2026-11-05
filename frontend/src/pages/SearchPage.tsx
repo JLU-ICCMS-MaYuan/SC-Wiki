@@ -4,6 +4,8 @@ import {Box,Typography,Card,CardContent,Chip,Button,Select,MenuItem,ToggleButton
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import PeriodicTable from '../components/PeriodicTable'
 import SearchResults from '../components/SearchResults'
+import SearchFamilyFilter from '../components/SearchFamilyFilter'
+import {useAuth} from '../context/AuthContext'
 import {StructuralResults} from '../components/PaperStructuralCollection'
 import {useLanguage} from '../context/LanguageContext'
 import {SEARCH_FILTER_DEFAULTS as FILTER_DEFAULTS,searchFilters,updateFilters,searchRequest,searchURL,searchPageNumber,type SearchFilters} from '../lib/searchNavigation'
@@ -77,6 +79,9 @@ const RangeFieldContent: React.FC<{
 }
 
 const SearchPage:React.FC=()=>{
+ const {user,loading:authLoading}=useAuth()
+ const canReview=!!user?.is_approved && (user.role==='admin'||user.role==='superadmin')
+ const identity=authLoading?'loading':`${user?.id??'anonymous'}:${user?.role??''}:${user?.is_approved??false}`
  const {t}=useLanguage(),[params,setParams]=useSearchParams(),location=useLocation()
  const [selected,setSelected]=useState(new Set<string>((params.get('elements')||'').split(',').filter(Boolean))),[formula,setFormula]=useState(params.get('formula')||''),[mode,setMode]=useState(params.get('mode')||'elements_combination_search')
  const elementSearchModes=[
@@ -86,7 +91,7 @@ const SearchPage:React.FC=()=>{
  const currentElementSearchMode=elementSearchModes.find(x=>x.value===mode),formulaQuery=formula.trim()
  const entry=params.get('entry')==='1', paramsKey=params.toString()
  useEffect(()=>{if(entry){setSelected(new Set((params.get('elements')||'').split(',').filter(Boolean)));setFormula(params.get('formula')||'');setMode(params.get('mode')||'elements_combination_search')}},[entry,paramsKey])
- const filters=searchFilters(params),setFilters=(next:SearchFilters)=>setParams(updateFilters(params,next),{replace:true})
+ const filters={...searchFilters(params),...(!canReview?{review:'All'}:{})},setFilters=(next:SearchFilters)=>setParams(updateFilters(params,next),{replace:true})
  if(params.has('paper_id'))return <Navigate replace to={`/papers/${encodeURIComponent(params.get('paper_id')||'')}`} />
  if(entry || (!params.has('elements')&&!params.has('formula'))) {
     return (
@@ -172,7 +177,7 @@ const SearchPage:React.FC=()=>{
     }
     const activeCount = Object.values(groupActive).filter(Boolean).length
  const view=params.get('view')==='states'?'states':'papers',pageKey=view==='papers'?'paper_page':'state_page'
- const request=searchRequest(params),returnTo=location.pathname+location.search
+ const request=searchRequest(params,canReview),returnTo=location.pathname+location.search
  const {tc_min: _tcMin,tc_max: _tcMax,chart_only: _chartOnly,...structuralQuery}=request
  const setPage=(key:string,page:number)=>{const next=new URLSearchParams(params);next.set(key,String(page));setParams(next)}
  const entryParams=new URLSearchParams(params);entryParams.set('entry','1')
@@ -229,43 +234,38 @@ const SearchPage:React.FC=()=>{
               <Box>
                 <FilterGroupLabel text={t('search.superconductorType')} active={groupActive.type} />
                 <Box sx={shellSx}>
-                  <Select variant="standard" disableUnderline MenuProps={selectMenuProps}
-                    value={filters.type} onChange={e=>setFilters({...filters,type:e.target.value})} sx={selectSx}>
-                    {/* 规范全称，与 backend/sc_types.py 一致 */}
-                    {[
-                      {v:'All',l:t('search.allTypes')},{v:'hydride',l:t('search.scType.hydride')},{v:'cuprate',l:t('search.scType.cuprate')},
-                      {v:'iron_based',l:t('search.scType.iron_based')},{v:'nickel_based',l:t('search.scType.nickel_based')},{v:'carbon',l:t('search.scType.carbon')},
-                      {v:'organic',l:t('search.scType.organic')},{v:'others',l:t('search.scType.others')},
-                    ].map(o=><MenuItem key={o.v} value={o.v}>{o.l}</MenuItem>)}
-                  </Select>
+                  <SearchFamilyFilter value={filters.type} onChange={type=>setFilters({...filters,type})} />
                 </Box>
               </Box>
-              {/* 审核状态 */}
-              <Box>
+              {/* 审核状态只对获批准的管理角色开放。 */}
+              {canReview && <Box>
                 <FilterGroupLabel text={t('search.reviewStatus')} active={groupActive.review} />
                 <Box sx={shellSx}>
                   <Select variant="standard" disableUnderline MenuProps={selectMenuProps}
-                    value={filters.review} onChange={e=>setFilters({...filters,review:e.target.value})} sx={selectSx}>
+                    inputProps={{'aria-label':t('search.reviewStatus')}} value={filters.review} onChange={e=>setFilters({...filters,review:e.target.value})} sx={selectSx}>
                     {[
                       {v:'All',l:t('search.allStatuses')},{v:'Approved',l:t('search.status.approved')},{v:'Pending',l:t('search.status.pending')},
                       {v:'Rejected',l:t('search.status.rejected')},
                     ].map(o=><MenuItem key={o.v} value={o.v}>{o.l}</MenuItem>)}
                   </Select>
                 </Box>
-              </Box>
-              {/* 图表记录开关 */}
-              <Box component="button"
+              </Box>}
+              {/* 代表 Tc 只过滤材料状态，独立结构不受影响。 */}
+              <Box component="button" aria-pressed={filters.chartOnly} aria-describedby="representative-tc-hint"
                 onClick={()=>setFilters({...filters,chartOnly:!filters.chartOnly})}
-                sx={{ minHeight:32,px:1.5,borderRadius:'999px',display:'inline-flex',alignItems:'center',gap:0.75,border:'1px solid',borderColor:filters.chartOnly?'primary.main':'divider',bgcolor:filters.chartOnly?'#e0e7ff':'grey.50',color:filters.chartOnly?'#312e81':'text.primary',fontSize:12,fontWeight:700,cursor:'pointer',justifySelf:'start',transition:'all .15s ease' }}>
+                sx={{ minHeight:32,px:1.5,borderRadius:'999px',display:'inline-flex',alignItems:'center',gap:0.75,border:'1px solid',borderColor:filters.chartOnly?'primary.main':'divider',bgcolor:filters.chartOnly?'#e0e7ff':'grey.50',color:filters.chartOnly?'#312e81':'text.primary',fontSize:12,fontWeight:700,cursor:'pointer',justifySelf:'start',textAlign:'left',transition:'all .15s ease' }}>
                 <Box sx={{ width:8,height:8,borderRadius:'50%',bgcolor:filters.chartOnly?'primary.main':'text.disabled' }} />
                 {t('search.chartOnly')}
               </Box>
+              <Typography id="representative-tc-hint" variant="caption" color="text.secondary">{t('search.chartOnlyHint')}</Typography>
             </Box>
           </Box>
 
-<Box sx={{minWidth:0}}>
+<Box key={identity} sx={{minWidth:0}}>
+  {!authLoading && <>
   <SearchResults query={request} view={view} page={searchPageNumber(params,pageKey)} returnTo={returnTo} onPageChange={page=>setPage(pageKey,page)} />
   <StructuralResults query={structuralQuery} page={searchPageNumber(params,'structure_page')-1} onPageChange={page=>setPage('structure_page',page+1)} />
+  </>}
   </Box></Box></Box>
 }
 export default SearchPage

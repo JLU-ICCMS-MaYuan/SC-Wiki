@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-05",
+  "base_sha": "355c7a625f376c39e90402edcd155ffc4cbfc024",
+  "source_sha256": {
+    "backend/api/structural_records.py": "ca49562ae087993d9f6f7d75220b6350284acc2754c7c2c71fe5d7bbf109ea8a",
+    "backend/tests/test_structural_records.py": "69e20ddd4d12f5ae9992f487787bb9ba3411e5b0c9d66f0a9b73e86050106ef7",
+    "frontend/src/i18n/en/search.ts": "f3d015825a07a4b1ae9a9171714d0f3aa6556cf2d7096dfce785c1ddc5f25816",
+    "frontend/src/i18n/zh/search.ts": "5e017e353cc2e58fb77f128ed31dd5199df36ac92d36134d35a0cc5ecca220a9",
+    "frontend/src/lib/searchNavigation.ts": "a3849070f489bd1db9dbddc31a51a53d67a0917c1a4b5958821670f96260d4d1",
+    "frontend/src/pages/SearchPage.tsx": "8f10d769ab8c9ca84f7b85f931b64ef44c78d244e802fad679433017e1b50982",
+    "goserver/handlers/search_results.go": "6538be18ac568b789a44060ceaabab3f3005924998f42648c8f97a4db601c200",
+    "goserver/handlers/search_results_test.go": "45aeb9f771d96b87c710f813ad2397598605412bc165c481eddabb5bb4c16918",
+    "tests/03_data_search_and_database_discovery/local-search-regression.test.tsx": "751bfc8ebd114812c227018f3cf45d81085149c520e7dd73df99b47bc3f8178f",
+    "tests/03_data_search_and_database_discovery/search-navigation.test.tsx": "52b03ea18aaffb4d94cb2d4e9054db8f9fcefe35021a849391607394613f0fc7",
+    "tests/03_data_search_and_database_discovery/search-page-defaults.test.tsx": "7baa302db93035254f97ce0b5dce3321c81c02c8391aa2e8dd112721faf8fc9f",
+    "tests/03_data_search_and_database_discovery/search-results.test.tsx": "d7c49a917268bad037b4bc83bc58a630314ec32e8153b03f1f2d298225edacb1",
+    "frontend/src/components/SearchFamilyFilter.tsx": "6c2a9395e3c08469991c50d5910a3e6694472941bfeb675a3c2ce381da4fd44c",
+    "goserver/handlers/search_filters_browser_test.go": "b4bb37eed5704f2489419a623c9075b980ac12d4a3e46da8fd8e89f3743473e2",
+    "tests/03_data_search_and_database_discovery/search-filters.test.tsx": "e3884b8d1e24e575778e0ef909f1e6f00f0acbed30d7525f562148cbfdfc8333",
+    "tests/03_data_search_and_database_discovery/search-filters-browser.mjs": "7d9aae6841f63ee283a8726b42892de92ff0652d2878711ccd2c62bcc38a291f"
+  },
+  "verification": {
+    "go_query_tests": "passed; SQLite/authenticated scope/catalog/custom family",
+    "mysql": "passed; isolated database scwiki_issue178_test_20261105_filters",
+    "frontend": "44 passed in 6 files",
+    "python": "37 passed; 1 inherited reextract failure reproduced on independent base",
+    "browser": "four roles at 1400px and 390px; real React/Go/OptionalAuth/MySQL; catalog and independent structure browser responses are fixtures; real Python queries separately tested",
+    "build": "TypeScript and production build passed"
+  },
+  "live_readonly_legacy_and_id_counts": [
+    {
+      "papers_total": 3,
+      "states_total": 28,
+      "total": 3
+    },
+    {
+      "papers_total": 3,
+      "states_total": 28,
+      "total": 3
+    }
+  ]
+}

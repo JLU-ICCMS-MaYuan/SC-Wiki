@@ -1,0 +1,4 @@
+=== RUN   TestSearchResultsMySQL
+--- PASS: TestSearchResultsMySQL (0.17s)
+PASS
+ok  	scwiki/server/handlers	0.822s

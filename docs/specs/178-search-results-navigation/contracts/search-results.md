@@ -41,3 +41,11 @@
 ## 兼容与验证
 
 旧 `/search/records` 调用方先审计；本Feature只移除搜索UI依赖，不自动删除图表等仍使用契约。新增Go查询必须有多状态、多Tc、无Tc、无状态模型、跨页／过滤／revision／审核权限集成用例。涉及MySQL去重和分页的SQL必须在隔离MySQL验证，单纯SQLite或字符串断言不够。
+
+## 2026-11-05：筛选契约变更（取代上文无角色差异的公开范围）
+
+两个查询均接受可选正整数 material_family_id，按论文当前版本家族关联精确匹配；ID 优先。旧 superconductor_type 按目录 code／规范名称／别名精确解析，不匹配返回空集；新页面只提交 ID。
+
+review_status 可为省略、approved、pending、rejected；非法状态返回 400（Python 参数模型为 422）。经真实鉴权且获批准的 admin/superadmin 缺省检索全部三个状态，有参数时精确过滤；仍只读当前 revision，结构只含 retained model。其他身份无论传入何种合法状态都限 approved 且 approved_revision=content_revision。请求不接受客户端角色作为权限依据。
+
+chart_only 的 API 名保持兼容，只表示同一状态存在代表 Tc；独立结构忽略此条件，其来源仍可进入论文视图。前端显示准确名称及例外说明。身份变化销毁旧结果请求生命周期，防止前一身份的摘要残留。

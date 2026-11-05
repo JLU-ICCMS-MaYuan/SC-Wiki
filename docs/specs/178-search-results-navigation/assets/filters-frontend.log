@@ -1,0 +1,56 @@
+
+> sc-wiki-frontend@1.0.0 test:upload-ui
+> vitest run --config ../vitest.config.ts tests/03_data_search_and_database_discovery/search-filters.test.tsx tests/03_data_search_and_database_discovery/search-results.test.tsx tests/03_data_search_and_database_discovery/local-search-regression.test.tsx tests/03_data_search_and_database_discovery/search-navigation.test.tsx tests/03_data_search_and_database_discovery/search-page-defaults.test.tsx tests/01_decentralized_uploading/structural-records.test.tsx
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v2.1.9 /private/tmp/scwiki178-validation/patched
+
+ ✓ tests/03_data_search_and_database_discovery/search-navigation.test.tsx (13 tests) 6ms
+stderr | tests/03_data_search_and_database_discovery/local-search-regression.test.tsx > elements_combination_search keeps local query semantics with paper results
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/03_data_search_and_database_discovery/search-filters.test.tsx > uses canonical catalog labels, custom families and IDs, restoring old aliases
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/03_data_search_and_database_discovery/search-results.test.tsx > defaults to papers and switches to stable states in the same result page
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/01_decentralized_uploading/structural-records.test.tsx > 元素检索展示无Tc结构、来源论文和模型入口，支持下一页
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/03_data_search_and_database_discovery/search-page-defaults.test.tsx > 探索页元素默认选中（Issue #65） > 无 URL 参数进入探索页时不预选任何元素
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/03_data_search_and_database_discovery/search-page-defaults.test.tsx (3 tests) 257ms
+ ✓ tests/01_decentralized_uploading/structural-records.test.tsx (8 tests) 282ms
+ ✓ tests/03_data_search_and_database_discovery/search-results.test.tsx (2 tests) 1361ms
+   ✓ defaults to papers and switches to stable states in the same result page 721ms
+   ✓ late paper responses cannot overwrite the selected state view or cause structural refetches 640ms
+ ✓ tests/03_data_search_and_database_discovery/local-search-regression.test.tsx (8 tests) 3426ms
+   ✓ elements_combination_search keeps local query semantics with paper results 393ms
+   ✓ elements_exact_search keeps local query semantics with paper results 328ms
+   ✓ elements_contained_search keeps local query semantics with paper results 315ms
+   ✓ filters and server pagination keep their state and native paper destination 640ms
+   ✓ failed result requests retry without pretending to be empty results 624ms
+   ✓ reset clears only result filters and retains the selected system 642ms
+   ✓ returning to element entry retains the original selected elements 388ms
+ ✓ tests/03_data_search_and_database_discovery/search-filters.test.tsx (10 tests) 3441ms
+   ✓ uses canonical catalog labels, custom families and IDs, restoring old aliases 501ms
+   ✓ hides status and discards URL status for a public viewer null 321ms
+   ✓ hides status and discards URL status for a public viewer {"id":1,"role":"user","is_approved":true} 317ms
+   ✓ hides status and discards URL status for a public viewer {"id":2,"role":"admin","is_approved":false} 314ms
+   ✓ allows approved admin to request a selected status in both APIs 342ms
+   ✓ allows approved superadmin to request a selected status in both APIs 327ms
+   ✓ clears admin results immediately and ignores late admin responses after logout 629ms
+   ✓ names representative Tc accurately and never refetches independent structures for it 632ms
+
+ Test Files  6 passed (6)
+      Tests  44 passed (44)
+   Start at  13:42:28
+   Duration  4.47s (transform 237ms, setup 0ms, collect 3.30s, tests 8.77s, environment 944ms, prepare 205ms)

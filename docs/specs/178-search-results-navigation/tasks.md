@@ -66,3 +66,12 @@ T001→T002→T003→T004；T005验证T004并阻断T006后对外集成；T007→
 ## 执行证据
 
 T001～T020对应实现、测试和文档证据统一见[validation.md](validation.md)及其实际日志／浏览器／基线文件；没有用源码字符串断言替代交互和查询。T021保留远程文档链接门，不自动推送或关闭。
+
+## 2026-11-05：三个搜索筛选目标
+
+- [x] T022 [US5] 在既有 #178 Issue／本目录追加原话、图片和 FR-021～025／SC-010～012、接口及验证计划。
+- [x] T023 [US5] 在 goserver/handlers/search_results_test.go、backend/tests/test_structural_records.py 及搜索宿主测试中先复现标准目录 ID／旧别名与四身份范围失败。
+- [x] T024 [US5] 在 goserver/handlers/search_results.go、backend/api/structural_records.py 实现目录 ID／兼容参数、服务端角色权限及一致计数。
+- [x] T025 [US5] 在 SearchPage.tsx、SearchFamilyFilter.tsx、searchNavigation.ts 和搜索双语字典实现目录选择、权限控件、准确代表 Tc 说明；通过宿主身份 key 刷新既有 SearchResults／StructuralResults。
+- [x] T026 [US5] 执行 Go、Python、前端宿主与隔离 MySQL／真实路由浏览器验证，记录失败前后、四身份、重试、分页及旧响应边界；构建、适用合同按实际改动执行。
+- [x] T027 [US5] 按已验证实现同步 docs/overview 搜索说明及相关旧约束，追加 validation.md，完成本次范围本地提交；远程链接与关闭门继续单列。

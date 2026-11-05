@@ -1,0 +1,737 @@
+{
+  "passed": true,
+  "cases": [
+    "anonymous:catalog-id,status-permission,query-results,mobile",
+    "user:catalog-id,status-permission,query-results,mobile",
+    "admin:catalog-id,status-permission,query-results,mobile",
+    "superadmin:catalog-id,status-permission,query-results,mobile"
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "role": "anonymous",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "superconductor_type": "hydride",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "anonymous",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "superconductor_type": "hydride",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "anonymous",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 2,
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "anonymous",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 2,
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "anonymous",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 1,
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "anonymous",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 1,
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "anonymous",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "anonymous",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "anonymous",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "anonymous",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "anonymous",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "chart_only": true,
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "user",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "superconductor_type": "hydride",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "user",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "superconductor_type": "hydride",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "user",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 2,
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "user",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 2,
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "user",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 1,
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "user",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 1,
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "user",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "user",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "user",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "user",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "user",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "chart_only": true,
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "admin",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "superconductor_type": "hydride",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "admin",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "superconductor_type": "hydride",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "admin",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 2,
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "admin",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 2,
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "admin",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 1,
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "admin",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 1,
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "admin",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "admin",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "admin",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "review_status": "pending",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "admin",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "review_status": "pending",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "admin",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "review_status": "rejected",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "admin",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "review_status": "rejected",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "superadmin",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "superconductor_type": "hydride",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "superadmin",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "superconductor_type": "hydride",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "superadmin",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 2,
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "superadmin",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 2,
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "superadmin",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 1,
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "superadmin",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "material_family_id": 1,
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "superadmin",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "superadmin",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "superadmin",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "review_status": "pending",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "superadmin",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "review_status": "pending",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "superadmin",
+      "path": "/api/rag/structural-records/search",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "review_status": "rejected",
+        "independent_only": true,
+        "limit": 20,
+        "offset": 0
+      }
+    },
+    {
+      "role": "superadmin",
+      "path": "/api/papers/search/results",
+      "body": {
+        "elements": [
+          "H",
+          "La",
+          "Sc"
+        ],
+        "mode": "elements_exact_search",
+        "review_status": "rejected",
+        "view": "states",
+        "limit": 20,
+        "offset": 0
+      }
+    }
+  ],
+  "scope": "正式 React 路由与 Go Handler／OptionalAuth／隔离 MySQL；目录和独立结构响应为夹具，Python 结构真实查询另由 TestClient 验证。"
+}

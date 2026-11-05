@@ -10,6 +10,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+vi.mock('../../frontend/src/context/AuthContext', () => ({useAuth:()=>({user:null,loading:false})}))
 import SearchPage from '../../frontend/src/pages/SearchPage'
 
 vi.mock('../../frontend/src/lib/api', () => ({

@@ -3,9 +3,10 @@ import React from 'react'
 import {MemoryRouter} from 'react-router-dom'
 import {cleanup,render,screen,fireEvent,waitFor} from '@testing-library/react'
 import {afterEach,beforeEach,expect,it,vi} from 'vitest'
+vi.mock('../../frontend/src/context/AuthContext', () => ({useAuth:()=>({user:null,loading:false})}))
 import SearchPage from '../../frontend/src/pages/SearchPage'
 import {api} from '../../frontend/src/lib/api'
-vi.mock('../../frontend/src/lib/api',()=>({api:{get:vi.fn(),post:vi.fn()}}))
+vi.mock('../../frontend/src/lib/api',()=>({api:{get:vi.fn().mockResolvedValue({material_families:[]}),post:vi.fn()}}))
 const response={items:[{paper_id:9,title:'Mercury superconductivity',year:1911,doi:'10.1000/mercury',matched_states:1}],total:1,papers_total:1,states_total:1}
 const at=(path:string)=>render(<MemoryRouter initialEntries={[path]}><SearchPage/></MemoryRouter>)
 beforeEach(()=>{vi.mocked(api.post).mockReset().mockImplementation(async(url)=>url.includes('structural-records')?{items:[],total:0}:response as any)})

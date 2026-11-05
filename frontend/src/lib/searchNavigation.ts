@@ -10,21 +10,28 @@ export function searchFilters(params: URLSearchParams): SearchFilters {
     else if(field==='chartOnly') value[field]=raw==='true'
     else (value as any)[field]=raw
   }
+  value.type=params.get('material_family_id') || value.type
   return value
 }
 export function updateFilters(params: URLSearchParams, filters: SearchFilters) {
   const next=new URLSearchParams(params)
+  next.delete('material_family_id')
   for(const field of Object.keys(keys) as Array<keyof SearchFilters>) {
+    if(field==='type' && /^[1-9]\d*$/.test(filters.type)) {next.delete(keys.type);next.set('material_family_id',filters.type);continue}
     if(filters[field]===SEARCH_FILTER_DEFAULTS[field])next.delete(keys[field]);else next.set(keys[field],String(filters[field]))
   }
   for(const key of ['paper_page','state_page','structure_page'])next.delete(key)
   return next
 }
-export function searchRequest(params: URLSearchParams) {
+export function searchRequest(params: URLSearchParams, canReview=false) {
   const f=searchFilters(params)
   const body: Record<string,unknown>={elements:(params.get('elements')||'').split(',').filter(Boolean),mode:params.get('mode')||'elements_combination_search'}
   if(params.has('formula')) {body.formula=params.get('formula');body.mode='formula_search';body.elements=[]}
-  for(const field of Object.keys(keys) as Array<keyof SearchFilters>) if(f[field]!==SEARCH_FILTER_DEFAULTS[field])body[keys[field]]=field==='review'?String(f[field]).toLowerCase():f[field]
+  for(const field of Object.keys(keys) as Array<keyof SearchFilters>) {
+    if(f[field]===SEARCH_FILTER_DEFAULTS[field] || (field==='review' && !canReview))continue
+    if(field==='type' && /^[1-9]\d*$/.test(f.type))body.material_family_id=Number(f.type)
+    else body[keys[field]]=field==='review'?String(f[field]).toLowerCase():f[field]
+  }
   return body
 }
 export function searchURL(selected: Iterable<string>,mode:string,formula:string) {
