@@ -230,15 +230,15 @@ describe('详情页对 JSON 文本列字段的容错', () => {
     methodology: '["电阻测量", "低温实验"]',
   })
 
-  it('keywords_tags 为 JSON 字符串时正常渲染详情而非白屏', async () => {
+  it('keywords_tags 为 JSON 字符串时详情正常显示，不恢复已移除的旧侧栏', async () => {
     mockedApi.get.mockResolvedValue(jsonStringPaper)
 
     renderAt('/papers/9')
 
     expect(await screen.findByText('论文详情')).toBeInTheDocument()
-    expect(screen.getByText('超导')).toBeInTheDocument()
-    expect(screen.getByText('汞')).toBeInTheDocument()
-    expect(screen.getByText('液氦')).toBeInTheDocument()
+    expect(screen.getByText(jsonStringPaper.title)).toBeInTheDocument()
+    expect(screen.queryByText('关键词')).not.toBeInTheDocument()
+    expect(screen.queryByText('超导')).not.toBeInTheDocument()
   })
 
   it('methodology 为 JSON 字符串时逐项可读展示', async () => {

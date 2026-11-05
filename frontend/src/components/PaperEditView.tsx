@@ -70,8 +70,8 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
     }
   }
 
-  // 化学式来自 MaterialState；Read switch 后不再依赖旧 key_properties。
-  const formula = paper?.material_states?.[0]?.material || (paper?.materials?.[0]) || '-'
+  const reviewStatus = paper.workflow_status || paper.review_status
+  const showingPublishedVersion = paper.review_status === 'approved' && reviewStatus !== 'approved'
 
   // 论文数据由 props 传入；同步到本地展示状态，切换论文时重新填充
   useEffect(() => {
@@ -90,9 +90,8 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
     setEditResearchMotivation(data.research_motivation || '')
   }, [paper, lang])
 
-  // 研究方法与关键词处理：转为可读列表
+  // 研究方法转为可读列表。
   const methodologyList = toTextList(paper?.methodology)
-  const keywordList = toTextList(paper?.keywords_tags)
 
   return (
     <PropertySpectraProvider context={{ target: { target: 'paper', target_id: String(paper.id) } }}>
@@ -114,15 +113,16 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
         )}
       </Box>
 
-      {paper.can_revise ? <Box sx={{ mb: 2 }}>
-        <Alert severity="info" sx={{ mb: 1 }}>{t('paperDetail.revisionAvailable')}</Alert>
+      <Alert severity={STATUS_COLORS[reviewStatus] || 'info'} sx={{ mb: showingPublishedVersion ? 1 : 2 }}>
+        {reviewStatus
+          ? `${t('paperDetail.reviewStatus')}: ${reviewStatusLabel(dict, reviewStatus)}`
+          : t('paperDetail.submittedNotice')}
+      </Alert>
+      {showingPublishedVersion && <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.publishedVersionNotice')}</Alert>}
+      {paper.can_revise && <Box sx={{ mb: 2 }}>
         {paper.review_comment && <Alert severity="warning" sx={{ mb: 1 }}>{paper.review_comment}</Alert>}
         <Button component={Link} variant="contained" to={`/papers/${paper.id}/revise`} target="_blank" rel="noopener noreferrer">{t('paperDetail.revise')}</Button>
-      </Box> : <Alert severity={paper.review_status === 'approved' ? 'success' : 'info'} sx={{ mb: 2 }}>
-        {paper.review_status && paper.review_status !== 'pending'
-          ? `${t('paperDetail.reviewStatus')}: ${reviewStatusLabel(dict, paper.review_status)}`
-          : t('paperDetail.submittedNotice')}
-      </Alert>}
+      </Box>}
 
       <Box sx={{
         display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 3, alignItems: 'start',
@@ -194,8 +194,8 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
                     </Box>
                   )}
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    <Chip label={`${t('paperDetail.reviewStatus')}: ${reviewStatusLabel(dict, paper?.review_status) || reviewStatusLabel(dict, 'pending')}`}
-                      size="small" color={STATUS_COLORS[paper?.review_status] || 'default'} />
+                    <Chip label={`${t('paperDetail.reviewStatus')}: ${reviewStatusLabel(dict, reviewStatus) || reviewStatusLabel(dict, 'pending')}`}
+                      size="small" color={STATUS_COLORS[reviewStatus] || 'default'} />
                     <Chip label={`${t('paperDetail.dataSource')}: Local`} size="small" color="primary" />
                     {paper?.id && <Chip label={`ID: ${paper.id}`} size="small" variant="outlined" />}
                   </Box>
@@ -317,27 +317,6 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
           </CardContent>
         </Card>
 
-        {/* Sidebar */}
-        <Card sx={{ position: 'sticky', top: 20, boxShadow: 3 }}>
-          <CardContent>
-            <Typography variant="overline" color="text.secondary">{t('paperDetail.formulaLabel')}</Typography>
-            <Typography variant="h5" fontWeight={700} sx={{ mb: 2, wordBreak: 'break-word' }}>
-              {formula}
-            </Typography>
-
-            {keywordList.length > 0 && (
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="caption" color="text.secondary">{t('paperDetail.keywordsLabel')}</Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                  {keywordList.map((kw, idx) => (
-                    <Chip key={idx} label={kw} size="small" />
-                  ))}
-                </Box>
-              </Box>
-            )}
-
-          </CardContent>
-        </Card>
       </Box>
 
     </MaterialOutlineLayout>

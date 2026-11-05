@@ -85,7 +85,7 @@ const MyPapersList: React.FC<{ kind?: 'uploads' | 'reviews'; pageSize?: number; 
     <>
     <Box component="form" onSubmit={event => { event.preventDefault(); setPage(1); setQuery(keyword.trim()) }} sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2, mb: 1 }}>
       <TextField size="small" label={t('account.searchContributions')} value={keyword} onChange={e => setKeyword(e.target.value)} sx={{ flex: '1 1 240px' }} />
-      <TextField select size="small" label={t('account.contributionStatus')} value={status} onChange={e => { setPage(1); setStatus(e.target.value) }} sx={{ minWidth: 130 }}><MenuItem value="">{t('account.allStatuses')}</MenuItem>{Object.keys(STATUS_COLORS).map(value => <MenuItem key={value} value={value}>{(dict.enums.reviewStatus as Record<string, string>)[value] || value}</MenuItem>)}</TextField>
+      <TextField select size="small" label={t('account.contributionStatus')} value={status} onChange={e => { setPage(1); setStatus(e.target.value) }} sx={{ minWidth: 130 }}><MenuItem value="">{t('account.allStatuses')}</MenuItem>{Object.keys(STATUS_COLORS).filter(value => kind !== 'reviews' || value !== 'pending').map(value => <MenuItem key={value} value={value}>{(dict.enums.reviewStatus as Record<string, string>)[value] || value}</MenuItem>)}</TextField>
       <Button type="submit" variant="outlined">{t('common.search')}</Button>
     </Box>
     {!items?.length && <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>{query || status ? t('account.noMatchingContributions') : kind === 'reviews' ? t('account.noChecks') : t('paperDetail.emptyMyPapers')}</Typography>}
@@ -111,8 +111,8 @@ const MyPapersList: React.FC<{ kind?: 'uploads' | 'reviews'; pageSize?: number; 
             <Chip
               size="small"
               variant="outlined"
-              label={(dict.enums.reviewStatus as Record<string, string>)[paper.checked_status || paper.workflow_status || paper.review_status || ''] || paper.checked_status || paper.workflow_status || paper.review_status || (dict.enums.reviewStatus as Record<string, string>).pending}
-              color={STATUS_COLORS[paper.checked_status || paper.workflow_status || paper.review_status || ''] || 'default'}
+              label={(dict.enums.reviewStatus as Record<string, string>)[paper.workflow_status || paper.review_status || ''] || paper.workflow_status || paper.review_status || (dict.enums.reviewStatus as Record<string, string>).pending}
+              color={STATUS_COLORS[paper.workflow_status || paper.review_status || ''] || 'default'}
             />
           </Stack></Box>
           {paper.can_revise && <Button size="small" component={Link} to={`/papers/${paper.id}/revise`} target="_blank" rel="noopener noreferrer">{t('paperDetail.revise')}</Button>}

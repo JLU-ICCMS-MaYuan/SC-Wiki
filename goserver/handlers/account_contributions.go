@@ -23,7 +23,7 @@ func contributionPagination(c *gin.Context) (int, int) {
 	return limit, offset
 }
 
-// 只使用本人不可变审核事件，其他人后续复核不会抹去既有贡献。
+// 本人审核事件确定归属；当前待审稿只在待检查队列跟踪，历史保留在文章内部。
 func GetReviewedPapers(c *gin.Context) {
 	user, ok := currentUserFromContext(c)
 	if !ok {
@@ -34,16 +34,18 @@ func GetReviewedPapers(c *gin.Context) {
 		return
 	}
 	limit, offset := contributionPagination(c)
+	statusSQL := workflowStatusSQL(database.DB)
 	query := database.DB.Table("paper_history_events AS h").
-		Joins("JOIN papers p ON p.id = h.paper_id").
+		Joins("JOIN papers ON papers.id = h.paper_id").
 		Where("h.actor_user_id = ? AND h.event_type = ?", user.ID, paperHistoryReviewed).
+		Where(statusSQL+" <> ?", reviewStatusPending).
 		Where(`NOT EXISTS (SELECT 1 FROM paper_history_events newer WHERE newer.paper_id=h.paper_id AND newer.actor_user_id=h.actor_user_id AND newer.event_type='reviewed' AND (newer.occurred_at>h.occurred_at OR (newer.occurred_at=h.occurred_at AND newer.id>h.id)))`)
 	if keyword := strings.TrimSpace(c.Query("keyword")); keyword != "" {
 		like := "%" + keyword + "%"
-		query = query.Where("(p.title LIKE ? OR p.doi LIKE ? OR p.journal LIKE ?)", like, like, like)
+		query = query.Where("(papers.title LIKE ? OR papers.doi LIKE ? OR papers.journal LIKE ?)", like, like, like)
 	}
 	if status := c.Query("review_status"); status != "" {
-		query = query.Where("h.review_status = ?", status)
+		query = query.Where(statusSQL+" = ?", status)
 	}
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
@@ -51,17 +53,18 @@ func GetReviewedPapers(c *gin.Context) {
 		return
 	}
 	type item struct {
-		ID            uint      `json:"id"`
-		Title         *string   `json:"title"`
-		DOI           *string   `json:"doi"`
-		Journal       *string   `json:"journal"`
-		Year          *int      `json:"year"`
-		ReviewStatus  string    `json:"review_status"`
-		CheckedStatus string    `json:"checked_status"`
-		CheckedAt     time.Time `json:"checked_at"`
+		ID             uint      `json:"id"`
+		Title          *string   `json:"title"`
+		DOI            *string   `json:"doi"`
+		Journal        *string   `json:"journal"`
+		Year           *int      `json:"year"`
+		ReviewStatus   string    `json:"review_status"`
+		WorkflowStatus string    `json:"workflow_status"`
+		CheckedStatus  string    `json:"checked_status"`
+		CheckedAt      time.Time `json:"checked_at"`
 	}
 	items := []item{}
-	if err := query.Select("p.id, p.title, p.doi, p.journal, p.year, p.review_status, h.review_status AS checked_status, h.occurred_at AS checked_at").Order("h.occurred_at DESC, h.id DESC").Limit(limit).Offset(offset).Scan(&items).Error; err != nil {
+	if err := query.Select("papers.id, papers.title, papers.doi, papers.journal, papers.year, papers.review_status, " + statusSQL + " AS workflow_status, h.review_status AS checked_status, h.occurred_at AS checked_at").Order("h.occurred_at DESC, h.id DESC").Limit(limit).Offset(offset).Scan(&items).Error; err != nil {
 		c.JSON(500, gin.H{"error": "检查贡献加载失败"})
 		return
 	}

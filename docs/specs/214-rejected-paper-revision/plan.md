@@ -81,3 +81,19 @@ spec.md、plan.md、research.md、tasks.md、quickstart.md、validation.md、con
 - `docs/overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md`
 - `docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-ingestion.md`
 本轮只修正文档引用归属，不改变这些说明中的业务事实。
+
+## 2026-11-05 增量实施
+
+本节承接用户本轮明确授权，取代前文“本轮仅拆分、不安排开发”对当前轮次的描述；前文保留为2026-11-04历史。
+
+- FR-005：GetReviewedPapers复用workflowStatusSQL，先排除pending再计数分页，按当前状态筛选；本人最近检查事件只确定归属和检查时间。待检查复用GetPapers，不删除历史事件。
+- FR-006：检查列表返回workflow_status，MyPapersList优先显示当前状态；PaperEditView顶部和基础信息统一使用当前状态，并单独说明旧批准版继续展示。无私有状态时沿公开review_status。
+- FR-007：直接移除PaperEditView遗留侧栏与专用formula、keywordList计算，保留真实材料与关键词原始存储。
+- 新增触点：goserver/handlers/account_contributions.go、frontend/src/components/PaperEditView.tsx、frontend/src/i18n/{zh,en}/paperDetail.ts，现有MyPapersList继续复用。不改表结构、解析、科学值和共享表单编辑逻辑。
+- 先添加可失败的列表生命周期和详情回归，再修复；覆盖管理员／超级管理员、无交接存量、分页、公开版、状态变化、中文／英文和只读。执行定向Go／Vitest、字段与表单契约、变异检查及构建；隔离快照验证任务范围与共享工作树改动分离。
+
+| 需求 | 任务 | 验收 |
+| --- | --- | --- |
+| FR-005 | T006、T007、T009 | 同一论文当前列表互斥、计数、筛选及生命周期 |
+| FR-006 | T006、T007、T008、T009 | 当前状态优先、公开版说明及权限 |
+| FR-007 | T006、T008、T009 | 无遗留卡片、原材料仍可读取 |

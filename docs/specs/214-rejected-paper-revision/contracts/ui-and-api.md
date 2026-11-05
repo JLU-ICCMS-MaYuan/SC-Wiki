@@ -19,3 +19,10 @@ papers的批准状态和当前科学图决定公开版；最新handoff.holder仅
 ## 验证对应
 
 FR-001～FR-004对应US1与SC-001/002，实际案例及原运行边界见[验收记录](../validation.md)。
+
+## 2026-11-05 当前列表合同
+
+- GET /api/account/reviewed-papers按本人审核归属每篇最多一条，但排除当前pending；同一论文送审后只进入待检查队列。review_status筛选参数按当前工作稿状态过滤，计数与分页使用同一条件。
+- 检查列表增加workflow_status，checked_status仅为最后一次本人决定的历史信息；当前列表标签优先workflow_status，无交接存量回退review_status。
+- 详情对有权限者显示当前workflow_status；已批准公开版与当前工作稿状态不同时说明旧批准版继续公开。公开访客没有私有状态时仍显示公开版状态。
+- 删除详情底部“化学式＋关键词”卡片，不改API科学字段，不删除关键词存储和历史事件。

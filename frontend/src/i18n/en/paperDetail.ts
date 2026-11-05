@@ -15,6 +15,7 @@ export default {
   readOnlyMode: 'Read-only mode',
   paperDetailTitle: 'Paper Details',
   submittedNotice: 'This paper has been submitted for review. Regular users cannot edit the official record here.',
+  publishedVersionNotice: 'The previously approved version is shown. Public content will update after the revision is approved.',
 
   // ── Load failure branches (PaperDetailPage) ──
   failure: {

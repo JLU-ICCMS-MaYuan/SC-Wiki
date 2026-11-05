@@ -4,6 +4,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import AccountReviews from '../../frontend/src/components/AccountReviews'
+import MyPapersList from '../../frontend/src/components/MyPapersList'
 import AdminPage from '../../frontend/src/pages/AdminPage'
 import AdminWorkspacePage from '../../frontend/src/pages/AdminWorkspacePage'
 import PaperTitle from '../../frontend/src/components/PaperTitle'
@@ -51,6 +52,18 @@ it.each(['history', 'pending'])('独立工作区承接%s页签，每页20篇并�
   expect(document.querySelector('[data-paper-list-scroll="true"]')).not.toBeNull()
   fireEvent.click(screen.getByRole('button', { name: 'Go to page 2' }))
   await screen.findByText('Paper 21')
+})
+
+it('已检查列表展示当前状态，旧拒绝只在文章历史，不再提供待审筛选', async () => {
+  mocked.get.mockResolvedValue({items:[{id:1208,title:'CaH6',review_status:'approved',workflow_status:'approved',checked_status:'rejected'}],total:1})
+  host(<MyPapersList kind="reviews" />)
+  await screen.findByText('CaH6')
+  expect(screen.getByText('审核完成')).toBeInTheDocument()
+  expect(screen.queryByText('已拒绝')).not.toBeInTheDocument()
+  fireEvent.mouseDown(screen.getByRole('combobox',{name:'检查状态'}))
+  expect(screen.queryByRole('option',{name:'待审核',exact:true})).not.toBeInTheDocument()
+  fireEvent.click(screen.getByRole('option',{name:'已拒绝',exact:true}))
+  await waitFor(() => expect(mocked.get.mock.calls.some(([url])=>url.includes('review_status=rejected'))).toBe(true))
 })
 
 it('已批准稿从小锤子拒绝，不先领取已交出的工作稿', async () => {

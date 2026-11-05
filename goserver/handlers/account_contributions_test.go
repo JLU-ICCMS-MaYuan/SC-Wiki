@@ -19,7 +19,7 @@ func TestReviewedPapersOwnershipLatestAndPagination(t *testing.T) {
 	db.Create(&actor)
 	db.Create(&other)
 	first, second, unrelated := "First checked paper", "Second checked paper", "Other reviewer only"
-	for _, p := range []models.Paper{{ID: 1, Title: &first, ReviewStatus: "pending"}, {ID: 2, Title: &second, ReviewStatus: "approved"}, {ID: 3, Title: &unrelated, ReviewStatus: "approved"}} {
+	for _, p := range []models.Paper{{ID: 1, Title: &first, ReviewStatus: "rejected"}, {ID: 2, Title: &second, ReviewStatus: "approved"}, {ID: 3, Title: &unrelated, ReviewStatus: "approved"}, {ID: 4, Title: &first, ReviewStatus: "pending"}} {
 		if err := db.Create(&p).Error; err != nil {
 			t.Fatal(err)
 		}
@@ -33,6 +33,7 @@ func TestReviewedPapersOwnershipLatestAndPagination(t *testing.T) {
 		{PaperID: 2, ActorUserID: &actor.ID, EventType: "reviewed", ReviewStatus: &approved, OccurredAt: now.Add(-time.Minute)},
 		{PaperID: 3, ActorUserID: &other.ID, EventType: "reviewed", ReviewStatus: &approved, OccurredAt: now},
 		{PaperID: 3, ActorUserID: &actor.ID, EventType: "modified", OccurredAt: now},
+		{PaperID: 4, ActorUserID: &actor.ID, EventType: "reviewed", ReviewStatus: &rejected, OccurredAt: now},
 	} {
 		if err := db.Create(&event).Error; err != nil {
 			t.Fatal(err)
@@ -48,7 +49,7 @@ func TestReviewedPapersOwnershipLatestAndPagination(t *testing.T) {
 		query        string
 		total, count int
 		id           uint
-	}{{"", 2, 2, 1}, {"?limit=1&offset=1", 2, 1, 2}, {"?keyword=First", 1, 1, 1}, {"?review_status=rejected", 0, 0, 0}, {"?limit=-1&offset=-2", 2, 2, 1}} {
+	}{{"", 2, 2, 1}, {"?limit=1&offset=1", 2, 1, 2}, {"?keyword=First", 1, 1, 1}, {"?review_status=rejected", 1, 1, 1}, {"?review_status=approved", 1, 1, 2}, {"?limit=-1&offset=-2", 2, 2, 1}} {
 		response := httptest.NewRecorder()
 		router.ServeHTTP(response, httptest.NewRequest("GET", "/reviews"+tc.query, nil))
 		if response.Code != 200 {
@@ -71,7 +72,7 @@ func TestReviewedPapersOwnershipLatestAndPagination(t *testing.T) {
 		if tc.count > 0 && (body.Items[0].ID != tc.id || body.Items[0].CheckedStatus != "approved") {
 			t.Fatal(response.Body)
 		}
-		if tc.id == 1 && body.Items[0].ReviewStatus != "pending" {
+		if tc.id == 1 && body.Items[0].ReviewStatus != "rejected" {
 			t.Fatal("historical decision confused with current status")
 		}
 	}

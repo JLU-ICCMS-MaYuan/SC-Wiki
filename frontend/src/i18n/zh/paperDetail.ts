@@ -16,6 +16,7 @@ export default {
   readOnlyMode: '只读模式',
   paperDetailTitle: '论文详情',
   submittedNotice: '论文已提交审核。普通用户不能在这里直接修改正式记录。',
+  publishedVersionNotice: '当前展示旧批准版；修订稿通过审核后更新公开内容。',
 
   // ── 加载失败分流（PaperDetailPage）──
   failure: {

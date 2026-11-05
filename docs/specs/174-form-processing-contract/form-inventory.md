@@ -102,3 +102,7 @@ StructureOptimizationFields与既有CalculationConditionFields接入上传、返
 ## #209 退回结果保留与字段原文展示
 
 既有sidebar-field-hosts增加四宿主无整包兜底、无蓝底信息框、相关反证与长原文直接显示；field-sidebar-ownership、graph-title-form和form-contract改为在原AI理由区验证真实状态和恢复按钮，不要求已删除的重复摘要／蓝底文案。正式表单门140项通过，8项变异检出；后端真实交接、来源版本与人工决定保持的回滚检查独立记录。实际PDF重新上传、模型与整篇事务边界见[#209验收](../209-return-field-evidence/validation.md)，不把固定宿主夹具冒充整篇科学验收。
+
+## #214 当前稿件状态与只读详情清理
+
+MyPapersList、管理员／超级管理员检查列表及PaperEditView只读详情按当前状态显示；待审稿不重复留在已检查列表。删除旧摘要卡片，保留材料字段与正式关键词数据。本轮未改科学编辑组件、字段契约或保存流程。完整表单188项、12项变异及真实只读API六组浏览器通过；七项相邻旧失败经独立HEAD基线复现，具体范围见[#214验收](../214-rejected-paper-revision/validation.md)，不宣称这些旧失败通过。

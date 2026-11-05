@@ -1,0 +1,120 @@
+{
+  "date": "2026-11-05",
+  "baseline_head": "f2989c15cf29e38d2b9f1a1b1bf250a4e51d71d3",
+  "isolation": "未修改HEAD归档加本次文件；前端正式构建配本机真实只读API，未写业务数据",
+  "source_sha256": {
+    "frontend/src/components/PaperEditView.tsx": "39cd7ac470792e24e9c3a0d6c39a121f3346610ba558cc881bedcc3a491bada0",
+    "frontend/src/components/MyPapersList.tsx": "e83aff96f8ce4ca779b2e90d08027b647dc5e6ba12f787ce34b67e77c8f5a2d4",
+    "frontend/src/i18n/zh/paperDetail.ts": "0d3b560f6c2ac227954512bbc8bcecba586c319d1bf14f4c29009b86940d5248",
+    "frontend/src/i18n/en/paperDetail.ts": "ba17c15eb7b94cad01be8cc35c400db3eead6377fe083ca80a0bb75aec285db1",
+    "goserver/handlers/account_contributions.go": "acccf4b07e8fb02ffc09d92ac0e13c07e5a7808646b0c54f243b4172158b7a8c"
+  },
+  "red": {
+    "frontend_failed": 5,
+    "frontend_cases": [
+      "旧批准版的当前返修状态为pending，顶部和基础信息一致",
+      "旧批准版的当前返修状态为rejected，顶部和基础信息一致",
+      "上传者返修入口仍显示当前拒绝状态和原意见",
+      "公开访客仅看批准版，详情不再有旧化学式关键词卡片",
+      "已检查列表展示当前状态，旧拒绝只在文章历史，不再提供待审筛选"
+    ],
+    "go_failure": "TestReviewedPapersFollowCurrentStatusWithoutDuplicatePending在旧接口缺workflow_status时失败"
+  },
+  "verification": {
+    "form_contract_passed": 188,
+    "mutation_detected": {
+      "render": 8,
+      "red_marking": 4
+    },
+    "field_contract": "通过",
+    "build": "通过",
+    "go_passed": [
+      "TestReviewedPapersOwnershipLatestAndPagination",
+      "TestReviewedPapersFollowCurrentStatusWithoutDuplicatePending",
+      "TestPaperDetailReturnsTargetPropertyModules",
+      "TestPaperDetailTargetPreloadsHaveBoundedQueryCount",
+      "TestPaperDetailReturnsFullMaterialStateFields",
+      "TestPaperDetailUsesOnlyTargetPropertyRecords",
+      "TestPaperDetailUsesEmptyArraysWhenNoScientificData",
+      "TestPaperDetailReturnsFamilyNameEn",
+      "TestRejectedRevisionAppearsInPrivateFilterWhileApprovedPaperStaysPublic"
+    ],
+    "frontend_passed": 52,
+    "frontend_existing_failures": {
+      "只读详情页与校对表单字段一致（Issue #59） 材料状态分类区 9 项均渲染": "TestingLibraryElementError: Found multiple elements with the text: /Fm-3m · LaH₁₀ · 压强未填写/",
+      "只读详情页与校对表单字段一致（Issue #59） 压强单臂区间不补造缺失的一侧": "TestingLibraryElementError: Unable to find an element with the text: /above 200 GPa/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.",
+      "只读详情页与校对表单字段一致（Issue #59） 物性字段集无多余项（无最小值/最大值）": "Error: expect(element).toHaveValue(200)",
+      "详情页前往「我的论文」的入口 点击「我的论文」导航到用户中心": "Error: Unable to find role=\"link\" and name \"我的论文\"",
+      "我的论文列表 渲染已提交论文并可点击进入详情": "AssertionError: expected \"spy\" to be called with arguments: [ '/api/papers/my-uploads' ]",
+      "我的论文列表 没有已提交论文时显示空状态": "Error: Unable to find an element with the text: /还没有提交过论文/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.",
+      "关键物性跨来源汇总（Issue #65） 普通物性仍然纳入，且按 material_state_id 回查条件": "AssertionError: expected '-' to be '200 GPa' // Object.is equality"
+    },
+    "baseline_same_failure_names_and_first_messages": true
+  },
+  "live_readonly": [
+    {
+      "path": "/api/admin/papers/all?review_status=pending&keyword=10.1073%2Fpnas.1118168109&limit=20&offset=0",
+      "status": 200,
+      "total": 1,
+      "items": [
+        {
+          "id": 1208,
+          "workflow_status": "pending",
+          "checked_status": null
+        }
+      ]
+    },
+    {
+      "path": "/api/account/reviewed-papers?keyword=10.1073%2Fpnas.1118168109&limit=20&offset=0",
+      "status": 200,
+      "total": 0,
+      "items": []
+    },
+    {
+      "path": "/api/account/reviewed-papers?review_status=rejected&keyword=10.1073%2Fpnas.1118168109&limit=20&offset=0",
+      "status": 200,
+      "total": 0,
+      "items": []
+    }
+  ],
+  "browser": {
+    "checks": [
+      {
+        "role": "admin",
+        "checkedCount": 0,
+        "pendingCount": 1
+      },
+      {
+        "role": "superadmin",
+        "checkedCount": 0,
+        "pendingCount": 1
+      },
+      {
+        "role": "user",
+        "width": 1440,
+        "status": "pending",
+        "oldCard": false
+      },
+      {
+        "role": "user",
+        "width": 390,
+        "status": "pending",
+        "oldCard": false
+      },
+      {
+        "role": "superadmin",
+        "width": 1440,
+        "status": "pending",
+        "oldCard": false
+      },
+      {
+        "role": "anonymous",
+        "width": 1440,
+        "status": "approved",
+        "oldCard": false
+      }
+    ],
+    "errors": [],
+    "writes": []
+  }
+}
