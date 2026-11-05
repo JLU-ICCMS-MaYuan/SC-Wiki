@@ -1,0 +1,454 @@
+{
+  "scope": "真实40项输入与旧过滤器返回的34项有效处置；不是未保存的模型原始响应",
+  "task_id": "7dd881676f654078982f886948819a22",
+  "items": [
+    {
+      "id": "block:d69b46bde0586f7b856459aa5a6ad184599b8fc30fa48fb18eaeeb302f72b4f0",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "d69b46bde0586f7b856459aa5a6ad184599b8fc30fa48fb18eaeeb302f72b4f0",
+      "text": "Potential high-Tc superconducting lanthanum and yttrium hydrides at high pressure"
+    },
+    {
+      "id": "block:664225519bfac959882cd696632e863b894189bae49cd6e292322782bcffe49e",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "664225519bfac959882cd696632e863b894189bae49cd6e292322782bcffe49e",
+      "text": "high pressure | superconductivity | hydrides | structure search"
+    },
+    {
+      "id": "block:1915bd38e441e0c03af0558077818504ee4cd1a92b715f5e19ceabd526de52fb",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "1915bd38e441e0c03af0558077818504ee4cd1a92b715f5e19ceabd526de52fb",
+      "text": "Theoretical predictions and subsequent experimental observations of high-temperature superconductivity in dense hydrogen-rich compounds havereinvigoratedthe field of superconductivity. A systematic computational study of the hydrides of lanthanum and yttrium over a wide composition range reveals hydrogen-rich structures with intriguing electronic properties under pressure. Electron-phonon coupling calculations predict the existence of new superconducting phases, some exhibiting superconductivity in the range of room temperature. Moreover, the calculated stabilities indicate the materials could be synthesized at pressures that are currently accessible in the laboratory. The results open the prospect for the design, synthesis, and recovery of new hightemperature superconductors with potential practical applications."
+    },
+    {
+      "id": "block:7b74d3115193f326b5f8a3be7a0601f136e4b54c702d600cc38531f7f281fe60",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "7b74d3115193f326b5f8a3be7a0601f136e4b54c702d600cc38531f7f281fe60",
+      "text": "In summary, exploration of La-H and Y-H systems at high pressures reveals stable hydrogen-rich phases with calculated unusually high superconducting temperatures. To be realistic, we should be careful about these high { \\bar { T } } _ { c } s . Although well-calibrated on low T _ { c } elemental superconductors, more high - T _ { c } compounds need to be studied—we only have SH3 mentioned above (with its attendant ambiguities—not in the T _ { c } , measured, but in the structure). The predicted stabilities of the phases are in the range of current high-pressure techniques, although the megabar pressures required present challenges for combined synthesis and characterization. On the other hand, it may also be possible to synthesize these and related materials metastably at lower pressure. For instance, one might reason from the fact that Y (54) itself has a distorted fcc structure that it may be possible to produce sodalite-like \\mathrm { Y H _ { 1 0 } } at a metal-hydrogen interface. The exploration, theoretical and experimental, of high hydrides of heavy metals is thus a promising field (55–58)."
+    },
+    {
+      "id": "block:8f50171da4ffb9d70e84e3f91713fe1e0ac91caeed829bac27dd61ff61ba1b9d",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "8f50171da4ffb9d70e84e3f91713fe1e0ac91caeed829bac27dd61ff61ba1b9d",
+      "text": "1. Ashcroft NW (1968) Metallic hydrogen: A high-temperature superconductor? Phys Rev Lett 21:1748."
+    },
+    {
+      "id": "block:0ef801dfbf726ee6f591ad0566642d9e0608a4e461699031ec2a7e3cba843234",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "0ef801dfbf726ee6f591ad0566642d9e0608a4e461699031ec2a7e3cba843234",
+      "text": "2. Ashcroft NW (2004) Hydrogen dominant metallic alloys: High temperature superconductors? Phys Rev Lett 92:187002."
+    },
+    {
+      "id": "block:b1bcd5b2fea210d11cfbecc74cf0d2039edeba6d9f13f516dc8c7c13bef8efd8",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "b1bcd5b2fea210d11cfbecc74cf0d2039edeba6d9f13f516dc8c7c13bef8efd8",
+      "text": "3. Bardeen J, Cooper LN, Schrieffer JR (1957) Microscopic theory of superconductivity. Phys Rev 106:162."
+    },
+    {
+      "id": "block:17d80d9a955970e8b8ab0c24f622503c2e64f5bc0f7c6e36fcf9f94f57afa6e4",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "17d80d9a955970e8b8ab0c24f622503c2e64f5bc0f7c6e36fcf9f94f57afa6e4",
+      "text": "4. Eremets MI, Trojan IA, Medvedev SA, Tse JS, Yao Y (2008) Superconductivity in hydrogen dominant materials: Silane. Science 319:1506–1509."
+    },
+    {
+      "id": "block:bef81cf675f922e83ed962814cc9c6e89e48aec41fba51cc345fcc7981faee22",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "bef81cf675f922e83ed962814cc9c6e89e48aec41fba51cc345fcc7981faee22",
+      "text": "5. Chen XJ, et al. (2008) Superconducting behavior in compressed solid SiH4 with a layered structure. Phys Rev Lett 101:077002."
+    },
+    {
+      "id": "block:f8bd6eddce5b3f8a995475091cfa472469d6403dcb6d5839de0700b3b85ce4c3",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "f8bd6eddce5b3f8a995475091cfa472469d6403dcb6d5839de0700b3b85ce4c3",
+      "text": "8. Shamp A, Zurek E (2015) Superconducting high-pressure phases composed of hydrogen and iodine. J Phys Chem Lett 6:4067–4072."
+    },
+    {
+      "id": "block:8dddd8f8434babcf56cf4b59866f9aee2933d819dee90e58a2830f5e94ddf27f",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "8dddd8f8434babcf56cf4b59866f9aee2933d819dee90e58a2830f5e94ddf27f",
+      "text": "10. Shamp A, Zurek E (2017) Superconductivity in hydrides doped with main group elements under pressure. Novel Supercond Mat 3:14–22."
+    },
+    {
+      "id": "block:21557ed8d7d74ba6446398337574b3f53aea55a9cdd8b18ce908f2b511205169",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "21557ed8d7d74ba6446398337574b3f53aea55a9cdd8b18ce908f2b511205169",
+      "text": "11. Feng J, et al. (2006) Structures and potential superconductivity in at high pressure: En route to \"metallic hydrogen\". Phys Rev Lett 96:017006."
+    },
+    {
+      "id": "block:d89663f76e57564fa14f8decefe560858e08185f2e81da26a99f78dfdc056ce4",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "d89663f76e57564fa14f8decefe560858e08185f2e81da26a99f78dfdc056ce4",
+      "text": "12. Tse JS, Yao Y, Tanaka K (2007) Novel superconductivity in metallic SnH4 under high pressure. Phys Rev Lett 98:117004."
+    },
+    {
+      "id": "block:ad5ada487700ad1c5096e51af67d6a04e4f16da2a608cd18299243b5031b620e",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "ad5ada487700ad1c5096e51af67d6a04e4f16da2a608cd18299243b5031b620e",
+      "text": "13. Gao G, et al. (2008) Superconducting high pressure phase of germane. Phys Rev Lett 101:107002."
+    },
+    {
+      "id": "block:cd69845584d7ede61bfce2c6add94cf49c47a33c9ed5c318a4b3be7adb544719",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "cd69845584d7ede61bfce2c6add94cf49c47a33c9ed5c318a4b3be7adb544719",
+      "text": "14. Li Y, et al. (2010) Superconductivity at approximately 100 K in dense SiH4(H2)2 pre-dicted by first principles. Proc Nat/ Acad Sci USA 107:15708–15711."
+    },
+    {
+      "id": "block:a75634a6d63e97cb62928af2a8e8ed2be7d45f4827b718746ac2dbc2bdfeef1c",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "a75634a6d63e97cb62928af2a8e8ed2be7d45f4827b718746ac2dbc2bdfeef1c",
+      "text": "15. Chen Y, Hu QM, Yang R (2012) Predicted suppression of the superconducting transition of new high-pressure yttrium phases with increasing pressure from firstprinciples calculations. Phys Rev Lett 109:157004."
+    },
+    {
+      "id": "block:c0cd74d7cf99458ce6dcd8ad432e6ea262b98be55f7801730745fa2c20f57d5a",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "c0cd74d7cf99458ce6dcd8ad432e6ea262b98be55f7801730745fa2c20f57d5a",
+      "text": "16. Kim DY, Scheicher RH, Ahuja R (2009) Predicted high-temperature superconducting state in the hydrogen-dense transition-metal hydride YH3 at 40 K and 17.7 GPa. Phys Rev Lett 103:077002."
+    },
+    {
+      "id": "block:73d2f0fee1ffeecf18b0c12548ea73109c89ef086b67245e09f6373f1170215f",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "73d2f0fee1ffeecf18b0c12548ea73109c89ef086b67245e09f6373f1170215f",
+      "text": "17. Wang H, Tse JS, Tanaka K, litaka T, Ma Y (2012) Superconductive sodalite-like clathrate calcium hydride at high pressures. Proc Nat/ Acad Sci USA 109:6463–6466."
+    },
+    {
+      "id": "block:16a7c298dc06294ad3e90490361b89530129a8d0c3b86d86771cac04725aaf50",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "16a7c298dc06294ad3e90490361b89530129a8d0c3b86d86771cac04725aaf50",
+      "text": "19. Li Y, Hao J, Liu H, Li Y, Ma Y (2014) The metallization and superconductivity of dense hydrogen sulfide. J Chem Phys 140:174712."
+    },
+    {
+      "id": "block:68c9578776b6ea752848cbd974e9b9b434e54320029f46eed657c5910edbac4e",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "68c9578776b6ea752848cbd974e9b9b434e54320029f46eed657c5910edbac4e",
+      "text": "20. Drozdov AP, Eremets MI, Troyan IA, Ksenofontov V, Shylin SI (2015) Conventional superconductivity at 203 kelvin at high pressures in the sulfur hydride system. Nature 525:73-76."
+    },
+    {
+      "id": "block:add95effe0ae52c5032c6fc5202ffddc17de077913442a673b2a5ce6476c0177",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "add95effe0ae52c5032c6fc5202ffddc17de077913442a673b2a5ce6476c0177",
+      "text": "21. Errea I, et al. (2015) High-pressure hydrogen sulfide from first principles: A strongly anharmonic phonon-mediated superconductor. Phys Rev Lett 114:157004."
+    },
+    {
+      "id": "block:42c600cc426f73875aafe0180206928afb0a09ba0f490f7aeaf9f816b7b59bf2",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "42c600cc426f73875aafe0180206928afb0a09ba0f490f7aeaf9f816b7b59bf2",
+      "text": "23. Einaga M, et al. (2016) Crystal structure of the superconducting phase of sulfur hydride. Nat Phys 12:835–838."
+    },
+    {
+      "id": "block:daaa800f715a681adc28071278064a1ecba4bb9a1696e6f43b863f8a76187329",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "daaa800f715a681adc28071278064a1ecba4bb9a1696e6f43b863f8a76187329",
+      "text": "24. Duan D, et al. (2014) Pressure-induced metallization of dense (H₂S)₂H₂ with high-Tc superconductivity. Sci Rep 4:6968."
+    },
+    {
+      "id": "block:02ee2f24d99615c5beab1107283597cd78d25ec8dbee564de1aab04f6a84743c",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "02ee2f24d99615c5beab1107283597cd78d25ec8dbee564de1aab04f6a84743c",
+      "text": "25. Drozdov AP, Eremets MI, Troyan IA (2015) Superconductivity above 100 K in PH3 at high pressures. arXiv:1508.06224."
+    },
+    {
+      "id": "block:798bc0462b666bf717f2ac2c346f37f75315fc8714db907693246d081898808a",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "798bc0462b666bf717f2ac2c346f37f75315fc8714db907693246d081898808a",
+      "text": "26. Shamp A, et al. (2016) Decomposition products of phosphine under pressure: PH2 stable and superconducting? J Am Chem Soc 138:1884–1892."
+    },
+    {
+      "id": "block:c0ad6827ef99104546811675cd6f92ed992b0994fe0d73b1d8c493d2c1218f62",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "c0ad6827ef99104546811675cd6f92ed992b0994fe0d73b1d8c493d2c1218f62",
+      "text": "27. Liu H, Li Y, Gao G, Tse JS, Naumov II (2016) Crystal structure and superconductivity of PH3 at high pressures. J Phys Chem C 120:3458–3461."
+    },
+    {
+      "id": "block:f26bcf955a000a3ea9f64e9ed5668c99f35a48d5cc26ad794e482d2ea0961cb6",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "f26bcf955a000a3ea9f64e9ed5668c99f35a48d5cc26ad794e482d2ea0961cb6",
+      "text": "28. Flores-Livas JA, et al. (2016) Superconductivity in metastable phases of phosphorushydride compounds under high pressure. Phys Rev B 93:020508."
+    },
+    {
+      "id": "block:21f13e460817bfe1b85aebf3623dd015edb407dc2c7772c06a3dfe392870df0f",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "21f13e460817bfe1b85aebf3623dd015edb407dc2c7772c06a3dfe392870df0f",
+      "text": "29. Feng X, Zhang J, Gao G, Liu H, Wang H (2015) Compressed sodalite-like MgH₆ as a potential high-temperature superconductor. RSC Adv 5:59292–59296."
+    },
+    {
+      "id": "block:2878b7170f821bad85a73b2d9fc0d803833b8aa2d25876149a42dcd755f246e5",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "2878b7170f821bad85a73b2d9fc0d803833b8aa2d25876149a42dcd755f246e5",
+      "text": "30. Li Y, et al. (2015) Pressure-stabilized superconductive yttrium hydrides. Sci Rep 5:9948."
+    },
+    {
+      "id": "block:0786e3a919e1f6921468276851bd186450e1a66cb7fd078ece6653b61bf3a24f",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "0786e3a919e1f6921468276851bd186450e1a66cb7fd078ece6653b61bf3a24f",
+      "text": "42. Papaconstantopoulos D, Klein B, Mehl M, Pickett W (2015) Cubic H3S around 200 GPa: An atomic hydrogen superconductor stabilized by sulfur. Phys Rev B 91:184511."
+    },
+    {
+      "id": "block:efab8b54303196a0072f3f6d73db15b39dd9d3fbbc9bd7547ccdaa0e7d4f58d8",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "efab8b54303196a0072f3f6d73db15b39dd9d3fbbc9bd7547ccdaa0e7d4f58d8",
+      "text": "44. Dynes R (1972) McMillan's equation and the Tc of superconductors. Solid State Commun 10:615–618."
+    },
+    {
+      "id": "block:9e067d4c0a2d9c9f7aa16dd2388698d00b577fd2d1cb9c5394d19316d8ed3add",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "9e067d4c0a2d9c9f7aa16dd2388698d00b577fd2d1cb9c5394d19316d8ed3add",
+      "text": "45. Nixon LW, Papaconstantopoulos DA, Mehl MJ (2008) Electronic structure and superconducting properties of lanthanum. Phys Rev B 78:214510."
+    },
+    {
+      "id": "block:3ab91d8e817a9ae0dcf512b3fa74793f24f30560aecf9ef0af6c223af44aea12",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "3ab91d8e817a9ae0dcf512b3fa74793f24f30560aecf9ef0af6c223af44aea12",
+      "text": "46. Bağci S, Tutuncu H, Duman S, Srivastava G (2010) Phonons and superconductivity in fcc and dhcp lanthanum. Phys Rev B 81:144507."
+    },
+    {
+      "id": "block:2cf3d7a6c994dbac80b3daff0538345b0062674fba697f69f52b449b71b8935b",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "2cf3d7a6c994dbac80b3daff0538345b0062674fba697f69f52b449b71b8935b",
+      "text": "48. Tissen VG, Ponyatovskii EG, Nefedova MV, Porsch F, Holzapfel WB (1996) Effect of pressure on the superconducting T, of lanthanum. Phys Rev B: Condens Matter 53: 8238-8240."
+    },
+    {
+      "id": "block:d7897db133fd6c44e74e27af1dc569659f7209ecbabdb94f2b3c26e86c78f913",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "d7897db133fd6c44e74e27af1dc569659f7209ecbabdb94f2b3c26e86c78f913",
+      "text": "49. Hamlin J, Tissen V, Schilling J (2006) Superconductivity at 17 K in yttrium metal under nearly hydrostatic pressures up to 89 GPa. Phys Rev B 73:094522."
+    },
+    {
+      "id": "block:118b93109b4745dacab586c6cdd791e44a923d21236cd0c7af25ec3c89467aaf",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "118b93109b4745dacab586c6cdd791e44a923d21236cd0c7af25ec3c89467aaf",
+      "text": "51. Borinaga M, et al. (2016) Anharmonic enhancement of superconductivity in metallic molecular Cmca-4 hydrogen at high pressure: A first-principles study. J Phys: Condens Matter 28:494001."
+    },
+    {
+      "id": "block:c7632bf1c311136d417dffd61349b43e1d844cca6ada0c39eb0298ee2e3cb024",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "c7632bf1c311136d417dffd61349b43e1d844cca6ada0c39eb0298ee2e3cb024",
+      "text": "52. Borinaga M, Errea I, Calandra M, Mauri F, Bergara A (2016) Anharmonic effects in atomic hydrogen: Superconductivity and lattice dynamical stability. Phys Rev B 93: 174308."
+    },
+    {
+      "id": "block:f033ddadfc0790a1cb5dda124e8069565c1b8107580382bf5e2c48239319a89a",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "f033ddadfc0790a1cb5dda124e8069565c1b8107580382bf5e2c48239319a89a",
+      "text": "53. Garland J, Bennemann K, Mueller F (1968) Effect of lattice disorder on the superconducting transition temperature. Phys Rev Lett 21:1315."
+    },
+    {
+      "id": "block:6026b206954d6d4e9c82cef5d6582887dbbc53fd0a6f32ec47c9622d07e59680",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "6026b206954d6d4e9c82cef5d6582887dbbc53fd0a6f32ec47c9622d07e59680",
+      "text": "57. Zhong X, et al. (2016) Tellurium hydrides at high pressures: High-temperature superconductors. Phys Rev Lett 116:057002."
+    },
+    {
+      "id": "block:266e1ac9fbe7a85973fba96a90c3e4e2dc382f31e50bdc0d4bd55a0d0a39a079",
+      "file_id": "ee9e8eac2a504984b85eae23d428696d",
+      "block_id": "266e1ac9fbe7a85973fba96a90c3e4e2dc382f31e50bdc0d4bd55a0d0a39a079",
+      "text": "58. Kim DY, Scheicher RH, Pickard CJ, Needs RJ, Ahuja R (2011) Predicted formation of superconducting platinum-hydride crystals under pressure in the presence of molecular hydrogen. Phys Rev Lett 107:117002."
+    }
+  ],
+  "filtered_response": {
+    "items": [
+      {
+        "id": "block:d69b46bde0586f7b856459aa5a6ad184599b8fc30fa48fb18eaeeb302f72b4f0",
+        "decision": "exclude",
+        "category": "header_or_unit_row",
+        "reason": "Document title, not a superconductivity data result."
+      },
+      {
+        "id": "block:664225519bfac959882cd696632e863b894189bae49cd6e292322782bcffe49e",
+        "decision": "exclude",
+        "category": "header_or_unit_row",
+        "reason": "Article keywords/header, not extractable result data."
+      },
+      {
+        "id": "block:1915bd38e441e0c03af0558077818504ee4cd1a92b715f5e19ceabd526de52fb",
+        "decision": "exclude",
+        "category": "non_result_content",
+        "reason": "Significance summary repeats results covered by extracted records."
+      },
+      {
+        "id": "block:7b74d3115193f326b5f8a3be7a0601f136e4b54c702d600cc38531f7f281fe60",
+        "decision": "exclude",
+        "category": "non_result_content",
+        "reason": "Concluding narrative summarizes previously reported predictions without a new measurement."
+      },
+      {
+        "id": "block:8f50171da4ffb9d70e84e3f91713fe1e0ac91caeed829bac27dd61ff61ba1b9d",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:0ef801dfbf726ee6f591ad0566642d9e0608a4e461699031ec2a7e3cba843234",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:b1bcd5b2fea210d11cfbecc74cf0d2039edeba6d9f13f516dc8c7c13bef8efd8",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to foundational theory, not this paper's result."
+      },
+      {
+        "id": "block:17d80d9a955970e8b8ab0c24f622503c2e64f5bc0f7c6e36fcf9f94f57afa6e4",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:bef81cf675f922e83ed962814cc9c6e89e48aec41fba51cc345fcc7981faee22",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:f8bd6eddce5b3f8a995475091cfa472469d6403dcb6d5839de0700b3b85ce4c3",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:21557ed8d7d74ba6446398337574b3f53aea55a9cdd8b18ce908f2b511205169",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:d89663f76e57564fa14f8decefe560858e08185f2e81da26a99f78dfdc056ce4",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:ad5ada487700ad1c5096e51af67d6a04e4f16da2a608cd18299243b5031b620e",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:cd69845584d7ede61bfce2c6add94cf49c47a33c9ed5c318a4b3be7adb544719",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:c0cd74d7cf99458ce6dcd8ad432e6ea262b98be55f7801730745fa2c20f57d5a",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:73d2f0fee1ffeecf18b0c12548ea73109c89ef086b67245e09f6373f1170215f",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:16a7c298dc06294ad3e90490361b89530129a8d0c3b86d86771cac04725aaf50",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:68c9578776b6ea752848cbd974e9b9b434e54320029f46eed657c5910edbac4e",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior experimental work, not this paper's result."
+      },
+      {
+        "id": "block:add95effe0ae52c5032c6fc5202ffddc17de077913442a673b2a5ce6476c0177",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:42c600cc426f73875aafe0180206928afb0a09ba0f490f7aeaf9f816b7b59bf2",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:daaa800f715a681adc28071278064a1ecba4bb9a1696e6f43b863f8a76187329",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:02ee2f24d99615c5beab1107283597cd78d25ec8dbee564de1aab04f6a84743c",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:798bc0462b666bf717f2ac2c346f37f75315fc8714db907693246d081898808a",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:c0ad6827ef99104546811675cd6f92ed992b0994fe0d73b1d8c493d2c1218f62",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:f26bcf955a000a3ea9f64e9ed5668c99f35a48d5cc26ad794e482d2ea0961cb6",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:0786e3a919e1f6921468276851bd186450e1a66cb7fd078ece6653b61bf3a24f",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:efab8b54303196a0072f3f6d73db15b39dd9d3fbbc9bd7547ccdaa0e7d4f58d8",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference describing a calculation method, not this paper's result."
+      },
+      {
+        "id": "block:9e067d4c0a2d9c9f7aa16dd2388698d00b577fd2d1cb9c5394d19316d8ed3add",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:d7897db133fd6c44e74e27af1dc569659f7209ecbabdb94f2b3c26e86c78f913",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:118b93109b4745dacab586c6cdd791e44a923d21236cd0c7af25ec3c89467aaf",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:c7632bf1c311136d417dffd61349b43e1d844cca6ada0c39eb0298ee2e3cb024",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:f033ddadfc0790a1cb5dda124e8069565c1b8107580382bf5e2c48239319a89a",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:6026b206954d6d4e9c82cef5d6582887dbbc53fd0a6f32ec47c9622d07e59680",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      },
+      {
+        "id": "block:266e1ac9fbe7a85973fba96a90c3e4e2dc382f31e50bdc0d4bd55a0d0a39a079",
+        "decision": "exclude",
+        "category": "reference_or_background",
+        "reason": "Bibliographic reference to prior work, not this paper's result."
+      }
+    ]
+  }
+}

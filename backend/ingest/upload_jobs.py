@@ -2297,8 +2297,14 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                 items = _uncovered_classifier_items(file_id, ir, uncovered, claims=claims)
                 if not items:
                     continue
+                classification_directory = artifact_directory(task_id) / 'coverage_classification' / file_id
+                classification_directory.mkdir(parents=True, exist_ok=True)
+                _atomic_write_json(classification_directory / 'input.json', {'items': items})
+                def save_classification_event(event):
+                    _atomic_write_json(classification_directory /
+                        f"attempt-{event.get('attempt', 1)}-{event['status']}.json", event)
                 try:
-                    decisions = classify_uncovered(items)
+                    decisions = classify_uncovered(items, on_event=save_classification_event)
                     _atomic_write_json(artifact_directory(task_id) / f"coverage-classification-{file_id}.json",
                                        {"items": items, "decisions": decisions})
                 except Exception as exc:

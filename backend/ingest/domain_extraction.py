@@ -605,30 +605,50 @@ prove coverage and never authorizes excluding new or unreadable data.
 """
 
 
-def classify_uncovered(items: list[dict]) -> list[dict]:
+def classify_uncovered(items: list[dict], *, on_event=None) -> list[dict]:
     """对仍未覆盖的块/表行做一次定向分类：转为带理由排除，或确认需要提取。
 
     只产出排除项与"需提取"标记；不生成记录、不伪造证据。输出经服务端回代校验。
     """
     from backend.rag.llm import complete_json
+    from backend.rag.structured_output import StructuredOutputError, validate_output
+    from .scientific_output_schema import obj, array, nullable
 
     if not items:
         return []
-    parsed = complete_json(UNCOVERED_CLASSIFIER_PROMPT, json.dumps({"items": items}, ensure_ascii=False,
-                                                                  default=str), retries=2)
     by_id = {str(item.get("id")): item for item in items}
+    if len(by_id) != len(items) or any(not item.get('id') for item in items):
+        raise StructuredOutputError('覆盖分类输入缺少唯一身份')
+    schema = obj({'items': {**array(obj({
+        'id': {'type': 'string', 'enum': list(by_id)},
+        'decision': {'type': 'string', 'enum': ['exclude', 'needs_extraction']},
+        'category': nullable({'type': 'string', 'enum': list(EXCLUSION_CATEGORIES)}),
+        'reason': {'type': 'string', 'minLength': 1},
+    })), 'minItems': len(items), 'maxItems': len(items)}})
+    partial = {'text': '', 'attempt': 1}
+    def remember(text):
+        partial['text'] = text
+    def record(event):
+        partial['attempt'] = event.get('attempt', partial['attempt'])
+        if on_event:
+            on_event({**event, 'partial_response': partial['text']})
+        partial['text'] = ''
+    parsed = complete_json(UNCOVERED_CLASSIFIER_PROMPT, json.dumps({'items': items}, ensure_ascii=False,
+        default=str), retries=2, response_schema=schema, on_partial=remember, on_call=record)
+    if on_event:
+        on_event({'attempt': partial['attempt'], 'status': 'received', 'response': deepcopy(parsed)})
+    validate_output(parsed, schema)
+    if {row['id'] for row in parsed['items']} != set(by_id):
+        raise StructuredOutputError('覆盖分类响应必须逐项完整且身份唯一')
     results = []
-    for raw in parsed.get("items") or []:
-        if not isinstance(raw, dict):
-            continue
-        identifier = str(raw.get("id") or "")
-        source = by_id.get(identifier)
-        if source is None or raw.get("decision") not in {"exclude", "needs_extraction"}:
-            continue
+    for raw in parsed['items']:
+        identifier = raw['id']
+        source = by_id[identifier]
         entry = {"id": identifier, "decision": raw["decision"], "reason": str(raw.get("reason") or "")[:200]}
         if raw["decision"] == "exclude":
-            category = str(raw.get("category") or "")
-            entry["category"] = category if category in EXCLUSION_CATEGORIES else "unreadable"
+            if raw['category'] is None:
+                raise StructuredOutputError('覆盖排除缺少明确类别')
+            entry['category'] = raw['category']
         # 回代分类器的定位信息，防止 id 对不上导致越权排除。
         entry.update({k: source[k] for k in ("file_id", "block_id", "table_id", "row_index") if source.get(k) is not None})
         results.append(entry)

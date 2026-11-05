@@ -233,3 +233,13 @@ SHA-256 完全一致，将新任务的 6 个 AI 生成关键词写回旧任务�
 `test_issue114_multimodal_pdf_agent.py` 与关键词补全测试，**67 项通过**；上传编辑器布局
 **22 项通过**，前端生产构建通过。仓库代码与文档中已无固定篇数门槛或全类别齐全判断；
 GitHub #114、#120、#122 的正文及相关旧评论也已同步新策略，三项 Issue 均保持开放。
+
+## 第八轮覆盖分类遗漏的修复验证
+
+任务7dd881676f654078982f886948819a22在正文/SI新提取2/2后失败：正文第6页6项内容未覆盖。原SI Table S1的28组Tc/μ*/方法/λ/ωlog新提取逐项匹配，尚未进入整理/保存，不宣称整篇通过。40项分类输入只得到34项有效处置；六项原页均为参考文献。旧代码未存模型原响应，无法区分原始漏项与非法编号，只保留真实过滤后输入/输出及终态作为失败证据。
+
+七项反例先失败后通过，覆盖真实40→34产物、未知/重复身份、非法类别、空理由、真实需提取项不放行及安全失败原响应留证。扩展回归61通过/8失败；八失败与独立未修改HEAD d77c7b25逐项一致，旧失败未计为通过，见eighth-coverage-baseline-proof.json。原文件IR及未改动候选背景上重新调用LLM2/gpt-6.1-sol：正文40/40、SI1/1处置齐全，原audit_coverage两文件均无缺口/限制，原任务完整缓存字节不变；未增加AI语义重试。
+
+证据位于tests/TestForRealScenario/runs/20261104T043104Z-lah-324f7fe6/eighth-coverage-before/after.txt、eighth-coverage-failed-artifacts、eighth-coverage-live及tests/TestForRealScenario/fixtures/lah-coverage-40-to-34.json。该固定/隔离/真实分类验证不代替第九轮网页上传及完整送审、拒绝、返修、批准和探索；字段/表单/变异及最终隔离候选仍待本轮收尾复核。
+
+最终隔离候选52项受影响回归、163四宿主、字段契约及12变异检出通过；原旧领域用例的8失败已独立HEAD证明，未冒充通过。源码摘要见eighth-coverage-candidate-manifest.json。真实分类成功不代表正式表单已保存或送审。
