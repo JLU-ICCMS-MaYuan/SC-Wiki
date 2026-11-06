@@ -31,17 +31,17 @@
       </div>
     </aside>
   </div>
-  <p class="boundary">流程图独立于应用；所有细节仍完整保留在本功能的详情页，源码中存在实现不等于真实服务或科学结果已验收。</p>
+  <p class="boundary">流程图独立于应用；所有细节仍完整保留在本功能的详情页。源码实现与隔离验收不等于真实服务或科学结果已验收；#225 业务库迁移与历史回填未执行。</p>
   <footer><span>依据本机实际源码（含工作区改动）静态核对；不代表模型科学结果或运行服务已验收。</span><a href="index.html">返回全站主流程 ↑</a></footer>
 </main>
 <script type="application/json" id="flow-data">{
   "main": [
     {
       "id": "upload-worker",
-      "title": "上传论文 PDF",
-      "summary": "Worker 定位正文文件",
+      "title": "Worker 定位正文 PDF",
+      "summary": "仅主文件为 PDF 时进入引用提取",
       "owner": "Python 上传 Worker",
-      "description": "Worker 定位正文文件；新上传缺少主 PDF 时跳过引用提取，citation_extraction 保持 None，不写 unavailable／failed。详细行为、边界和来源见独立详情页。",
+      "description": "Worker 定位正文 PDF；新上传缺少主 PDF 时跳过引用提取，不伪写 unavailable／failed。详细边界见详情页。",
       "notes": [],
       "code": "backend/ingest/upload_jobs.py",
       "links": [
@@ -53,10 +53,10 @@
     },
     {
       "id": "grobid-parse",
-      "title": "GROBID 解析引文",
-      "summary": "提取 biblStruct 各字段",
+      "title": "GROBID 提取原始引文",
+      "summary": "保留 DOI、题名、作者、年份与原文",
       "owner": "GROBID / Python Worker",
-      "description": "提取 biblStruct 各字段。详细行为、边界和来源见独立详情页。",
+      "description": "从 TEI biblStruct 提取结构化引文与原文；失败状态不等于零引用。详细行为见详情页。",
       "notes": [],
       "code": "backend/services/citation_graph.py",
       "links": [
@@ -66,80 +66,138 @@
         },
         {
           "href": "04-knowledge-graph-details.html#grobid-down",
-          "label": "分支：解析失败留空"
-        }
-      ]
-    },
-    {
-      "id": "redis-draft",
-      "title": "保存解析草稿与引文",
-      "summary": "任务状态与持久工作稿保留引用结果",
-      "owner": "Python Worker / Redis",
-      "description": "任务状态与持久工作稿保留引用结果。详细行为、边界和来源见独立详情页。",
-      "notes": [],
-      "code": "backend/ingest/upload_tasks.py::save_draft；backend/ingest/scientific_evidence.py::persist_upload",
-      "links": [
+          "label": "分支：unavailable／failed"
+        },
         {
-          "href": "04-knowledge-graph-details.html#redis-draft",
-          "label": "展开此步骤的完整细节"
-        }
-      ]
-    },
-    {
-      "id": "submit-persist",
-      "title": "提交保存引文",
-      "summary": "落库可追溯引用事实",
-      "owner": "Python API / MySQL",
-      "description": "落库可追溯引用事实。详细行为、边界和来源见独立详情页。",
-      "notes": [],
-      "code": "backend/api/rag.py",
-      "links": [
-        {
-          "href": "04-knowledge-graph-details.html#submit-persist",
-          "label": "展开此步骤的完整细节"
+          "href": "04-knowledge-graph-details.html#history-backfill",
+          "label": "独立入口：历史回填 CLI"
         }
       ]
     },
     {
       "id": "match-ref",
       "kind": "check",
-      "title": "DOI／题名匹配",
-      "summary": "精确或唯一题名命中",
-      "owner": "Python 引用服务",
-      "description": "有 DOI 时按规范化 DOI 精确匹配；无 DOI 时才按唯一题名与不冲突年份匹配。详细行为、边界和来源见独立详情页。",
+      "title": "第4步后双向匹配",
+      "summary": "ready 前程序优先，受限 LLM2 核对疑难候选",
+      "owner": "Python 引用匹配服务",
+      "description": "第4步汇总及科学字段核对后、ready 前执行：程序按 DOI／规范题名及作者年份确定身份，similarity 只召回；LLM2 每批最多16条，只能选本条候选 ID 或 null。同步核对当前论文出边与库内引用者，不在提交后首次匹配。",
       "notes": [],
-      "code": "backend/services/citation_graph.py",
+      "code": "backend/services/citation_matching.py；backend/ingest/upload_jobs.py",
       "links": [
         {
           "href": "04-knowledge-graph-details.html#match-ref",
-          "label": "展开此步骤的完整细节"
+          "label": "展开双向匹配与缓存规则"
         },
         {
           "href": "04-knowledge-graph-details.html#unmatched-wait",
-          "label": "分支：未匹配留库"
+          "label": "分支：未命中保留原引文"
         },
         {
           "href": "04-knowledge-graph-details.html#ambiguous-wait",
-          "label": "分支：多候选歧义"
+          "label": "分支：多候选保持歧义"
+        },
+        {
+          "href": "04-knowledge-graph-details.html#matching-failed",
+          "label": "分支：匹配技术失败"
+        }
+      ]
+    },
+    {
+      "id": "match-cache",
+      "title": "持久缓存与工作稿快照",
+      "summary": "保存决定、理由、模型版本、失败回执与双向快照",
+      "owner": "Python / MySQL / Redis 工作稿",
+      "description": "逐引文缓存与任务快照独立持久化，再写入服务器工作稿；读取、刷新和无变化保存不调用模型，浏览器不能伪造或删除服务器快照。",
+      "notes": [],
+      "code": "backend/services/citation_matching.py；backend/ingest/upload_tasks.py::save_draft",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#match-cache",
+          "label": "展开签名、失效与持久化细节"
+        }
+      ]
+    },
+    {
+      "id": "ready-review",
+      "title": "ready：等待用户核对",
+      "summary": "第5步显示可编辑工作稿与匹配入口",
+      "owner": "Python Worker / React 解析页",
+      "description": "匹配快照保存后才进入 ready；citation_matching_status 为 completed 或 unavailable 时显示“参考文献匹配”入口。",
+      "notes": [],
+      "code": "backend/ingest/upload_jobs.py；frontend/src/components/UploadParsingDetail.tsx",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#ready-review",
+          "label": "展开 ready 与入口条件"
+        }
+      ]
+    },
+    {
+      "id": "matching-result",
+      "title": "可选：三列只读结果",
+      "summary": "新标签页列命中引用者、当前论文、全部原引文",
+      "owner": "React / Python 只读 API",
+      "description": "左侧仅列实际命中的库内引用者，中间为当前论文，右侧保留全部已解析引文；命中填色，未命中不造占位论文。",
+      "notes": [],
+      "code": "frontend/src/pages/CitationMatchingPage.tsx；backend/api/upload_tasks.py",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#matching-result",
+          "label": "展开三列展示与只读语义"
+        },
+        {
+          "href": "04-knowledge-graph-details.html#matching-access",
+          "label": "权限：所有者／管理员及 403／404／409"
+        },
+        {
+          "href": "04-knowledge-graph-details.html#matching-stale",
+          "label": "分支：源或目标 stale"
+        },
+        {
+          "href": "04-knowledge-graph-details.html#matching-unavailable",
+          "label": "分支：提取 unavailable／failed"
+        },
+        {
+          "href": "04-knowledge-graph-details.html#matching-archived",
+          "label": "分支：提交归档后读取"
+        },
+        {
+          "href": "04-knowledge-graph-details.html#no-placeholder",
+          "label": "边界：未收录目标无占位节点"
+        }
+      ]
+    },
+    {
+      "id": "submit-persist",
+      "title": "提交保存正式引用与依据",
+      "summary": "复用有效决定，保存原引文、快照及 match_evidence",
+      "owner": "Python API / MySQL",
+      "description": "提交当前版本的 GROBID 原引文、服务器快照和经缓存核验的匹配依据；提交阶段不新调 LLM2，也不接受浏览器伪造决定。",
+      "notes": [],
+      "code": "backend/api/rag.py；backend/services/citation_graph.py::persist_reference_extraction",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#submit-persist",
+          "label": "展开正式持久化与依据核验"
         }
       ]
     },
     {
       "id": "review-approve",
-      "title": "论文审核通过",
-      "summary": "进入公开图查询范围",
-      "owner": "管理员 / Go 审核兼容入口 → Python 发布",
-      "description": "当前 React 主链由 Python 保存引用事实并匹配；Go 审核兼容入口先提交审核，再调用 Python 发布与重扫。详细行为、边界和来源见独立详情页。",
+      "title": "React → Python 批准主链",
+      "summary": "Python 审核事务后发布；Go 保留兼容审核入口",
+      "owner": "管理员 / Python 审核与发布；Go 兼容",
+      "description": "当前 React 使用 Python review-commit，批准事务提交后调用 Python 发布；Go ReviewPaper 是兼容入口。只有当前已批准版本进入公开图。",
       "notes": [],
-      "code": "goserver/handlers/admin.go",
+      "code": "frontend/src/lib/paperReview.ts；backend/api/evidence.py；goserver/handlers/admin.go",
       "links": [
         {
           "href": "04-knowledge-graph-details.html#review-approve",
-          "label": "展开此步骤的完整细节"
+          "label": "展开当前主链与 Go 兼容路径"
         },
         {
           "href": "04-knowledge-graph-details.html#mark-denied",
-          "label": "分支：非管理员拒绝"
+          "label": "分支：非管理员拒绝标记"
         },
         {
           "href": "04-knowledge-graph-details.html#mark-admin",
@@ -147,56 +205,49 @@
         },
         {
           "href": "04-knowledge-graph-details.html#review-post-error",
-          "label": "边界：审核保存与发布后处理分离"
+          "label": "失败：Python publication_pending／Go 502"
         }
       ]
     },
     {
       "id": "reconcile",
-      "title": "审核后重试匹配",
-      "summary": "重试当前出边并扫描历史未匹配记录",
+      "title": "批准后定向 reconcile",
+      "summary": "复用有效依据补齐关系，不新调 LLM2",
       "owner": "Python 引用服务",
-      "description": "批准后重试当前论文出边，并重扫历史 unmatched／ambiguous；匹配异常只记录日志并继续发布。详细行为、边界和来源见独立详情页。",
+      "description": "批准后用程序与服务器缓存依据重评当前出边、快照中的下游及相关历史 unmatched／ambiguous；不在批准阶段新发 LLM2 请求。",
       "notes": [],
-      "code": "backend/services/citation_graph.py",
+      "code": "backend/services/citation_graph.py::reconcile_after_paper_approval",
       "links": [
         {
           "href": "04-knowledge-graph-details.html#reconcile",
-          "label": "展开此步骤的完整细节"
-        }
-      ]
-    },
-    {
-      "id": "build-edge",
-      "title": "匹配成功成边",
-      "summary": "投影 cites 有向边",
-      "owner": "MySQL / Go 查询",
-      "description": "投影 cites 有向边。详细行为、边界和来源见独立详情页。",
-      "notes": [],
-      "code": "goserver/handlers/knowledge_graph.go",
-      "links": [
+          "label": "展开定向重扫与依据复用"
+        },
         {
-          "href": "04-knowledge-graph-details.html#build-edge",
-          "label": "展开此步骤的完整细节"
+          "href": "04-knowledge-graph-details.html#reconcile-error",
+          "label": "失败：只记日志并继续向量发布"
         }
       ]
     },
     {
       "id": "go-graph-api",
-      "title": "Go 图查询接口",
-      "summary": "MySQL 当前公开图，非 Neo4j 旧同步",
+      "title": "Go 查询 MySQL 公开投影",
+      "summary": "仅当前已批准节点与 matched 去重有向边",
       "owner": "Go API / MySQL",
-      "description": "概览／邻居／搜索／统计直接查询 MySQL 当前公开引用图，不读取 Neo4j 旧同步结果。详细行为、边界和来源见独立详情页。",
+      "description": "overview／neighbors／search／stats 直接读取 MySQL；公开边固定 citing → cited，两端及源版本均须满足当前批准边界，不读取 Neo4j 旧同步。",
       "notes": [],
       "code": "goserver/handlers/knowledge_graph.go",
       "links": [
         {
           "href": "04-knowledge-graph-details.html#go-graph-api",
-          "label": "展开此步骤的完整细节"
+          "label": "展开公开投影、概览筛选与统计"
         },
         {
           "href": "04-knowledge-graph-details.html#title-fallback",
-          "label": "分支：标题缺失回退"
+          "label": "标题：概览非空过滤与完整标题回退"
+        },
+        {
+          "href": "04-knowledge-graph-details.html#graph-stats",
+          "label": "口径：stats 与节点被引数"
         },
         {
           "href": "04-knowledge-graph-details.html#graph-api-error",
@@ -205,28 +256,49 @@
         {
           "href": "04-knowledge-graph-details.html#self-reference-scope",
           "label": "边界：自引用与概览内部边"
+        },
+        {
+          "href": "04-knowledge-graph-details.html#visible-cross-edges",
+          "label": "展开：visible_paper_id 交叉边"
         }
       ]
     },
     {
       "id": "frontend-graph",
-      "title": "前端筛选与展开",
-      "summary": "家族多选 OR，节点／边去重并手动分页",
+      "title": "静态布局与手动分页展开",
+      "summary": "固定网格、直线、physics=false，仅新增节点找空位",
       "owner": "React / vis-network",
-      "description": "家族多选按 OR 过滤，搜索可固定节点；节点与边按稳定键去重，用户点击后才分页加载邻居，不自动递归。详细行为、边界和来源见独立详情页。",
+      "description": "无自动布局和持续模拟；拖动只保存当前页内存位置，刷新恢复默认。上下游每次手动请求一页，节点与边按稳定键去重，并补齐可见节点间实际交叉边。",
       "notes": [],
-      "code": "frontend/src/pages/KnowledgeGraphPage.tsx",
+      "code": "frontend/src/pages/KnowledgeGraphPage.tsx；frontend/src/lib/citationGraphLayout.ts",
       "links": [
         {
           "href": "04-knowledge-graph-details.html#frontend-graph",
-          "label": "展开此步骤的完整细节"
+          "label": "展开筛选、搜索与手动分页"
+        },
+        {
+          "href": "04-knowledge-graph-details.html#static-layout",
+          "label": "布局：固定坐标、拖动与刷新恢复"
         },
         {
           "href": "04-knowledge-graph-details.html#cycle-dedupe",
-          "label": "分支：节点／边去重与手动分页"
+          "label": "边界：节点／边去重不等于异常治理"
         }
       ]
     }
+  ],
+  "edges": [
+    {"from": "upload-worker", "to": "grobid-parse"},
+    {"from": "grobid-parse", "to": "match-ref", "label": "第4步汇总及科学字段核对后"},
+    {"from": "match-ref", "to": "match-cache"},
+    {"from": "match-cache", "to": "ready-review", "label": "快照保存后 ready"},
+    {"from": "ready-review", "to": "matching-result", "label": "可选新标签页"},
+    {"from": "ready-review", "to": "submit-persist", "label": "核对后提交"},
+    {"from": "matching-result", "to": "submit-persist", "label": "只读核对后提交"},
+    {"from": "submit-persist", "to": "review-approve"},
+    {"from": "review-approve", "to": "reconcile", "label": "当前版本批准"},
+    {"from": "reconcile", "to": "go-graph-api"},
+    {"from": "go-graph-api", "to": "frontend-graph"}
   ],
   "branches": [
     {
@@ -236,12 +308,12 @@
       "kind": "stop",
       "label": "解析失败",
       "title": "解析失败留空",
-      "summary": "GROBID 失败记 unavailable／failed 状态",
+      "summary": "本次解析出边留空，仍保存 unavailable 快照",
       "owner": "GROBID / Python Worker",
-      "description": "GROBID 不可用或解析失败时，只记录 unavailable／failed 状态，不创建任何引用边，也不阻断论文人工校对。",
+      "description": "GROBID 不可用或解析失败时，只不生成当前论文本次解析的出边；解析状态保留 unavailable／failed，匹配快照 status=unavailable。其他论文引用当前论文的入边仍可能被匹配保留，科学主流程成功时可继续 ready 与人工校对。",
       "notes": [
-        "新版本文档不保留旧引用。",
-        "旧直接升版缺主文件或主文件非 PDF 时才记 unavailable。"
+        "解析失败不等于零引用，也不清空其他来源论文已存在的入边。",
+        "新版本文档不保留旧引用；旧直接升版缺主文件或主文件非 PDF 时才记 unavailable。"
       ],
       "code": "backend/ingest/upload_jobs.py",
       "links": [
@@ -263,13 +335,14 @@
       "description": "backfill_citation_references.py 按 --paper-id 或 --all-approved 选择当前已批准论文；--dry-run 只核对范围与主 PDF。正式执行逐篇调用 GROBID、逐篇开启写事务，解析期间版本或审核状态变化则跳过该篇。",
       "notes": [
         "单篇失败或跳过不会回滚其他论文，也不改变论文版本或审核状态。",
-        "这是历史数据运维入口，不是每次上传或图查询都会执行的自动递归任务。"
+        "这是历史数据运维入口，不是每次上传或图查询都会执行的自动递归任务。",
+        "#225 迁移仅在隔离库验证；业务库升级与历史回填未执行，不能视为业务环境已验收。"
       ],
       "code": "backend/scripts/backfill_citation_references.py；backend/services/citation_backfill.py",
       "links": [
         {
-          "href": "04-knowledge-graph-details.html#grobid-parse",
-          "label": "返回 GROBID 解析主链"
+          "href": "04-knowledge-graph-details.html#history-backfill",
+          "label": "展开历史回填与未执行边界"
         }
       ]
     },
@@ -279,15 +352,15 @@
       "side": "left",
       "kind": "wait",
       "label": "匹配未命中",
-      "title": "未匹配留库",
-      "summary": "等待目标论文入库",
+      "title": "预览未命中与正式 unmatched",
+      "summary": "提交前 matched_paper 为空；提交后保存正式 unmatched",
       "owner": "Python 引用服务 / MySQL",
-      "description": "未命中记录以 unmatched 保存在库，目标论文以后审核通过时由审核后重试流程再次匹配成边。",
+      "description": "提交前，程序无确定目标或受限 LLM2 返回 null 时，预览保留原引文且 matched_paper 为空；提交后，没有有效命中的当前版本 PaperReference 才保存正式 match_status=unmatched，等待相关目标批准后的定向重试。",
       "notes": [
-        "解析原文与失败信息一并保留。",
-        "不人工创建引用边。"
+        "解析原文与失败信息一并保留，不把预览空值与正式状态混写。",
+        "不人工创建引用边，读取与批准后程序重试不新调 LLM2。"
       ],
-      "code": "backend/services/citation_graph.py",
+      "code": "backend/services/citation_matching.py；backend/services/citation_graph.py",
       "links": [
         {
           "href": "04-knowledge-graph-details.html#match-ref",
@@ -300,15 +373,15 @@
       "attachTo": "match-ref",
       "side": "right",
       "kind": "wait",
-      "label": "题名歧义",
+      "label": "多候选歧义",
       "title": "多候选歧义",
-      "summary": "记为 ambiguous 待重扫",
+      "summary": "先受限 LLM2；确定性重评仍不唯一才正式 ambiguous",
       "owner": "Python 引用服务",
-      "description": "DOI 或题名匹配到多个候选时记入 ambiguous，与 unmatched 一起进入审核后的历史重扫范围。",
+      "description": "DOI 或规范题名对应多个候选时，解析期先交受限 LLM2 选择本条候选 ID 或 null；提交与批准阶段只做确定性重评，仍不唯一且没有有效命中时才保存正式 match_status=ambiguous，并进入后续相关批准的定向重扫。",
       "notes": [
-        "不按相似度猜选唯一目标。"
+        "不按相似度猜选唯一目标；非法模型响应属于技术失败，不直接记为 ambiguous。"
       ],
-      "code": "backend/services/citation_graph.py",
+      "code": "backend/services/citation_matching.py；backend/services/citation_graph.py",
       "links": [
         {
           "href": "04-knowledge-graph-details.html#match-ref",
@@ -367,12 +440,12 @@
       "kind": "stop",
       "label": "后处理失败",
       "title": "审核保存与发布后处理分离",
-      "summary": "后处理失败不回滚已保存审核",
-      "owner": "Go 审核兼容入口 / Python 发布",
-      "description": "Go 审核事务提交后才调用 Python 发布或清理；发布、清理失败返回 502 并明确审核已保存。Python 的引用重扫异常则被捕获并记录日志，随后继续向量发布，不把匹配异常回滚成审核失败。",
+      "summary": "Python 标 publication_pending；Go 兼容入口返回 502",
+      "owner": "Python 审核主链 / Go 审核兼容入口",
+      "description": "当前 React 的 Python review-commit 在审核事务提交后发布；发布异常由 Python 捕获并在结果中设置 publication_pending=true，不把它伪装成 Go 502。Go ReviewPaper 兼容路径则在审核事务提交后调用 Python，发布或清理失败时返回 502，并明确审核已保存。",
       "notes": [
-        "当前 React 上传、提交、引用匹配主链在 Python；Go 路径是审核兼容与后处理编排。",
-        "引用匹配失败可在后续论文批准时重试，不等于已成功成边。"
+        "两种失败都不表示审核事务已回滚，但响应合同不同。",
+        "引用 reconcile 异常在 Python 发布内部单独记录日志并继续向量发布，见 reconcile 失败分支。"
       ],
       "code": "goserver/handlers/admin.go::finalizeReviewArtifacts；backend/api/rag.py::publish_approved_paper",
       "links": [
@@ -383,18 +456,40 @@
       ]
     },
     {
+      "id": "reconcile-error",
+      "attachTo": "reconcile",
+      "side": "right",
+      "kind": "stop",
+      "label": "引用 reconcile 失败",
+      "title": "只记日志并继续向量发布",
+      "summary": "批准公开范围已生效，Go 可读已有投影但关系可能未补齐",
+      "owner": "Python publish_approved_paper / Go 查询",
+      "description": "批准事务提交已使当前 approved 公开范围生效；引用 reconcile 失败只记录 [citation-graph] 日志并继续向量发布，不回滚批准，也不阻断 Go 查询 MySQL 中已有公开投影，但本次应补的当前或历史关系可能尚未补齐。",
+      "notes": [
+        "异常不伪写 matched，可在后续相关论文批准时定向重试。",
+        "Go 查询不依赖本次向量发布结果；已有公开投影可读不等于 reconcile 已完整成功。"
+      ],
+      "code": "backend/api/rag.py::publish_approved_paper；backend/services/citation_graph.py::reconcile_after_paper_approval；goserver/handlers/knowledge_graph.go",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#reconcile-error",
+          "label": "展开 reconcile 失败与公开查询边界"
+        }
+      ]
+    },
+    {
       "id": "title-fallback",
       "attachTo": "go-graph-api",
       "side": "right",
       "kind": "result",
       "label": "标题缺失",
-      "title": "标题缺失回退",
-      "summary": "退回论文原标题",
-      "owner": "Go API / MySQL",
-      "description": "节点 label 优先取非空 knowledge_graph_title，为 NULL 或空串时回退 title，同时返回完整原标题。",
+      "title": "概览标题过滤与完整标题回退",
+      "summary": "概览仅收非空短标题；搜索／展开可回退原标题",
+      "owner": "Go API / MySQL / React",
+      "description": "默认概览只选择 knowledge_graph_title 去空白后非空的当前已批准论文；搜索和邻居展开不受此过滤。节点 label 优先取非空短标题，NULL、空串或纯空白时回退完整 title。",
       "notes": [
-        "重新发布不会为缺失标题再调 AI。",
-        "历史论文由管理员编辑页补充。"
+        "前端标签过长仅截断显示，选中节点仍可查看完整原标题。",
+        "重新发布不会为缺失标题再调 AI；历史论文可由管理员编辑页补充。"
       ],
       "code": "goserver/handlers/knowledge_graph.go",
       "links": [
@@ -413,7 +508,7 @@
       "title": "图 API 400／404／500",
       "summary": "参数无效 400，中心论文不可公开 404，查询异常 500",
       "owner": "Go API / graphError",
-      "description": "非法 limit／offset／direction／family／kind、空搜索词或非法论文 ID 返回 400 invalid_graph_filter；邻居中心论文不存在或并非当前已批准版本返回 404 paper_not_found；数据库查询与节点装饰失败返回 500 graph_query_failed。",
+      "description": "非法 limit／offset／direction／family／kind、空搜索词、非法论文或 visible_paper_id 返回 400 invalid_graph_filter；邻居中心论文不存在或并非当前已批准版本返回 404 paper_not_found；数据库查询与节点装饰失败返回 500 graph_query_failed。",
       "notes": [
         "错误不会伪装成空图；前端在对应加载区域展示错误。"
       ],

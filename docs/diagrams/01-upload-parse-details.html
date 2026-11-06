@@ -57,6 +57,46 @@
       ]
     },
     {
+      "id": "model-runtime",
+      "title": "管理可恢复模型执行",
+      "summary": "通用读取前建立执行代次、检查点与公开动态",
+      "owner": "上传 Worker / ModelRuntime / LangMem",
+      "description": "process_upload_task 先以 start_runtime 原子领取 queued 任务，递增 execution_generation，绑定用户、文件角色与 SHA、解析方案、模型及 endpoint 摘要，再在 execution_context 中运行谱续跑判断或通用管线。ModelRuntime.call 以身份、阶段和完整请求生成确定性目录及 occurrence；request、attempt、failure、prepared-request 和完整 result 分文件原子落盘，已完成 result.json 在后续执行直接复用，不拼接半截输出。",
+      "notes": [
+        "检查点写入和事件更新前重新检查执行代次；旧代次、pausing、paused、cancelling、cancelled 或 submitted 均阻止继续写回。",
+        "公开动态只含脱敏阶段、文件、页、动作、请求计时与错误；events.jsonl 可分页读取，任务状态默认只带最近 100 条，不公开内部思维链或密钥。",
+        "prepare_request 先做可完整还原的传输去重；需要压缩时仅由 LangMem 摘要旧过程，当前原文、图片、科学值、来源和近期完整工具交互保持，压缩无效或必要内容仍超限则明确停止。",
+        "临时传输错误原地等待并占用当前 Worker；本机既有 Worker 数量不因等待而释放或增加。"
+      ],
+      "code": "backend/ingest/upload_jobs.py::process_upload_task；backend/ingest/model_runtime.py::start_runtime / ModelRuntime.call；backend/ingest/model_memory.py::prepare_fixed_request / prepare_request / compact_history",
+      "links": [
+        {
+          "href": "01-upload-parse.html#model-runtime",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#model-retry",
+          "label": "查看持续退避与固定错误边界"
+        },
+        {
+          "href": "#model-paused",
+          "label": "查看停止为 paused"
+        },
+        {
+          "href": "#model-resume",
+          "label": "查看同任务 resume"
+        },
+        {
+          "href": "#late-result",
+          "label": "查看迟到结果隔离"
+        },
+        {
+          "href": "#context-memory",
+          "label": "查看无损准备与 LangMem 记忆"
+        }
+      ]
+    },
+    {
       "id": "extract",
       "title": "通用读取正文与补充材料",
       "summary": "先保存基础文本，再选择解析审核流程",
@@ -80,13 +120,15 @@
       "title": "适用性判断：匹配哪类流程？",
       "summary": "matched / unmatched / uncertain / failed",
       "owner": "typed-parsing-v1 / 适用性判断模型",
-      "description": "assess 完整读取非参考文献窗口，综合研究目标、摘要、结果、讨论、结论和方法，输出 paper_type、theoretical_subtype、superconductor_kind、理由及真实来源。只有理论计算且常规超导机制的 matched 结果绑定 conventional-theory-calculation，并调用其专用入口。",
+      "description": "assess 完整读取非参考文献窗口，综合研究目标、摘要、结果、讨论、结论和方法，输出 paper_type、theoretical_subtype、superconductor_kind、理由及真实来源。每个窗口及汇总响应还以 tc_materials 盘点本文所有报告 Tc 的材料及其来源、具体值/范围标记和理由；collect_scope 合并全部窗口与汇总响应，生成 workflow_assessment.tc_material_scope，随后传播给结构读取、分段科学提取和材料状态规划。只有理论计算且常规超导机制的 matched 结果绑定 conventional-theory-calculation，并调用其专用入口。",
       "notes": [
+        "tc_materials 是后端审计清单，同时包含保留与排除材料；仅当整篇正文/SI对某材料只有明确数值范围或单侧界限且没有任何具体 Tc 时才列入 excluded_materials。任一有效来源窗口报告具体 Tc 都保留该材料；未报告 Tc 不等于仅范围，也不能据此排除。",
+        "contribution_source_ids 必须来自 source_ids 且指向主文（file_role=main）的本文直接贡献来源；SI、方法软件或他人工作不能单独证明本文贡献。section_role 只是排版线索，无小标题的结果段同样可以有效。",
         "unmatched 表示实验、综述、方法创新、理论推导或非常规机制等不匹配；uncertain 表示证据不足、冲突或缺少主要贡献依据。",
         "failed 表示适用性模型调用失败或返回格式无效；它与专用管线的技术 failed 不同，任务同样暂停为 needs_workflow。",
         "当前 WORKFLOWS 只登记 conventional-theory-calculation；不把软件名、单个公式或引用他人工作当作匹配依据。"
       ],
-      "code": "backend/ingest/parsing_workflows.py::POLICY / assess / CURRENT / WORKFLOWS；backend/ingest/upload_jobs.py::_process_upload_task",
+      "code": "backend/ingest/parsing_workflows.py::POLICY / PROMPT / assess / CURRENT / WORKFLOWS；backend/ingest/tc_material_scope.py::collect_scope；backend/ingest/upload_jobs.py::_process_upload_task / _process_conventional_upload_task",
       "links": [
         {
           "href": "01-upload-parse.html#workflow-check",
@@ -99,21 +141,35 @@
       ]
     },
     {
-      "id": "text",
-      "kind": "check",
-      "label": "matched：常规专用管线",
-      "title": "常规管线：有效正文是否可用？",
-      "summary": "空正文不能生成可校对草稿",
-      "owner": "程序检查",
-      "description": "检查可以参与阅读的论文正文。正文为空或必要解析失败时停止，不用空输入生成科学草稿。",
+      "id": "structure-reading",
+      "title": "读取 PDF/附件结构候选",
+      "summary": "每个 PDF 最多 13 次模型迭代、12 次工具行动",
+      "owner": "结构读取模型 / 几何校验程序",
+      "description": "专用流程选定后，在逐文件读取阶段处理结构来源：CIF/POSCAR 等结构附件直接校验并生成候选；非结构附件 PDF 由 extract_structure_candidates 核验 SHA-256、按真实 PDF 文字行建立只读 IR，再进入 range(13) 的有界模型迭代。该调用接收 workflow_assessment.tc_material_scope，并把 scope_prompt 加入每轮结构模型请求；模型以 report_structures 返回全部已报告几何及未决疑点，程序随后用 assert_allowed 阻止整篇仅范围材料重新进入，再在几何合并时排除对应候选。此步尚未调用 assign_structures，不决定候选属于哪个材料状态。",
       "notes": [
-        "结构附件不能代替论文正文。"
+        "每个 PDF 分别读取并保存 structure_reading 事件；13 次是模型迭代上限，DocumentTools 的 ActionBudget 另设 max_actions=12，工具行动耗尽或 13 次迭代耗尽都不能冒充无结构。",
+        "tc_material_scope 的排除只覆盖整篇正文/SI仅有范围或单侧界限且无具体 Tc 的材料；任一有效来源的具体 Tc 均保留材料，未报告 Tc 不等于仅范围。",
+        "read_original_page 对坐标表及续页渲染指定真实 PDF 页的 PNG，并在下一轮模型请求中携带图像；其内部 read_page 文字读取与图像渲染算同一次行动，文本定位不能替代视觉核对。",
+        "report_structures 经严格结构与原文行数值校验后，仍调用既有完整坐标/Wyckoff 几何解码；有效结果按结构哈希及材料、压力、空间群、优化范围合并，重复项补充来源，不同几何继续分别保留。",
+        "未读覆盖或解释疑点写入 uncertainties / blocked 候选；技术失败或预算耗尽不得用空 structures 冒充整份文件没有结构。"
       ],
-      "code": "backend/ingest/upload_jobs.py::_process_conventional_upload_task",
+      "code": "backend/ingest/structure_reading.py::extract_structure_candidates / _reading_result；backend/ingest/tc_material_scope.py::scope_prompt / assert_allowed / is_excluded；backend/ingest/document_agent.py::ActionBudget；backend/ingest/upload_jobs.py::_extract_pdf_structure_candidates / _process_conventional_upload_task",
       "links": [
         {
-          "href": "01-upload-parse.html#text",
+          "href": "01-upload-parse.html#structure-reading",
           "label": "返回本功能主干"
+        },
+        {
+          "href": "#structure-original-page",
+          "label": "查看真实原页读取"
+        },
+        {
+          "href": "#structure-reading-incomplete",
+          "label": "查看预算耗尽与失败边界"
+        },
+        {
+          "href": "#structure-assign",
+          "label": "继续查看后续结构归属"
         }
       ]
     },
@@ -133,38 +189,6 @@
         {
           "href": "01-upload-parse.html#roles",
           "label": "返回本功能主干"
-        }
-      ]
-    },
-    {
-      "id": "structure-reading",
-      "title": "读取 PDF/附件结构候选",
-      "summary": "逐文件发现几何，暂不分配材料状态",
-      "owner": "结构读取模型 / 几何校验程序",
-      "description": "专用管线在逐文件读取阶段处理结构来源：CIF/POSCAR 等结构附件直接校验并生成候选；非结构附件 PDF 由 extract_structure_candidates 核验 SHA-256、按真实 PDF 文字行建立只读 IR，再进入最多 13 轮的有界模型工具循环。模型以 report_structures 返回全部已报告几何及未决疑点；此步尚未调用 assign_structures，不决定候选属于哪个材料状态。",
-      "notes": [
-        "每个 PDF 分别读取并保存 structure_reading 事件；结构附件读取与 PDF 内容发现都先于后续科学候选整理和 structure-assign。",
-        "read_original_page 对坐标表及续页渲染指定真实 PDF 页的 PNG，并在下一轮模型请求中携带图像；文本行定位不能替代坐标表的视觉核对。",
-        "report_structures 经严格结构与原文行数值校验后，仍调用既有完整坐标/Wyckoff 几何解码；有效结果按结构哈希及材料、压力、空间群、优化范围合并，重复项补充来源，不同几何继续分别保留。",
-        "未读覆盖或解释疑点写入 uncertainties / blocked 候选；技术失败或预算耗尽不得用空 structures 冒充整份文件没有结构。"
-      ],
-      "code": "backend/ingest/structure_reading.py::extract_structure_candidates / _reading_result；backend/ingest/upload_jobs.py::_extract_pdf_structure_candidates / _process_conventional_upload_task",
-      "links": [
-        {
-          "href": "01-upload-parse.html#structure-reading",
-          "label": "返回本功能主干"
-        },
-        {
-          "href": "#structure-original-page",
-          "label": "查看真实原页读取"
-        },
-        {
-          "href": "#structure-reading-incomplete",
-          "label": "查看预算耗尽与失败边界"
-        },
-        {
-          "href": "#structure-assign",
-          "label": "继续查看后续结构归属"
         }
       ]
     },
@@ -206,16 +230,64 @@
       ]
     },
     {
+      "id": "citation-extract",
+      "title": "GROBID 提取题录与原始引文",
+      "summary": "succeeded / partial / failed / unavailable",
+      "owner": "上传 Worker / 本地 GROBID",
+      "description": "最终角色、身份与主文路径确定后，complementary 任务优先读取主文 IR coverage.grobid，否则由 extract_references_from_pdf 调用本地 GROBID processFulltextDocument。程序保存 parser 状态、版本、错误、参考文献数组与数量；题录组装可读取已成功提取的 GROBID 元数据，但原始引文始终作为独立服务端产物保留。",
+      "notes": [
+        "succeeded 表示本次 TEI 与引文解析完成；partial 表示至少有引文同时缺 DOI 和规范化题名，仍保留所有已解析条目并进入匹配。",
+        "连接错误和 HTTP 5xx 为 unavailable；HTTP 4xx 或 TEI 无法解析为 failed。两种状态都不等同于‘论文没有引文’，也不直接抛出上传技术失败。",
+        "GROBID 结果不由浏览器回传覆盖；没有 PDF 主文时 citation_extraction 为 None，后续 citation_matching 快照保存为 unavailable。",
+        "源码顺序为 structure-reading → roles → role-check → sources → citation-extract → text，不能按旧图把正文检查挪到角色与结构读取之前。"
+      ],
+      "code": "backend/ingest/upload_jobs.py::_process_conventional_upload_task；backend/ingest/grobid_document.py::extract_document / apply_bibliography；backend/services/citation_graph.py::extract_references_from_pdf",
+      "links": [
+        {
+          "href": "01-upload-parse.html#citation-extract",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#citation-unavailable",
+          "label": "查看 failed / unavailable 分支"
+        },
+        {
+          "href": "#citation-matching",
+          "label": "继续查看 ready 前双向匹配"
+        }
+      ]
+    },
+    {
+      "id": "text",
+      "kind": "check",
+      "label": "继续常规专用管线",
+      "title": "常规管线：有效正文是否可用？",
+      "summary": "空正文不能生成可校对草稿",
+      "owner": "程序检查",
+      "description": "GROBID 状态保存后，过滤出 main / supplementary 分段并检查是否存在可参与阅读的论文正文。正文为空或必要解析失败时停止，不用空输入生成科学草稿。",
+      "notes": [
+        "结构附件不能代替论文正文；GROBID 不可用不会被当作正文为空。"
+      ],
+      "code": "backend/ingest/upload_jobs.py::_process_conventional_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse.html#text",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
       "id": "read",
       "title": "分段读取并提取科学候选",
       "summary": "按材料、条件、记录保留原文依据",
       "owner": "领域提取程序 / LLM",
-      "description": "按正文与补充材料的完整来源块提取材料、计算条件及科学候选。模型只填写程序登记的字段，身份由程序生成；来源、方法和数值保留继续由正式流程核对。",
+      "description": "按正文与补充材料的完整来源块提取材料、计算条件及科学候选。_process_conventional_upload_task 把 workflow_assessment.tc_material_scope 放入每个 extraction_source；_read_chunk 将对应 scope_prompt 加入系统请求，并在模型返回后以 assert_allowed 检查 material_states，已按整篇正文/SI确认的仅范围材料不能重新进入。模型只填写程序登记的字段，身份由程序生成；来源、方法和数值保留继续由正式流程核对。",
       "notes": [
+        "只有整篇正文/SI均为范围或单侧界限且无具体 Tc 时才排除；任一有效来源的具体 Tc 保留材料，未报告 Tc 不等于仅范围。",
         "模型输出使用严格结构化协议，不自行创建科学键或冒充人工扩展。",
         "不确定值可保留候选或留空，须有理由并等待人工审核。"
       ],
-      "code": "backend/ingest/upload_jobs.py::_read_chunk；backend/ingest/scientific_output_schema.py；backend/rag/structured_output.py",
+      "code": "backend/ingest/upload_jobs.py::_read_chunk / _process_conventional_upload_task；backend/ingest/tc_material_scope.py::scope_prompt / assert_allowed；backend/ingest/scientific_output_schema.py；backend/rag/structured_output.py",
       "links": [
         {
           "href": "01-upload-parse.html#read",
@@ -265,10 +337,11 @@
       "id": "state-inventory",
       "title": "先建立材料状态",
       "summary": "候选级 assignments + 记录级 record_assignments",
-      "description": "plan_states 以当前来源规划实际材料状态，响应同时包含候选级 assignments 和记录级 record_assignments。apply_inventory 要求每个 candidate_state_key 在候选级归属中恰好出现一次；记录级覆盖再以 candidate_state_key、module_key、record_key 定位单条记录，把它放入指定的已有目标状态。不同材料、压力、物相或实际优化几何分别保留，不能因一个数值压力未知便额外创建占位卡。",
-      "code": "backend/ingest/state_inventory.py::plan_states / apply_inventory / referenced_pages",
+      "description": "plan_states 以当前来源规划实际材料状态，并继续接收 workflow_assessment.tc_material_scope、把 scope_prompt 加入规划请求；响应同时包含候选级 assignments 和记录级 record_assignments。apply_inventory 先用 assert_allowed 检查规划输出的全部状态，再要求每个 candidate_state_key 在候选级归属中恰好出现一次；记录级覆盖再以 candidate_state_key、module_key、record_key 定位单条记录，把它放入指定的已有目标状态。不同材料、压力、物相或实际优化几何分别保留，不能因一个数值压力未知便额外创建占位卡。",
+      "code": "backend/ingest/state_inventory.py::plan_states / apply_inventory / referenced_pages；backend/ingest/tc_material_scope.py::scope_prompt / assert_allowed",
       "owner": "材料状态规划模型 / 程序",
       "notes": [
+        "tc_material_scope 的排除仍以整篇正文/SI只有范围或单侧界限且无具体 Tc 为前提；任一有效来源的具体 Tc 保留材料，未报告 Tc 不等于仅范围。",
         "单记录重分配只复制该记录并补充已验证来源；未覆盖的兄弟记录仍按候选级 assignments 落位，不能为修正一条记录搬走兄弟记录或整张材料卡。",
         "状态字段完全相同时沿用原 state_key；记录的 module_key、record_key、科学值和原来源由程序从原候选带入。规划模型只提供去向、supported/uncertain、理由与 source_ids，不能输出替代科学值。",
         "uncertain 只对实际受影响的记录生成 state_assignment_uncertain；一个记录的疑问不自动扩散到兄弟属性或无关材料卡。",
@@ -299,7 +372,8 @@
       "code": "backend/ingest/scientific_form_filling.py::fill_scientific_forms；backend/ingest/scientific_output_schema.py::filling_schema",
       "owner": "固定表单整理模型 / 程序",
       "notes": [
-        "fill_scientific_forms 默认最多 4 轮；来源上下文约 60000 字符、首批读取约 65000 字符，单次请求超过 250000 字符即停止并保留候选。",
+        "fill_scientific_forms 默认最多 4 轮；来源上下文约 60000 字符、首批读取约 65000 字符。先记录 original_input_chars；仅当原始 content 超过 250000 字符时调用 prepare_fixed_request 做可完整还原的文本去重、来源目录与未读索引分组，随后按实际 wire content 再执行 250000 字符门。",
+        "无损准备不调用模型、不删除科学原文或候选；原始 request 和实际 wire_input 分别留证。准备失败或 wire 仍超过 250000 字符时以 context_budget 停止并保留候选，不能按旧逻辑在准备前直接判 incomplete。",
         "没有新来源可读时进入收尾，最终仍未完成写 form_filling_incomplete；不用旧结果冒充新提取。",
         "软件参数只在所属 QE、EPW、SSCHA 组内填写；严格字段限制只约束模型，人工扩展入口继续保留。"
       ],
@@ -369,11 +443,44 @@
       ]
     },
     {
+      "id": "citation-matching",
+      "title": "双向匹配库内引用关系",
+      "summary": "evidence 后、save 与 ready 前持久保存决定和快照",
+      "owner": "引用匹配程序 / 固定 LLM2 / MySQL",
+      "description": "complete_upload_matching 将 citation_matching_status 写为 running，调用 prepare_upload_matching。上游对当前论文的每条原始引文匹配已批准且 approved_revision=content_revision 的库内论文；下游扫描这些论文当前版本的相关引文，反向确认哪些论文引用当前论文，只保留命中下游并按论文去重。程序先用唯一 DOI、规范化题名及作者/年份兼容规则确定明确关系，相似度只召回候选；有候选而程序不能确定的疑难项才固定调用 LLM2。",
+      "notes": [
+        "LLM2 每批最多 16 条；每条只能返回本条给定候选 paper_id 或 null 和简短理由。Schema 验证非法 ID、漏答、重复键或候选越界均抛出错误，不把非法结果修补为成功。",
+        "每条疑难决定按匹配版本、任务命名空间、模型标签、原引文签名及候选身份签名缓存；相同输入复用 completed 决定，原引文或候选变化只使相关决定失效。下游可复用同身份的有效 LLM2 决定。",
+        "网络模型调用不占论文事务，每次缓存写入使用独立短事务；完成后再做取消/停止检查，将 citation_matching 快照挂入当前草稿，随后才进入 save。",
+        "GROBID 状态为 succeeded 或 partial 时快照为 completed；failed、unavailable 或无提取结果时快照为 unavailable，仍保存原状态与 parser_error，不把零引用或模型猜测当事实。",
+        "读取、刷新、普通输入和保存不运行匹配模型；未提交论文使用临时中心身份，正式公开边仍需提交、批准及两端当前已审核版本。"
+      ],
+      "code": "backend/services/citation_matching.py::complete_upload_matching / prepare_upload_matching / match_references / read_matching_snapshot；backend/ingest/upload_jobs.py::_process_conventional_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse.html#citation-matching",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#citation-results",
+          "label": "查看只读三列结果与陈旧提示"
+        },
+        {
+          "href": "#citation-matching-failed",
+          "label": "查看匹配失败与恢复边界"
+        },
+        {
+          "href": "#citation-unavailable",
+          "label": "查看 GROBID 不可用分支"
+        }
+      ]
+    },
+    {
       "id": "save",
       "title": "保存草稿与审核产物",
       "summary": "保留快照、来源和产物清单",
       "owner": "上传 Worker / 草稿存储",
-      "description": "保存本轮草稿、来源核对结果、科学产物与适用存储模式的产物清单，分区预览进入 saving。受控重跑核对预期草稿哈希，拒绝覆盖期间的人工编辑。",
+      "description": "引用匹配快照挂入 draft 后，保存本轮草稿、来源核对结果、科学产物与适用存储模式的产物清单，分区预览进入 saving。citation_matching 由服务端快照继承，浏览器不能通过整体保存伪造或丢弃。受控重跑核对预期草稿哈希，拒绝覆盖期间的人工编辑。",
       "notes": [
         "保存草稿不会创建待审论文，也不会自动批准。",
         "技术失败时保留已生成预览和成功结果。"
@@ -427,8 +534,9 @@
       "title": "标记 ready：技术处理完成",
       "summary": "不代表科学核对或人工批准完成",
       "owner": "上传 Worker",
-      "description": "complete_parsing_state 先检查表单整理和字段核对技术错误，再在适用时同步执行自动谱；全部结束后才写 status=ready、processing_status=succeeded，清除只读 partial_draft 并允许读取正式可编辑稿。",
+      "description": "常规新建管线已在此前由 complete_upload_matching 保存 completed 或 unavailable 快照；complete_parsing_state 再检查表单整理和字段核对技术错误，并在适用时同步执行自动谱。全部结束后才写 status=ready、processing_status=succeeded，清除只读 partial_draft 并允许读取正式可编辑稿。spectra-resume 直接以现有草稿调用 complete_parsing_state(include_spectra=True)，不经过 complete_upload_matching，也不重新生成匹配快照。",
       "notes": [
+        "匹配快照要求只描述常规新建管线；谱专用续跑沿用现有草稿及其快照，不把续跑画成重新执行引用匹配。",
         "ready 只表示本轮技术处理完成，不表示所有字段、结构或曲线科学正确，也不等于人工确认或整篇批准。",
         "目标谱身份明确但标定待核对与自动谱技术故障分开记录；真实论文和真实 PDF 的科学验收不由本静态图代替。"
       ],
@@ -437,6 +545,55 @@
         {
           "href": "01-upload-parse.html#ready",
           "label": "返回本功能主干"
+        },
+        {
+          "href": "#citation-results",
+          "label": "查看只读引用匹配三列结果"
+        },
+        {
+          "href": "#field-review-workflow",
+          "label": "继续查看逐字段人工处理"
+        }
+      ]
+    },
+    {
+      "id": "field-review-workflow",
+      "title": "ready 后逐字段人工处理",
+      "summary": "统一字段设置、人工资料、模型核对与人工决定",
+      "owner": "上传者或审核员 / 四宿主字段工作流",
+      "description": "ready 后，上传校对、论文审核与返修等宿主按同一字段输入契约定位当前值和来源。未修改且尚待确认的字段可直接人工认可；实际修改可保存人工理由与多源资料后主动核对，或留到提交/批准检查时统一核对，也可对符合程序资格的字段显式选择 without_evidence。所有结果绑定 item_key、内容摘要、来源摘要和实际状态范围，普通读取与输入不启动模型。",
+      "notes": [
+        "普通人工资料包含链接、图片、PDF 各最多 10 项及一个最长 100000 字符的长文字框；单文件最大 10 MiB，PDF 读取最多 20 页、正文最多 100000 字符。保存链接不触发网络或模型，只有核对时才按公开地址与格式边界读取。",
+        "普通路径要求实际修改字段有人工理由和至少一项资料；模型可立即核对或提交时核对。读取失败、格式错误或技术失败保留真实回执，不伪装为已读或科学通过。",
+        "without_evidence 是 field-review-v2 的 approve 人工决定，不是模型支持；有效时该字段普通提交不再发起模型，并清空 AI 理由、证据关联和模型审核字段。前端以 waived 黄色状态显示。",
+        "补入人工资料、修改当前值、原始论文来源变化或状态适用范围变化会使旧免证决定失效；结构类、未验证派生、非法空值或不满足字段 Schema 的当前值不能免证放行。",
+        "有效黄色可以进入送审、审核员批准、入库与检索；仍须通过任务 ready、权限、来源、流程绑定、整篇提交及最终审核员批准等其他门禁。当前工作区 #226 新版正式批准与搜索验收仍受本机 #225 迁移缺失阻塞，不把实现画成该黑盒已完成。"
+      ],
+      "code": "backend/api/evidence.py::save_field_decision / enqueue_review；backend/ingest/field_input.py::bind；backend/ingest/field_decisions.py::detail / decide；backend/ingest/field_review.py::valid_field_decision / blocking；backend/ingest/field_waiver.py；backend/ingest/manual_evidence.py；backend/ingest/manual_links.py",
+      "links": [
+        {
+          "href": "01-upload-parse.html#field-review-workflow",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#manual-evidence-review",
+          "label": "查看普通人工资料核对"
+        },
+        {
+          "href": "#field-waiver",
+          "label": "查看黄色免证人工决定"
+        },
+        {
+          "href": "#field-stale",
+          "label": "查看失效与补证后重核"
+        },
+        {
+          "href": "#field-gate",
+          "label": "查看程序资格与送审门禁"
+        },
+        {
+          "href": "#handoff",
+          "label": "继续查看正式送审"
         }
       ]
     },
@@ -446,13 +603,14 @@
       "title": "用户校对并正式送审",
       "summary": "校验流程绑定、来源版本与当前草稿",
       "owner": "上传者 / Python 提交事务",
-      "description": "上传者在 ready 后校对并按字段保存工作稿，明确提交后由 _submit_upload_draft_locked 再次调用 require_task_workflow，检查当前来源、证据版本与草稿。首次送审在事务中创建 pending 论文并冻结正式整稿交接快照，holder 转为 review；交出后旧写凭证失效。",
+      "description": "上传者在 ready 后完成逐字段处理并保存工作稿，明确提交后由 _submit_upload_draft_locked 再次调用 require_task_workflow，检查当前来源、证据版本与草稿。有效 without_evidence 黄色人工决定可复用并通过该字段提交门，不表示 AI 支持；其他未通过或失效字段仍阻断。首次送审在事务中创建 pending 论文并冻结正式整稿交接快照，holder 转为 review；草稿含 citation_extraction 时，同一正式转接调用 persist_reference_extraction，按论文版本持久化 GROBID 提取、原始引文及匹配快照并执行论文引用匹配。交出后旧写凭证失效。",
       "notes": [
+        "论文批准并进入 publish_approved_paper 后，reconcile_after_paper_approval 只在 approved_revision=content_revision 时重新协调本论文及受影响下游引用关系；协调异常不会回滚已提交的审核状态，可在后续审核时重试。",
         "正式送审不是 ready 的自动后续；保存、AI 核对、人工确认、提交和整篇批准分别生效。",
         "needs_workflow 或草稿流程绑定不一致会阻止送审，手工填写也不能删除 _parsing_workflow 或伪造其他流程。",
         "后续审核与公开修订见 02；本静态图不实际送审任何用户草稿。"
       ],
-      "code": "frontend/src/components/UploadTaskEditor.tsx；backend/api/rag.py::_submit_upload_draft_locked；backend/services/manuscript_handoffs.py::record_handoff",
+      "code": "frontend/src/components/UploadTaskEditor.tsx；backend/api/rag.py::_submit_upload_draft_locked / publish_approved_paper；backend/services/manuscript_handoffs.py::record_handoff；backend/services/citation_graph.py::persist_reference_extraction / reconcile_after_paper_approval",
       "links": [
         {
           "href": "01-upload-parse.html#handoff",
@@ -489,6 +647,159 @@
       ]
     },
     {
+      "id": "model-retry",
+      "attachTo": "model-runtime",
+      "side": "left",
+      "kind": "wait",
+      "label": "临时传输故障",
+      "returnTo": "model-runtime",
+      "returnLabel": "退避后重发未完成请求",
+      "title": "持续退避，直到成功或人工停止",
+      "summary": "临时错误没有两次封顶；固定错误明确停止",
+      "owner": "ModelRuntime / 当前上传 Worker",
+      "description": "APIConnectionError、APITimeoutError、httpx.TransportError、可恢复 DNS、无任何有效输出就结束，以及 HTTP 408 / 429 / 500 / 502 / 503 / 504 归入临时错误。每次先保存脱敏 failure、output_started 与已有半截响应，再按 Retry-After 或 retry_after_seconds 等待；没有服务端时间时使用最高 60 秒的递增退避加随机抖动，然后重发整个未完成请求。",
+      "notes": [
+        "retry_wait 期间每 0.2 秒检查停止/代次并维持心跳，等待继续占用当前 Worker；不存在两次后自动 failed 的限制。",
+        "明确 retryable=false、配额/计费、固定配置、非空非法 JSON、严格 Schema、明确拒绝或截断不沿临时传输循环；科学审核结论也不因传输成功而改变。",
+        "已输出后持续空白/读取超时保存 partial_response 并整体重发；完整响应成功后才原子写 result.json，不把多次半截输出拼成科学结果。"
+      ],
+      "code": "backend/ingest/model_runtime.py::transient / retry_delay / error_detail / ModelRuntime.call / wait",
+      "links": [
+        {
+          "href": "01-upload-parse.html#model-retry",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#model-paused",
+          "label": "查看人工停止退避等待"
+        }
+      ]
+    },
+    {
+      "id": "model-paused",
+      "attachTo": "model-runtime",
+      "side": "right",
+      "kind": "wait",
+      "label": "人工停止",
+      "title": "停止并保留进度：pausing → paused",
+      "summary": "旧执行失效，暂停任务与草稿保留到主动清理",
+      "owner": "上传者 / 上传 API / RQ Worker",
+      "description": "POST /pause 仅所有者可调用。queued 且尚未领取的任务直接写 paused；extracting / reading / summarizing 先写 pausing、递增 execution_generation、保存当前草稿摘要并 persist 草稿，再定向停止本任务已开始 RQ 作业。ModelRuntime.check 抛出 ExecutionStopped，或 reconcile_execution 依据 RQ stopped / failed / canceled / finished 实际状态收敛为 paused。重复停止 pausing / paused 幂等返回。",
+      "notes": [
+        "停止立即阻止新模型请求和旧代次写回，并关闭已登记客户端；原生 PDF 或第三方 HTTP 阻塞需由定向 RQ 停止配合，不能只用 PID 或超时宣称已停。",
+        "暂停保留到用户主动清理，计入既有 100 个活动任务上限；delete 接受 paused，但不接受仍在 pausing 的任务。",
+        "刷新页面不停止；关闭本地连接不保证上游模型已经停止计算或不再计费。已送审或有正式论文的任务不能走此入口。",
+        "paused 是模型执行暂停；needs_workflow 是适用性未匹配/存疑/失败后等待新流程，二者不是同一状态。"
+      ],
+      "code": "backend/api/upload_tasks.py::pause_upload_task / delete_upload_task；backend/ingest/model_runtime.py::_pause_task_state / pause_task / reconcile_execution；backend/ingest/upload_jobs.py::process_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse.html#model-paused",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#model-resume",
+          "label": "继续查看同任务 resume"
+        },
+        {
+          "href": "#delete-task",
+          "label": "查看 paused 主动清理"
+        }
+      ]
+    },
+    {
+      "id": "model-resume",
+      "attachTo": "model-runtime",
+      "side": "right",
+      "kind": "result",
+      "label": "同任务继续",
+      "returnTo": "model-runtime",
+      "returnLabel": "重建确定性编排",
+      "title": "校验当前版本后同任务 resume",
+      "summary": "复用完整响应，仅重发未完成请求",
+      "owner": "上传者 / 上传 API / ModelRuntime",
+      "description": "POST /resume 仅所有者可调用；接受 paused 或无 paper_id 的 failed，拒绝其他状态。任务锁内核对 execution_input_hash 与当前用户/文件角色/SHA/解析方案、execution_draft_hash 与当前草稿，以及 provider、model、catalog_id 和 endpoint 摘要；一致后写 queued、resume=true，failed 还会标记 retry=true，并设置 execution_resume_requested 与受控重跑草稿哈希，再入队。",
+      "notes": [
+        "若已经是带 execution_resume_requested 的 queued，重复继续幂等返回，不重复领取；入队失败回到 paused 并保留可重试提示。",
+        "继续不重复上传、不创建新任务、不自动提交。通用文本在哈希一致时复用；模型调用按确定性目录复用已保存完整 result.json，只有缺失完整结果的请求才实际执行。",
+        "任何输入、草稿、模型或服务地址不一致都返回 409 RESUME_NOT_ALLOWED，不拿旧缓存覆盖当前用户值，也不隐式换模型。",
+        "与 POST /retry 区分：retry 仅接受 failed 并直接重新入队；resume 接受 paused / failed 并增加上述执行上下文版本保护。谱专用续跑还须另满足 spectra-resume 的全部条件。"
+      ],
+      "code": "backend/api/upload_tasks.py::resume_upload_task；backend/ingest/model_runtime.py::resume_task / input_identity；backend/ingest/upload_jobs.py::process_upload_task / _process_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse.html#model-resume",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#retry-task",
+          "label": "比较失败任务 retry"
+        },
+        {
+          "href": "#late-result",
+          "label": "查看旧执行迟到隔离"
+        },
+        {
+          "href": "#spectra-resume",
+          "label": "查看更严格的仅续跑谱条件"
+        }
+      ]
+    },
+    {
+      "id": "late-result",
+      "attachTo": "model-runtime",
+      "side": "left",
+      "kind": "stop",
+      "label": "旧代次迟到完成",
+      "title": "迟到结果只读隔离，不合并正式结果",
+      "summary": "late_ignored 记录保留原响应或错误类型",
+      "owner": "ModelRuntime / 旧执行线程",
+      "description": "interruptible 在停止时标记旧操作并关闭客户端；旧操作之后若仍返回或报错，且任务状态仍存在，就把 generation、操作名、late_ignored、完成时间及结果或脱敏错误写入 model-runtime 的 late/g〈generation〉-*.json。正常 result.json 提交前还会在任务锁内调用 check，旧代次无法覆盖新执行。",
+      "notes": [
+        "迟到归档不是恢复输入，也不会自动在下一次 resume 中作为完整响应复用；只有当前确定性调用目录中已正常提交的 result.json 才复用。",
+        "同一机制阻止迟到的分区预览、进度或 ready 写回把 paused / cancelled 任务恢复成活动状态。"
+      ],
+      "code": "backend/ingest/model_runtime.py::ModelRuntime.interruptible / check / event；backend/ingest/upload_jobs.py::process_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse.html#late-result",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#model-resume",
+          "label": "返回同任务恢复"
+        }
+      ]
+    },
+    {
+      "id": "context-memory",
+      "attachTo": "model-runtime",
+      "side": "left",
+      "kind": "wait",
+      "label": "上下文接近预算",
+      "returnTo": "model-runtime",
+      "returnLabel": "继续同一请求",
+      "title": "先无损准备，再只压缩旧过程",
+      "summary": "当前科学依据不由摘要替代",
+      "owner": "model_memory / LangMem / ModelRuntime",
+      "description": "prepare_fixed_request 以 o200k_base 加图片余量估计固定输入，先做可逐树还原的重复文本字典、来源目录和未读索引分组。prepare_request 仍超预算时，先保留受保护与最近完整工具组，仅把原文已在当前 sources 完整提供的旧回执交给 LangMem 滚动摘要；摘要请求本身经 runtime.call，因而同样可停止并复用完整响应。",
+      "notes": [
+        "原始请求、完整工具历史和图片关联独立留档；摘要不是科学证据，不替代当前原文、图片、数值、引用、有效审核或当前草稿。",
+        "无损传输标识若出现在模型输出中会拒绝该响应；摘要未缩短、单组过大、必要内容仍超限或仍有独立科学依据不能压缩时明确 ContextBudgetError，不无限压缩。"
+      ],
+      "code": "backend/ingest/model_memory.py::prepare_fixed_request / prepare_request / compact_history / validate_context_output；backend/ingest/model_runtime.py::ModelRuntime.call",
+      "links": [
+        {
+          "href": "#model-runtime",
+          "label": "返回模型运行器"
+        },
+        {
+          "href": "#form-fill",
+          "label": "查看 form-fill 的 250000 字符门"
+        }
+      ]
+    },
+    {
       "id": "workflow-paused",
       "attachTo": "workflow-check",
       "side": "right",
@@ -500,6 +811,7 @@
       "description": "通用入口在服务端保留基础 Markdown、来源、workflow_assessment 和适用的产物清单，清空 partial_draft，写 status=needs_workflow、processing_status=needs_input、reading_state=workflow_unavailable。needs_workflow 页面实际显示判断理由、基础题录和原文件下载，不据此扩大为页面可查看所有来源或完整 Markdown。只有 matched 才由 WORKFLOWS 执行 conventional-theory-calculation 专用入口。",
       "notes": [
         "服务端保留基础读取产物；页面展示范围不等于完整产物清单，needs_workflow 也不是 ready 或科学审核通过。",
+        "needs_workflow 表示 unmatched / uncertain / failed 导致没有选定专用流程，processing_status=needs_input；它不是 #224 人工停止产生的 paused，不能用 POST /resume 绕过流程选择。paused 才沿同任务模型执行恢复入口继续。",
         "手工填写入口先在 processing_status≠failed 时返回 manual_not_allowed，因此 needs_workflow 不能直接改手工填写；后续保存或送审仍由 require_task_workflow 拒绝无有效绑定的请求，不能绕过流程。",
         "正式送审同样要求任务与草稿绑定一致；preserve_binding 防止整体回传删除或伪造绑定。"
       ],
@@ -546,10 +858,10 @@
       "title": "仅失败任务可重新入队",
       "summary": "failed → queued；其他状态 409",
       "owner": "上传者 / 上传 API",
-      "description": "retry 只接受 status=failed，否则返回 409 RETRY_NOT_ALLOWED。允许后清错误并写 queued / processing，再调用 RQ；通用读取、适用性判断或专用管线按当前持久状态决定执行路径。",
+      "description": "POST /retry 只接受 status=failed，否则返回 409 RETRY_NOT_ALLOWED。允许后清错误并写 queued / processing，再调用 RQ；通用读取、适用性判断或专用管线按当前持久状态决定执行路径。它与 POST /resume 是不同接口：resume 另接受 paused，并在入队前核对执行输入、当前草稿、模型和 endpoint。",
       "notes": [
-        "needs_workflow、ready、needs_role_review 不能借用失败重试入口改变流程。",
-        "谱续跑另有严格前置条件，不会把任何 failed 都当成只续跑谱。"
+        "needs_workflow、ready、needs_role_review 不能借用失败重试入口改变流程；needs_workflow 也不是 paused。",
+        "谱续跑另有严格前置条件，不会把任何 failed 都当成只续跑谱；普通 retry 不等于已经通过 resume 的版本保护检查。"
       ],
       "code": "backend/api/upload_tasks.py::retry_upload_task；backend/ingest/upload_jobs.py::process_upload_task；backend/ingest/upload_resume.py::resume_spectra",
       "links": [
@@ -569,12 +881,12 @@
       "side": "left",
       "kind": "stop",
       "label": "删除",
-      "title": "仅清理允许终态的临时任务",
-      "summary": "运行中、待校对或已生成论文不可删除",
+      "title": "清理允许状态的临时任务",
+      "summary": "failed / duplicate / cancelled / paused 可删除",
       "owner": "上传者 / 上传 API",
-      "description": "单条删除只接受 failed、duplicate、cancelled，且 submitted_paper_id 必须为空；否则分别返回 UPLOAD_TASK_NOT_CLEARABLE 或 UPLOAD_TASK_PERSISTED。记录正被其他请求处理时返回 UPLOAD_TASK_BUSY。",
+      "description": "单条删除接受 failed、duplicate、cancelled、paused，且 submitted_paper_id 必须为空；否则分别返回 UPLOAD_TASK_NOT_CLEARABLE 或 UPLOAD_TASK_PERSISTED。记录正被其他请求处理时返回 UPLOAD_TASK_BUSY。",
       "notes": [
-        "ready、needs_workflow、needs_role_review 和 submitted 不在可直接删除集合内。",
+        "paused 可主动清理，但 pausing 仍受保护；ready、needs_workflow、needs_role_review 和 submitted 不在可直接删除集合内。",
         "批量删除逐条 best-effort 处理，不把单条失败伪装成全部成功。"
       ],
       "code": "backend/api/upload_tasks.py::delete_upload_task / batch_delete_upload_tasks；backend/ingest/upload_tasks.py::delete_task_record",
@@ -597,7 +909,7 @@
       "description": "记录 failed、failed_stage 与安全错误信息，保留可追查产物。重试受原文件有效性和当前任务状态限制。",
       "notes": [
         "不是科学字段不通过，也不伪造 ready。",
-        "有界处理仍失败时不会无限循环调用模型。"
+        "科学处理与工具行动按各自预算有界停止；临时传输故障不属于此固定失败路径，而由 ModelRuntime 持续退避，直到成功或人工停止。"
       ],
       "code": "backend/ingest/upload_jobs.py::process_upload_task / _process_conventional_upload_task",
       "links": [
@@ -709,8 +1021,9 @@
       "title": "保留未决状态，不伪造无结构",
       "summary": "技术异常与未读覆盖都不能变成空结构结论",
       "owner": "结构读取程序 / 上传 Worker",
-      "description": "13 轮工具循环耗尽、模型调用异常、文件身份或响应 Schema 校验失败会抛出错误并由上传流程记录失败；单项结构的来源、原子坐标或晶格等校验失败则转为该结构的 blocked 候选，不抹掉其他有效几何。任何情况都不会以空 structures 宣称全文没有结构；模型已 report_structures 但覆盖或解释仍不完整时，_reading_result 另保留 uncertainties 对应的 blocked 诊断候选。",
+      "description": "13 次模型迭代耗尽、ActionBudget 的 12 次工具行动耗尽、文件身份或响应 Schema 等固定错误会抛出并由上传流程记录 failed；模型连接、超时、限流和暂时服务错误则先由 ModelRuntime 持续退避，不进入固定失败出口。人工停止通过 ExecutionStopped 与 RQ 实际状态沿 pausing → paused 收敛，也不写成 failed。单项结构的来源、原子坐标或晶格等科学校验失败转为该结构的 blocked 候选，不抹掉其他有效几何。任何情况都不会以空 structures 宣称全文没有结构；模型已 report_structures 但覆盖或解释仍不完整时，_reading_result 另保留 uncertainties 对应的 blocked 诊断候选。",
       "notes": [
+        "临时传输重试、pausing / paused 与固定 failed 是三条不同路径；只有固定错误和科学处理预算耗尽进入本失败出口。",
         "有效几何、单项科学校验失败与文件级读取疑点分别保留，不用一个失败项抹掉其他候选。",
         "失败不是后续 structure-assign 的“无候选可分配”正常路径。"
       ],
@@ -768,6 +1081,98 @@
         {
           "href": "01-upload-parse.html#state-inventory",
           "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "citation-unavailable",
+      "attachTo": "citation-extract",
+      "side": "right",
+      "kind": "result",
+      "label": "failed / unavailable",
+      "returnTo": "text",
+      "returnLabel": "继续有效正文检查",
+      "title": "保留 GROBID 失败状态，不解释为零引用",
+      "summary": "unavailable 快照仍可随主草稿进入 ready",
+      "owner": "GROBID 适配器 / 引用匹配程序",
+      "description": "连接或 HTTP 5xx 返回 unavailable，HTTP 4xx 与 TEI 解析失败返回 failed；complementary 的 extract_document 以 unavailable 起始并保留实际异常类型。引用匹配阶段对这些状态以及无提取结果生成 status=unavailable 快照，写入 parser_status、parser_error、空 references、source_signature 和创建时间；downstream 仍根据已批准论文的既有引文独立计算，因此上游不可用时仍可能有反向命中。",
+      "notes": [
+        "此分支不抛上传技术异常，主流程继续 text、科学处理与 ready；但结果页显示 unavailable 和实际 parser_error，不能宣称已完成引用匹配。downstream 不保证为空，上游失败也不证明没有既有论文引用当前论文。",
+        "partial 表示仍有已解析引文但部分缺 DOI 与规范化题名，快照为 completed 并保留这些条目；不能把 partial 与 unavailable 合并。",
+        "不让 LLM 根据论文主题或记忆猜造参考文献，也不创建未收录目标的占位论文。"
+      ],
+      "code": "backend/services/citation_graph.py::extract_references_from_pdf；backend/ingest/grobid_document.py::extract_document；backend/services/citation_matching.py::prepare_upload_matching；frontend/src/pages/CitationMatchingPage.tsx",
+      "links": [
+        {
+          "href": "01-upload-parse.html#citation-unavailable",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#citation-results",
+          "label": "查看 unavailable 的只读三列页"
+        }
+      ]
+    },
+    {
+      "id": "citation-results",
+      "attachTo": "ready",
+      "side": "right",
+      "kind": "result",
+      "label": "只读三列结果",
+      "title": "新标签读取持久匹配快照",
+      "summary": "下游命中 / 当前论文 / 全部原始引文",
+      "owner": "上传者或管理员 / 只读匹配 API / React 结果页",
+      "description": "ready 且 citation_matching_status 为 completed 或 unavailable 时，解析页提供 target=_blank 链接。结果页左列只列命中下游，中列为当前论文，右列按 reference_index 保留全部已解析引文的原顺序、编号、原文与题名；命中填色并可打开论文，未命中不填色。无图谱标题不影响在此显示。",
+      "notes": [
+        "GET /api/upload-tasks/{task_id}/citation-matching 只调用 read_matching_snapshot 读取快照并核验依赖，不运行模型、不扫描新候选、不清空其他命中；刷新同样零模型调用。",
+        "source_signature 不一致时整份结果标 stale；命中论文不再是当前已批准版本、书目身份变化或下游原引文变化时，仅给受影响决定标 stale 并计入 stale_count，页面不再把它显示为有效命中。",
+        "所有者和已批准的 admin / superadmin 可读，其他用户 403；任务已提交归档后按正式论文归属读取同一快照。无快照返回 409 citation_matching_not_ready，unavailable 显示解析错误。",
+        "此处只是解析期只读核对结果；公开图谱边仍需提交和审核边界，不能在未审核时提前公开。"
+      ],
+      "code": "backend/api/upload_tasks.py::get_citation_matching；backend/services/citation_matching.py::read_matching_snapshot；frontend/src/components/UploadParsingDetail.tsx；frontend/src/pages/CitationMatchingPage.tsx",
+      "links": [
+        {
+          "href": "01-upload-parse.html#citation-results",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#citation-matching",
+          "label": "返回双向匹配与快照生成"
+        }
+      ]
+    },
+    {
+      "id": "citation-matching-failed",
+      "attachTo": "citation-matching",
+      "side": "left",
+      "kind": "stop",
+      "label": "匹配技术失败",
+      "title": "保留失败证据，不保存完成快照或发布 ready",
+      "summary": "citation_matching_status=failed；任务进入 failed",
+      "owner": "引用匹配程序 / 上传 Worker",
+      "description": "LLM2 调用异常、响应 Schema 不合法、非法候选 ID、漏答、缓存/数据库或快照生成异常会使 complete_upload_matching 写 citation_matching_status=failed 并抛出，外层上传流程记录 failed。match_references 另按失败输入与最后原始响应保存 state=failed 回执；已写出的独立有效缓存不因此被清空。",
+      "notes": [
+        "临时模型连接、限流与服务故障沿 #224 ModelRuntime 持续退避；固定协议错误直接停止，二者都不伪造 completed。",
+        "停止/暂停使用原执行信号，不写 failed 冒充科学失败；同任务恢复只重做未完成匹配，已有完整模型响应和有效决定按身份复用。",
+        "原始 GROBID 引文与用户当前草稿保留；匹配失败与 GROBID unavailable 的可继续分支不同。"
+      ],
+      "code": "backend/services/citation_matching.py::match_references / complete_upload_matching；backend/ingest/upload_jobs.py::_process_conventional_upload_task；backend/ingest/model_runtime.py::ModelRuntime.call",
+      "links": [
+        {
+          "href": "01-upload-parse.html#citation-matching-failed",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#model-runtime",
+          "label": "查看模型重试、停止与恢复"
+        },
+        {
+          "href": "#retry-task",
+          "label": "查看失败任务 retry"
+        },
+        {
+          "href": "#model-resume",
+          "label": "查看同任务 resume"
         }
       ]
     },
@@ -835,12 +1240,148 @@
       "returnLabel": "继续字段核对",
       "links": [
         {
-          "href": "01-upload-parse.html#native-page",
+          "href": "01-upload-parse.html#evidence",
           "label": "返回本功能主干"
         },
         {
           "href": "#native-page",
           "label": "改查真实 PDF 原页图像"
+        }
+      ]
+    },
+    {
+      "id": "manual-evidence-review",
+      "attachTo": "field-review-workflow",
+      "side": "left",
+      "kind": "wait",
+      "label": "普通修改与人工资料",
+      "returnTo": "field-review-workflow",
+      "returnLabel": "保存并复用同版本结果",
+      "title": "人工理由与多源资料进入普通模型核对",
+      "summary": "可立即核对，也可提交/批准检查时统一核对",
+      "owner": "上传者或审核员 / 人工资料存储 / 字段核对 Worker",
+      "description": "实际修改字段后，普通路径保存人工判断理由，并提供链接、图片、PDF、单个长文字中的一项或多项。field_input.bind 把当前字段值、原论文来源和人工资料摘要绑定为 field_input_token；显式单字段核对或提交/批准检查只处理当前需核对字段。同版本 supported 与有效人工决定复用，普通查看、输入和保存不追加模型调用。",
+      "notes": [
+        "链接、图片、PDF 各最多 10 项，文字只用一个最长 100000 字符输入框；图片/PDF/旧文本单文件最大 10 MiB，PDF 最多 20 页和 100000 正文字符。超限、不可读或格式错误明确失败，不自动裁剪后冒充完整读取。",
+        "保存 HTTP/HTTPS 链接不触发网络；核对时只允许公网地址、限制重定向和 10 MiB 读取，支持可读取文本或 PDF。网络 403、无正文、加密/超页 PDF 等保留 not_read 或失败回执，不伪称模型已读。",
+        "图片和可搜索 PDF 的实际内容进入模型输入后才记录相应已读状态；人工资料独立于论文原文，不进入原文检索语料。",
+        "模型不通过、技术失败、取消或迟到写回均不伪装成科学通过；当前输入和其他有效结果保留。纯查看不抢工作稿写锁，模型外部调用不占保存锁。"
+      ],
+      "code": "backend/ingest/manual_evidence.py::save_explanation / add_file / review_context；backend/ingest/manual_links.py::validate_url / read_public_link；backend/ingest/field_input.py::bind；backend/api/evidence.py::enqueue_review",
+      "links": [
+        {
+          "href": "01-upload-parse.html#manual-evidence-review",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#field-waiver",
+          "label": "比较 without_evidence 黄色分支"
+        },
+        {
+          "href": "#field-gate",
+          "label": "查看普通核对的阻断条件"
+        }
+      ]
+    },
+    {
+      "id": "field-waiver",
+      "attachTo": "field-review-workflow",
+      "side": "right",
+      "kind": "result",
+      "label": "不提交人工资料直接人工通过",
+      "returnTo": "field-review-workflow",
+      "returnLabel": "保留黄色当前决定",
+      "title": "without_evidence：黄色人工免证决定",
+      "summary": "人工 approve；machine_status=unchecked，零模型调用",
+      "owner": "上传者或审核员 / field-review-v2",
+      "description": "用户显式点击免证按钮后，前端重新读取当前 field-detail 并携带最新 review_token 调 POST /field-decision(action=approve_without_evidence)。服务端再次检查字段资格和令牌，保存 contract=field-review-v2、action=approve、mode=without_evidence、actor 与 content/source 摘要；当前人工资料行转 historical。结果写 status=supported、human_confirmed=true、source_kind=human_review、machine_status=unchecked，并清空 AI 理由、证据关联、候选和模型审核字段。",
+      "notes": [
+        "此操作不启动模型，不把人工决定改写为 AI 科学支持；旧审核事件和历史资料保留，不是物理删除历史。",
+        "前端 FieldReviewFeedback / evidenceStatus 将当前有效决定显示为 waived 黄色；同版本重复点击幂等返回，不追加决定或重复保存科学数据。",
+        "有效 waiver 在 needs_review / blocking 与提交结果解析中作为当前人工通过复用，普通提交不再核对该字段的模型证据；可以随整篇送审、审核员批准、入库和检索。",
+        "黄色只代表当前版本人工免证通过，不证明字段内容经原文或模型科学验证，也不等于整篇论文已批准。"
+      ],
+      "code": "backend/api/evidence.py::FieldDecision / save_field_decision；backend/ingest/field_decisions.py::decide；backend/ingest/field_waiver.py；backend/ingest/property_evidence.py::checked_result；frontend/src/components/EvidenceWorkflow.tsx；frontend/src/components/FieldReviewFeedback.tsx",
+      "links": [
+        {
+          "href": "01-upload-parse.html#field-waiver",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#field-stale",
+          "label": "查看值、来源、范围或资料变化后的失效"
+        },
+        {
+          "href": "#field-gate",
+          "label": "查看不可免证与整篇门禁"
+        },
+        {
+          "href": "#handoff",
+          "label": "继续查看正式送审"
+        }
+      ]
+    },
+    {
+      "id": "field-stale",
+      "attachTo": "field-waiver",
+      "side": "left",
+      "kind": "wait",
+      "label": "当前依据已变化",
+      "returnTo": "field-review-workflow",
+      "returnLabel": "按当前版本重新核对",
+      "title": "旧免证决定失效，黄色转待核对",
+      "summary": "unchecked / stale / pending_review，不沿用旧通过",
+      "owner": "字段输入、来源与状态范围校验程序",
+      "description": "valid_field_decision 与 field_waiver.active / project 共同检查 field-review-v2、approve、内容摘要、来源摘要和 scope_matches。当前值改变、paper_source_hash 与 waiver_source_hash 不一致、状态适用范围变化、字段不再满足免证资格，或当前人工理由与资料已补齐，都会使旧 without_evidence 失效；详情和摘要转为 unchecked / stale / pending_review，AI 理由保持为空。",
+      "notes": [
+        "换值或换原始来源时，旧人工资料不能自动成为新值依据；服务端清空当前草稿说明和 items 以待重新填写，历史行仍保留。",
+        "补入人工理由与资料后不再满足‘无人工资料’语义，黄色转待核对并进入普通模型路径；只有重新形成当前版本有效决定才可复用。",
+        "失效不是模型判定不通过，也不是技术失败；它只是旧人工决定不能绑定新内容。提交门的 blocking 会阻止继续沿用旧结果。"
+      ],
+      "code": "backend/ingest/field_waiver.py::active / project；backend/ingest/field_review.py::valid_field_decision / needs_review / blocking；backend/ingest/field_input.py::bind；backend/ingest/manual_evidence.py::_ensure；frontend/src/components/EvidenceWorkflow.tsx",
+      "links": [
+        {
+          "href": "01-upload-parse.html#field-stale",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#manual-evidence-review",
+          "label": "补资料后进入普通核对"
+        },
+        {
+          "href": "#field-waiver",
+          "label": "返回当前版本人工决定"
+        }
+      ]
+    },
+    {
+      "id": "field-gate",
+      "attachTo": "field-review-workflow",
+      "side": "left",
+      "kind": "stop",
+      "label": "资格或门禁未满足",
+      "title": "程序校验、字段通过与整篇审核分别生效",
+      "summary": "黄色不绕过格式、来源、权限或最终批准",
+      "owner": "字段程序校验 / 提交事务 / 审核员",
+      "description": "field_waiver.allowed 拒绝 structure / structure_issue、未验证派生、非法或不允许的空值，以及不满足字段 Schema 的值；decide 还核对最新 review_token，格式不合法返回 evidence_invalid_value，版本过期返回 evidence_stale。普通路径缺人工理由或资料返回 manual_evidence_incomplete，人工拒绝、当前结果未通过或失效继续由 blocking 阻断。",
+      "notes": [
+        "有效 without_evidence 仅让本字段以人工 supported 通过；其他字段的不通过、正文来源不完整、文件身份确认、任务 ready、上传者权限、typed-parsing-v1 绑定、证据版本与工作稿写凭证仍分别检查。",
+        "模型技术故障与科学不通过分开显示，不能用黄色或失败重试伪造 AI 结论。提交失败回滚 ready，正式批准由审核员独立执行。",
+        "当前工作区已落实代码与黄色字段操作；#226 记录的新版正式批准/搜索黑盒仍受本机 #225 数据库迁移缺失阻塞，因此本图只陈述源码行为，不宣称该最终验收已经完成。"
+      ],
+      "code": "backend/ingest/field_waiver.py::allowed；backend/ingest/field_decisions.py::decide；backend/ingest/field_review.py::blocking；backend/api/evidence.py::enqueue_review；backend/ingest/property_evidence.py::resolve_results；backend/api/rag.py::_submit_upload_draft_locked；docs/specs/226-field-workflow-convergence/validation.md",
+      "links": [
+        {
+          "href": "01-upload-parse.html#field-gate",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#field-review-workflow",
+          "label": "返回逐字段处理"
+        },
+        {
+          "href": "#handoff",
+          "label": "查看正式送审检查"
         }
       ]
     },
@@ -889,17 +1430,19 @@
     },
     {
       "id": "spectra-resume",
-      "attachTo": "automatic-spectra",
+      "attachTo": "model-runtime",
       "side": "left",
       "kind": "wait",
       "label": "严格续跑条件",
+      "returnTo": "automatic-spectra",
+      "returnLabel": "仅续跑自动谱",
       "title": "满足全部条件才只续跑谱",
       "summary": "不重建或覆盖用户草稿",
       "owner": "上传恢复程序",
       "description": "process_upload_task 在任何通用或专用管线之前调用 resume_spectra。仅当 status=queued、reading_state=extracting_spectra，任务与草稿均无字段变更事件，草稿存在且 _form_contract_version=1，form_filling_report=completed，model_review_report.unfinished_fields=0 且无 errors，field_suggestions_error 为空时，才直接 complete_parsing_state(include_spectra=True)。",
       "notes": [
         "任一条件不满足都返回 None，继续正常 _process_upload_task，不把普通失败重试伪装成谱续跑。",
-        "续跑只重建本轮自动谱处理，不重新生成科学草稿；谱异常写 failed / automatic_spectra_incomplete / failed_stage=spectra。"
+        "续跑只重建本轮自动谱处理，不重新生成科学草稿或引用匹配快照；谱异常写 failed / automatic_spectra_incomplete / failed_stage=spectra。"
       ],
       "code": "backend/ingest/upload_resume.py::resume_spectra；backend/ingest/upload_jobs.py::process_upload_task / complete_parsing_state",
       "links": [

@@ -88,6 +88,10 @@
         {
           "href": "02-review-audit-details.html#structure-format-invalid",
           "label": "分支：结构格式拒绝"
+        },
+        {
+          "href": "02-review-audit-details.html#unified-field-settings",
+          "label": "分支：统一字段设置回退"
         }
       ]
     },
@@ -110,15 +114,19 @@
       "id": "manual-decision",
       "kind": "wait",
       "title": "逐条人工裁决",
-      "summary": "理由绑定当前值与来源版本",
+      "summary": "普通修改需理由与真实资料；也可选择黄色免证",
       "owner": "React 侧栏 / Python field-decision",
-      "description": "认可具备人工通过资格的当前内容可直接人工审核通过，不填理由、不调用模型；普通非空修改按字段规则保存理由、证据或缺证说明并完成必要核对。允许留空的字段在人工资料完整时可人工确认留空，也可主动进行单字段模型核对；决定绑定当前版本，详细边界见详情页。",
+      "description": "认可具备人工通过资格的当前内容可直接人工审核通过，不填理由、不调用模型。#226 普通修改须保存人工理由和至少一项真实 items，可主动核对或送审时核对；也可明确选择 without_evidence，以零资料、零模型形成黄色人工通过。合法空值可走新免证；旧 mode=empty 在空值资格、资料完整和 hash 匹配时可复用通过，但当前 confirm_empty 不是完整新建 HTTP/UI 主链。其他格式、必填、权限、版本与批准门禁不绕过。",
       "notes": [],
-      "code": "backend/api/evidence.py#/field-decision；backend/ingest/field_decisions.py；backend/ingest/empty_field_review.py；文档依据：literature-and-record-review.md#保存与人工审核决定",
+      "code": "backend/api/evidence.py#/field-decision；backend/ingest/field_decisions.py；backend/ingest/field_waiver.py；backend/ingest/manual_evidence.py；backend/ingest/empty_field_review.py",
       "links": [
         {
           "href": "02-review-audit-details.html#manual-decision",
           "label": "展开此步骤的完整细节"
+        },
+        {
+          "href": "02-review-audit-details.html#manual-evidence-226",
+          "label": "分支：#226 多源资料与黄色免证"
         }
       ]
     },
@@ -127,9 +135,9 @@
       "kind": "check",
       "label": "approved 专用",
       "title": "approved 专用提交前检查",
-      "summary": "仅批准路径；return / forward 绕过",
+      "summary": "仅批准路径；return 绕过",
       "owner": "React 编辑页 / Python submit-check",
-      "description": "仅 approved 批准请求在保存后复用有效结果并执行必要核对；return / forward 不经过此检查，沿绕过分支直接进入服务端准入。",
+      "description": "仅 approved 批准请求在保存后复用有效结果并执行必要核对；return 不经过此检查，沿绕过分支直接进入服务端准入。有效 without_evidence 只免除该字段的资料与模型核对，不跳过其他门禁。",
       "notes": [],
       "code": "frontend/src/pages/AdminPaperEditPage.tsx::handleEditReview；backend/api/evidence.py::submit_check / enqueue_review",
       "links": [
@@ -146,22 +154,18 @@
     {
       "id": "server-guard",
       "kind": "check",
-      "title": "服务端准入校验",
-      "summary": "Python 接口验证角色与禁止自审",
+      "title": "管理员准入与状态校验",
+      "summary": "管理员准入后仅接受 approved / rejected",
       "owner": "Python 审核事务",
-      "description": "approved 经专用 submit-gate 到达；return / forward 绕过该门直接进入。Python 接口统一验证角色与禁止自审，再进入后续行锁。",
+      "description": "approved 经专用 submit-gate 到达；return 绕过该门直接进入。get_current_admin 先完成管理员准入，commit_review 在事务内先校验状态，再以 FOR UPDATE 锁论文；pending、空值或缺失决定均不是新审核动作。",
       "notes": [
-        "后端 approve / return / forward 映射仍发生在 commit_review 锁后，不因前端绕过分支而提前。"
+        "锁后依次复核角色与禁止自审、映射 approve / return 并检查幂等，再按动作校验写者与工作稿。"
       ],
       "code": "frontend/src/pages/AdminPaperEditPage.tsx::handleEditReview；backend/api/evidence.py::commit_field_review；backend/services/field_review_commit.py::commit_review",
       "links": [
         {
           "href": "02-review-audit-details.html#server-guard",
           "label": "展开此步骤的完整细节"
-        },
-        {
-          "href": "02-review-audit-details.html#self-review-blocked",
-          "label": "分支：禁止审核自提交"
         },
         {
           "href": "02-review-audit-details.html#legacy-go-review",
@@ -173,9 +177,9 @@
       "id": "lock-idempotency",
       "kind": "check",
       "title": "行锁与幂等校验",
-      "summary": "MySQL FOR UPDATE 锁论文行并核对请求与版本",
+      "summary": "锁论文后复核角色/自审，再检查动作与幂等",
       "owner": "Python 审核事务 / MySQL",
-      "description": "锁论文行并核对请求与版本。详细行为、边界和来源见独立详情页。",
+      "description": "事务锁论文后复核管理员角色与禁止自审；approved / rejected 映射为 approve / return，随后按 review_request_id 检查幂等。重复相同操作只返回成功、paper_id 和当前 review_status，不是完整原响应；不同稿件、操作者或动作复用身份则冲突，之后才按动作校验写者与工作稿。",
       "notes": [],
       "code": "backend/services/field_review_commit.py::commit_review；backend/services/manuscript_handoffs.py::require_writer",
       "links": [
@@ -184,8 +188,12 @@
           "label": "展开此步骤的完整细节"
         },
         {
+          "href": "02-review-audit-details.html#self-review-blocked",
+          "label": "分支：锁后禁止审核自提交"
+        },
+        {
           "href": "02-review-audit-details.html#reject-or-return",
-          "label": "分支：return 退回或 forward 转交"
+          "label": "分支：return 退回作者"
         },
         {
           "href": "02-review-audit-details.html#version-conflict",
@@ -197,19 +205,19 @@
       "id": "review-action",
       "kind": "check",
       "title": "选择审核动作",
-      "summary": "approve / return / forward 三分支",
+      "summary": "approved→approve / rejected→return 两分支",
       "owner": "React 编辑页 / Python commit_review",
-      "description": "review-commit 将 approved 映射为 approve，rejected 映射为 return，pending 映射为 forward；只有 approve 继续进入批准专用证据门。",
+      "description": "FieldReviewCommit.status 只接受 approved 与 rejected，分别映射 approve 与 return；pending 仅用于队列和历史，不提供审核员间主动转交。动作与幂等确认后，approve 校验当前写者和工作稿再进入批准专用证据门，return 经 review_handoff 校验后退回作者。",
       "notes": [],
       "code": "backend/api/evidence.py::FieldReviewCommit / commit_field_review；backend/services/field_review_commit.py::commit_review",
       "links": [
         {
           "href": "02-review-audit-details.html#review-action",
-          "label": "展开三种审核动作"
+          "label": "展开两种审核动作"
         },
         {
           "href": "02-review-audit-details.html#reject-or-return",
-          "label": "分支：return 退回或 forward 转交"
+          "label": "分支：return 退回作者"
         }
       ]
     },
@@ -241,7 +249,9 @@
       "summary": "科学内容、来源、批准和交接原子切换",
       "owner": "Python 审核事务 / MySQL",
       "description": "科学内容、来源、批准和交接原子切换。详细行为、边界和来源见独立详情页。",
-      "notes": [],
+      "notes": [
+        "本机 CaH6 1208 在批准事务内因并行 #225 的 paper_references.match_evidence 迁移缺失而回滚，尚未进入事务后发布；旧批准版不等于本次成功。"
+      ],
       "code": "backend/services/field_review_commit.py::commit_review；backend/services/manuscript_handoffs.py::record_handoff / capture",
       "links": [
         {
@@ -251,6 +261,10 @@
         {
           "href": "02-review-audit-details.html#transaction-rollback",
           "label": "分支：事务整体回滚"
+        },
+        {
+          "href": "02-review-audit-details.html#cah6-approval-blocked",
+          "label": "分支：CaH6 批准事务环境阻塞"
         }
       ]
     },
@@ -286,9 +300,9 @@
       "title": "打开快速审核弹窗",
       "summary": "与独立编辑汇合到 Python 工作稿和 review-commit",
       "owner": "React AdminPage / Python 证据与审核服务",
-      "description": "非 approved 论文先 open-workdraft 取得工作稿与写周期；已 approved 论文的快速审核仅允许 rejected 拒绝返修，无须先领取已交出的编辑工作稿。审核动作 approved 经 submit-check，return / forward 绕过该专用门，最终均进入 Python review-commit。",
+      "description": "非 approved 论文先 open-workdraft 取得工作稿与写周期；已 approved 论文的快速审核仅允许 rejected 拒绝返修，无须先领取已交出的编辑工作稿。approved 经 submit-check，rejected 映射 return 并绕过该专用门，最终均进入 Python review-commit；不提供审核员间主动转交。",
       "notes": [
-        "快速弹窗不是 Go ReviewPaper 或 BatchReview，也不是另一条批准事务。"
+        "快速弹窗不是 Go ReviewPaper 或 BatchReview，也不是另一条批准事务；待审稿初始未选择动作，也不预填旧意见。"
       ],
       "code": "frontend/src/pages/AdminPage.tsx::openReview / handleReview；frontend/src/components/EvidenceWorkflow.tsx::gate；backend/api/evidence.py::open_workdraft / submit_check / commit_field_review",
       "links": [
@@ -324,7 +338,7 @@
       "kind": "stop",
       "label": "超管维护",
       "title": "单篇或批量删除论文",
-      "summary": "维护动作，不属于审核 approve / return / forward",
+      "summary": "维护动作，不属于审核 approve / return",
       "owner": "超级管理员 / Go 删除接口",
       "description": "SuperAdminRequired 保护单篇 DELETE 与批量 batch-delete。批量删除逐篇 best-effort 执行；部分失败继续处理其余论文，并返回 HTTP 206 与 failed_ids，前端据此提示部分失败。",
       "notes": [],
@@ -404,22 +418,22 @@
     },
     {
       "id": "self-review-blocked",
-      "attachTo": "server-guard",
+      "attachTo": "lock-idempotency",
       "side": "left",
       "kind": "stop",
       "label": "自审请求",
       "title": "禁止审核自提交",
-      "summary": "无权或自审均不批准",
+      "summary": "管理员先准入；锁后复核角色并禁止自审",
       "owner": "Python 审核事务",
-      "description": "当前 get_current_admin 与 commit_review 拒绝缺少管理员身份或操作者等于原上传者的请求，不产生批准或正式交接。",
+      "description": "get_current_admin 先做管理员准入；commit_review 锁论文后再次复核角色，并拒绝操作者等于原上传者的请求，不产生批准或正式交接。",
       "notes": [
         "Go 存量审核同样禁止自审，不能通过更换接口绕过。"
       ],
       "code": "backend/api/evidence.py::commit_field_review；backend/services/field_review_commit.py::commit_review",
       "links": [
         {
-          "href": "02-review-audit-details.html#server-guard",
-          "label": "返回本功能主干"
+          "href": "02-review-audit-details.html#lock-idempotency",
+          "label": "返回锁后复核与幂等"
         }
       ]
     },
@@ -427,7 +441,7 @@
       "id": "legacy-go-review",
       "title": "存量 Go 审核兼容入口",
       "summary": "已有 handoff，或 approved 的旧接口非 approved 动作均拒绝旁路",
-      "description": "Go ReviewPaper 只作为存量兼容入口。paperUsesHandoffs 命中，或论文已 approved 且旧接口请求动作不是 approved 时，返回 409 workdraft_required；必须改用 Python 工作稿与 commit_review 正式交接。",
+      "description": "Go ReviewPaper 只作为存量兼容入口，isValidReviewAction 只接受 approved / rejected，pending 不能作为新动作。paperUsesHandoffs 命中，或论文已 approved 且旧接口请求动作不是 approved 时，返回 409 workdraft_required；必须改用 Python 工作稿与 commit_review 正式交接。",
       "code": "goserver/handlers/admin.go::ReviewPaper；goserver/handlers/manuscript_handoffs.go",
       "owner": "Go 审核兼容层",
       "attachTo": "server-guard",
@@ -446,20 +460,20 @@
       "attachTo": "review-action",
       "side": "left",
       "kind": "result",
-      "label": "return / forward",
-      "title": "return 退回作者或 forward 转交",
-      "summary": "return 进入完整返修闭环；forward 继续审核交接",
+      "label": "return",
+      "title": "return 退回作者",
+      "summary": "return 建立作者工作稿并进入完整返修闭环",
       "owner": "Python 审核事务 / MySQL",
-      "description": "rejected 映射 return，holder 交还作者并创建作者工作稿；pending 映射 forward，holder 保持 review。作者在 /papers/:id/revise 局部保存、AI 核对和人工处理后显式重交，冻结新快照并 holder=review 再审核；未批准稿 rejected→pending，已批准旧版在新批准前持续公开。",
+      "description": "rejected 映射 return，holder 交还作者并创建作者工作稿。作者在 /papers/:id/revise 局部保存、AI 核对和人工处理后显式重交，冻结新快照并 holder=review 再审核；未批准稿 rejected→pending，已批准旧版在新批准前持续公开。pending 是此时的工作流状态，不是审核员可新选的转交动作。",
       "notes": [
-        "这些动作不经过批准专用证据与分类门；返修保存也不会自动重交。",
+        "return 不经过批准专用证据与分类门；返修保存也不会自动重交。",
         "作者须等待其他合法审核员正式退回，不能通过角色变化自行取回。"
       ],
       "code": "backend/services/field_review_commit.py::commit_review；backend/services/manuscript_handoffs.py::record_handoff / author_working_copy；backend/services/paper_revisions.py::submit_draft",
       "links": [
         {
           "href": "02-review-audit-details.html#reject-or-return",
-          "label": "展开 return / forward 与返修闭环"
+          "label": "展开 return 与返修闭环"
         },
         {
           "href": "02-review-audit-details.html#author-revision",
@@ -535,13 +549,14 @@
       "kind": "stop",
       "label": "证据不完整",
       "title": "证据门禁拦截",
-      "summary": "缺出处或未核对则拒绝批准",
+      "summary": "无有效人工决定时，缺出处或未核对才拦截",
       "owner": "Python 审核事务",
-      "description": "批准所需的来源、核对结果、预期版本或必填分类不满足时返回明确错误，resolve_results / _validate_draft 阻止正式物化与批准。技术故障与科学问题分别显示。",
+      "description": "无有效人工批准或 without_evidence 时，批准所需来源、核对结果、预期版本或必填分类不满足才返回明确错误并阻止正式物化；有效免证不因零资料进入此拒绝分支。技术故障与科学问题分别显示。",
       "notes": [
+        "有效人工批准的旧引用若无法定位，转 legacy_source_history 标记 historical_unlocated，不伪装成已定位来源，也不仅因此拒绝。",
         "Go 存量接口的关联完整性防线继续存在，但不是当前编辑页的主提交入口。"
       ],
-      "code": "backend/services/field_review_commit.py::commit_review；backend/ingest/property_evidence.py::resolve_results",
+      "code": "backend/services/field_review_commit.py::commit_review；backend/ingest/property_evidence.py::resolve_results；backend/ingest/reviewed_sources.py；backend/ingest/submission_sources.py",
       "links": [
         {
           "href": "02-review-audit-details.html#classification-evidence-gate",
@@ -618,7 +633,7 @@
     {
       "from": "manual-decision",
       "to": "server-guard",
-      "label": "return / forward：绕过 approved 专用检查",
+      "label": "return：绕过 approved 专用检查",
       "lane": 2
     },
     {
@@ -667,7 +682,7 @@
     {
       "from": "quick-review-modal",
       "to": "server-guard",
-      "label": "return / forward：直接 review-commit",
+      "label": "return：直接 review-commit",
       "lane": 2
     }
   ]
