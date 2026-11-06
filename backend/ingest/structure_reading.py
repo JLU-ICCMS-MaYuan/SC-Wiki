@@ -30,6 +30,7 @@ An interpretation is not automatically uncertain merely because a heading is imp
 context and actual geometry uniquely establish it, explain that inference in reason. uncertainties
 contains only UNRESOLVED missing choices or conflicts. Keep each geometry's uncertainty in that item;
 file-level uncertainties are only unresolved reading coverage. Normal coverage notes belong in reason.
+All read source text is in sources; source_index lists only unread rows. Tool receipts may reference source_ids whose full unchanged text is already in sources.
 All references must use actual source_ids, not invented quotes. Empty structures means no coordinate
 structure is reported in the fully read file; if coverage or interpretation remains incomplete, report
 it in uncertainties instead of pretending absence. Give short source-backed reasons, no deliberation.'''
@@ -96,6 +97,18 @@ def _normalized_space_group_text(text):
     return re.sub(r'\s+', '', text)
 
 
+def _atom_source_fields(element, row):
+    """识别元素后的三坐标及原文Wyckoff标签，兼容标签前置或后置。"""
+    number = NUMBER.pattern
+    text = row.replace('−', '-').replace('–', '-')
+    match = re.search(r'\b' + re.escape(element) + r'(?:\s*\(\s*(\d+[a-z])\s*\))?'
+        + r'\s+(' + number + r')\s+(' + number + r')\s+(' + number + r')'
+        + r'(?:\s+(\d+[a-z])\b)?', text)
+    if match is None:
+        return None
+    return match.groups()[1:4], match[1] or match[5]
+
+
 def _expand_reported_sites(item, catalog, cell, source):
     """把已核对的原行交给既有Wyckoff解码，不再依赖原文表题格式。"""
     from .structure_extractor import _phase_table_candidates
@@ -105,12 +118,10 @@ def _expand_reported_sites(item, catalog, cell, source):
     sites = []
     for atom in item['atoms']:
         row = catalog[atom['source_id']]['content']
-        match = re.search(r'\b' + re.escape(atom['element']) + r'\s+'
-            + r'\s+'.join('(' + NUMBER.pattern + ')' for _ in range(3))
-            + r'\s+(\d+[a-z])\b', row)
-        if not match:
+        fields = _atom_source_fields(atom['element'], row)
+        if fields is None or fields[1] is None:
             return None
-        sites.append(f"{atom['element']}({match[4]}) {' '.join(match.groups()[:3])}")
+        sites.append(f"{atom['element']}({fields[1]}) {' '.join(fields[0])}")
     if not sites:
         return None
     page = catalog[item['atoms'][0]['source_id']]['pdf_page']
@@ -150,8 +161,9 @@ def _validated_candidates(answer, catalog, imaged_pages, source):
                 raise ValueError('报告空间群未在所选原文行找到，不能将几何检测结果冒作原文报告')
         for atom in item['atoms']:
             row = catalog[atom['source_id']]['content']
-            match = re.search(r'\b' + re.escape(atom['element']) + r'\s+(.+)$', row)
-            if atom['element'] not in atomic_numbers or not match or _numbers(match.group(1))[:3] != atom['coordinates']:
+            fields = _atom_source_fields(atom['element'], row)
+            if (atom['element'] not in atomic_numbers or fields is None
+                    or [float(value) for value in fields[0]] != atom['coordinates']):
                 raise ValueError('原子元素或三坐标没有与原PDF同一行对应，原响应已保留')
         cell = {k: v for k, v in item['cell_parameters'].items() if v is not None}
         cell_numbers = [n for key in item['cell_source_ids'] for n in _numbers(catalog[key]['content'])]
@@ -270,6 +282,47 @@ def _compact_structure_history(history, read):
     return result
 
 
+
+def compact_model_context(request, history):
+    """原文只在sources发送一次；未知工具结果保留原样，原生调用身份不变。"""
+    known = {row['source_id'] for row in request.get('sources', [])}
+    def receipt(value):
+        if not isinstance(value, dict) or not isinstance(value.get('blocks'), list):
+            return deepcopy(value)
+        rows = {row['source_id']: row for row in request.get('sources', [])}
+        ids = []
+        for block in value['blocks']:
+            key = (block.get('metadata') or {}).get('source_id', block.get('source_id'))
+            row = rows.get(key)
+            reference = set(block) <= {'source_id', 'block_id', 'pdf_page'}
+            if (not row or row.get('block_id') != block.get('block_id')
+                    or row.get('pdf_page') != block.get('pdf_page')
+                    or (not reference and row.get('content') != block.get('text'))):
+                return deepcopy(value)
+            ids.append(key)
+        result = {key: deepcopy(item) for key, item in value.items() if key != 'blocks'}
+        result.update(source_ids=list(dict.fromkeys(ids)), source_text_location='request.sources')
+        return result
+    payload = deepcopy(request)
+    payload['sources'] = [{k: row[k] for k in ('source_id', 'pdf_page', 'content') if k in row}
+                          for row in request.get('sources', [])]
+    payload['source_index'] = [{k: row[k] for k in ('source_id', 'block_id', 'pdf_page', 'preview') if k in row}
+        for row in request.get('source_index', []) if row.get('source_id') not in known]
+    payload['observation'] = receipt(payload.get('observation'))
+    messages = _compact_structure_history(history, {row['source_id']: row for row in request.get('sources', [])})
+    for message in messages:
+        if message.get('role') != 'tool' or not isinstance(message.get('content'), str):
+            continue
+        try:
+            value = json.loads(message['content'])
+        except json.JSONDecodeError:
+            continue
+        compact = receipt(value)
+        if compact != value:
+            message['content'] = json.dumps(compact, ensure_ascii=False)
+    return payload, messages
+
+
 def extract_structure_candidates(markdown, *, source, material_state_ref=None, pdf_path=None,
                                  model=None, on_event=None, cancelled=lambda: False, material_scope=None):
     if pdf_path is None:
@@ -315,8 +368,9 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
                 'pdf_page': page, 'source_sha256': source['sha256']}
                 for index, page in enumerate(page_images, 1)],
             'observation': observation, 'remaining_actions': tools.budget.max_actions - tools.budget.actions}
-        model_history = _compact_structure_history(history, read)
-        event = {'iteration': iteration, 'request': request, 'tool_history': model_history,
+        model_request, model_history = compact_model_context(request, history)
+        event = {'iteration': iteration, 'request': model_request, 'tool_history': model_history,
+                 'original_context': {'request': deepcopy(request), 'tool_history': deepcopy(history)},
                  'raw_tool_history': deepcopy(history),
                  'image_pages': list(page_images), 'image_count': len(page_images)}
         if on_event: on_event({**event, 'status': 'started'})
@@ -326,7 +380,7 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
         try:
             from .tc_material_scope import scope_prompt
             answer = model(PROMPT + scope_prompt(material_scope),
-                           json.dumps(request, ensure_ascii=False), tool_definitions=definitions,
+                           json.dumps(model_request, ensure_ascii=False), tool_definitions=definitions,
                            **({'tool_history': model_history} if model_history else {}),
                            **({'images': list(page_images.values())} if page_images else {}),
                            on_partial=remember, retries=0)

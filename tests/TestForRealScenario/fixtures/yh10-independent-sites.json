@@ -1,0 +1,112 @@
+{
+  "source": {
+    "file_id": "96f6792565924e80a91b5ce33ba83060",
+    "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+    "role": "supplementary",
+    "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93"
+  },
+  "catalog": {
+    "structure-source-413": {
+      "source_id": "structure-source-413",
+      "file_id": "96f6792565924e80a91b5ce33ba83060",
+      "pdf_page": 31,
+      "block_id": "pdf-row-74f46442f21b4f9ccc144929ebcd15a3",
+      "bbox": [
+        59.77299880981445,
+        681.2455444335938,
+        448.5918884277344,
+        692.8525390625
+      ],
+      "content": "YH10 Fm-3m a=b =c= 4.47880 Y(4a) 0.00000 0.00000 0.00000"
+    },
+    "structure-source-414": {
+      "source_id": "structure-source-414",
+      "file_id": "96f6792565924e80a91b5ce33ba83060",
+      "pdf_page": 31,
+      "block_id": "pdf-row-8bdab09c81d91179f913d9724809603e",
+      "bbox": [
+        59.77299880981445,
+        698.5255126953125,
+        448.5918884277344,
+        709.4183959960938
+      ],
+      "content": "(400 GPa) α=β=γ= 90.0000° H(32f) 0.62045 -0.37955 0.62045"
+    },
+    "structure-source-415": {
+      "source_id": "structure-source-415",
+      "file_id": "96f6792565924e80a91b5ce33ba83060",
+      "pdf_page": 31,
+      "block_id": "pdf-row-599a38b6f569e3b09f8bf3bb143b245d",
+      "bbox": [
+        246.97300720214844,
+        715.8055419921875,
+        448.5918884277344,
+        726.6984252929688
+      ],
+      "content": "H(8c) 0.75000 0.25000 0.75000"
+    }
+  },
+  "imaged_pages": [
+    30,
+    31,
+    32,
+    33
+  ],
+  "item": {
+    "angle_unit": "degree",
+    "atoms": [
+      {
+        "coordinates": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "element": "Y",
+        "source_id": "structure-source-413"
+      },
+      {
+        "coordinates": [
+          0.62045,
+          -0.37955,
+          0.62045
+        ],
+        "element": "H",
+        "source_id": "structure-source-414"
+      },
+      {
+        "coordinates": [
+          0.75,
+          0.25,
+          0.75
+        ],
+        "element": "H",
+        "source_id": "structure-source-415"
+      }
+    ],
+    "cell_parameters": {
+      "a": 4.4788,
+      "alpha": 90,
+      "b": 4.4788,
+      "beta": 90,
+      "c": 4.4788,
+      "gamma": 90
+    },
+    "cell_source_ids": [
+      "structure-source-413",
+      "structure-source-414"
+    ],
+    "coordinate_mode": "fractional",
+    "length_unit": "angstrom",
+    "material": "YH10",
+    "position_unit": "dimensionless",
+    "pressure_value_gpa": 400,
+    "reason": "Table S1, p31; cubic cell and fractional sites retained together.",
+    "source_ids": [
+      "structure-source-413",
+      "structure-source-414",
+      "structure-source-415"
+    ],
+    "space_group_symbol": "Fm-3m",
+    "uncertainties": []
+  }
+}

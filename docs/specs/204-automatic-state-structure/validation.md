@@ -96,3 +96,11 @@ LaSc2H24正文与SI分别为7fccce6780e71f826519256542a5416f5b256e1aa2b546b68e19
 8份新结构再经真实模型assign_structures、正式persist_upload写隔离SQLite、新会话重读完整投影严格相等；没有向业务库填入隔离答案，也未授予人工通过。证据在tests/TestForRealScenario/runs/20261106-labeh8-r2/si-length-investigation/，含parallel-round、serial-round、regression-before/after、compact-production-live、compact-roundtrip及字段/表单/变异日志。原503内部具体限制仍无上游证据；本节只确认可复现的请求冗余和保持来源的恢复结果，整篇及五阶段网页验收未完成。
 
 实际第八轮整篇新网页上传及五阶段业务验收继续待完成；不据上述定向/隔离通过关闭Issue或宣称黑盒结束。
+
+## 2026-11-06 前置独立位点标签的真实SI修复
+
+2017稀土氢化物SI真实新读取完成5个原生调用、成功送入30–33页图片，但旧原行核验拒绝Y(4a)、H(32f)等前置标签。完整生产Markdown固定重放同样33条全部blocked，排除隔离脚本未传Markdown的干扰。YH10最小真实失败夹具先失败，伪造坐标反例保持拒绝；共用原行解析器兼容前置和后置标签，再交既有空间群展开。
+
+新原PDF/原SI模型读取与正式候选构建得到33候选、28有效、5疑点；不是33条全部通过。YH10为400 GPa、Fm-3m、4Y+40H、a=b=c=4.4788 Å，原始三条独立位点和引句保持，完整CIF明确为推导；CIF保存与ASE重新读取44原子验证通过。完整来源与响应保存在tests/TestForRealScenario/runs/20261106-peng2017/context-full-pdfs-final/。正文受上游503阻塞，不能写为两PDF整篇/父流程或业务批准通过。
+
+最终以独立HEAD 592e6a75加本轮自有增量验证：151项后端、198项四宿主表单、字段契约、12项变异均通过。保留已提交的结构历史压缩函数并复用，其余并行审核界面/服务改动不纳入本轮提交。第四轮真实网页及五阶段仍待完成。

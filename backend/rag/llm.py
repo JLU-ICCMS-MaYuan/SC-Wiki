@@ -72,7 +72,7 @@ def _stream_json(
                         *({"type": "image_url", "image_url": {"url": url}} for url in images)]
     config = get_llm_config()
     deepseek = config.model.startswith("deepseek")
-    _call_stats.set({"thinking": "disabled" if deepseek else "provider_default"})
+    _call_stats.set({"thinking": "disabled" if deepseek else "provider_default", "output_started": False})
     messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_content}]
     if tool_history:
         messages.extend(tool_history)
@@ -90,6 +90,7 @@ def _stream_json(
     actions: dict[int, dict] = {}
     call_ids: dict[int, str] = {}
     finish_reason = None
+    output_seen = False
     last_progress = time.monotonic()
     try:
         for chunk in stream:
@@ -103,6 +104,9 @@ def _stream_json(
                 continue
             delta_object = chunk.choices[0].delta
             delta = delta_object.content
+            if not output_seen and (delta or getattr(delta_object, "tool_calls", None)):
+                output_seen = True
+                _call_stats.set({**_call_stats.get(), "output_started": True})
             made_progress = bool(delta and delta.strip())
             finish_reason = getattr(chunk.choices[0], "finish_reason", None) or finish_reason
             for call in getattr(delta_object, "tool_calls", None) or []:
@@ -157,6 +161,27 @@ def _stream_json(
     return result
 
 
+def _retryable_unstarted_service_error(error):
+    """只读取明确的无输出/可重试标记；缺失或互相矛盾均不重试。"""
+    if error.status_code != 503 or _call_stats.get().get('output_started') is not False:
+        return False
+    bodies = [error.body]
+    try:
+        bodies.append(error.response.json())
+    except (ValueError, httpx.ResponseNotRead):
+        pass
+    nodes = []
+    for body in bodies:
+        if isinstance(body, dict):
+            nodes.append(body)
+            if isinstance(body.get('error'), dict):
+                nodes.append(body['error'])
+    started = [node['output_started'] for node in nodes if 'output_started' in node]
+    retryable = [node['retryable'] for node in nodes if 'retryable' in node]
+    return bool(started and retryable and all(value is False for value in started)
+                and all(value is True for value in retryable))
+
+
 def complete_json(
     system_prompt: str,
     user_prompt: str,
@@ -170,7 +195,7 @@ def complete_json(
     tool_definitions: list[dict] | None = None,
     tool_history: list[dict] | None = None,
 ) -> dict[str, Any]:
-    """流式请求 LLM 并解析 JSON。连接中断或读超时最多额外重试 retries 次。"""
+    """流式请求并校验JSON；明确未输出的可重试503最多额外两次，其余沿原预算。"""
     from .structured_output import StructuredOutputError, output_format, validate_output
     format_options = {"response_format": output_format(response_schema)} if response_schema is not None else {}
     if tool_definitions:
@@ -196,8 +221,9 @@ def complete_json(
                       "input_chars": len(system_prompt) + len(user_prompt), "tokens": None,
                       "input_tokens_estimate": (len(system_prompt) + len(user_prompt) + 3) // 4})
     last_error: Exception | None = None
-    for attempt in range(retries + 1):
+    for attempt in range(max(retries, 2) + 1):
         started = time.monotonic()
+        _call_stats.set({"output_started": False})
         try:
             result = _stream_json(
                 system_prompt, user_prompt,
@@ -223,7 +249,14 @@ def complete_json(
             record_failure(exc, attempt, started)
             raise
         except APIStatusError as exc:
+            service_retryable = _retryable_unstarted_service_error(exc)
+            _call_stats.set({**_call_stats.get(), "unstarted_service_retryable": service_retryable,
+                             "retry_scheduled": attempt < 2 and service_retryable})
             record_failure(exc, attempt, started)
+            if attempt < 2 and service_retryable:
+                print(f"  [LLM] 上游503明确未输出，{attempt + 1}/2 次传输重试")
+                time.sleep(min(2 ** attempt, 8))
+                continue
             if (response_schema is not None or tool_definitions) and exc.status_code in (400, 422):
                 raise StructuredOutputError("当前模型接口拒绝严格输出结构；未降级或自动重试") from exc
             raise
