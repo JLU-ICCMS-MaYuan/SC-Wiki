@@ -91,17 +91,77 @@ def _compact_source_texts(request):
     return {**request, 'system_prompt':request['system_prompt'] + instruction, 'user_prompt':packed}
 
 
+def _compact_source_catalog(request):
+    """引用选择模型读全部原文，程序保留完整定位；与原有source_id写回契约一致。"""
+    def cites_source_ids(schema):
+        if isinstance(schema, dict):
+            return 'source_ids' in (schema.get('properties') or {}) or any(cites_source_ids(v) for v in schema.values())
+        return isinstance(schema, list) and any(cites_source_ids(v) for v in schema)
+    if request.get('tool_definitions') or not cites_source_ids(request.get('response_schema')):
+        return request
+    try:
+        payload = json.loads(request['user_prompt'])
+    except (KeyError, TypeError, ValueError):
+        return request
+    if not isinstance(payload, dict) or not isinstance(payload.get('sources'), list):
+        return request
+    sources = payload['sources']
+    allowed = {'source_id','file_id','file_role','source_sha256','source_version','block_id','page_start','page_end','pdf_page','content'}
+    if not sources or any(not isinstance(row,dict) or set(row)-allowed or
+            not all(row.get(key) for key in ('source_id','file_id','content')) for row in sources):
+        return request
+    by_id = {row['source_id']:row for row in sources}
+    if len(by_id) != len(sources):
+        raise ContextBudgetError('原文目录引用身份重复，未合并或丢弃来源')
+    referenced = set()
+    def find_anchors(value):
+        if isinstance(value, dict):
+            for key,item in value.items():
+                if key in {'block_id','quote_id'} and isinstance(item,str): referenced.add(item)
+                find_anchors(item)
+        elif isinstance(value,list):
+            for item in value:find_anchors(item)
+    find_anchors({key:value for key,value in payload.items() if key != 'sources'})
+    common_keys = ('file_id','file_role','source_sha256','source_version')
+    visible_keys = ('source_id','page_start','page_end','pdf_page','content')
+    groups = {}
+    for source in sources:
+        shared = {key:source[key] for key in common_keys if key in source}
+        group = groups.setdefault(digest(shared), {**shared, 'sources':[]})
+        group['sources'].append({key:source[key] for key in visible_keys if key in source})
+    catalog = {'file_groups':list(groups.values()), 'candidate_source_anchors':[
+        {key:row[key] for key in ('source_id','file_id','block_id') if key in row}
+        for row in sources if row.get('block_id') in referenced]}
+    seen = []
+    for group in catalog['file_groups']:
+        for row in group['sources']:
+            original = by_id[row['source_id']]
+            if ({key:group[key] for key in common_keys if key in group} !=
+                    {key:original[key] for key in common_keys if key in original} or row !=
+                    {key:original[key] for key in visible_keys if key in original}):
+                raise ContextBudgetError('来源分组改变了原文、页码或文件归属，未发送')
+            seen.append(row['source_id'])
+    if len(seen) != len(sources) or set(seen) != set(by_id):
+        raise ContextBudgetError('来源分组遗漏条目，未发送')
+    payload['sources'] = {'_context_source_catalog':catalog}
+    instruction = ('\n原文目录按文件分组：sources._context_source_catalog.file_groups中每组的file_id、'
+        'file_role、摘要和版本共同适用于组内全部sources。每条sources仍含原文content、真实PDF页码和原source_id，'
+        '必须读全部原文。candidate_source_anchors保留候选已有块引用与source_id的精确对应。'
+        '仅引用原有source_id，不引用组下标；程序用完整原始目录恢复块标识和版本，不能改写来源或科学值。\n')
+    return {**request, 'system_prompt':request['system_prompt']+instruction,
+            'user_prompt':json.dumps(payload,ensure_ascii=False,separators=(',',':'))}
+
+
 def validate_context_output(response, request):
-    if '"_context_texts"' not in request.get('user_prompt', ''):
+    if not any(marker in request.get('user_prompt','') for marker in ('"_context_texts"','"_context_source_catalog"')):
         return
     payload = json.loads(request['user_prompt'])
     texts = payload.get('_context_texts') if isinstance(payload, dict) else None
-    if not texts:
-        return
+    texts = texts or {}
     from backend.rag.structured_output import StructuredOutputError
     def visit(value):
         if isinstance(value, dict):
-            if set(value) & {'_context_text_ref', '_context_texts'}:
+            if set(value) & {'_context_text_ref', '_context_texts', '_context_source_catalog'}:
                 raise StructuredOutputError('模型返回内部传输引用，未提供实际字段内容')
             for item in value.values(): visit(item)
         elif isinstance(value, list):
@@ -226,6 +286,9 @@ def prepare_request(request, directory, *, model=None, budget=96000, force=False
     fixed_tokens = _fixed_token_estimate(prepared)
     if fixed_tokens >= budget:
         prepared = _compact_source_texts(prepared)
+        fixed_tokens = _fixed_token_estimate(prepared)
+    if fixed_tokens >= budget:
+        prepared = _compact_source_catalog(prepared)
         fixed_tokens = _fixed_token_estimate(prepared)
     if fixed_tokens >= budget:
         raise ContextBudgetError("当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据")

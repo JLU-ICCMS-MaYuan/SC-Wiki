@@ -1,0 +1,10 @@
+{
+  "original_tokens_estimate": 240571,
+  "prepared_tokens_estimate": 80835,
+  "source_rows": 1070,
+  "file_groups": 2,
+  "candidate_source_anchors": 10,
+  "all_scientific_text_equal": true,
+  "all_candidates_equal": true,
+  "budget": 96000
+}

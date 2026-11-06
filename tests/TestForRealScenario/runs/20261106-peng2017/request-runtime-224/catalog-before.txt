@@ -1,0 +1,12 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_citation_catalog_keeps_all_text_and_server_owned_binding _________
+backend/tests/test_model_memory.py:122: in test_citation_catalog_keeps_all_text_and_server_owned_binding
+    prepared=prepare_request(request,tmp_path,budget=2400)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/ingest/model_memory.py:231: in prepare_request
+    raise ContextBudgetError("当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据")
+E   backend.ingest.model_memory.ContextBudgetError: 当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据
+=========================== short test summary info ============================
+FAILED backend/tests/test_model_memory.py::test_citation_catalog_keeps_all_text_and_server_owned_binding
+1 failed, 7 deselected in 0.41s

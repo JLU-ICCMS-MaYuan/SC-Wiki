@@ -106,3 +106,26 @@ def test_transport_dictionary_references_are_not_valid_field_output():
     with pytest.raises(StructuredOutputError):validate_context_output({'paper':{'summary':'ctx_unique'}},request)
     with pytest.raises(StructuredOutputError):validate_context_output({'paper':{'summary':{'_context_text_ref':'ctx_unique'}}},request)
     validate_context_output({'paper':{'summary':'actual supported summary'}},request)
+
+
+def test_citation_catalog_keeps_all_text_and_server_owned_binding(tmp_path):
+    from backend.ingest.model_memory import prepare_request
+    from backend.ingest.state_inventory import _evidence
+    import json,hashlib
+    file_id=hashlib.sha256(b'file').hexdigest()[:32];file_hash=hashlib.sha256(b'original PDF bytes').hexdigest()
+    sources=[{'source_id':f'src-{i}','file_id':file_id,'file_role':'main','source_sha256':file_hash,'source_version':1,
+              'block_id':hashlib.sha256(f'original block {i}'.encode()).hexdigest(),'page_start':i+1,'page_end':i+1,
+              'content':f'Original scientific row {i}: YH10 Tc 303 K at 400 GPa.'} for i in range(25)]
+    payload={'sources':sources,'candidates':[{'candidate_state_key':'existing','evidences':[{'file_id':file_id,'block_id':sources[0]['block_id']}]}]}
+    schema={'type':'object','properties':{'source_ids':{'type':'array','items':{'type':'string'}}},'required':['source_ids'],'additionalProperties':False}
+    request={'system_prompt':'Read all original text, cite source_ids.','user_prompt':json.dumps(payload),'response_schema':schema}
+    prepared=prepare_request(request,tmp_path,budget=2400)
+    wire=json.loads(prepared['user_prompt']);groups=wire['sources']['_context_source_catalog']['file_groups']
+    rows=[row for group in groups for row in group['sources']]
+    assert [(row['source_id'],row['content'],row['page_start']) for row in rows]==[(row['source_id'],row['content'],row['page_start']) for row in sources]
+    assert groups[0]['file_id']==file_id and groups[0]['source_sha256']==file_hash
+    assert wire['candidates']==payload['candidates']
+    assert wire['sources']['_context_source_catalog']['candidate_source_anchors'][0]['block_id']==sources[0]['block_id']
+    bound=_evidence(['src-0'],{row['source_id']:row for row in sources})[0]
+    assert bound['file_id']==file_id and bound['block_id']==sources[0]['block_id'] and bound['source_version']==1
+    assert request['user_prompt']==json.dumps(payload)
