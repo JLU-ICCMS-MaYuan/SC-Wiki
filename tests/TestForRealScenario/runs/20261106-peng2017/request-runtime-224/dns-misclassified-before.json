@@ -1,0 +1,7 @@
+{
+  "task_id": "d2ca41e5f16b4d65bf744f5d5325e855",
+  "observed_exception_type": "UserCredentialError",
+  "safe_message": "无法解析 Base URL 主机",
+  "wrapped_message": "严格输出未返回完整有效JSON；原响应保留，未自动纠错",
+  "status": "failed"
+}

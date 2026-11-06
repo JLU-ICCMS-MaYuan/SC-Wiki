@@ -31,3 +31,17 @@ mayuan分支，本机原生实时开发，10个实际上传Worker；未推送、
 ## 共享工作区
 
 实施后出现独立#225引用匹配工作：backend/models.py、backend/services/citation_matching.py、backend/tests/test_citation_matching.py、alembic/versions/20261106_0225_citation_matching.py及其Spec。均不属于#224，不暂存、不回退、不代为迁移。最终验证使用HEAD加#224明确路径的隔离副本，实际本机运行仍如实记录共享差异。
+
+## 本地提交与正式任务
+
+本地提交84c0639749a147da11eb0ca558c4535d390055d7。隔离源码复核59后端、21上传交互、210四宿主、字段契约、12变异、构建全部通过；同文件#225增量保留。新任务d2ca41e5f16b4d65bf744f5d5325e855真实正文/SI角色和哈希一致，当前在正文四图完整科学请求持续503；四图小探针成功而完整无历史请求仍503，不把原因断言为SI上下文超限。SC-005五阶段未完成，见本轮报告末节。
+
+## 第159次真实失败：前置DNS被误判为JSON
+
+fresh-latest-status.json记录任务在第159次尝试后failed；llm_calls.json最后一次实际error_type=UserCredentialError、output_started=false、耗时约0.0009秒。RQ调用栈只提取允许公开的固定错误文本，确认“无法解析 Base URL 主机”，见dns-misclassified-before.json。模型尚未被请求，不能把它当作模型给出的非法结构。
+
+DNS固定反例修复前3项失败：错误包装成StructuredOutputError、固定网址错误丢码、DNS导致模型快照被删除。修复后只将LLM_URL_UNRESOLVABLE作为连接错误恢复，其余网址/内网/配置错误仍停止并保留真实码；读取快照遇临时DNS保留原配置，实际HTTP连接仍逐次使用原网址及内网检查。独立反例证明DNS恢复后解析为内网IP仍在连接前被拒绝。
+
+补充同类未响应边界：真实本地HTTP/SSE只返回[DONE]、没有任何内容时，修复前被严格JSON包装拦截；现在按未完成传输处理。明确length/content_filter等结束原因、非空非法JSON和结构错误仍不重试。该SSE场景是隔离回归，不冒充本轮真实故障；本轮真实故障确认为DNS。
+
+64项受影响后端回归通过，原科学字段及输出契约未改。修复后从同一任务继续，完整科学响应按原身份复用，不把旧提取冒充新提取；正式五阶段仍待完成。

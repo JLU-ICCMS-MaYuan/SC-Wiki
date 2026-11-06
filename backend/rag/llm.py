@@ -13,13 +13,18 @@ from typing import Any
 import httpx
 from openai import APIConnectionError, APITimeoutError, APIStatusError, OpenAI
 from backend.rag.llm_client import get_llm_client
-from backend.rag.llm_context import get_llm_config
+from backend.rag.llm_context import get_llm_config, UserCredentialError
 
 
 _call_observer: ContextVar[Callable[[dict], None] | None] = ContextVar("llm_call_observer", default=None)
 _call_phase: ContextVar[str] = ContextVar("llm_call_phase", default="")
 _call_scope: ContextVar[dict] = ContextVar("llm_call_scope", default={})
 _call_stats: ContextVar[dict] = ContextVar("llm_call_stats", default={})
+
+
+class ModelNoOutputError(RuntimeError):
+    """模型连接尚未给出任何内容就结束，不是科学输出的结构错误。"""
+    code = 'LLM_EMPTY_RESPONSE'
 
 
 def set_call_observer(observer: Callable[[dict], None]):
@@ -109,6 +114,8 @@ def _stream_json(
                 _call_stats.set({**_call_stats.get(), "usage": chunk.usage.model_dump()})
             if not chunk.choices:
                 if now - last_progress >= read_timeout:
+                    if runtime and not output_seen:
+                        raise ModelNoOutputError('模型未返回任何输出，等待响应超时')
                     raise RuntimeError("模型持续返回空白或空响应，超过现有读取超时")
                 continue
             delta_object = chunk.choices[0].delta
@@ -139,12 +146,16 @@ def _stream_json(
             if made_progress:
                 last_progress = now
             elif now - last_progress >= read_timeout:
+                if runtime and not output_seen:
+                    raise ModelNoOutputError('模型未返回任何输出，等待响应超时')
                 raise RuntimeError("模型持续返回空白或空响应，超过现有读取超时")
     finally:
         close = getattr(stream, "close", None)
         if callable(close):
             close()
     _call_stats.set({**_call_stats.get(), "finish_reason": finish_reason})
+    if runtime and not output_seen and finish_reason in (None, 'stop'):
+        raise ModelNoOutputError('模型连接已结束，但未返回任何输出')
     if actions:
         from .structured_output import StructuredOutputError, validate_tool_action
         if len(actions) != 1 or finish_reason != "tool_calls" or not tool_definitions:
@@ -225,6 +236,8 @@ def _complete_json(
                  "error_type": type(exc).__name__, "elapsed_seconds": time.monotonic() - started}
         if isinstance(exc, APIStatusError):
             event["status_code"] = exc.status_code
+        if isinstance(exc, (UserCredentialError, ModelNoOutputError)):
+            event['error_code'] = exc.code
         if on_call:
             on_call(dict(event))
         observer = _call_observer.get()
@@ -279,6 +292,8 @@ def _complete_json(
         except (APITimeoutError, APIConnectionError, httpx.TransportError, json.JSONDecodeError, RuntimeError) as exc:
             record_failure(exc, attempt, started)
             last_error = exc
+            if _single_attempt and isinstance(exc, (UserCredentialError, ModelNoOutputError)):
+                raise  # DNS/网址错误发生在请求前，不能冒充模型返回了非法JSON。
             if (response_schema is not None or tool_definitions) and isinstance(exc, (json.JSONDecodeError, RuntimeError)):
                 raise StructuredOutputError("严格输出未返回完整有效JSON；原响应保留，未自动纠错") from exc
             if _single_attempt or attempt >= retries:

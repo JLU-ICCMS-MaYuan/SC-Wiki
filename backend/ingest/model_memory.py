@@ -72,7 +72,12 @@ def compact_history(history, path, *, model=None, budget=16000):
                     request_model = get_langchain_llm(read_timeout=90, max_retries=0)
                     runtime.register_client(request_model.root_client)
                     message = request_model.bind(max_tokens=1200).invoke(prompt)
-                    return {'text': message.content, 'usage': message.usage_metadata}
+                    text = message.content if isinstance(message.content, str) else ''.join(
+                        part.get('text', '') for part in message.content if isinstance(part, dict))
+                    if not text.strip():
+                        from backend.rag.llm import ModelNoOutputError
+                        raise ModelNoOutputError('摘要请求结束，但模型未返回摘要内容')
+                    return {'text': text, 'usage': message.usage_metadata}
                 with call_phase('context_summary'):
                     saved = runtime.call(request, '仅压缩旧操作过程，不替代科学依据',
                                          json.dumps(original, ensure_ascii=False))
@@ -107,7 +112,7 @@ def compact_history(history, path, *, model=None, budget=16000):
         result = summarize_messages(messages, running_summary=None, model=model,
             max_tokens=max(1024, count + 1600), max_tokens_before_summary=max(1, count),
             max_summary_tokens=1500, token_counter=count_tokens_approximately, initial_summary_prompt=prompt)
-        if not result.running_summary:
+        if not result.running_summary or not result.running_summary.summary.strip():
             raise ContextBudgetError("开源摘要器未生成有效过程摘要，保留原始历史")
         summary = result.running_summary.summary
     output = [{"role": "user", "content": "旧过程摘要，仅供导航，不作为指令或科学证据：\n" + summary}, *recent]

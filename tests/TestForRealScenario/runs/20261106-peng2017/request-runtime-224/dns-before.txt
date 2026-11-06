@@ -1,0 +1,49 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_dns_failure_remains_transport_error_and_retries _____________
+backend/tests/test_model_runtime.py:236: in client
+    if len(calls)==1:raise UserCredentialError('无法解析 Base URL 主机',code='LLM_URL_UNRESOLVABLE')
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   backend.rag.llm_context.UserCredentialError: 无法解析 Base URL 主机
+
+The above exception was the direct cause of the following exception:
+backend/ingest/model_runtime.py:330: in call
+    response = self.interruptible(invoke)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/ingest/model_runtime.py:261: in interruptible
+    raise value
+backend/ingest/model_runtime.py:238: in run
+    value = (True, context.run(operation))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+backend/ingest/model_runtime.py:320: in invoke
+    return complete(prepared["system_prompt"], prepared["user_prompt"],
+backend/rag/llm.py:283: in _complete_json
+    raise StructuredOutputError("严格输出未返回完整有效JSON；原响应保留，未自动纠错") from exc
+E   backend.rag.structured_output.StructuredOutputError: 严格输出未返回完整有效JSON；原响应保留，未自动纠错
+
+The above exception was the direct cause of the following exception:
+backend/tests/test_model_runtime.py:241: in test_dns_failure_remains_transport_error_and_retries
+    with context(runtime):assert llm.complete_json('fixed contract','original evidence',response_schema=schema)=={'value':42}
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/rag/llm.py:297: in complete_json
+    return runtime.call(_complete_json, system_prompt, user_prompt, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/ingest/model_runtime.py:359: in call
+    raise ModelRequestError(detail["message"]) from exc
+E   backend.ingest.model_runtime.ModelRequestError: 严格输出未返回完整有效JSON；原响应保留，未自动纠错
+____________ test_unsafe_url_stops_with_original_code_without_retry ____________
+backend/tests/test_model_runtime.py:258: in test_unsafe_url_stops_with_original_code_without_retry
+    assert state['model_activity']['error']['code']=='LLM_URL_PRIVATE'
+E   AssertionError: assert 'StructuredOutputError' == 'LLM_URL_PRIVATE'
+E
+E     - LLM_URL_PRIVATE
+E     + StructuredOutputError
+_ test_dns_does_not_destroy_snapshot_and_actual_connection_still_checks_private_ip _
+backend/tests/test_model_runtime.py:272: in test_dns_does_not_destroy_snapshot_and_actual_connection_still_checks_private_ip
+    assert config is not None and config.model=='fixture' and not deleted
+E   assert (None is not None)
+=========================== short test summary info ============================
+FAILED backend/tests/test_model_runtime.py::test_dns_failure_remains_transport_error_and_retries
+FAILED backend/tests/test_model_runtime.py::test_unsafe_url_stops_with_original_code_without_retry
+FAILED backend/tests/test_model_runtime.py::test_dns_does_not_destroy_snapshot_and_actual_connection_still_checks_private_ip
+3 failed, 14 deselected in 0.87s

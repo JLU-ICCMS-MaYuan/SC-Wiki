@@ -73,7 +73,8 @@ def test_paused_state_cannot_be_revived_by_late_progress():
     assert paused['cleanup_at'] is None
 
 
-def test_real_openai_stream_four_503_then_success_and_disk_resume(tmp_path,monkeypatch):
+@pytest.mark.parametrize('first_response',['503','empty_sse'])
+def test_real_openai_stream_recovers_unanswered_attempts_and_disk_resume(tmp_path,monkeypatch,first_response):
     """真实OpenAI客户端/HTTP/SSE/严格校验/落盘/重读；不访问业务API。"""
     from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
     from openai import OpenAI
@@ -83,7 +84,10 @@ def test_real_openai_stream_four_503_then_success_and_disk_resume(tmp_path,monke
         def log_message(self,*args):pass
         def do_POST(self):
             seen.append(json.loads(self.rfile.read(int(self.headers['Content-Length']))))
-            if len(seen)<5:
+            if len(seen)<5 and first_response=='empty_sse':
+                body=b'data: [DONE]\n\n'
+                self.send_response(200);self.send_header('Content-Type','text/event-stream');self.send_header('Content-Length',str(len(body)));self.end_headers();self.wfile.write(body)
+            elif len(seen)<5:
                 body=json.dumps({'error':{'code':'service_unavailable','message':'fixture-503','output_started':False,'retryable':True}}).encode()
                 self.send_response(503);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(body)));self.end_headers();self.wfile.write(body)
             else:
@@ -225,3 +229,65 @@ def test_history_api_reads_owned_journal_with_pagination(tmp_path,monkeypatch):
     user=NS(id=1,role='user',is_approved=True)
     result=api.get_model_activity('a'*32,before=4,limit=2,current_user=user)
     assert result['data']=={'events':[{'status':'requesting','updated_at':2},{'status':'requesting','updated_at':3}],'has_more':True}
+
+
+def test_dns_failure_remains_transport_error_and_retries(tmp_path,monkeypatch):
+    from backend.rag.llm_context import UserCredentialError
+    runtime,context,state=setup_runtime(tmp_path,monkeypatch)
+    calls=[]
+    def client(_):
+        calls.append(1)
+        if len(calls)==1:raise UserCredentialError('无法解析 Base URL 主机',code='LLM_URL_UNRESOLVABLE')
+        return NS(chat=NS(completions=NS(create=lambda **_:iter([NS(choices=[NS(delta=NS(content='{"value":42}',tool_calls=None),finish_reason='stop')])]))))
+    monkeypatch.setattr(llm,'_client',client)
+    monkeypatch.setattr(llm,'get_llm_config',lambda:NS(model='fixture'))
+    schema={'type':'object','properties':{'value':{'type':'integer'}},'required':['value'],'additionalProperties':False}
+    with context(runtime):assert llm.complete_json('fixed contract','original evidence',response_schema=schema)=={'value':42}
+    assert len(calls)==2
+    import json
+    failure=json.loads(next(tmp_path.rglob('failure-*.json')).read_text())
+    assert failure['error']['code']=='LLM_URL_UNRESOLVABLE'
+    assert failure['error']['error_type']=='UserCredentialError'
+
+
+def test_unsafe_url_stops_with_original_code_without_retry(tmp_path,monkeypatch):
+    from backend.rag.llm_context import UserCredentialError
+    runtime,context,state=setup_runtime(tmp_path,monkeypatch)
+    calls=[]
+    def client(_):calls.append(1);raise UserCredentialError('Base URL 不允许访问内网地址',code='LLM_URL_PRIVATE')
+    monkeypatch.setattr(llm,'_client',client)
+    monkeypatch.setattr(llm,'get_llm_config',lambda:NS(model='fixture'))
+    with context(runtime),pytest.raises(Exception):llm.complete_json('contract','source',response_schema={'type':'object','properties':{},'additionalProperties':False})
+    assert len(calls)==1
+    assert state['model_activity']['error']['code']=='LLM_URL_PRIVATE'
+
+
+def test_dns_does_not_destroy_snapshot_and_actual_connection_still_checks_private_ip(monkeypatch):
+    import json
+    from backend.ingest import upload_tasks
+    from backend.rag import llm_context,llm_client
+    from backend.rag.llm_context import UserCredentialError
+    deleted=[]
+    stored={'provider':'server:fixture','base_url':'https://model.example.invalid/v1','model':'fixture','api_key':'test-only-key','catalog_id':'fixture'}
+    monkeypatch.setattr(upload_tasks,'redis_client',lambda:NS(get=lambda _:json.dumps(stored),delete=lambda key:deleted.append(key)))
+    def dns(_):raise UserCredentialError('无法解析 Base URL 主机',code='LLM_URL_UNRESOLVABLE')
+    monkeypatch.setattr(upload_tasks,'validate_base_url',dns)
+    config=upload_tasks.load_llm_config('a'*32)
+    assert config is not None and config.model=='fixture' and not deleted
+    monkeypatch.setattr(llm_context.socket,'getaddrinfo',lambda *_,**__:[(None,None,None,None,('10.0.0.1',443))])
+    token=llm_context.set_llm_config(config)
+    try:
+        with pytest.raises(UserCredentialError) as error:llm_client.get_llm_client()
+        assert error.value.code=='LLM_URL_PRIVATE'
+    finally:llm_context.reset_llm_config(token)
+
+
+def test_nonempty_invalid_json_remains_blocked_without_regeneration(tmp_path,monkeypatch):
+    runtime,context,state=setup_runtime(tmp_path,monkeypatch);calls=[]
+    def create(**_):calls.append(1);return iter([NS(choices=[NS(delta=NS(content='{broken',tool_calls=None),finish_reason='stop')])])
+    monkeypatch.setattr(llm,'_client',lambda _:NS(chat=NS(completions=NS(create=create))))
+    monkeypatch.setattr(llm,'get_llm_config',lambda:NS(model='fixture'))
+    schema={'type':'object','properties':{},'additionalProperties':False}
+    with context(runtime),pytest.raises(Exception):llm.complete_json('contract','source',response_schema=schema)
+    assert len(calls)==1
+    assert state['model_activity']['error']['error_type']=='StructuredOutputError'

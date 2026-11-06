@@ -1,0 +1,54 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_real_openai_stream_recovers_unanswered_attempts_and_disk_resume[empty_sse] _
+backend/rag/llm.py:51: in _extract_json
+    return json.loads(text)
+           ^^^^^^^^^^^^^^^^
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/json/__init__.py:346: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/json/decoder.py:338: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/json/decoder.py:356: in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+E   json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+backend/rag/llm.py:241: in _complete_json
+    result = _stream_json(
+backend/rag/llm.py:166: in _stream_json
+    result = _extract_json("".join(accumulated))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/rag/llm.py:56: in _extract_json
+    raise RuntimeError("LLM 未返回有效 JSON")
+E   RuntimeError: LLM 未返回有效 JSON
+
+The above exception was the direct cause of the following exception:
+backend/ingest/model_runtime.py:333: in call
+    response = self.interruptible(invoke)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/ingest/model_runtime.py:264: in interruptible
+    raise value
+backend/ingest/model_runtime.py:241: in run
+    value = (True, context.run(operation))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+backend/ingest/model_runtime.py:323: in invoke
+    return complete(prepared["system_prompt"], prepared["user_prompt"],
+backend/rag/llm.py:285: in _complete_json
+    raise StructuredOutputError("严格输出未返回完整有效JSON；原响应保留，未自动纠错") from exc
+E   backend.rag.structured_output.StructuredOutputError: 严格输出未返回完整有效JSON；原响应保留，未自动纠错
+
+The above exception was the direct cause of the following exception:
+backend/tests/test_model_runtime.py:103: in test_real_openai_stream_recovers_unanswered_attempts_and_disk_resume
+    with context(runtime):assert llm.complete_json('fixed schema','original evidence',response_schema=schema)=={'answer':42}
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/rag/llm.py:299: in complete_json
+    return runtime.call(_complete_json, system_prompt, user_prompt, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/ingest/model_runtime.py:362: in call
+    raise ModelRequestError(detail["message"]) from exc
+E   backend.ingest.model_runtime.ModelRequestError: 严格输出未返回完整有效JSON；原响应保留，未自动纠错
+=========================== short test summary info ============================
+FAILED backend/tests/test_model_runtime.py::test_real_openai_stream_recovers_unanswered_attempts_and_disk_resume[empty_sse]
+1 failed, 17 deselected in 1.42s

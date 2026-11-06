@@ -98,7 +98,13 @@ def load_llm_config(task_id: str) -> LlmConfig | None:
     try:
         data = json.loads(raw)
         provider = str(data["provider"]).strip()
-        base_url = validate_base_url(str(data["base_url"]))
+        try:
+            base_url = validate_base_url(str(data["base_url"]))
+        except UserCredentialError as exc:
+            if exc.code != 'LLM_URL_UNRESOLVABLE':
+                raise
+            # 域名临时不可解析不表示快照损坏；实际HTTP客户端仍逐次执行原网址/内网检查。
+            base_url = str(data["base_url"]).strip().rstrip('/')
         model = str(data["model"]).strip()
         api_key = str(data["api_key"]).strip()
         if not all((provider, base_url, model, api_key)):

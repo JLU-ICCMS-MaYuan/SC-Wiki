@@ -1,0 +1,51 @@
+{
+  "files": [
+    {
+      "path": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261106-peng2017/sources/2017 YHn LaHn-彭枫.pdf",
+      "role": "main",
+      "size": 3476148,
+      "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846"
+    },
+    {
+      "path": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261106-peng2017/sources/2017 YHn LaHn-彭枫 Supplementary.pdf",
+      "role": "supplementary",
+      "size": 14260391,
+      "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93"
+    }
+  ],
+  "accounts": {
+    "user": {
+      "email": "myth620137018@163.com",
+      "browser": "safari",
+      "origin": "http://127.0.0.1:5173"
+    },
+    "superadmin": {
+      "email": "mayuan_mark@163.com",
+      "browser": "chrome",
+      "origin": "http://localhost:5173"
+    }
+  },
+  "source_sha": "84c0639749a147da11eb0ca558c4535d390055d7",
+  "worktree_status": " M backend/api/rag.py\n M backend/api/upload_tasks.py\n M backend/ingest/upload_jobs.py\n M backend/models.py\n M backend/services/citation_graph.py\n M frontend/src/pages/KnowledgeGraphPage.tsx\n M goserver/handlers/knowledge_graph.go\n?? alembic/versions/20261106_0225_citation_matching.py\n?? backend/services/citation_matching.py\n?? backend/tests/test_citation_matching.py\n?? docs/specs/225-citation-matching-and-static-graph/\n?? frontend/src/lib/citationGraphLayout.ts\n",
+  "started": "2026-11-06T01:51:03.890546+00:00",
+  "doi": "10.1103/PhysRevLett.119.107001",
+  "search": "YH10",
+  "phases": [
+    {
+      "id": "1"
+    },
+    {
+      "id": "2"
+    },
+    {
+      "id": "3"
+    },
+    {
+      "id": "4"
+    },
+    {
+      "id": "5"
+    }
+  ],
+  "test_scope": "#224提交后，原文件新上传的正式五阶段黑盒；保留并行#225共享差异"
+}

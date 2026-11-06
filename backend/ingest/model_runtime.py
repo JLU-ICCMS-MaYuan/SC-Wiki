@@ -104,8 +104,8 @@ def error_detail(error, *, output_started=False):
     body = getattr(error, "body", None)
     node = body.get("error", body) if isinstance(body, dict) else {}
     node = node if isinstance(node, dict) else {}
-    code = str(node.get("code") or type(error).__name__)
-    fallback = str(error) if type(error).__name__ in {"StructuredOutputError", "ContextBudgetError"} else None
+    code = str(node.get("code") or getattr(error, 'code', None) or type(error).__name__)
+    fallback = str(error) if type(error).__name__ in {"StructuredOutputError", "ContextBudgetError", "UserCredentialError", "ModelNoOutputError"} else None
     message = redact(str(node.get("message") or fallback or {
         "APIConnectionError": "无法连接模型服务", "APITimeoutError": "等待模型响应超时",
     }.get(type(error).__name__, "模型请求未完成，请查看错误类型")))[:1000]
@@ -124,6 +124,12 @@ def context_overflow(error):
 
 
 def transient(error):
+    from backend.rag.llm_context import UserCredentialError
+    from backend.rag.llm import ModelNoOutputError
+    if isinstance(error, ModelNoOutputError):
+        return True
+    if isinstance(error, UserCredentialError):
+        return error.code == 'LLM_URL_UNRESOLVABLE'
     body = getattr(error, 'body', None)
     node = body.get('error', body) if isinstance(body, dict) else {}
     if isinstance(node, dict) and node.get('retryable') is False:

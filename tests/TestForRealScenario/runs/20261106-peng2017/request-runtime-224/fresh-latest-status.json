@@ -1,0 +1,46 @@
+{
+  "task_id": "d2ca41e5f16b4d65bf744f5d5325e855",
+  "recorded_at": "2026-11-06T20:59:47.829055+08:00",
+  "source_commit": "84c0639749a147da11eb0ca558c4535d390055d7",
+  "status": "failed",
+  "stage": "extracting",
+  "paper_id": null,
+  "activity": {
+    "status": "blocked",
+    "phase": "structure_reading",
+    "filename": "2017 YHn LaHn-彭枫.pdf",
+    "pages": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "attempt": 159
+  },
+  "failed_attempts_all_calls": 159,
+  "latest_failure": {
+    "error_type": "StructuredOutputError",
+    "status_code": null,
+    "code": "StructuredOutputError",
+    "message": "严格输出未返回完整有效JSON；原响应保留，未自动纠错",
+    "request_id": null,
+    "output_started": false
+  },
+  "latest_failure_path": "/Users/mayuan/Codes/SC-Wiki/.data/review_artifacts/d2ca41e5f16b4d65bf744f5d5325e855/model-runtime/ebb799d1e82fd3784e2ffe41f92a94407486a70676dc0b481dcbfc4200fb9728/calls/cfcf75b518a7722c9d7c619d8b059da3e7edcd05b625edd4a617dfd55a520ef1-0/failure-159-446cbe542a904d8694e3a9e7c153c853.json",
+  "formal_papers": [],
+  "job_status": "JobStatus.FAILED",
+  "model": {
+    "provider": "server:LLM2",
+    "model": "gpt-6.1-sol",
+    "catalog_id": "LLM2",
+    "input_hash": "ebb799d1e82fd3784e2ffe41f92a94407486a70676dc0b481dcbfc4200fb9728",
+    "endpoint_hash": "8f11cc1d483994c69a25d434dbc98dc8be8e43bd63ef3a59af2f68795f62e5af"
+  },
+  "stages": {
+    "1": "已上传，完整解析仍在运行，未送审",
+    "2": "未执行",
+    "3": "未执行",
+    "4": "未执行",
+    "5": "未执行"
+  }
+}
