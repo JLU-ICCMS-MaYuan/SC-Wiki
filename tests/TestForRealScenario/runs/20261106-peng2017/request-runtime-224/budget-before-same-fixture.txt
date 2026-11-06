@@ -1,0 +1,18 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____ test_large_repeated_sources_are_losslessly_encoded_before_budget_gate _____
+backend/tests/test_model_memory.py:83: in test_large_repeated_sources_are_losslessly_encoded_before_budget_gate
+    prepared=prepare_request(request,tmp_path,budget=2400)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/ingest/model_memory.py:133: in prepare_request
+    raise ContextBudgetError("当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据")
+E   backend.ingest.model_memory.ContextBudgetError: 当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据
+=============================== warnings summary ===============================
+../../../Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/_pytest/config/__init__.py:1345
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/_pytest/config/__init__.py:1345: PytestAssertRewriteWarning: Module already imported so cannot be rewritten; anyio
+    self._mark_plugins_for_rewrite(hook, disable_autoload)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_model_memory.py::test_large_repeated_sources_are_losslessly_encoded_before_budget_gate
+1 failed, 6 deselected, 1 warning in 0.08s

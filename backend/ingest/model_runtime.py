@@ -276,7 +276,7 @@ class ModelRuntime:
 
     def call(self, complete, system_prompt, user_prompt, **options):
         from backend.rag.llm import _call_phase, _call_scope
-        from .model_memory import prepare_request, ContextBudgetError
+        from .model_memory import prepare_request, ContextBudgetError, validate_context_output
         self.check()
         phase = _call_phase.get() or str(self.read_state().get("reading_state") or "model_request")
         request = {"system_prompt": system_prompt, "user_prompt": user_prompt,
@@ -330,10 +330,16 @@ class ModelRuntime:
             try:
                 if not prepared_once and not compacted:
                     prepared = self.interruptible(lambda: prepare_request(request, directory, budget=budget))
+                    with self.lock():
+                        self.check()
+                        atomic_json(directory / 'prepared-request.json', {'request':prepared,
+                            'budget':budget, 'token_estimator':'o200k_base+image_allowance',
+                            'original_request_hash':digest(request), 'generation':self.generation})
                     prepared_once = True
                     self.event('requesting', phase=phase, attempt=attempt, filename=filename, pages=pages,
                                started_at=time.time(), error=None, retry_at=None)
                 response = self.interruptible(invoke)
+                validate_context_output(response, prepared)
             except ExecutionStopped:
                 raise
             except Exception as exc:

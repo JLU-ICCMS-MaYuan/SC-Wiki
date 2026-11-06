@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import json
+import hashlib
+from collections import Counter
+from functools import lru_cache
 from pathlib import Path
 
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
@@ -12,6 +15,100 @@ from .model_runtime import atomic_json, current_execution, digest, read_json
 
 class ContextBudgetError(RuntimeError):
     pass
+
+
+@lru_cache(maxsize=1)
+def _tokenizer():
+    import tiktoken
+    return tiktoken.get_encoding('o200k_base')
+
+
+def _fixed_token_estimate(request):
+    # 估计实际消息文本，而非把已序列化user_prompt再次JSON转义；不是上游容量声明。
+    texts = [request.get('system_prompt') or '', request.get('user_prompt') or '']
+    for key in ('response_schema', 'tool_definitions'):
+        if request.get(key):
+            texts.append(json.dumps(request[key], ensure_ascii=False, separators=(',', ':')))
+    return 32 + sum(len(_tokenizer().encode(text, disallowed_special=())) for text in texts) + len(request.get('images') or []) * 4096
+
+
+def expand_source_texts(payload):
+    """仅解开传输字典；原文件、页、块及科学值从不合并。"""
+    texts = payload.get('_context_texts') or {}
+    def expand(value):
+        if isinstance(value, dict):
+            if set(value) == {'_context_text_ref'}:
+                key = value['_context_text_ref']
+                text = texts[key]
+                if key != 'ctx_' + hashlib.sha256(text.encode()).hexdigest():
+                    raise ContextBudgetError('传输字典文本摘要不匹配，原始请求保留')
+                return text
+            return {key: expand(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [expand(item) for item in value]
+        return value
+    return expand({key:value for key,value in payload.items() if key != '_context_texts'})
+
+
+def _compact_source_texts(request):
+    try:
+        original = json.loads(request['user_prompt'])
+    except (KeyError, ValueError, TypeError):
+        return request
+    if not isinstance(original, dict) or '_context_texts' in original:
+        return request
+    keys = {'quote', 'content', 'text', 'abstract'}
+    counts = Counter()
+    def visit(value, key=None):
+        if isinstance(value, dict):
+            for child, item in value.items(): visit(item, child)
+        elif isinstance(value, list):
+            for item in value: visit(item, key)
+        elif isinstance(value, str) and key in keys and len(value) >= 160:
+            counts[value] += 1
+    visit(original)
+    texts = {}
+    def compact(value, key=None):
+        if isinstance(value, dict): return {child:compact(item,child) for child,item in value.items()}
+        if isinstance(value, list): return [compact(item,key) for item in value]
+        if isinstance(value, str) and key in keys and counts[value] > 1:
+            identity = 'ctx_' + hashlib.sha256(value.encode()).hexdigest()
+            texts[identity] = value
+            return {'_context_text_ref':identity}
+        return value
+    payload = compact(original)
+    if not texts:
+        return request
+    payload['_context_texts'] = texts
+    if expand_source_texts(payload) != original:
+        raise ContextBudgetError('原文传输去重不能完整还原，未发送模型')
+    packed = json.dumps(payload, ensure_ascii=False, separators=(',', ':'))
+    if len(packed) >= len(request['user_prompt']):
+        return request
+    instruction = ('\n输入使用无损文本字典：{"_context_text_ref":"ctx_..."}的实际文本在同一输入的_context_texts中。'
+        '请先解析这些引用再理解内容；它们仅减少重复传输，不是新的文件/页/块身份。'
+        '文件身份、科学数值、条件和来源归属保持原样。输出必须填写实际内容，不得输出这些传输引用。\n')
+    return {**request, 'system_prompt':request['system_prompt'] + instruction, 'user_prompt':packed}
+
+
+def validate_context_output(response, request):
+    if '"_context_texts"' not in request.get('user_prompt', ''):
+        return
+    payload = json.loads(request['user_prompt'])
+    texts = payload.get('_context_texts') if isinstance(payload, dict) else None
+    if not texts:
+        return
+    from backend.rag.structured_output import StructuredOutputError
+    def visit(value):
+        if isinstance(value, dict):
+            if set(value) & {'_context_text_ref', '_context_texts'}:
+                raise StructuredOutputError('模型返回内部传输引用，未提供实际字段内容')
+            for item in value.values(): visit(item)
+        elif isinstance(value, list):
+            for item in value: visit(item)
+        elif isinstance(value, str) and any(key in value for key in texts):
+            raise StructuredOutputError('模型把内部传输标识写入字段，未作为有效结果保存')
+    visit(response)
 
 
 def _groups(history):
@@ -126,9 +223,10 @@ def compact_history(history, path, *, model=None, budget=16000):
 def prepare_request(request, directory, *, model=None, budget=96000, force=False):
     prepared = dict(request)
     history = list(request.get("tool_history") or [])
-    # 图片预算采用保守估计，不能用base64字符数冒充图片token数。
-    fixed = {key: value for key, value in request.items() if key not in {"tool_history", "images", "retries", "read_timeout"}}
-    fixed_tokens = len(json.dumps(fixed, ensure_ascii=False)) // 2 + len(request.get("images") or []) * 4096
+    fixed_tokens = _fixed_token_estimate(prepared)
+    if fixed_tokens >= budget:
+        prepared = _compact_source_texts(prepared)
+        fixed_tokens = _fixed_token_estimate(prepared)
     if fixed_tokens >= budget:
         raise ContextBudgetError("当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据")
     size = count_tokens_approximately(_messages(history)) if history else 0

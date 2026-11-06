@@ -1,0 +1,13 @@
+{
+  "phase": "paper_summary",
+  "source_request": "/Users/mayuan/Codes/SC-Wiki/.data/review_artifacts/d2ca41e5f16b4d65bf744f5d5325e855/model-runtime/ebb799d1e82fd3784e2ffe41f92a94407486a70676dc0b481dcbfc4200fb9728/calls/52619ee295837b37929716bf503d12cfc413847f51ee870ef2735116be898060-0/request.json",
+  "source_request_sha256": "492cb2f3221a39431bea302c1d85e692f46fab602d5b44634746f0650bb831fc",
+  "original_chars": 311439,
+  "prepared_chars": 245813,
+  "original_estimated_tokens": 106809,
+  "prepared_estimated_tokens": 83422,
+  "budget": 96000,
+  "all_data_roundtrip_equal": true,
+  "source_texts": 8,
+  "input_token_estimate": "o200k_base；不是上游容量或实际计费声明"
+}

@@ -72,3 +72,37 @@ def test_summary_calls_use_persistent_runtime_and_resume_without_model(tmp_path,
     assert first==second and len(calls)==1
     results=[json.loads(p.read_text()) for p in (tmp_path/'runtime').rglob('result.json')]
     assert results[0]['response']['usage']['input_tokens']==100
+
+
+def test_large_repeated_sources_are_losslessly_encoded_before_budget_gate(tmp_path):
+    from backend.ingest.model_memory import prepare_request
+    import json
+    quote='Original scientific evidence YH10 303 K at 400 GPa, mu*=0.1. '*30
+    payload={'candidates':[{'candidate_id':f'c{i}','material':'YH10','tc':303.0,'mu_star':0.1,'file_id':'actual-file','block_id':'actual-block','quote':quote} for i in range(10)]}
+    request={'system_prompt':'Fixed scientific fields.','user_prompt':json.dumps(payload),'images':[]}
+    prepared=prepare_request(request,tmp_path,budget=2400)
+    from backend.ingest.model_memory import expand_source_texts
+    encoded=json.loads(prepared['user_prompt'])
+    assert expand_source_texts(encoded)==payload
+    assert request['user_prompt']==json.dumps(payload)
+    assert len(prepared['user_prompt'])<len(request['user_prompt'])/2
+    assert all(row['file_id']=='actual-file' and row['block_id']=='actual-block' and row['tc']==303 for row in encoded['candidates'])
+
+
+def test_unique_required_evidence_is_not_truncated_to_fit(tmp_path):
+    from backend.ingest.model_memory import prepare_request,ContextBudgetError
+    import json,pytest
+    payload={'sources':[{'source_id':f's{i}','content':('distinct original evidence '+str(i)+' ')*100} for i in range(10)]}
+    original=json.dumps(payload)
+    with pytest.raises(ContextBudgetError):prepare_request({'system_prompt':'contract','user_prompt':original},tmp_path,budget=100)
+    assert json.loads(original)==payload
+
+
+def test_transport_dictionary_references_are_not_valid_field_output():
+    from backend.ingest.model_memory import validate_context_output
+    from backend.rag.structured_output import StructuredOutputError
+    import json,pytest
+    request={'user_prompt':json.dumps({'_context_texts':{'ctx_unique':'original source'}})}
+    with pytest.raises(StructuredOutputError):validate_context_output({'paper':{'summary':'ctx_unique'}},request)
+    with pytest.raises(StructuredOutputError):validate_context_output({'paper':{'summary':{'_context_text_ref':'ctx_unique'}}},request)
+    validate_context_output({'paper':{'summary':'actual supported summary'}},request)
