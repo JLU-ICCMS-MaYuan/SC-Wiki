@@ -35,19 +35,21 @@ def review_history_snapshot(checks, draft):
 
 
 async def commit_review(session, body, user):
+    if body.status not in {'approved', 'rejected'}:
+        ev.fail('review_status_invalid', '请选择审核通过并发布或拒绝并退回作者', status=400)
     paper = await session.scalar(select(models.Paper).where(models.Paper.id == body.paper_id).with_for_update())
     if paper is None or user.role not in {'admin', 'superadmin'} or paper.uploaded_by_user_id == user.id:
         ev.fail('review_forbidden', '需要管理员权限且不能审核自己的论文')
     from backend.services import manuscript_handoffs as handoffs
     operation_id=body.review_request_id or __import__('uuid').uuid4().hex
-    action='approve' if getattr(body,'status','approved')=='approved' else 'return' if body.status=='rejected' else 'forward'
+    action='approve' if body.status=='approved' else 'return'
     previous=await session.scalar(select(models.PaperHistoryEvent).where(models.PaperHistoryEvent.operation_id==operation_id))
     if previous is not None:
         saved=(previous.classification_snapshot or {}).get('handoff') or {}
         if previous.paper_id!=paper.id or previous.actor_user_id!=user.id or saved.get('action')!=action:
             ev.fail('handoff_operation_conflict','操作身份已用于其他交接')
         return {'ok':True,'paper_id':paper.id,'review_status':paper.review_status}
-    if getattr(body,'status','approved')!='approved':
+    if body.status!='approved':
         result=await session.run_sync(lambda s:handoffs.review_handoff(s,paper,user,status=body.status,
             operation_id=operation_id,comment=body.comment))
         await session.flush()

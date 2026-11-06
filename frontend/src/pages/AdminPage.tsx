@@ -23,7 +23,7 @@ import {
 import { type User, useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 import PaperReviewStatusSelect from '../components/PaperReviewStatusSelect'
-import { initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload, commitPaperReview } from '../lib/paperReview'
+import { isReviewAction, initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload, commitPaperReview } from '../lib/paperReview'
 import { Link as RouterLink, useSearchParams } from 'react-router-dom'
 import ChartGroupEditor from '../components/ChartGroupEditor'
 import NewsManager from '../components/NewsManager'
@@ -242,13 +242,13 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false,
       setReviewDlg({paper:{...paper,...lease.paper_header,id:paper.id},open:true})
       reviewOperation.current=undefined
       setReviewStatus(initialPaperReviewStatus(paper.review_status))
-      setReviewComment(paper.review_comment || '')
+      setReviewComment('')
       void evidenceWorkflow.restore(target)
     } catch(error) {setSnackbar((error as Error).message)}
   }
 
   const handleReview = async () => {
-    if (!reviewDlg.paper || reviewSaving) return
+    if (!reviewDlg.paper || reviewSaving || !isReviewAction(reviewStatus)) return
     setReviewSaving(true)
     try {
       const payload = reviewStatus === 'approved'
@@ -790,7 +790,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false,
         </DialogContent>
         <DialogActions>
           <Button disabled={reviewSaving} onClick={()=>setReviewDlg({paper:null!,open:false})}>{t('common.cancel')}</Button>
-          <Button variant="contained" disabled={reviewSaving} onClick={handleReview}>{t('admin.confirmReview')}</Button>
+          <Button variant="contained" disabled={reviewSaving || !isReviewAction(reviewStatus)} onClick={handleReview}>{t(reviewStatus === 'approved' ? 'admin.reviewApprove' : reviewStatus === 'rejected' ? 'admin.reviewReject' : 'admin.confirmReview')}</Button>
         </DialogActions>
       </Dialog>
 

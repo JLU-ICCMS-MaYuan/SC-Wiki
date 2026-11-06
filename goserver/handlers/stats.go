@@ -448,7 +448,7 @@ func BatchReview(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "参数错误"})
 		return
 	}
-	if len(body.PaperIDs) == 0 || !isValidReviewStatus(body.Status) {
+	if len(body.PaperIDs) == 0 || !isValidReviewAction(body.Status) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "论文列表为空或审核状态无效"})
 		return
 	}

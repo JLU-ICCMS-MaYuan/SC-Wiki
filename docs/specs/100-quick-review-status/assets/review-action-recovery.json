@@ -1,0 +1,75 @@
+{
+  "paper_id": 1208,
+  "actor": "superadmin_mayuan",
+  "post_open_workdraft_status": 200,
+  "get_draft_state_status": 200,
+  "before": {
+    "owner_id": 1,
+    "cycle": "434"
+  },
+  "after": {
+    "owner_id": 1,
+    "cycle": "440",
+    "epoch_rotated": true
+  },
+  "protected_before": {
+    "papers": {
+      "rows": 1,
+      "sha256": "31a1618e5d6fda2a9f7fae46a033935584f8d5335261a003bf6e6a9dbd159837"
+    },
+    "scientific_review_drafts": {
+      "rows": 1,
+      "sha256": "27229830bd077904334d0ecef370d14a99b91f3c1ba09b0fe84c1bb43043815c"
+    },
+    "paper_history_events": {
+      "rows": 6,
+      "sha256": "314ccf515c5803222a0c54a14b7deca02eff4896de5ec5c63bf817f262bfc8f9"
+    },
+    "scientific_evidence_checks": {
+      "rows": 802,
+      "sha256": "9ed6b98bd54eaabc4619b10e8c8d96e57499beaf1e9437eeafa2b311b1753154"
+    },
+    "scientific_evidence_sources": {
+      "rows": 791,
+      "sha256": "aaa23cafacc381cfcb3fa0314604f8de6ac2470365ec3e454bdca1886bdbeb64"
+    },
+    "scientific_manual_evidence": {
+      "rows": 5,
+      "sha256": "992ff54400b1e02c73f1c757daf0a526cb59039e55499fb22d1c7e03a351f6f0"
+    }
+  },
+  "protected_after": {
+    "papers": {
+      "rows": 1,
+      "sha256": "31a1618e5d6fda2a9f7fae46a033935584f8d5335261a003bf6e6a9dbd159837"
+    },
+    "scientific_review_drafts": {
+      "rows": 1,
+      "sha256": "27229830bd077904334d0ecef370d14a99b91f3c1ba09b0fe84c1bb43043815c"
+    },
+    "paper_history_events": {
+      "rows": 6,
+      "sha256": "314ccf515c5803222a0c54a14b7deca02eff4896de5ec5c63bf817f262bfc8f9"
+    },
+    "scientific_evidence_checks": {
+      "rows": 802,
+      "sha256": "9ed6b98bd54eaabc4619b10e8c8d96e57499beaf1e9437eeafa2b311b1753154"
+    },
+    "scientific_evidence_sources": {
+      "rows": 791,
+      "sha256": "aaa23cafacc381cfcb3fa0314604f8de6ac2470365ec3e454bdca1886bdbeb64"
+    },
+    "scientific_manual_evidence": {
+      "rows": 5,
+      "sha256": "992ff54400b1e02c73f1c757daf0a526cb59039e55499fb22d1c7e03a351f6f0"
+    }
+  },
+  "exactly_unchanged": true,
+  "history_event_id": 440,
+  "workflow_status": "pending",
+  "approved_current_revision": false,
+  "review_commit_calls": 0,
+  "model_calls": 0,
+  "new_handoffs": 0,
+  "private_backup_created": false
+}

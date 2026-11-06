@@ -81,12 +81,23 @@ def require_writer(session, paper, user, *, author=False):
     if author:
         allowed = state['holder'] == 'author' and user.id == paper.uploaded_by_user_id
     else:
-        allowed = (state['holder'] == 'review' and user.role in {'admin', 'superadmin'}
-                   and user.id != paper.uploaded_by_user_id and user.id != state['actor_user_id'])
-    if allowed and not author:
-        staged = session.get(models.ScientificReviewDraft, paper.id)
-        if staged is not None and staged.owner_id not in {user.id, state['actor_user_id']}:
-            error('workdraft_claimed', '工作稿已由其他审核员接手；请查看正式快照')
+        allowed = state['holder'] == 'review' and user.role in {'admin', 'superadmin'} and user.id != paper.uploaded_by_user_id
+        if allowed:
+            # 权限只读取属主，不为判断可编辑权加载整份科学稿。
+            staged_owner = session.scalar(select(models.ScientificReviewDraft.owner_id).where(
+                models.ScientificReviewDraft.paper_id == paper.id).with_for_update(read=True))
+            from backend.services.workdrafts import row
+            work = row(session, 'paper', str(paper.id), True)
+            # 旧forward保留原经手人私稿；不再把已接手稿开放给下一审核员。
+            legacy_owner = (state.get('action') == 'forward' and staged_owner is not None and work is not None
+                and staged_owner == work.owner_id == state['actor_user_id'] == user.id)
+            if state['actor_user_id'] == user.id and not legacy_owner:
+                allowed = False
+            queued_author = (state.get('action') == 'submit' and staged_owner is not None
+                and staged_owner == state['actor_user_id'] == paper.uploaded_by_user_id)
+            if (staged_owner is not None and staged_owner != user.id and not queued_author
+                    or work is not None and work.document_key == str(state['event_id']) and work.owner_id != user.id):
+                error('workdraft_claimed', '工作稿已由其他审核员接手；请查看正式快照')
     if not allowed:
         error('manuscript_handed_off', '稿件已交出，当前没有编辑权；须由其他合法经手人正式退回')
 
@@ -259,10 +270,10 @@ def review_handoff(session, paper, user, *, status, operation_id, comment=''):
     """拒绝是唯一返修入口；公开批准图保持，工作稿归属在调用方事务内交接。"""
     if user.role not in {'admin', 'superadmin'} or user.id == paper.uploaded_by_user_id:
         error('review_forbidden', '需要管理员权限且不能审核自己的论文', 403)
-    if status not in {'rejected', 'pending'}:
+    if status != 'rejected':
         error('review_status_invalid', '无效的审核状态', 400)
     previous = session.scalar(select(models.PaperHistoryEvent).where(models.PaperHistoryEvent.operation_id == operation_id))
-    action = 'return' if status == 'rejected' else 'forward'
+    action = 'return'
     if previous is not None:
         saved = (previous.classification_snapshot or {}).get('handoff') or {}
         if previous.paper_id != paper.id or previous.actor_user_id != user.id or saved.get('action') != action:

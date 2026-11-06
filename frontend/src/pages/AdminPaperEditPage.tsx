@@ -21,7 +21,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useNavigate, useParams } from 'react-router-dom'
 import PaperReviewStatusSelect from '../components/PaperReviewStatusSelect'
-import { initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload, commitPaperReview, paperEditorFromWorkdraft, type ReviewClassifications } from '../lib/paperReview'
+import { isReviewAction, initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload, commitPaperReview, paperEditorFromWorkdraft, type ReviewClassifications } from '../lib/paperReview'
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -212,9 +212,9 @@ const AdminPaperEditPage: React.FC = () => {
           superconductor_kind: classifications.superconductorKind,
         })
         setEditMaterialFamilies(classifications.materialFamilies)
-        // 已通过论文重新编辑时默认退回待审核，避免无修改地重复批准。
+        // 每次审核明确选择动作，不沿用旧决定或意见。
         setEditReviewStatus(initialPaperReviewStatus(detail.review_status))
-        setEditReviewComment(detail.review_comment || '')
+        setEditReviewComment('')
         // 科学数据：Go 详情行转成共享编辑器形态；既有结构并入候选（整体替换语义，T020）
         const detailStates: Array<Record<string, any>> = detail.material_states || []
         // 科学值与永久 Evidence 以数据库详情为准，不能被上传时的旧快照覆盖。
@@ -308,7 +308,7 @@ const AdminPaperEditPage: React.FC = () => {
 
   // 编辑页内提交审核；批准时由后端校验当前论文级 family 和状态分类完整性。
   const handleEditReview = async () => {
-    if (accessDenied) return
+    if (accessDenied || !isReviewAction(editReviewStatus)) return
     setEditReviewSaving(true)
     try {
       if (editReviewStatus === 'approved' && evidenceWorkflow.hasUnsavedChanges() && !(await handleEditSave())) return
@@ -416,9 +416,9 @@ const AdminPaperEditPage: React.FC = () => {
               </Box>
               <TextField label={t('admin.reviewComment')} size="small" multiline rows={2} sx={{ flex: 1, minWidth: 180 }}
                 disabled={editReviewSaving || accessDenied} value={editReviewComment} onChange={e => setEditReviewComment(e.target.value)} />
-              <Button variant="contained" size="small" disabled={editReviewSaving || accessDenied}
+              <Button variant="contained" size="small" disabled={editReviewSaving || accessDenied || !isReviewAction(editReviewStatus)}
                 onClick={handleEditReview} sx={{ mt: 0.5 }}>
-                {t('admin.submitReview')}
+                {t(editReviewStatus === 'approved' ? 'admin.reviewApprove' : editReviewStatus === 'rejected' ? 'admin.reviewReject' : 'admin.submitReview')}
               </Button>
             </Box>
             <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>

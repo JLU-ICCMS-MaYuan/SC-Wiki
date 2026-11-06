@@ -68,12 +68,10 @@ def authorized_draft(session, target, target_id, user, *, lock=False, allow_new_
             if staged.owner_id != user.id:
                 from backend.services.manuscript_handoffs import latest
                 state = latest(session, paper.id)
-                queued = state and state['holder'] == 'review' and staged.owner_id == state['actor_user_id']
-                if not queued:
+                queued_author = (state and state.get('action') == 'submit' and state['holder'] == 'review'
+                    and staged.owner_id == state['actor_user_id'] == paper.uploaded_by_user_id)
+                if not queued_author:
                     fail('workdraft_claimed', '工作稿已由其他审核员接手；可查看已交出快照')
-                if lock and not allow_new_cycle:
-                    staged.owner_id = user.id
-                    session.flush()
             if staged.base_revision != paper.content_revision:
                 fail('draft_version_conflict', '正式论文已变化，管理员草稿未覆盖新内容')
             from .tc_contexts import map_draft

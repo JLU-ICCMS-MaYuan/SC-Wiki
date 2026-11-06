@@ -57,7 +57,7 @@ async def review_case(passed):
                         cached = science.load_results(session, one, actor.id)
                         return decide(session, one, cached, actor, 'approve', detail(one, cached)['review_token'])
                     assert (await db.run_sync(approve_year))['record']['human_confirmed']
-                request = FieldReviewCommit(paper_id=paper.id, expected_evidence_version=snap['version'])
+                request = FieldReviewCommit(paper_id=paper.id,status='approved', expected_evidence_version=snap['version'])
                 if not passed:
                     with pytest.raises(Exception) as failure:
                         await commit_review(db, request, actor)

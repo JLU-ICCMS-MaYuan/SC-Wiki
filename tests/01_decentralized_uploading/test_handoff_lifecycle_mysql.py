@@ -95,7 +95,7 @@ async def exercise():
         checks={r['key']:{'status':'supported','reason':'隔离测试预置当前结果','source_kind':'paper_quote'} for r in current['records']}
         await db.run_sync(lambda session:science.save_results(session,current,checks,first.id));await db.flush()
         from backend.services.field_review_commit import commit_review
-        await commit_review(db,FieldReviewCommit(paper_id=paper.id,expected_evidence_version=current['version'],review_request_id=uuid.uuid4().hex),first)
+        await commit_review(db,FieldReviewCommit(paper_id=paper.id,status='approved',expected_evidence_version=current['version'],review_request_id=uuid.uuid4().hex),first)
         await db.commit();await db.refresh(paper)
         assert paper.title=='修订新稿' and paper.review_status=='approved'
         assert (await db.run_sync(lambda session:h.latest(session,paper.id)))['published_snapshot_id']!=published['snapshot_id']

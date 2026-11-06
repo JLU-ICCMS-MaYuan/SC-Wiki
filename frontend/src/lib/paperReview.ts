@@ -4,11 +4,11 @@ import type { DraftMaterialState } from './paperProcessing'
 
 export const PAPER_REVIEW_OPTIONS = [
   { value: 'approved', label: 'admin.reviewApprove' },
-  { value: 'pending', label: 'admin.reviewBackToPending' },
   { value: 'rejected', label: 'admin.reviewReject' },
 ] as const
 
-export const initialPaperReviewStatus = (status?: string) => status === 'rejected' ? 'rejected' : 'pending'
+export const initialPaperReviewStatus = (_status?: string) => ''
+export const isReviewAction = (status: string) => status === 'approved' || status === 'rejected'
 
 const REVIEW_SERVER_FIELDS = ['id', 'created_at', 'updated_at', 'review_status', 'content_revision',
   'approved_revision', 'uploaded_by_user_id', 'reviewed_by_user_id'] as const
@@ -116,6 +116,7 @@ export function needsReviewClassificationSave(detail: Record<string, any>, pendi
 }
 
 export function paperReviewPayload(status: string, comment: string, classifications?: ReviewClassifications) {
+  if (!isReviewAction(status)) throw new Error('请选择审核通过并发布或拒绝并退回作者')
   if (status === 'approved' && !classifications) throw new Error('Approval classifications are required')
   return {
     status, comment, review_request_id: crypto.randomUUID(),

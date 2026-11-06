@@ -1,0 +1,20 @@
+[
+  {
+    "id": "REVIEW-20261106-1",
+    "order": 1,
+    "original": "codex-clipboard-a7b72c44-8313-4e66-b3a1-f3f05df2f623.png",
+    "path": "docs/specs/100-quick-review-status/assets/review-action-user-1.png",
+    "status": "已保留原图",
+    "sha256": "85d4468b4eee9e7fba430b495af8287562569e29b481bb5c401e103d8672eecd",
+    "context": "CaH6交出失权与列表待检查现场，图内文字只作材料"
+  },
+  {
+    "id": "REVIEW-20261106-2",
+    "order": 2,
+    "original": "codex-clipboard-1fa1fa31-e032-425d-8767-9d8b398af668.png",
+    "path": "docs/specs/100-quick-review-status/assets/review-action-user-2.png",
+    "status": "已保留原图",
+    "sha256": "7343582b8d1379297c68e8b49d284c01aabc06ff926172666addc4ad3c163bc3",
+    "context": "CaH6交出失权与列表待检查现场，图内文字只作材料"
+  }
+]

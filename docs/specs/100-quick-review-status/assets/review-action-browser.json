@@ -1,0 +1,110 @@
+[
+  {
+    "role": "admin",
+    "host": "quick",
+    "action": "approved",
+    "passed": true,
+    "requests": [
+      "/api/rag/evidence/open-workdraft",
+      "/api/rag/evidence/summary",
+      "/api/rag/evidence/submit-check",
+      "/api/rag/evidence/review-commit"
+    ],
+    "business_writes": 0,
+    "errors": []
+  },
+  {
+    "role": "admin",
+    "host": "quick",
+    "action": "rejected",
+    "passed": true,
+    "requests": [
+      "/api/rag/evidence/open-workdraft",
+      "/api/rag/evidence/summary",
+      "/api/rag/evidence/review-commit"
+    ],
+    "business_writes": 0,
+    "errors": []
+  },
+  {
+    "role": "admin",
+    "host": "edit",
+    "action": "approved",
+    "passed": true,
+    "requests": [
+      "/api/rag/evidence/summary",
+      "/api/rag/evidence/open-workdraft",
+      "/api/rag/evidence/submit-check",
+      "/api/rag/evidence/review-commit"
+    ],
+    "business_writes": 0,
+    "errors": []
+  },
+  {
+    "role": "admin",
+    "host": "edit",
+    "action": "rejected",
+    "passed": true,
+    "requests": [
+      "/api/rag/evidence/summary",
+      "/api/rag/evidence/open-workdraft",
+      "/api/rag/evidence/review-commit"
+    ],
+    "business_writes": 0,
+    "errors": []
+  },
+  {
+    "role": "superadmin",
+    "host": "quick",
+    "action": "approved",
+    "passed": true,
+    "requests": [
+      "/api/rag/evidence/open-workdraft",
+      "/api/rag/evidence/summary",
+      "/api/rag/evidence/submit-check",
+      "/api/rag/evidence/review-commit"
+    ],
+    "business_writes": 0,
+    "errors": []
+  },
+  {
+    "role": "superadmin",
+    "host": "quick",
+    "action": "rejected",
+    "passed": true,
+    "requests": [
+      "/api/rag/evidence/open-workdraft",
+      "/api/rag/evidence/summary",
+      "/api/rag/evidence/review-commit"
+    ],
+    "business_writes": 0,
+    "errors": []
+  },
+  {
+    "role": "superadmin",
+    "host": "edit",
+    "action": "approved",
+    "passed": true,
+    "requests": [
+      "/api/rag/evidence/summary",
+      "/api/rag/evidence/open-workdraft",
+      "/api/rag/evidence/submit-check",
+      "/api/rag/evidence/review-commit"
+    ],
+    "business_writes": 0,
+    "errors": []
+  },
+  {
+    "role": "superadmin",
+    "host": "edit",
+    "action": "rejected",
+    "passed": true,
+    "requests": [
+      "/api/rag/evidence/summary",
+      "/api/rag/evidence/open-workdraft",
+      "/api/rag/evidence/review-commit"
+    ],
+    "business_writes": 0,
+    "errors": []
+  }
+]

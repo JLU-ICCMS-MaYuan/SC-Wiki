@@ -11,9 +11,10 @@ export default function PaperReviewStatusSelect({ id, value, onChange, disabled 
   const { t } = useLanguage()
   return (
     <FormControl fullWidth size="small" disabled={disabled}>
-      <InputLabel id={`${id}-label`}>{t('admin.reviewResult')}</InputLabel>
-      <Select id={id} labelId={`${id}-label`} value={value} label={t('admin.reviewResult')}
+      <InputLabel shrink id={`${id}-label`}>{t('admin.reviewResult')}</InputLabel>
+      <Select displayEmpty notched id={id} labelId={`${id}-label`} value={value} label={t('admin.reviewResult')}
         onChange={event => onChange(event.target.value)}>
+        <MenuItem value="" disabled>{t('admin.chooseReviewResult')}</MenuItem>
         {PAPER_REVIEW_OPTIONS.map(option => <MenuItem key={option.value} value={option.value}>{t(option.label)}</MenuItem>)}
       </Select>
     </FormControl>

@@ -20,3 +20,10 @@ frontend/node_modules/.bin/vitest run --config vitest.config.ts --no-file-parall
 5. 两个角色均应通过真实科学保存、新家族关联、重复同值保存、Go 正式详情、实际 TypeScript 批准载荷、真实 Python `prepare-review` 和三状态审核历史。旧分类与未核对内容仍拒绝。
 
 测试只截断批准后的发布/快照清理，人工确认由隔离夹具提供，不调用外部模型。测试服务仅绑定本机；结束后停止本轮测试进程，不连接正式索引。不能把旧 `TestCurrentMySQLQuickReview` 的通用成功替身当作本轮跨层验收。
+
+
+## 2026-11-06 当前验证入口
+
+前文三状态与旧API为历史验收步骤；当前审核动作以spec.md FR-007—010为准。执行review-actions.test.tsx、handoff-admin-dialog.test.tsx、paper-review-transport.test.tsx、review-classification-source.test.tsx；review-actions已纳入test:form-contract。真实Chrome脚本review-actions-browser.mjs使用FRONTEND_URL、PLAYWRIGHT_MODULE、CHROMIUM_PATH、REVIEW_ACTION_OUTPUT，所有业务API隔离拦截。
+
+后端test_review_actions.py验证显式决定和有界恢复；test_review_claim_mysql.py与test_handoff_lifecycle_mysql.py、test_workdraft_concurrency_mysql.py在只含表结构/目录的独立MySQL运行，覆盖竞争领取、作者再送审、非属主拒审与单审核员完成批准。APIstatus必须显式；Go仅新审核动作白名单排除pending，历史状态读取保持。完整检查为test:field-contract、test:form-contract、test:form-contract:mutation及build。

@@ -126,3 +126,8 @@ papers的批准状态和当前科学图决定公开版；最新handoff.holder仅
 ## Documentation Impact
 
 独立Spec、Plan、Research、Tasks、Quickstart、Validation、界面/接口契约及需求检查表归入本目录；当前功能引用见plan.md。远程Spec尚未推送，保持未验证，不关闭Issue。
+
+
+## 2026-11-06 审核动作与接手归属更新
+
+用户在[#100](../100-quick-review-status/spec.md)明确要求首位审核员排他接手、该人通过即发布；移除新审核动作pending，不增加审核员间主动转交。旧forward只作历史，原属主的受限恢复与最新验收见#100。本文原有冻结/旧公开版保护、作者不得自审、正常拒绝返修及并发周期约束保持；旧“转交后由另一审核员接手”不再作为新操作入口。

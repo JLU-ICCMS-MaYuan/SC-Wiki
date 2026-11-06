@@ -1,0 +1,121 @@
+{
+  "date": "2026-11-06",
+  "branch": "mayuan",
+  "scope": "#100 FR-007—010、SC-004—006",
+  "before": {
+    "frontend_failed": 8,
+    "frontend_note": "修正测试夹具后在独立改前HEAD重跑，无渲染错误，8项用户行为断言失败",
+    "backend_failed": 4,
+    "backend_passed": 1
+  },
+  "after": {
+    "targeted_frontend": {
+      "files": 4,
+      "passed": 27
+    },
+    "form_contract": {
+      "files": 15,
+      "passed": 210
+    },
+    "field_contract": "v1锁定基线通过，未修改标准JSON或lock",
+    "mutation": {
+      "render_detected": 8,
+      "missing_red_detected": 4
+    },
+    "build": "TypeScript/Vite通过，原有大包提示保留",
+    "backend": {
+      "passed": 32,
+      "failed": 3,
+      "baseline_passed": 5,
+      "baseline_failed": 3,
+      "old_failure_names": [
+        "test_review_classification_current.py::test_saved_classifications_reach_real_prepare_review",
+        "test_review_classification_save.py::test_new_families_save_reload_clear_and_rollback[admin]",
+        "test_review_classification_save.py::test_new_families_save_reload_clear_and_rollback[superadmin]"
+      ],
+      "errors": [
+        "旧人工分类判断未满足现行字段决定协议",
+        "旧保存失败替身不接受reviewed参数"
+      ]
+    },
+    "isolated_mysql": {
+      "passed": 4,
+      "proof": [
+        "两个真实RR事务并发领取只成功一人",
+        "其他审核员及作者不能批准/拒绝",
+        "作者重新送审后正常领取",
+        "原审核员正式批准事务保存新版，保持旧快照"
+      ]
+    },
+    "go": "新动作白名单、历史pending可读、两角色当前队列与公开版、空值相邻聚焦回归通过",
+    "chrome": {
+      "scenarios": 8,
+      "roles": [
+        "admin",
+        "superadmin"
+      ],
+      "hosts": [
+        "quick",
+        "edit"
+      ],
+      "actions": [
+        "approved",
+        "rejected"
+      ],
+      "business_api": "隔离拦截",
+      "real_business_writes": 0
+    }
+  },
+  "recovery": {
+    "paper_id": 1208,
+    "post_open_workdraft_status": 200,
+    "get_draft_state_status": 200,
+    "original_owner": 1,
+    "old_cycle": "434",
+    "new_cycle": "440",
+    "review_commit_calls": 0,
+    "model_calls": 0,
+    "protected_payloads_equal": true,
+    "snapshot_count": 6,
+    "scientific_checks": 802,
+    "formal_sources": 791,
+    "manual_rows": 5
+  },
+  "source_sha256": {
+    "backend/api/evidence.py": "6144e486e4b94d3113b263cfa6f80674ba3fc36edf64c8d32cf71f3888d9ee7d",
+    "backend/ingest/field_drafts.py": "d8e9894cf35a385865b191472e8c4cd04e663f9d3d0ea08843d9ce82ac46bb1c",
+    "backend/services/field_review_commit.py": "f92dce60378a3737f47737e471ece8dd92b57234b6149d55ec3dcff44d57c064",
+    "backend/services/manuscript_handoffs.py": "520c4b7fe286839742c1e6bd7e5d6cdeaa0bc6b87a02bdba94db8bf5c5a87223",
+    "frontend/src/components/PaperReviewStatusSelect.tsx": "860f0885552649ade2b415d4787b497097f9085cb769b89508e96840f4ec833e",
+    "frontend/src/lib/paperReview.ts": "bff53bae8fc2f17934ee760c9d31d7912fcf16c91504858bed24c0e0e2ead82e",
+    "frontend/src/i18n/zh/admin.ts": "495783ed80ebd99f4047faab7779aea715efec2a643019be51ec396169634b27",
+    "frontend/src/i18n/en/admin.ts": "af6871e051f5682ba2938cfaf325032b08fc917e7c5a8fc0d49b6469d920abdc",
+    "frontend/src/pages/AdminPage.tsx": "800cdd9d969435e9d701f617fad8421bab546077fabeb048ea84799b9c933287",
+    "frontend/src/pages/AdminPaperEditPage.tsx": "482513707d7b19331706f28b4e3f402953daa17adef7ba9526005d3520ce8c66",
+    "goserver/handlers/admin.go": "1f88b14d663a5e6b9f5ca781444954dc1703b9e9160e7a015e8749c176e1ab70",
+    "goserver/handlers/stats.go": "0de9a6d75c4593fdfe63658232764dde86405a760fdfc46874a556f3528b0ce1",
+    "goserver/handlers/review_action_test.go": "5ee14fb6c833fd6be984ba5683acaf765644fc1b4dd3e3a12b46af5b67c37c41",
+    "scripts/check-form-contract.mjs": "330e20eb709c7c638040ec7aa9bf27e3235372c5f7be63694612a7e1acd00957",
+    "tests/01_decentralized_uploading/review-actions.test.tsx": "047f1d33bf6219a468465d0a77e92c56775f7e750a220b1f53ecf4f7c58a7a77",
+    "tests/01_decentralized_uploading/review-actions-browser.mjs": "81d17103e89ec0cfc0cbe016dccc56e27f590e707e94b68764816e47d0128d25",
+    "tests/01_decentralized_uploading/test_review_actions.py": "d829348aaefc62ad7714dd10c17b5ea2ab930c9e80f0b89cc2957816564d11ac",
+    "tests/01_decentralized_uploading/test_review_claim_mysql.py": "0825b6a2cfe0cac714ada590291904fb338953a968f11d33714b7150cf35f1a7",
+    "tests/01_decentralized_uploading/handoff-admin-dialog.test.tsx": "17283ca55279cbf867f7976caf42fe7c91095bde0bd54483aa0eaa090d0bc8ae",
+    "tests/01_decentralized_uploading/test_handoff_manual.py": "40d27db7fb251ca92eba2db2f82cc523b9546989028390aaf68f17ba044821b0",
+    "tests/01_decentralized_uploading/test_handoff_lifecycle_mysql.py": "6901efad3569d1c461a3f549b79859a1a26d6633ae232239e6ba5df510d52549",
+    "tests/01_decentralized_uploading/test_two_stage_commit_mysql.py": "59b08744cfb231a0a564cda1026b3412c624cad1fc33dfa45866be0c004dd2f2"
+  },
+  "limits": [
+    "未替用户批准真实CaH6稿件",
+    "无第二审核人流程或转交新功能",
+    "没有数据库结构迁移或业务私有备份",
+    "远程链接未推送核验，Issue保持OPEN",
+    "未推送、阿里云或Docker部署"
+  ],
+  "evidence": {
+    "browser_image": "review-action-browser.png",
+    "image_type": "隔离Chrome派生图，非用户原图",
+    "logs": ".local/issue100-review",
+    "mysql": "临时库仅复制表结构和目录，结束已删除"
+  }
+}

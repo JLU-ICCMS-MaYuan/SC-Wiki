@@ -394,7 +394,7 @@ func ReviewPaper(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "参数错误"})
 		return
 	}
-	if !isValidReviewStatus(body.Status) {
+	if !isValidReviewAction(body.Status) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的审核状态"})
 		return
 	}
@@ -663,6 +663,10 @@ func validatePaperClassificationComplete(tx *gorm.DB, paper *models.Paper) error
 		return &classificationIncompleteError{MaterialStateIDs: missing}
 	}
 	return nil
+}
+
+func isValidReviewAction(status string) bool {
+	return status == reviewStatusApproved || status == reviewStatusRejected
 }
 
 func isValidReviewStatus(status string) bool {

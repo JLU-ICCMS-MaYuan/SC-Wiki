@@ -205,7 +205,7 @@ class FieldReviewCommit(BaseModel):
     paper_id: int
     evidence_job_id: str | None = None
     expected_evidence_version: str | None = None
-    status: Literal['approved','rejected','pending'] = 'approved'
+    status: Literal['approved','rejected']
     comment: str = ''
     review_request_id: str = Field(default='', max_length=64)
 
