@@ -1,0 +1,69 @@
+{
+  "recorded_at": "2026-11-06T18:27:19.803245+00:00",
+  "task_id": "d2ca41e5f16b4d65bf744f5d5325e855",
+  "status": "failed",
+  "stage": "summarizing",
+  "citation_matching_status": "failed",
+  "database_error": "Unknown column paper_references.match_evidence",
+  "missing_schema": {
+    "citation_match_cache": true,
+    "matching_snapshot": true,
+    "match_evidence": true
+  },
+  "model_review_counts": {
+    "unsupported": 0,
+    "supported": 479,
+    "uncertain": 14,
+    "missing": 0
+  },
+  "generation_issues": [
+    {
+      "field": "material_states[20].property_modules[0].records[0].value_number",
+      "record_key": "assembled-5-electronic_properties-0",
+      "code": "state_assignment_uncertain",
+      "message": "已核对图S14原页：这是电子态密度图，面板及图注均未标压力，不能借用图S15的声子或谱函数条件。暂归于表S1完整结构对应的200 GPa静态YH6；竞争条件包括图4的120 GPa。需查原始图S14计算说明才能确认，现有原页本身不能消除歧义。",
+      "state_key": "state-a5f1260f0d2e441b5832"
+    },
+    {
+      "field": "material_states[0].property_modules[1].records[0].value_number",
+      "record_key": "assembled-6-electronic_properties-0",
+      "code": "state_assignment_uncertain",
+      "message": "图S14原页确为YH9电子态密度，但没有压力标签。暂归于正文超导计算的150 GPa笼状相；表S1另有300 GPa同类笼状结构，不能据此断言电子DOS属于300 GPa。需查图S14原始计算条件；不为此另建压力未知状态。",
+      "state_key": "state-2be7a9e280186f5873b2"
+    },
+    {
+      "field": "material_states[1].property_modules[1].records[0].value_number",
+      "record_key": "assembled-7-electronic_properties-0",
+      "code": "state_assignment_uncertain",
+      "message": "图S14电子DOS没有压力标签，暂归于正文与表S1均明确报告的400 GPa立方YH10。图S15是另一物理量，不能用其声子或谱函数条件证明图S14的压力；仍需图S14原始计算说明确认。",
+      "state_key": "state-d6610ba134922154d915"
+    },
+    {
+      "field": "material_states[0].property_modules[1]",
+      "code": "ambiguous",
+      "message": "Source-186 supports the qualitative large, H-dominated Fermi-level DOS for YH9, but does not specify its pressure. Source-46 repeats the general qualitative statement, without explicitly assigning the DOS calculation to the candidate's 150 GPa state. Its neighboring 150 GPa specification is for lambda. A pressure-specific DOS record cannot be established from these sources.",
+      "record_key": "assembled-6-electronic_properties-0"
+    },
+    {
+      "field": "material_states[1].property_modules[1]",
+      "code": "ambiguous",
+      "message": "The qualitative large, H-dominated Fermi-level DOS is explicitly supported for YH10 by source-186, but the caption does not give a pressure. Source-46's 400 GPa assignment explicitly concerns lambda rather than the DOS calculation. The available text therefore does not unambiguously establish applicability to this 400 GPa state.",
+      "record_key": "assembled-7-electronic_properties-0"
+    },
+    {
+      "field": "material_states[20].property_modules[0]",
+      "code": "ambiguous",
+      "message": "Source-186 reports a qualitative large, H-dominated Fermi-level DOS for YH6 without specifying pressure. The 200 GPa ELF calculation elsewhere does not establish the pressure of this DOS result; Fig. 4 instead specifies 120 GPa for its YH6 data. The candidate's 200 GPa DOS attribution therefore remains unestablished.",
+      "record_key": "assembled-5-electronic_properties-0"
+    },
+    {
+      "field": "material_states.structure_optimization",
+      "code": "optimization_unresolved",
+      "message": "结构优化关联调用失败：ModelRequestError"
+    }
+  ],
+  "formal_papers": [],
+  "draft_exists": false,
+  "partial_draft_states": 37,
+  "all_five_stages_complete": false
+}

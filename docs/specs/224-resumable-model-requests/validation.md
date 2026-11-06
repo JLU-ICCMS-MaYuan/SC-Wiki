@@ -71,3 +71,7 @@ paper_summary原始输入311439字符，候选与原文混合反复携带8段相
 修复前置入口，复用纯本地固定输入准备，再执行原25万字符门；96k token预算、最多4次信息递增整理轮数均不变。未读source_index按真实文件分组，全部预览/页/引用键保持，明确预览不等于已读，须read_source_ids后才可引用。原始输入和实际wire_input分别留证，程序原目录及apply_plan写回不改。
 
 当前37状态/原IR生产函数输入重放：296946原字符→150869实际发送表示，模型回调已到达；该回放不调用模型或写业务数据。88项后端及既有科学填表回归通过；真实整理须在同任务继续实际调用验证，不把回放当整篇完成。
+
+## 最新外部环境阻塞
+
+真实37状态、科学整理completed、42组后处理核对记录479 supported/14 uncertain；尚未科学批准。随后并行#225引用匹配报缺match_evidence列；三项schema缺口见citation-schema-block.json。task d2ca41e5f16b4d65bf744f5d5325e855当前failed/summarizing，无正式论文。用户待确认并行迁移责任，本轮不代为执行其他Feature结构变更。SC-005仍未完成，Issue保持OPEN。
