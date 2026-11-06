@@ -291,3 +291,27 @@ def test_nonempty_invalid_json_remains_blocked_without_regeneration(tmp_path,mon
     with context(runtime),pytest.raises(Exception):llm.complete_json('contract','source',response_schema=schema)
     assert len(calls)==1
     assert state['model_activity']['error']['error_type']=='StructuredOutputError'
+
+
+def test_partial_output_then_whitespace_timeout_retries_original_request(tmp_path,monkeypatch):
+    runtime,context,state=setup_runtime(tmp_path,monkeypatch);sent=[];clock=[0.0]
+    monkeypatch.setattr(llm,'time',NS(monotonic=lambda:clock[0],sleep=lambda _:None))
+    def create(**options):
+        sent.append(options)
+        if len(sent)==1:
+            def stalled():
+                yield NS(choices=[NS(delta=NS(content='{"value":',tool_calls=None),finish_reason=None)])
+                clock[0]+=91
+                yield NS(choices=[NS(delta=NS(content=' \n  \n',tool_calls=None),finish_reason=None)])
+            return stalled()
+        return iter([NS(choices=[NS(delta=NS(content='{"value":42}',tool_calls=None),finish_reason='stop')])])
+    monkeypatch.setattr(llm,'_client',lambda _:NS(chat=NS(completions=NS(create=create))))
+    monkeypatch.setattr(llm,'get_llm_config',lambda:NS(model='fixture'))
+    schema={'type':'object','properties':{'value':{'type':'integer'}},'required':['value'],'additionalProperties':False}
+    with context(runtime):assert llm.complete_json('fixed schema','unchanged original',response_schema=schema)=={'value':42}
+    assert len(sent)==2 and sent[0]==sent[1]
+    import json
+    failure=json.loads(next(tmp_path.rglob('failure-*.json')).read_text())
+    assert failure['error']['output_started'] is True
+    assert failure['error']['code']=='LLM_STREAM_IDLE_TIMEOUT'
+    assert failure['partial_response'].startswith('{"value":')

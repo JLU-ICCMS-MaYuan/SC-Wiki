@@ -27,6 +27,11 @@ class ModelNoOutputError(RuntimeError):
     code = 'LLM_EMPTY_RESPONSE'
 
 
+class ModelProgressTimeout(httpx.ReadTimeout):
+    """已开始响应但后续停滞；保留半截内容，整次请求按传输超时重发。"""
+    code = 'LLM_STREAM_IDLE_TIMEOUT'
+
+
 def set_call_observer(observer: Callable[[dict], None]):
     return _call_observer.set(observer)
 
@@ -116,6 +121,8 @@ def _stream_json(
                 if now - last_progress >= read_timeout:
                     if runtime and not output_seen:
                         raise ModelNoOutputError('模型未返回任何输出，等待响应超时')
+                    if runtime:
+                        raise ModelProgressTimeout('模型输出停滞，超过读取等待时间；未完整响应不进入表单')
                     raise RuntimeError("模型持续返回空白或空响应，超过现有读取超时")
                 continue
             delta_object = chunk.choices[0].delta
@@ -148,6 +155,8 @@ def _stream_json(
             elif now - last_progress >= read_timeout:
                 if runtime and not output_seen:
                     raise ModelNoOutputError('模型未返回任何输出，等待响应超时')
+                if runtime:
+                    raise ModelProgressTimeout('模型输出停滞，超过读取等待时间；未完整响应不进入表单')
                 raise RuntimeError("模型持续返回空白或空响应，超过现有读取超时")
     finally:
         close = getattr(stream, "close", None)
@@ -236,7 +245,7 @@ def _complete_json(
                  "error_type": type(exc).__name__, "elapsed_seconds": time.monotonic() - started}
         if isinstance(exc, APIStatusError):
             event["status_code"] = exc.status_code
-        if isinstance(exc, (UserCredentialError, ModelNoOutputError)):
+        if isinstance(exc, (UserCredentialError, ModelNoOutputError, ModelProgressTimeout)):
             event['error_code'] = exc.code
         if on_call:
             on_call(dict(event))

@@ -1,0 +1,37 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_partial_output_then_whitespace_timeout_retries_original_request _____
+backend/rag/llm.py:254: in _complete_json
+    result = _stream_json(
+backend/rag/llm.py:151: in _stream_json
+    raise RuntimeError("模型持续返回空白或空响应，超过现有读取超时")
+E   RuntimeError: 模型持续返回空白或空响应，超过现有读取超时
+
+The above exception was the direct cause of the following exception:
+backend/ingest/model_runtime.py:336: in call
+    response = self.interruptible(invoke)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/ingest/model_runtime.py:267: in interruptible
+    raise value
+backend/ingest/model_runtime.py:244: in run
+    value = (True, context.run(operation))
+                   ^^^^^^^^^^^^^^^^^^^^^^
+backend/ingest/model_runtime.py:326: in invoke
+    return complete(prepared["system_prompt"], prepared["user_prompt"],
+backend/rag/llm.py:298: in _complete_json
+    raise StructuredOutputError("严格输出未返回完整有效JSON；原响应保留，未自动纠错") from exc
+E   backend.rag.structured_output.StructuredOutputError: 严格输出未返回完整有效JSON；原响应保留，未自动纠错
+
+The above exception was the direct cause of the following exception:
+backend/tests/test_model_runtime.py:311: in test_partial_output_then_whitespace_timeout_retries_original_request
+    with context(runtime):assert llm.complete_json('fixed schema','unchanged original',response_schema=schema)=={'value':42}
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/rag/llm.py:312: in complete_json
+    return runtime.call(_complete_json, system_prompt, user_prompt, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/ingest/model_runtime.py:365: in call
+    raise ModelRequestError(detail["message"]) from exc
+E   backend.ingest.model_runtime.ModelRequestError: 严格输出未返回完整有效JSON；原响应保留，未自动纠错
+=========================== short test summary info ============================
+FAILED backend/tests/test_model_runtime.py::test_partial_output_then_whitespace_timeout_retries_original_request
+1 failed, 19 deselected in 0.50s

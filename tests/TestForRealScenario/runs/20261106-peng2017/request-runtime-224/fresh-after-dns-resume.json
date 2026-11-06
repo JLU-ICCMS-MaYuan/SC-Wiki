@@ -1,0 +1,23 @@
+{
+  "task_id": "d2ca41e5f16b4d65bf744f5d5325e855",
+  "status": "reading",
+  "stage": "reading",
+  "generation": 2,
+  "activity": {
+    "status": "receiving",
+    "phase": "chunk_extraction",
+    "attempt": 1,
+    "filename": "2017 YHn LaHn-彭枫.pdf",
+    "pages": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "error": null
+  },
+  "reused_in_recent_history": 8,
+  "resume_source_commit": "be732e7b7aa85045bac774fb3bf7d2f27446b891",
+  "recorded_at": "2026-11-06T15:46:37.518816+00:00"
+}
