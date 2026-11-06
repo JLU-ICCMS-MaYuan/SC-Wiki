@@ -88,6 +88,49 @@ def _numbers(text):
     return [float(n) for n in NUMBER.findall(text.replace('−', '-').replace('–', '-'))]
 
 
+def _normalized_space_group_text(text):
+    """统一PDF负号/上划线编码；不从几何检测结果反填报告空间群。"""
+    import unicodedata
+    text = unicodedata.normalize('NFKC', text).replace('−', '-').replace('–', '-')
+    text = re.sub(r'([1-6])[\u0304\u0305\u00af\u0d24]', r'-\1', text)
+    return re.sub(r'\s+', '', text)
+
+
+def _expand_reported_sites(item, catalog, cell, source):
+    """把已核对的原行交给既有Wyckoff解码，不再依赖原文表题格式。"""
+    from .structure_extractor import _phase_table_candidates
+    if (item['coordinate_mode'] != 'fractional' or item['position_unit'] != 'dimensionless'
+            or item['length_unit'] != 'angstrom' or not item['space_group_symbol']):
+        return None
+    sites = []
+    for atom in item['atoms']:
+        row = catalog[atom['source_id']]['content']
+        match = re.search(r'\b' + re.escape(atom['element']) + r'\s+'
+            + r'\s+'.join('(' + NUMBER.pattern + ')' for _ in range(3))
+            + r'\s+(\d+[a-z])\b', row)
+        if not match:
+            return None
+        sites.append(f"{atom['element']}({match[4]}) {' '.join(match.groups()[:3])}")
+    if not sites:
+        return None
+    page = catalog[item['atoms'][0]['source_id']]['pdf_page']
+    pressure = item['pressure_value_gpa']
+    # 这是内部解码输入，不是伪造引句；对外sources始终由调用方写回真实原行。
+    text = (f'<!-- page: {page} -->\nTable S1. Structural parameters'
+        + (f' at {pressure} GPa' if pressure is not None else '')
+        + '\nAtomic coordinates (fractional)\n'
+        + f"{item['material'] or ''} {item['space_group_symbol']} "
+        + ' '.join(f'{key}={value}' for key, value in cell.items())
+        + '\n' + '\n'.join(sites))
+    candidates, _ = _phase_table_candidates(text, source)
+    if len(candidates) != 1 or candidates[0]['status'] != 'valid':
+        return None
+    candidate = candidates[0]
+    candidate['derivation'].update(input_layout='validated_original_pdf_rows',
+        source_reading_notes=deepcopy(item['uncertainties']), reason=item['reason'])
+    return candidate
+
+
 def _validated_candidates(answer, catalog, imaged_pages, source):
     from ase import Atoms
     from ase.data import atomic_numbers
@@ -102,7 +145,7 @@ def _validated_candidates(answer, catalog, imaged_pages, source):
             raise ValueError('结构引用不属于当前已读原PDF')
         rows = [catalog[key] for key in ids]
         if item['space_group_symbol']:
-            normalized = lambda value: re.sub(r'\s+', '', value.replace('−', '-').replace('–', '-'))
+            normalized = _normalized_space_group_text
             if not any(normalized(item['space_group_symbol']) in normalized(row['content']) for row in rows):
                 raise ValueError('报告空间群未在所选原文行找到，不能将几何检测结果冒作原文报告')
         for atom in item['atoms']:
@@ -138,7 +181,9 @@ def _validated_candidates(answer, catalog, imaged_pages, source):
         coordinate_pages = {catalog[a['source_id']]['pdf_page'] for a in item['atoms']}
         if not coordinate_pages.issubset(imaged_pages): reason.append('尚未成功读取全部坐标表原页图像')
         candidate = None
-        if not reason:
+        if coordinate_pages.issubset(imaged_pages) and str(item['reason']).strip():
+            candidate = _expand_reported_sites(item, catalog, cell, source)
+        if candidate is None and not reason:
             try:
                 atoms = Atoms(symbols=[a['element'] for a in item['atoms']],
                     **{'scaled_positions' if item['coordinate_mode'] == 'fractional' else 'positions':

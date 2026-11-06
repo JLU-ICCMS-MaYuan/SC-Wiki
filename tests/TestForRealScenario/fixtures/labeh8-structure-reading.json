@@ -1,0 +1,484 @@
+{
+  "answer": {
+    "reason": "Reviewed the supplied text for all 51 pages and the original images of pages 35 and 47–49. The coordinate table reports 12 geometries; Table S2 separately reports seven hard-sphere-model metrics and seven DFT metrics. These are kept separate, without transferring coordinates between tables or generating symmetry-equivalent atoms. Fractional coordinates and angstrom lattice lengths are explicit in structure-source-629 and structure-source-630. Unreported angles are not supplied from symmetry.",
+    "structures": [
+      {
+        "angle_unit": "unknown",
+        "atoms": [
+          {
+            "coordinates": [
+              0.351,
+              -0.351,
+              -0.351
+            ],
+            "element": "H",
+            "source_id": "structure-source-632"
+          },
+          {
+            "coordinates": [
+              0.5,
+              0.5,
+              0.5
+            ],
+            "element": "Be",
+            "source_id": "structure-source-633"
+          },
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "element": "La",
+            "source_id": "structure-source-635"
+          }
+        ],
+        "cell_parameters": {
+          "a": 5.643,
+          "alpha": null,
+          "b": 5.643,
+          "beta": null,
+          "c": 5.643,
+          "gamma": null
+        },
+        "cell_source_ids": [
+          "structure-source-632",
+          "structure-source-630"
+        ],
+        "coordinate_mode": "fractional",
+        "length_unit": "angstrom",
+        "material": "LaBeH8",
+        "position_unit": "dimensionless",
+        "pressure_value_gpa": 50,
+        "reason": "Page 47: explicit fractional site table, equal lattice lengths, phase and pressure.",
+        "source_ids": [
+          "structure-source-629",
+          "structure-source-631",
+          "structure-source-632",
+          "structure-source-633",
+          "structure-source-634",
+          "structure-source-635"
+        ],
+        "space_group_symbol": "Fm-3m",
+        "uncertainties": [
+          "Cell angles are not reported."
+        ]
+      },
+      {
+        "angle_unit": "unknown",
+        "atoms": [
+          {
+            "coordinates": [
+              -0.647,
+              0.352,
+              -0.647
+            ],
+            "element": "H",
+            "source_id": "structure-source-637"
+          },
+          {
+            "coordinates": [
+              0.5,
+              0.5,
+              0.5
+            ],
+            "element": "B",
+            "source_id": "structure-source-638"
+          },
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "element": "La",
+            "source_id": "structure-source-640"
+          }
+        ],
+        "cell_parameters": {
+          "a": 5.456,
+          "alpha": null,
+          "b": 5.456,
+          "beta": null,
+          "c": 5.456,
+          "gamma": null
+        },
+        "cell_source_ids": [
+          "structure-source-637",
+          "structure-source-630"
+        ],
+        "coordinate_mode": "fractional",
+        "length_unit": "angstrom",
+        "material": "LaBH8",
+        "position_unit": "dimensionless",
+        "pressure_value_gpa": 70,
+        "reason": "Page 47: separate LaBH8 geometry; coordinates copied without wrapping or rounding corrections.",
+        "source_ids": [
+          "structure-source-629",
+          "structure-source-636",
+          "structure-source-637",
+          "structure-source-638",
+          "structure-source-639",
+          "structure-source-640"
+        ],
+        "space_group_symbol": "Fm-3m",
+        "uncertainties": [
+          "Cell angles are not reported.",
+          "The H coordinates reduce modulo lattice translations to (0.353,0.352,0.353), not exactly equal components for the stated 32f site; values retained as printed."
+        ]
+      },
+      {
+        "angle_unit": "unknown",
+        "atoms": [
+          {
+            "coordinates": [
+              0.338,
+              -0.338,
+              0.162
+            ],
+            "element": "H",
+            "source_id": "structure-source-642"
+          },
+          {
+            "coordinates": [
+              0.5,
+              0.5,
+              0.5
+            ],
+            "element": "B",
+            "source_id": "structure-source-643"
+          },
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "element": "La",
+            "source_id": "structure-source-645"
+          }
+        ],
+        "cell_parameters": {
+          "a": 5.582,
+          "alpha": null,
+          "b": 5.582,
+          "beta": null,
+          "c": 5.582,
+          "gamma": null
+        },
+        "cell_source_ids": [
+          "structure-source-642",
+          "structure-source-630"
+        ],
+        "coordinate_mode": "fractional",
+        "length_unit": "angstrom",
+        "material": "LaAlH8",
+        "position_unit": "dimensionless",
+        "pressure_value_gpa": 100,
+        "reason": "Page 47 image confirms LaAlH8 heading but B in the actual 4b atom row; copied B rather than silently replacing it by Al.",
+        "source_ids": [
+          "structure-source-629",
+          "structure-source-641",
+          "structure-source-642",
+          "structure-source-643",
+          "structure-source-644",
+          "structure-source-645"
+        ],
+        "space_group_symbol": "Fm-3m",
+        "uncertainties": [
+          "Cell angles are not reported.",
+          "Material heading LaAlH8 conflicts with the printed B atom in structure-source-643; intended 4b element is unresolved."
+        ]
+      }
+    ],
+    "uncertainties": []
+  },
+  "catalog": {
+    "structure-source-629": {
+      "source_id": "structure-source-629",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-c72604ac11c0872eef1461f2ec0ad574",
+      "bbox": [
+        118.07999420166016,
+        150.4799041748047,
+        408.6371154785156,
+        166.6439666748047
+      ],
+      "content": "Pressure parameters (fractional)"
+    },
+    "structure-source-630": {
+      "source_id": "structure-source-630",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-9a82fbc60987ce98925dd98748adaa60",
+      "bbox": [
+        240.239990234375,
+        174.95994567871094,
+        256.83599853515625,
+        191.1239471435547
+      ],
+      "content": "(Å)"
+    },
+    "structure-source-631": {
+      "source_id": "structure-source-631",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-356c08df969370472756b3bb632ae22a",
+      "bbox": [
+        99.83999633789062,
+        185.55596923828125,
+        173.6999969482422,
+        254.927978515625
+      ],
+      "content": "Fm3തm-LaBeH8"
+    },
+    "structure-source-632": {
+      "source_id": "structure-source-632",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-67b15162464657dc3cea91f5a828aba9",
+      "bbox": [
+        207.59999084472656,
+        199.9199676513672,
+        509.6759948730469,
+        216.08396911621094
+      ],
+      "content": "a = b = c = 5.643 H 0.351 -0.351 -0.351 32f"
+    },
+    "structure-source-633": {
+      "source_id": "structure-source-633",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-0df4bbad1f2a664c87299073717c3869",
+      "bbox": [
+        320.0400085449219,
+        224.87998962402344,
+        507.72003173828125,
+        241.0439910888672
+      ],
+      "content": "Be 0.500 0.500 0.500 4b"
+    },
+    "structure-source-634": {
+      "source_id": "structure-source-634",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-8510b32fca251a57ce6c77f48182c6a5",
+      "bbox": [
+        120.5999984741211,
+        237.11997985839844,
+        156.2880096435547,
+        253.2839813232422
+      ],
+      "content": "50 GPa"
+    },
+    "structure-source-635": {
+      "source_id": "structure-source-635",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-6586a15971d4cc4a04f79bfe8ae28cd2",
+      "bbox": [
+        320.0400390625,
+        249.8400115966797,
+        507.4080505371094,
+        266.0039978027344
+      ],
+      "content": "La 0.000 0.000 0.000 4a"
+    },
+    "structure-source-636": {
+      "source_id": "structure-source-636",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-9d3a4142e575d91fc458174afc7d5bfc",
+      "bbox": [
+        99.83999633789062,
+        260.43597412109375,
+        168.3000030517578,
+        329.8079833984375
+      ],
+      "content": "Fm3തm-LaBH8"
+    },
+    "structure-source-637": {
+      "source_id": "structure-source-637",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-1891d7387b00c9b55eb1da9593759f2a",
+      "bbox": [
+        205.79998779296875,
+        274.7999572753906,
+        509.6759948730469,
+        290.9639587402344
+      ],
+      "content": "a = b = c = 5.456 H -0.647 0.352 -0.647 32f"
+    },
+    "structure-source-638": {
+      "source_id": "structure-source-638",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-82dfbb30f0acc7068b5547274a589aeb",
+      "bbox": [
+        320.0400085449219,
+        299.7599792480469,
+        507.72003173828125,
+        315.9239807128906
+      ],
+      "content": "B 0.500 0.500 0.500 4b"
+    },
+    "structure-source-639": {
+      "source_id": "structure-source-639",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-0f7c9665829aed9cb9f92c5d60f58887",
+      "bbox": [
+        120.5999984741211,
+        311.8799743652344,
+        156.2880096435547,
+        328.0439758300781
+      ],
+      "content": "70 GPa"
+    },
+    "structure-source-640": {
+      "source_id": "structure-source-640",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-1651ef062e3c6b6fffcbcabf8726473b",
+      "bbox": [
+        320.0400390625,
+        324.5999755859375,
+        507.4080505371094,
+        340.76397705078125
+      ],
+      "content": "La 0.000 0.000 0.000 4a"
+    },
+    "structure-source-641": {
+      "source_id": "structure-source-641",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-f23264a54a0c8dbf03ce834b6cdec245",
+      "bbox": [
+        99.83999633789062,
+        335.19598388671875,
+        172.3800048828125,
+        404.5679626464844
+      ],
+      "content": "Fm3തm-LaAlH8"
+    },
+    "structure-source-642": {
+      "source_id": "structure-source-642",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-7d21d60783b6fe042d494dcba5b7d464",
+      "bbox": [
+        207.60000610351562,
+        349.5599670410156,
+        509.676025390625,
+        365.7239685058594
+      ],
+      "content": "a = b = c = 5.582 H 0.338 -0.338 0.162 32f"
+    },
+    "structure-source-643": {
+      "source_id": "structure-source-643",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-5aa6a31536034bf74dee0c2108fe9e19",
+      "bbox": [
+        320.0400085449219,
+        374.51995849609375,
+        507.72003173828125,
+        390.6839599609375
+      ],
+      "content": "B 0.500 0.500 0.500 4b"
+    },
+    "structure-source-644": {
+      "source_id": "structure-source-644",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-fc35e552b985ccf575da429758865b74",
+      "bbox": [
+        117.5999984741211,
+        386.7599792480469,
+        159.2880096435547,
+        402.9239807128906
+      ],
+      "content": "100 GPa"
+    },
+    "structure-source-645": {
+      "source_id": "structure-source-645",
+      "file_id": "25418226b3e84c98856ea3d1444371c1",
+      "pdf_page": 47,
+      "block_id": "pdf-row-87e0249b23e08a4545ae84721f5c72fe",
+      "bbox": [
+        320.0400390625,
+        399.4799499511719,
+        507.4080505371094,
+        415.6439514160156
+      ],
+      "content": "La 0.000 0.000 0.000 4a"
+    }
+  },
+  "imaged_pages": [
+    47,
+    48,
+    49,
+    35
+  ],
+  "source": {
+    "file_id": "25418226b3e84c98856ea3d1444371c1",
+    "role": "supplementary",
+    "filename": "2021 La-Be-H AXH8 Supplimentary.pdf",
+    "pages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51
+    ],
+    "sha256": "ddba2ed32ba40e42834284d634ef59642de26e2962d606c28a116701f6110f42"
+  }
+}
