@@ -1,0 +1,2152 @@
+EEEEEEEEEEEEE                                                            [100%]
+==================================== ERRORS ====================================
+_______ ERROR at setup of test_pending_rewrite_keeps_revision_and_status _______
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+___ ERROR at setup of test_rewrite_deletes_in_dependency_order_and_rebuilds ____
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+____________ ERROR at setup of test_rewrite_reuses_validation_rules ____________
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+_ ERROR at setup of test_rewrite_rejects_experimental_tc_calculation_context_without_partial_write _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+_____ ERROR at setup of test_review_paper_can_save_without_material_states _____
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+________ ERROR at setup of test_rewrite_does_not_touch_shared_catalogs _________
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+_____ ERROR at setup of test_approved_rewrite_bumps_revision_and_withdraws _____
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+_______ ERROR at setup of test_bump_cascades_revision_to_lineage_tables ________
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+_ ERROR at setup of test_approved_rewrite_reextracts_references_for_new_revision _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+__________ ERROR at setup of test_bump_writes_modified_history_event ___________
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+_ ERROR at setup of test_replaying_saved_scientific_draft_does_not_write_history _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+_________ ERROR at setup of test_failed_rewrite_rolls_back_everything __________
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+______________ ERROR at setup of test_rejected_paper_returns_409 _______________
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+>           yield
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:207:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:426: in _upgrade_revs
+    for script in reversed(list(revs))
+                           ^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:807: in iterate_revisions
+    revisions, heads = fn(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1440: in _collect_upgrade_revisions
+    for rev in self._parse_upgrade_target(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:1227: in _parse_upgrade_target
+    return self.get_revisions(target)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:537: in get_revisions
+    resolved_id, branch_label = self._resolve_revision_number(id_)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:771: in _resolve_revision_number
+    current_head = self.get_current_head(branch_label)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.revision.RevisionMap object at 0x107ee7a10>
+branch_label = None
+
+    def get_current_head(self, branch_label: str | None = None) -> str | None:
+        """Return the current head revision.
+
+        If the script directory has multiple heads
+        due to branching, an error is raised;
+        :meth:`.ScriptDirectory.get_heads` should be
+        preferred.
+
+        :param branch_label: optional branch name which will limit the
+         heads considered to those which include that branch_label.
+
+        :return: a string revision number.
+
+        .. seealso::
+
+            :meth:`.ScriptDirectory.get_heads`
+
+        """
+        current_heads: Sequence[str] = self.heads
+        if branch_label:
+            current_heads = self.filter_for_lineage(
+                current_heads, branch_label
+            )
+        if len(current_heads) > 1:
+>           raise MultipleHeads(
+                current_heads,
+                "%s@head" % branch_label if branch_label else "head",
+            )
+E           alembic.script.revision.MultipleHeads: Multiple heads are present for given argument 'head'; 20261102_0160, 20261102_0204
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/revision.py:501: MultipleHeads
+
+The above exception was the direct cause of the following exception:
+
+    @pytest.fixture(scope="module")
+    def migrated_engine():
+        database_url = _fresh_url
+        engine = create_engine(database_url, future=True)
+        _drop_all(engine)
+>       command.upgrade(_config(database_url), "head")
+
+backend/tests/test_scientific_draft_rewrite.py:272:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:487: in upgrade
+    script.run_env()
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:550: in run_env
+    util.load_python_file(self.dir, "env.py")
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:114: in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/util/pyfiles.py:132: in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap_external>:999: in exec_module
+    ???
+<frozen importlib._bootstrap>:488: in _call_with_frames_removed
+    ???
+alembic/env.py:55: in <module>
+    run_migrations_online()
+alembic/env.py:49: in run_migrations_online
+    context.run_migrations()
+<string>:8: in run_migrations
+    ???
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/environment.py:970: in run_migrations
+    self.get_context().run_migrations(**kw)
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/runtime/migration.py:604: in run_migrations
+    for step in self._migrations_fn(heads, self):
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/command.py:476: in upgrade
+    return script._upgrade_revs(revision, rev)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:414: in _upgrade_revs
+    with self._catch_revision_errors(
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:158: in __exit__
+    self.gen.throw(value)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <alembic.script.base.ScriptDirectory object at 0x107ee6180>
+ancestor = 'Destination %(end)s is not a valid upgrade target from current head(s)'
+multiple_heads = "Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads"
+start = None, end = 'head', resolution = None
+
+    @contextmanager
+    def _catch_revision_errors(
+        self,
+        ancestor: str | None = None,
+        multiple_heads: str | None = None,
+        start: str | None = None,
+        end: str | None = None,
+        resolution: str | None = None,
+    ) -> Iterator[None]:
+        try:
+            yield
+        except revision.RangeNotAncestorError as rna:
+            if start is None:
+                start = cast(Any, rna.lower)
+            if end is None:
+                end = cast(Any, rna.upper)
+            if not ancestor:
+                ancestor = (
+                    "Requested range %(start)s:%(end)s does not refer to "
+                    "ancestor/descendant revisions along the same branch"
+                )
+            ancestor = ancestor % {"start": start, "end": end}
+            raise util.CommandError(ancestor) from rna
+        except revision.MultipleHeads as mh:
+            if not multiple_heads:
+                multiple_heads = (
+                    "Multiple head revisions are present for given "
+                    "argument '%(head_arg)s'; please "
+                    "specify a specific target revision, "
+                    "'<branchname>@%(head_arg)s' to "
+                    "narrow to a specific head, or 'heads' for all heads"
+                )
+            multiple_heads = multiple_heads % {
+                "head_arg": end or mh.argument,
+                "heads": util.format_as_comma(mh.heads),
+            }
+>           raise util.CommandError(multiple_heads) from mh
+E           alembic.util.exc.CommandError: Multiple head revisions are present for given argument 'head'; please specify a specific target revision, '<branchname>@head' to narrow to a specific head, or 'heads' for all heads
+
+/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/alembic/script/base.py:233: CommandError
+=========================== short test summary info ============================
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_pending_rewrite_keeps_revision_and_status
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_rewrite_deletes_in_dependency_order_and_rebuilds
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_rewrite_reuses_validation_rules
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_rewrite_rejects_experimental_tc_calculation_context_without_partial_write
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_review_paper_can_save_without_material_states
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_rewrite_does_not_touch_shared_catalogs
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_approved_rewrite_bumps_revision_and_withdraws
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_bump_cascades_revision_to_lineage_tables
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_approved_rewrite_reextracts_references_for_new_revision
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_bump_writes_modified_history_event
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_replaying_saved_scientific_draft_does_not_write_history
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_failed_rewrite_rolls_back_everything
+ERROR backend/tests/test_scientific_draft_rewrite.py::test_rejected_paper_returns_409
+13 errors in 0.91s

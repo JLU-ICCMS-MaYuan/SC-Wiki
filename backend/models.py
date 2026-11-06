@@ -994,6 +994,7 @@ class PaperReferenceExtraction(Base):
     status = Column(String(20), nullable=False)
     parser_name = Column(String(32), nullable=False, default="grobid", server_default="grobid")
     parser_version = Column(String(64))
+    matching_snapshot = Column(JSON)
     error_message = Column(Text)
     processed_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
@@ -1018,7 +1019,7 @@ class PaperReference(Base):
             name="ck_paper_references_match_status",
         ),
         CheckConstraint(
-            "match_method IS NULL OR match_method IN ('doi', 'title_year', 'manual')",
+            "match_method IS NULL OR match_method IN ('doi', 'title_year', 'manual', 'llm2')",
             name="ck_paper_references_match_method",
         ),
         CheckConstraint(
@@ -1052,6 +1053,7 @@ class PaperReference(Base):
     cited_paper_id = Column(Integer, ForeignKey("papers.id", ondelete="RESTRICT"), nullable=True)
     match_status = Column(String(20), nullable=False, default="unmatched", server_default="unmatched")
     match_method = Column(String(20))
+    match_evidence = Column(JSON)
     match_checked_at = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     updated_at = Column(
@@ -1067,6 +1069,15 @@ class PaperReference(Base):
         foreign_keys=[paper_id],
     )
     cited_paper = relationship("Paper", foreign_keys=[cited_paper_id])
+
+
+class CitationMatchCache(Base):
+    """已完成模型决定及失败回执；与用户工作稿分离，不保存凭据。"""
+
+    __tablename__ = 'citation_match_cache'
+    cache_key = Column(String(64), primary_key=True)
+    payload = Column(JSON, nullable=False)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
 
 class PaperGraphMark(Base):

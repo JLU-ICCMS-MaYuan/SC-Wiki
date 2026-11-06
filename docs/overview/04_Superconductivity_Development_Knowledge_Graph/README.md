@@ -9,7 +9,7 @@
 | 小功能 | 职责 | 依赖 |
 | --- | --- | --- |
 | [超导知识图谱](superconductivity-knowledge-graph.md) | 分类概览、节点搜索、引用边和分页展开 | Go API、MySQL、vis-network |
-| [知识图谱数据同步](knowledge-graph-data-sync.md) | 上传时解析引用、提交保存、审核后匹配和历史重试 | Python Worker、GROBID、MySQL、Redis |
+| [知识图谱数据同步](knowledge-graph-data-sync.md) | 解析期程序/LLM2匹配、持久结果页、提交保存及批准后公开 | Python Worker、GROBID、MySQL、Redis |
 | [知识图谱边关系](knowledge-graph-edges.md) | 定义真实引用边、节点去重和被引计数 | `paper_references`、当前论文版本 |
 | [知识图谱节点标题](knowledge-graph-node-titles.md) | 提供节点短标题并在缺失时回退原标题 | `papers.knowledge_graph_title` |
 
@@ -18,7 +18,8 @@
 - `/knowledge` 支持 Material family 多选、常规/非常规 Superconductor type 组合筛选，以及标题或 DOI 搜索后固定节点。
 - 节点按 `paper_id` 去重，圆点大小按库内已审核下游论文的去重数量缩放。
 - 箭头方向为“引用论文 → 被引论文”。点击节点后，上游和下游分别按被引次数排序，每次最多请求 5 篇，并显示剩余数量。
-- 通过 GROBID 保存 DOI、题名、作者、年份和原始引文。未匹配引文保留在数据库，目标论文以后审核通过时自动重试。
+- 通过 GROBID 保存 DOI、题名、作者、年份和原始引文。第4步汇总后先由程序匹配明确身份，疑难候选固定交给LLM2批量核对并持久保存；解析页可打开独立三列结果页。公开图仍只读取MySQL。
+- 默认概览只展示图谱标题去空白后非空的当前已审核论文；搜索和展开仍可加入无短标题论文。固定网格初始坐标、直线和关闭物理模拟使节点停止漂移；拖动仅保留本页，刷新复位。
 - 管理员和超级管理员可以人工维护 `origin`（源头）与 `breakthrough`（突破）标记；系统不会用引用数自动认定里程碑。
 - 节点优先显示论文短标题，缺失时回退原标题；管理员可在论文编辑页修订短标题，具体生成规则与边界见[节点标题](knowledge-graph-node-titles.md)。
 
@@ -31,7 +32,7 @@ MySQL 是引用事实和公开图查询的唯一来源。旧 Neo4j 的其他论�
 ## 相关实现
 
 - Go API：`goserver/handlers/knowledge_graph.go`、`goserver/handlers/paper_graph_marks.go`
-- Python 解析与匹配：`backend/services/citation_graph.py`、`backend/ingest/upload_jobs.py`
+- Python 解析与匹配：`backend/services/citation_graph.py`、`backend/services/citation_matching.py`、`backend/ingest/upload_jobs.py`
 - 前端：`frontend/src/pages/KnowledgeGraphPage.tsx`
 - Schema：`alembic/versions/20260902_0004_paper_citation_graph.py`
-- 规格：[引用图谱 #81](../../specs/81-citation-graph/spec.md)、[节点标题 #70](../../specs/70-knowledge-graph-title/spec.md)
+- 规格：[引用图谱 #81](../../specs/81-citation-graph/spec.md)、[节点标题 #70](../../specs/70-knowledge-graph-title/spec.md)、[解析匹配与静态布局 #225](../../specs/225-citation-matching-and-static-graph/validation.md)

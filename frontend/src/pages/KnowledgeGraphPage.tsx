@@ -16,6 +16,7 @@ import { api } from '../lib/api'
 import { loadClassificationCatalogs, type ClassificationTerm } from '../lib/classifications'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
+import { allocateGraphPositions } from '../lib/citationGraphLayout'
 
 type SuperconductorKind = 'conventional' | 'unconventional' | 'unknown'
 type GraphDirection = 'upstream' | 'downstream'
@@ -88,6 +89,7 @@ const KnowledgeGraphPage: React.FC = () => {
   const nodesDs = useRef<DataSet<Record<string, unknown>>>(new DataSet([]))
   const edgesDs = useRef<DataSet<Record<string, unknown>>>(new DataSet([]))
   const graphNodes = useRef(new Map<number, GraphNode>())
+  const layoutColumns = useRef(3)
 
   const [catalogs, setCatalogs] = useState<ClassificationTerm[]>([])
   const [selectedFamilies, setSelectedFamilies] = useState<number[]>([])
@@ -106,28 +108,37 @@ const KnowledgeGraphPage: React.FC = () => {
   const [savingMarks, setSavingMarks] = useState(false)
 
   const addNodes = useCallback((items: GraphNode[]) => {
+    const existingNodes = nodesDs.current.get()
+    const newIDs = items.map(item => nodeKey(item.paper_id)).filter(id => !nodesDs.current.get(id))
+    const positions = allocateGraphPositions(newIDs, existingNodes.map(node => ({
+      x: Number(node.x), y: Number(node.y),
+    })), layoutColumns.current)
+    const updates: Record<string, unknown>[] = []
     for (const item of items) {
       graphNodes.current.set(item.paper_id, item)
       const id = nodeKey(item.paper_id)
       const existing = nodesDs.current.get(id)
-      nodesDs.current.update({
+      const label = item.label.trim() || item.title
+      updates.push({
         id,
-        label: item.label.length > 42 ? `${item.label.slice(0, 42)}...` : item.label,
+        label: label.length > 42 ? `${label.slice(0, 42)}...` : label,
         title: nodeTooltip(item),
         size: nodeSize(item.citation_count),
         color: nodeColor(item),
         borderWidth: item.marks.length ? 3 : 2,
         font: { color: '#172033', size: 12, face: 'Arial' },
-        ...(existing ? {} : { x: (Math.random() - 0.5) * 380, y: (Math.random() - 0.5) * 260 }),
+        ...(existing ? {} : positions.get(id)),
       })
     }
+    if (updates.length) nodesDs.current.update(updates)
   }, [])
 
   const addEdges = useCallback((items: GraphEdge[]) => {
+    const updates: Record<string, unknown>[] = []
     for (const item of items) {
       const id = edgeKey(item)
       if (!edgesDs.current.get(id)) {
-        edgesDs.current.add({
+        updates.push({
           id,
           from: nodeKey(item.citing_paper_id),
           to: nodeKey(item.cited_paper_id),
@@ -138,6 +149,7 @@ const KnowledgeGraphPage: React.FC = () => {
         })
       }
     }
+    if (updates.length) edgesDs.current.add(updates)
   }, [t])
 
   const selectPaper = useCallback((paperID: number) => {
@@ -150,12 +162,9 @@ const KnowledgeGraphPage: React.FC = () => {
     if (!containerRef.current) return undefined
     const network = new Network(containerRef.current, { nodes: nodesDs.current, edges: edgesDs.current }, {
       autoResize: true,
-      physics: {
-        solver: 'forceAtlas2Based',
-        forceAtlas2Based: { gravitationalConstant: -42, centralGravity: 0.008, springLength: 165, springConstant: 0.055 },
-        stabilization: { iterations: 140, fit: true },
-      },
-      edges: { smooth: { enabled: true, type: 'dynamic', roundness: 0.5 } },
+      physics: false,
+      layout: { improvedLayout: false },
+      edges: { smooth: false },
       nodes: { shape: 'dot', shadow: { enabled: true, color: 'rgba(15, 23, 42, 0.18)', size: 5, x: 1, y: 2 } },
       interaction: { hover: true, tooltipDelay: 120, zoomView: true, dragView: true },
     })
@@ -167,6 +176,11 @@ const KnowledgeGraphPage: React.FC = () => {
       } else {
         setSelectedNode(null)
       }
+    })
+    network.on('dragEnd', event => {
+      if (!event.nodes.length) return
+      const positions = network.getPositions(event.nodes)
+      nodesDs.current.update(event.nodes.map((id: string | number) => ({ id, ...positions[id] })))
     })
     networkRef.current = network
     return () => network.destroy()
@@ -188,6 +202,7 @@ const KnowledgeGraphPage: React.FC = () => {
     if (appliedKind) params.set('superconductor_kind', appliedKind)
     try {
       const data = await api.get<GraphOverview>(`/api/knowledge-graph/overview?${params}`)
+      layoutColumns.current = Math.max(1, Math.ceil(Math.sqrt(data.nodes.length)))
       graphNodes.current.clear()
       nodesDs.current.clear()
       edgesDs.current.clear()
@@ -196,7 +211,7 @@ const KnowledgeGraphPage: React.FC = () => {
       setSelectedNode(null)
       setRemaining({})
       setNextOffsets({})
-      networkRef.current?.fit({ animation: { duration: 220, easingFunction: 'easeInOutQuad' } })
+      networkRef.current?.fit({ animation: false })
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t('kg.graphLoadFailed'))
     } finally {
@@ -234,8 +249,10 @@ const KnowledgeGraphPage: React.FC = () => {
     const offset = nextOffsets[key] || 0
     setError('')
     try {
+      const visible = new URLSearchParams({ direction, offset: String(offset), limit: '5' })
+      graphNodes.current.forEach(node => visible.append('visible_paper_id', String(node.paper_id)))
       const data = await api.get<NeighborResponse>(
-        `/api/knowledge-graph/papers/${selectedNode.paper_id}/neighbors?direction=${direction}&offset=${offset}&limit=5`,
+        `/api/knowledge-graph/papers/${selectedNode.paper_id}/neighbors?${visible}`,
       )
       addNodes(data.nodes)
       addEdges(data.edges)

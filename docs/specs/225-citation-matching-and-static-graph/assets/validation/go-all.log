@@ -1,0 +1,373 @@
+ok  	scwiki/server	1.383s
+ok  	scwiki/server/cache	0.467s
+?   	scwiki/server/config	[no test files]
+?   	scwiki/server/database	[no test files]
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /reviews                  --> scwiki/server/handlers.TestReviewedPapersOwnershipLatestAndPagination.func1 (1 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /checked                  --> scwiki/server/handlers.TestReviewedPapersFollowCurrentStatusWithoutDuplicatePending.func1 (1 handlers)
+[GIN-debug] GET    /pending                  --> scwiki/server/handlers.GetPapers (1 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /checked                  --> scwiki/server/handlers.TestReviewedPapersFollowCurrentStatusWithoutDuplicatePending.func1 (1 handlers)
+[GIN-debug] GET    /pending                  --> scwiki/server/handlers.GetPapers (1 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /checked                  --> scwiki/server/handlers.TestReviewedPapersFollowCurrentStatusWithoutDuplicatePending.func1 (1 handlers)
+[GIN-debug] GET    /pending                  --> scwiki/server/handlers.GetPapers (1 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /checked                  --> scwiki/server/handlers.TestReviewedPapersFollowCurrentStatusWithoutDuplicatePending.func1 (1 handlers)
+[GIN-debug] GET    /pending                  --> scwiki/server/handlers.GetPapers (1 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /checked                  --> scwiki/server/handlers.TestReviewedPapersFollowCurrentStatusWithoutDuplicatePending.func1 (1 handlers)
+[GIN-debug] GET    /pending                  --> scwiki/server/handlers.GetPapers (1 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /checked                  --> scwiki/server/handlers.TestReviewedPapersFollowCurrentStatusWithoutDuplicatePending.func1 (1 handlers)
+[GIN-debug] GET    /pending                  --> scwiki/server/handlers.GetPapers (1 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /checked                  --> scwiki/server/handlers.TestReviewedPapersFollowCurrentStatusWithoutDuplicatePending.func1 (1 handlers)
+[GIN-debug] GET    /pending                  --> scwiki/server/handlers.GetPapers (1 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /checked                  --> scwiki/server/handlers.TestReviewedPapersFollowCurrentStatusWithoutDuplicatePending.func1 (1 handlers)
+[GIN-debug] GET    /pending                  --> scwiki/server/handlers.GetPapers (1 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /checked                  --> scwiki/server/handlers.TestReviewedPapersFollowCurrentStatusWithoutDuplicatePending.func1 (1 handlers)
+[GIN-debug] GET    /pending                  --> scwiki/server/handlers.GetPapers (1 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /checked                  --> scwiki/server/handlers.TestReviewedPapersFollowCurrentStatusWithoutDuplicatePending.func1 (1 handlers)
+[GIN-debug] GET    /pending                  --> scwiki/server/handlers.GetPapers (1 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /send                     --> scwiki/server/handlers.SendPasswordChangeCode (2 handlers)
+[GIN-debug] POST   /change                   --> scwiki/server/handlers.ChangePassword (2 handlers)
+[GIN-debug] GET    /profile                  --> scwiki/server/handlers.GetAccountProfile (2 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /send                     --> scwiki/server/handlers.SendPasswordChangeCode (2 handlers)
+[GIN-debug] POST   /change                   --> scwiki/server/handlers.ChangePassword (2 handlers)
+[GIN-debug] GET    /profile                  --> scwiki/server/handlers.GetAccountProfile (2 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /send                     --> scwiki/server/handlers.SendPasswordChangeCode (2 handlers)
+[GIN-debug] POST   /change                   --> scwiki/server/handlers.ChangePassword (2 handlers)
+[GIN-debug] GET    /profile                  --> scwiki/server/handlers.GetAccountProfile (2 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /send                     --> scwiki/server/handlers.SendPasswordChangeCode (2 handlers)
+[GIN-debug] POST   /change                   --> scwiki/server/handlers.ChangePassword (2 handlers)
+[GIN-debug] GET    /profile                  --> scwiki/server/handlers.GetAccountProfile (2 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /send                     --> scwiki/server/handlers.SendPasswordChangeCode (2 handlers)
+[GIN-debug] POST   /change                   --> scwiki/server/handlers.ChangePassword (2 handlers)
+[GIN-debug] GET    /profile                  --> scwiki/server/handlers.GetAccountProfile (2 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /send                     --> scwiki/server/handlers.SendPasswordChangeCode (2 handlers)
+[GIN-debug] POST   /change                   --> scwiki/server/handlers.ChangePassword (2 handlers)
+[GIN-debug] GET    /profile                  --> scwiki/server/handlers.GetAccountProfile (2 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /send                     --> scwiki/server/handlers.SendPasswordChangeCode (2 handlers)
+[GIN-debug] POST   /change                   --> scwiki/server/handlers.ChangePassword (2 handlers)
+[GIN-debug] GET    /profile                  --> scwiki/server/handlers.GetAccountProfile (2 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /send                     --> scwiki/server/handlers.SendPasswordChangeCode (2 handlers)
+[GIN-debug] POST   /change                   --> scwiki/server/handlers.ChangePassword (2 handlers)
+[GIN-debug] GET    /profile                  --> scwiki/server/handlers.GetAccountProfile (2 handlers)
+redis: 2026/11/07 00:17:32 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57704: connect: connection refused
+redis: 2026/11/07 00:17:32 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57704: connect: connection refused
+redis: 2026/11/07 00:17:33 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57704: connect: connection refused
+redis: 2026/11/07 00:17:33 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57704: connect: connection refused
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /send                     --> scwiki/server/handlers.SendPasswordChangeCode (2 handlers)
+[GIN-debug] POST   /change                   --> scwiki/server/handlers.ChangePassword (2 handlers)
+[GIN-debug] GET    /profile                  --> scwiki/server/handlers.GetAccountProfile (2 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /send                     --> scwiki/server/handlers.SendPasswordChangeCode (2 handlers)
+[GIN-debug] POST   /change                   --> scwiki/server/handlers.ChangePassword (2 handlers)
+[GIN-debug] GET    /profile                  --> scwiki/server/handlers.GetAccountProfile (2 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /send                     --> scwiki/server/handlers.SendPasswordChangeCode (2 handlers)
+[GIN-debug] POST   /change                   --> scwiki/server/handlers.ChangePassword (2 handlers)
+[GIN-debug] GET    /profile                  --> scwiki/server/handlers.GetAccountProfile (2 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /change                   --> scwiki/server/handlers.TestPasswordChangeRejectsRevokedInFlightSession.func1 (1 handlers)
+
+2026/11/07 00:17:33 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/admin_applications.go:27 UNIQUE constraint failed: admin_applications.user_id, admin_applications.pending_guard
+[0.027ms] [rows:0] INSERT INTO `admin_applications` (`user_id`,`real_name_snapshot`,`affiliation_snapshot`,`orcid_snapshot`,`research_interests_snapshot`,`status`,`pending_guard`,`reviewed_by_user_id`,`rejection_reason`,`submitted_at`,`withdrawn_at`,`reviewed_at`) VALUES (1,"申请人","吉林大学",NULL,(NULL),"pending",true,NULL,NULL,"2026-11-07 00:17:33.792",NULL,NULL) RETURNING `id`
+
+2026/11/07 00:17:33 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/manuscript_handoffs.go:18 no such table: scientific_work_drafts
+[0.004ms] [rows:0] SELECT count(*) FROM `scientific_work_drafts` WHERE target = "paper" AND target_id = "88"
+
+2026/11/07 00:17:33 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/manuscript_handoffs.go:18 no such table: scientific_work_drafts
+[0.003ms] [rows:0] SELECT count(*) FROM `scientific_work_drafts` WHERE target = "paper" AND target_id = "88"
+
+2026/11/07 00:17:33 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/manuscript_handoffs.go:18 no such table: scientific_work_drafts
+[0.003ms] [rows:0] SELECT count(*) FROM `scientific_work_drafts` WHERE target = "paper" AND target_id = "88"
+
+2026/11/07 00:17:33 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/manuscript_handoffs.go:18 no such table: scientific_work_drafts
+[0.002ms] [rows:0] SELECT count(*) FROM `scientific_work_drafts` WHERE target = "paper" AND target_id = "88"
+
+2026/11/07 00:17:33 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.015ms] [rows:0] SELECT * FROM `users` WHERE email = "researcher@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/07 00:17:33 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.031ms] [rows:0] SELECT * FROM `users` WHERE email = "failure@example.test" ORDER BY `users`.`id` LIMIT 1
+2026/11/07 00:17:33 注册用户写入数据库失败: forced create failure
+
+2026/11/07 00:17:33 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.021ms] [rows:0] SELECT * FROM `users` WHERE email = "resume@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/07 00:17:34 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.022ms] [rows:0] SELECT * FROM `users` WHERE email = "retry@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/07 00:17:34 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.018ms] [rows:0] SELECT * FROM `users` WHERE email = "banned@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/07 00:17:34 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:309 record not found
+[0.011ms] [rows:0] SELECT * FROM `users` WHERE email = "unknown@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/07 00:17:34 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.027ms] [rows:0] SELECT * FROM `users` WHERE email = "failure@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/07 00:17:34 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.023ms] [rows:0] SELECT * FROM `users` WHERE email = "failure@example.test" ORDER BY `users`.`id` LIMIT 1
+redis: 2026/11/07 00:17:34 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57790: connect: connection refused
+redis: 2026/11/07 00:17:35 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57790: connect: connection refused
+redis: 2026/11/07 00:17:35 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57790: connect: connection refused
+redis: 2026/11/07 00:17:36 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57790: connect: connection refused
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.073ms] [rows:0] SELECT * FROM `users` WHERE email = "preserve@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.026ms] [rows:0] SELECT * FROM `users` WHERE email = "password@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:117 no such table: community_answer_requests
+[0.007ms] [rows:-] SELECT sequence,context_snapshot FROM `community_answer_requests` WHERE answer_id = 2 AND turn_id IS NULL AND state = 'succeeded'
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:119 no such table: community_model_answers
+[0.004ms] [rows:-] SELECT first_sequence AS sequence FROM `community_model_answers` WHERE entry_id = 2
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:139 no such table: community_answer_turns
+[0.045ms] [rows:0] SELECT * FROM `community_answer_turns` WHERE entry_id = 2 ORDER BY id ASC
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:117 no such table: community_answer_requests
+[0.005ms] [rows:-] SELECT sequence,context_snapshot FROM `community_answer_requests` WHERE answer_id = 2 AND turn_id IS NULL AND state = 'succeeded'
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:119 no such table: community_model_answers
+[0.003ms] [rows:-] SELECT first_sequence AS sequence FROM `community_model_answers` WHERE entry_id = 2
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:139 no such table: community_answer_turns
+[0.003ms] [rows:0] SELECT * FROM `community_answer_turns` WHERE entry_id = 2 ORDER BY id ASC
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:117 no such table: community_answer_requests
+[0.006ms] [rows:-] SELECT sequence,context_snapshot FROM `community_answer_requests` WHERE answer_id = 2 AND turn_id IS NULL AND state = 'succeeded'
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:119 no such table: community_model_answers
+[0.003ms] [rows:-] SELECT first_sequence AS sequence FROM `community_model_answers` WHERE entry_id = 2
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:139 no such table: community_answer_turns
+[0.003ms] [rows:0] SELECT * FROM `community_answer_turns` WHERE entry_id = 2 ORDER BY id ASC
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:117 no such table: community_answer_requests
+[0.004ms] [rows:-] SELECT sequence,context_snapshot FROM `community_answer_requests` WHERE answer_id = 2 AND turn_id IS NULL AND state = 'succeeded'
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:119 no such table: community_model_answers
+[0.003ms] [rows:-] SELECT first_sequence AS sequence FROM `community_model_answers` WHERE entry_id = 2
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:139 no such table: community_answer_turns
+[0.043ms] [rows:0] SELECT * FROM `community_answer_turns` WHERE entry_id = 2 ORDER BY id ASC
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:179 record not found
+[0.010ms] [rows:0] SELECT * FROM `community_entries` WHERE id = 3 AND kind = 'answer' AND question_id = 2 ORDER BY `community_entries`.`id` LIMIT 1
+
+2026/11/07 00:17:36 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/community_ai.go:179 record not found
+[0.012ms] [rows:0] SELECT * FROM `community_entries` WHERE id = 1 AND kind = 'answer' AND question_id = 1 ORDER BY `community_entries`.`id` LIMIT 1
+redis: 2026/11/07 00:17:36 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57881: connect: connection refused
+redis: 2026/11/07 00:17:37 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57881: connect: connection refused
+redis: 2026/11/07 00:17:37 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57881: connect: connection refused
+redis: 2026/11/07 00:17:38 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57881: connect: connection refused
+redis: 2026/11/07 00:17:38 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57881: connect: connection refused
+redis: 2026/11/07 00:17:38 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57881: connect: connection refused
+redis: 2026/11/07 00:17:39 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57881: connect: connection refused
+redis: 2026/11/07 00:17:39 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57881: connect: connection refused
+redis: 2026/11/07 00:17:40 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57881: connect: connection refused
+redis: 2026/11/07 00:17:40 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57881: connect: connection refused
+redis: 2026/11/07 00:17:41 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57881: connect: connection refused
+redis: 2026/11/07 00:17:41 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:57881: connect: connection refused
+
+2026/11/07 00:17:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/material_state_export.go:67 record not found
+[0.024ms] [rows:0] SELECT * FROM `material_states` WHERE material_states.state_key = "1" AND material_states.paper_id = 4 AND material_states.paper_revision = 1 ORDER BY `material_states`.`id` LIMIT 1
+
+2026/11/07 00:17:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/material_state_export_test.go:177 UNIQUE constraint failed: property_modules.material_state_id, property_modules.module_code
+[0.024ms] [rows:0] INSERT INTO `property_modules` (`module_key`,`paper_id`,`paper_revision`,`material_state_id`,`module_code`,`definition_key`,`definition_version`,`display_order`,`metadata_json`) VALUES ("module-superconductive-2",4,1,2,"superconductive_properties","module.superconductive_properties",1,0,"{}") RETURNING `id`
+
+2026/11/07 00:17:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/news_feed.go:66 sql: database is closed
+[0.001ms] [rows:0] SELECT count(*) FROM `news_feed_items`
+
+2026/11/07 00:17:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/news.go:18 sql: database is closed
+[0.001ms] [rows:0] SELECT * FROM `news_items` ORDER BY event_date DESC
+
+2026/11/07 00:17:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/paper_deletion.go:87 no such table: main.papers
+[0.004ms] [rows:0] DELETE FROM `superconductor_properties` WHERE paper_id = 1
+
+2026/11/07 00:17:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/paper_deletion.go:194 record not found
+[0.034ms] [rows:0] SELECT * FROM `papers` WHERE `papers`.`id` = 99999 ORDER BY `papers`.`id` LIMIT 1
+--- FAIL: TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction (0.00s)
+    paper_evidence_manual_test.go:30: there is a remaining expectation which was not matched: ExpectedExec => expecting Exec or ExecContext which:
+          - matches sql: 'DELETE FROM scientific_evidence_checks'
+          - is with arguments:
+            0 - paper
+            1 - 29
+          - should return Result having:
+              LastInsertId: 0
+              RowsAffected: 1
+
+2026/11/07 00:17:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/manuscript_handoffs.go:18 no such table: scientific_work_drafts
+[0.004ms] [rows:0] SELECT count(*) FROM `scientific_work_drafts` WHERE target = "paper" AND target_id = "213"
+
+2026/11/07 00:17:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/password_reset.go:99 record not found
+[0.113ms] [rows:0] SELECT * FROM `users` WHERE email = "nobody@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/07 00:17:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/password_reset.go:149 record not found
+[0.014ms] [rows:0] SELECT * FROM `users` WHERE email = "nobody@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/07 00:17:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/password_reset.go:189 record not found
+[0.011ms] [rows:0] SELECT * FROM `users` WHERE email = "nobody@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/07 00:17:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/publication_stats.go:76 no such table: papers
+[0.018ms] [rows:-]
+SELECT f.id AS family_id, f.name_zh, COALESCE(f.name_en, '') AS name_en,
+       counts.year, COALESCE(counts.paper_count, 0) AS paper_count
+FROM material_families f
+LEFT JOIN (
+    SELECT pmf.material_family_id,
+           CASE WHEN p.year BETWEEN 1 AND 9999 THEN p.year ELSE NULL END AS year,
+           COUNT(DISTINCT p.id) AS paper_count
+    FROM papers p
+    JOIN paper_material_families pmf
+      ON pmf.paper_id = p.id AND pmf.paper_revision = p.content_revision
+    WHERE p.review_status = 'approved'
+    GROUP BY pmf.material_family_id,
+             CASE WHEN p.year BETWEEN 1 AND 9999 THEN p.year ELSE NULL END
+) counts ON counts.material_family_id = f.id
+UNION ALL
+SELECT 0 AS family_id, '未分类' AS name_zh, 'Unclassified' AS name_en,
+       CASE WHEN p.year BETWEEN 1 AND 9999 THEN p.year ELSE NULL END AS year,
+       COUNT(DISTINCT p.id) AS paper_count
+FROM papers p
+WHERE p.review_status = 'approved'
+  AND NOT EXISTS (
+      SELECT 1 FROM paper_material_families pmf
+      WHERE pmf.paper_id = p.id AND pmf.paper_revision = p.content_revision
+  )
+GROUP BY CASE WHEN p.year BETWEEN 1 AND 9999 THEN p.year ELSE NULL END
+redis: 2026/11/07 00:17:42 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58084: connect: connection refused
+redis: 2026/11/07 00:17:42 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58084: connect: connection refused
+redis: 2026/11/07 00:17:43 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58084: connect: connection refused
+redis: 2026/11/07 00:17:43 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58084: connect: connection refused
+redis: 2026/11/07 00:17:44 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58084: connect: connection refused
+redis: 2026/11/07 00:17:44 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58084: connect: connection refused
+redis: 2026/11/07 00:17:44 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58084: connect: connection refused
+redis: 2026/11/07 00:17:45 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58084: connect: connection refused
+redis: 2026/11/07 00:17:45 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58084: connect: connection refused
+redis: 2026/11/07 00:17:46 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58084: connect: connection refused
+redis: 2026/11/07 00:17:46 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58084: connect: connection refused
+redis: 2026/11/07 00:17:47 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58084: connect: connection refused
+
+2026/11/07 00:17:47 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.013ms] [rows:0] SELECT * FROM `users` WHERE email = "another@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/07 00:17:47 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/registration_username_test.go:39 UNIQUE constraint failed: users.username
+[0.025ms] [rows:0] INSERT INTO `users` (`email`,`username`,`username_change_allowed`,`password_hash`,`real_name`,`affiliation`,`avatar_key`,`orcid`,`research_interests`,`role`,`is_approved`,`is_email_verified`,`session_version`,`account_status`,`created_at`,`updated_at`,`approved_at`) VALUES ("direct@example.test","ExistingUser",false,"unused","",NULL,NULL,NULL,(NULL),"user",false,false,0,"active","2026-11-07 00:17:47.113","2026-11-07 00:17:47.113",NULL) RETURNING `id`
+
+2026/11/07 00:17:47 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.016ms] [rows:0] SELECT * FROM `users` WHERE email = "race@example.test" ORDER BY `users`.`id` LIMIT 1
+redis: 2026/11/07 00:17:47 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:48 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:48 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:48 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:49 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:49 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:50 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:50 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:51 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:51 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:51 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:52 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:52 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:53 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:53 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+redis: 2026/11/07 00:17:54 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:58663: connect: connection refused
+
+2026/11/07 00:17:54 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/username.go:222 audit unavailable
+[0.042ms] [rows:0] INSERT INTO `username_change_audit_events` (`target_user_id`,`changed_by_user_id`,`old_username`,`new_username`,`reason`,`created_at`) VALUES (9,1,'OldName','NewName','修正拼写','2026-11-07 00:17:54.098')
+FAIL
+FAIL	scwiki/server/handlers	23.641s
+ok  	scwiki/server/middleware	2.402s
+ok  	scwiki/server/models	2.882s
+ok  	scwiki/server/services	4.091s
+ok  	scwiki/server/storage	3.363s
+FAIL

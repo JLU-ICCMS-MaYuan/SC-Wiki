@@ -832,6 +832,7 @@ def _parse_partial_draft(text: str) -> dict[str, Any] | None:
     # 引用事实只能来自 GROBID。LLM 的流式草稿即使返回同名字段，也不能进入
     # Redis 或后续论文持久化流程。
     value.pop("citation_extraction", None)
+    value.pop('citation_matching', None)
     return value
 
 
@@ -1014,6 +1015,7 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
         "citation_extraction_status": state.get("citation_extraction_status"),
         "citation_extraction_error": state.get("citation_extraction_error"),
         "citation_reference_count": state.get("citation_reference_count", 0),
+        "citation_matching_status": state.get("citation_matching_status"),
         "files": [
             {key: file.get(key) for key in (
                 "file_id", "role", "original_filename", "upload_status", "extraction_status", "error",
@@ -1613,6 +1615,8 @@ def _normalize_draft(
     }
     if preserve_citation_extraction and '_parsing_workflow' in raw:
         normalized['_parsing_workflow'] = deepcopy(raw['_parsing_workflow'])
+    if preserve_citation_extraction and isinstance(raw.get('citation_matching'), dict):
+        normalized['citation_matching'] = deepcopy(raw['citation_matching'])
     for field in ("structural_extraction_version", "structural_extraction_issues"):
         if field in raw:
             normalized[field] = raw[field]
@@ -2683,6 +2687,9 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         })
         from .fixed_form_contract import finalize_current_draft
         finalize_current_draft(draft, model_output=True, legacy=not bool(document_set))
+        # #225：汇总/科学核对完成后匹配引用；只在解析执行中调用模型。
+        from backend.services.citation_matching import complete_upload_matching
+        complete_upload_matching(task_id, draft)
         publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='saving')
         # 已完成草稿的受控重跑必须保护期间的人工编辑；失败时保留原稿。
         expected_draft_hash = state.get("reparse_expected_draft_hash")

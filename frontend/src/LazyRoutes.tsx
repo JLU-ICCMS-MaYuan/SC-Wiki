@@ -12,6 +12,7 @@ const AdminPage = lazy(() => import('./pages/AdminWorkspacePage'))
 const AdminPaperEditPage = lazy(() => import('./pages/AdminPaperEditPage'))
 const UploadPage = lazy(() => import('./pages/UploadPage'))
 const UploadTaskPage = lazy(() => import('./pages/UploadTaskPage'))
+const CitationMatchingPage = lazy(() => import('./pages/CitationMatchingPage'))
 const PaperDetailPage = lazy(() => import('./pages/PaperDetailPage'))
 const SpectrumDetailPage = lazy(() => import('./pages/SpectrumDetailPage'))
 const StructuralRecordPage = lazy(() => import('./pages/StructuralRecordPage'))
@@ -56,6 +57,7 @@ const LazyRoutes: React.FC = () => (
     <Route path="/admin/community" element={<Spin><RoleRoute allow={['superadmin']}><CommunityModerationPage /></RoleRoute></Spin>} />
     <Route path="/upload" element={<Spin><UploadPage /></Spin>} />
     <Route path="/upload/tasks/:taskId" element={<Spin><UploadTaskPage /></Spin>} />
+    <Route path="/upload/tasks/:taskId/citation-matching" element={<Spin><RoleRoute allow={['user', 'admin', 'superadmin']}><CitationMatchingPage /></RoleRoute></Spin>} />
     {/* 论文可见性按论文状态与归属逐篇由后端裁决，因此不包裹 RoleRoute */}
     <Route path="/spectra/:collectionId" element={<Spin><SpectrumDetailPage /></Spin>} />
     <Route path="/papers/:id" element={<Spin><PaperDetailPage /></Spin>} />

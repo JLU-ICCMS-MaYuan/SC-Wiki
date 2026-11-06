@@ -1,0 +1,109 @@
+The CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.
+
+ RUN  v2.1.9 /private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/scwiki-citation-implementation-8if7ufao/isolated-head
+
+(node:91148) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ tests/01_decentralized_uploading/review-actions.test.tsx (12 tests | 12 failed) 4ms
+   × 'admin' 'quick' 'zh' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布 2ms
+     → Cannot read properties of undefined (reading 'setItem')
+     → Cannot read properties of undefined (reading 'clear')
+   × 'admin' 'quick' 'en' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布 0ms
+     → Cannot read properties of undefined (reading 'setItem')
+     → Cannot read properties of undefined (reading 'clear')
+   × 'admin' 'edit' 'zh' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布 0ms
+     → Cannot read properties of undefined (reading 'setItem')
+     → Cannot read properties of undefined (reading 'clear')
+   × 'admin' 'edit' 'en' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布 0ms
+     → Cannot read properties of undefined (reading 'setItem')
+     → Cannot read properties of undefined (reading 'clear')
+   × 'superadmin' 'quick' 'zh' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布 0ms
+     → Cannot read properties of undefined (reading 'setItem')
+     → Cannot read properties of undefined (reading 'clear')
+   × 'superadmin' 'quick' 'en' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布 0ms
+     → Cannot read properties of undefined (reading 'setItem')
+     → Cannot read properties of undefined (reading 'clear')
+   × 'superadmin' 'edit' 'zh' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布 0ms
+     → Cannot read properties of undefined (reading 'setItem')
+     → Cannot read properties of undefined (reading 'clear')
+   × 'superadmin' 'edit' 'en' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布 0ms
+     → Cannot read properties of undefined (reading 'setItem')
+     → Cannot read properties of undefined (reading 'clear')
+   × 'admin' 'quick' 拒绝直接退回作者；批准失败保留选择和本轮意见 0ms
+     → Cannot read properties of undefined (reading 'setItem')
+     → Cannot read properties of undefined (reading 'clear')
+   × 'admin' 'edit' 拒绝直接退回作者；批准失败保留选择和本轮意见 0ms
+     → Cannot read properties of undefined (reading 'setItem')
+     → Cannot read properties of undefined (reading 'clear')
+   × 'superadmin' 'quick' 拒绝直接退回作者；批准失败保留选择和本轮意见 0ms
+     → Cannot read properties of undefined (reading 'setItem')
+     → Cannot read properties of undefined (reading 'clear')
+   × 'superadmin' 'edit' 拒绝直接退回作者；批准失败保留选择和本轮意见 0ms
+     → Cannot read properties of undefined (reading 'setItem')
+     → Cannot read properties of undefined (reading 'clear')
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'admin' 'quick' 'zh' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'admin' 'quick' 'en' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'admin' 'edit' 'zh' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'admin' 'edit' 'en' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'superadmin' 'quick' 'zh' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'superadmin' 'quick' 'en' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'superadmin' 'edit' 'zh' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'superadmin' 'edit' 'en' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+TypeError: Cannot read properties of undefined (reading 'setItem')
+ ❯ host tests/01_decentralized_uploading/review-actions.test.tsx:32:31
+     30| afterEach(()=>{cleanup();vi.clearAllMocks();localStorage.clear()})
+     31| async function host(role:string,mode:string,lang:string){
+     32|  state.role=role;localStorage.setItem('sc-wiki.language',lang)
+       |                               ^
+     33|  render(<LanguageProvider><MemoryRouter initialEntries={[mode==='edit'…
+     34|  <Routes><Route path="/admin/papers/:id/edit" element={<AdminPaperEdit…
+ ❯ tests/01_decentralized_uploading/review-actions.test.tsx:45:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/24]⎯
+
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'admin' 'quick' 'zh' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'admin' 'quick' 'en' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'admin' 'edit' 'zh' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'admin' 'edit' 'en' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'superadmin' 'quick' 'zh' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'superadmin' 'quick' 'en' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'superadmin' 'edit' 'zh' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'superadmin' 'edit' 'en' 明确选择两种结果，旧意见不预填，原审核员可一次通过发布
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'admin' 'quick' 拒绝直接退回作者；批准失败保留选择和本轮意见
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'admin' 'edit' 拒绝直接退回作者；批准失败保留选择和本轮意见
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'superadmin' 'quick' 拒绝直接退回作者；批准失败保留选择和本轮意见
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'superadmin' 'edit' 拒绝直接退回作者；批准失败保留选择和本轮意见
+TypeError: Cannot read properties of undefined (reading 'clear')
+ ❯ tests/01_decentralized_uploading/review-actions.test.tsx:30:58
+     28|  vi.mocked(api.post).mockResolvedValue({write_epoch:'cycle',paper_head…
+     29| })
+     30| afterEach(()=>{cleanup();vi.clearAllMocks();localStorage.clear()})
+       |                                                          ^
+     31| async function host(role:string,mode:string,lang:string){
+     32|  state.role=role;localStorage.setItem('sc-wiki.language',lang)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/24]⎯
+
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'admin' 'quick' 拒绝直接退回作者；批准失败保留选择和本轮意见
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'admin' 'edit' 拒绝直接退回作者；批准失败保留选择和本轮意见
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'superadmin' 'quick' 拒绝直接退回作者；批准失败保留选择和本轮意见
+ FAIL  tests/01_decentralized_uploading/review-actions.test.tsx > 'superadmin' 'edit' 拒绝直接退回作者；批准失败保留选择和本轮意见
+TypeError: Cannot read properties of undefined (reading 'setItem')
+ ❯ host tests/01_decentralized_uploading/review-actions.test.tsx:32:31
+     30| afterEach(()=>{cleanup();vi.clearAllMocks();localStorage.clear()})
+     31| async function host(role:string,mode:string,lang:string){
+     32|  state.role=role;localStorage.setItem('sc-wiki.language',lang)
+       |                               ^
+     33|  render(<LanguageProvider><MemoryRouter initialEntries={[mode==='edit'…
+     34|  <Routes><Route path="/admin/papers/:id/edit" element={<AdminPaperEdit…
+ ❯ tests/01_decentralized_uploading/review-actions.test.tsx:62:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/24]⎯
+
+ Test Files  1 failed (1)
+      Tests  12 failed (12)
+   Start at  00:25:25
+   Duration  3.14s (transform 292ms, setup 0ms, collect 2.66s, tests 4ms, environment 217ms, prepare 42ms)

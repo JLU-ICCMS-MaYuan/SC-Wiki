@@ -47,7 +47,7 @@ func graphPaper(t *testing.T, db *gorm.DB, id uint, title string, status string,
 	year := 2000 + int(id)
 	approvedRevision := uint(1)
 	paper := models.Paper{
-		ID: id, Title: &title, Year: &year, ContentRevision: 1,
+		ID: id, Title: &title, KnowledgeGraphTitle: &title, Year: &year, ContentRevision: 1,
 		ReviewStatus: status, SuperconductorKind: kind,
 	}
 	if status == "approved" {

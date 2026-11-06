@@ -1,4 +1,10 @@
 export default {
+  viewMatching: 'View reference matching results', matchingTitle: 'Reference matching results',
+  matchingCiting: 'Library papers citing this work', matchingCurrent: 'Current paper', matchingReferences: 'References in this paper',
+  matchingHit: 'Matched library paper', matchingNoCiting: 'No library papers have been matched as citing this work', matchingNoReferences: 'No parsed references available',
+  matchingStale: 'Paper information or references have changed. These are the previous results; parse again to check current matches.',
+  matchingTargetStale: 'Some related papers or citations have changed and need to be checked again. Other matches remain valid.',
+  matchingUnavailable: 'Reference extraction is incomplete; citation matches are not available.', matchingLoadFailed: 'Could not load reference matching results',
   title: 'Superconductivity Citation Development Graph', description: 'Arrows point from a citing paper to its cited paper. Larger circles have more approved SC-Wiki citations.',
   mysqlSource: 'SC-Wiki citation facts', materialFamily: 'Material family', superconductorKind: 'Superconductor type', allKinds: 'All types', conventional: 'Conventional', unconventional: 'Unconventional', applyFilters: 'Apply filters', familyOption: '{name}',
   searchPaper: 'Search title or DOI', searchAction: 'Search papers', citationEdge: 'Citation',

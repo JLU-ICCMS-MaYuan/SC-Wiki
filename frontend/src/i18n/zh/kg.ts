@@ -1,4 +1,10 @@
 export default {
+  viewMatching: '查看参考文献匹配结果', matchingTitle: '参考文献匹配结果',
+  matchingCiting: '引用了当前论文的库内论文', matchingCurrent: '当前解析的论文', matchingReferences: '当前论文的参考文献',
+  matchingHit: '命中库内论文', matchingNoCiting: '尚未匹配到引用当前论文的库内论文', matchingNoReferences: '尚无已解析参考文献',
+  matchingStale: '论文信息或参考文献已变化，以下为上次结果；请重新解析后核对当前匹配。',
+  matchingTargetStale: '部分对应论文或引用已变化，这些命中需重新核对；其他匹配保持有效。',
+  matchingUnavailable: '参考文献提取未完成，暂不能判断引用匹配。', matchingLoadFailed: '参考文献匹配结果读取失败',
   title: '超导论文引用发展图谱', description: '箭头从引用论文指向被引论文；圆点越大，代表该论文在 SC-Wiki 内被更多已审核论文引用。',
   mysqlSource: '引用事实来自 SC-Wiki', materialFamily: '材料家族', superconductorKind: '超导类型', allKinds: '全部类型', conventional: '常规超导', unconventional: '非常规超导', applyFilters: '应用筛选', familyOption: '{name}',
   searchPaper: '按题名或 DOI 搜索论文', searchAction: '搜索论文', citationEdge: '引用关系',

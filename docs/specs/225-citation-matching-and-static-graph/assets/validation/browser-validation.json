@@ -1,0 +1,477 @@
+{
+  "results": [
+    {
+      "kind": "matching",
+      "width": 1600,
+      "references": 59,
+      "matched_references": 2,
+      "citing_papers": 1
+    },
+    {
+      "kind": "matching",
+      "width": 1600,
+      "references": 59,
+      "matched_references": 2,
+      "citing_papers": 1
+    },
+    {
+      "kind": "matching",
+      "width": 390,
+      "references": 59,
+      "matched_references": 2,
+      "citing_papers": 1
+    },
+    {
+      "kind": "permission",
+      "role": "other user",
+      "forbidden": true
+    },
+    {
+      "kind": "matching",
+      "width": 1600,
+      "references": 59,
+      "matched_references": 2,
+      "citing_papers": 1
+    },
+    {
+      "kind": "permission",
+      "role": "admin",
+      "allowed": true
+    },
+    {
+      "kind": "matching",
+      "width": 1600,
+      "references": 59,
+      "matched_references": 2,
+      "citing_papers": 1
+    },
+    {
+      "kind": "permission",
+      "role": "superadmin",
+      "allowed": true
+    },
+    {
+      "kind": "graph",
+      "idle_redraws": 0,
+      "nodes_before": 2,
+      "nodes_after_expansion": 4,
+      "visible_edges": 6,
+      "drag_persistent": true,
+      "repeat_drag": true,
+      "old_positions_preserved": true,
+      "refresh_restored": true
+    }
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa"
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/parsing"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/parsing"
+    },
+    {
+      "method": "GET",
+      "path": "/api/classification-catalogs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/space-groups"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/draft"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/space-groups"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/draft"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/evidence/summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/evidence/draft-revision"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/citation-matching"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/citation-matching"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/citation-matching"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/citation-matching"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/citation-matching"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/citation-matching"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/citation-matching"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/citation-matching"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/citation-matching"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/citation-matching"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/citation-matching"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/991aa500ef154c4f9a788b915d7c04aa/citation-matching"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/classification-catalogs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/knowledge-graph/overview"
+    },
+    {
+      "method": "GET",
+      "path": "/api/knowledge-graph/overview"
+    },
+    {
+      "method": "GET",
+      "path": "/api/knowledge-graph/papers/1208/neighbors"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/classification-catalogs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/knowledge-graph/overview"
+    },
+    {
+      "method": "GET",
+      "path": "/api/knowledge-graph/overview"
+    }
+  ],
+  "unexpected_writes": []
+}

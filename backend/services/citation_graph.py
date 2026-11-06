@@ -1,8 +1,6 @@
-"""Citation extraction, conservative matching, and lifecycle reconciliation.
+"""GROBID原始引文、正式引用持久化及当前审核版本投影。
 
-GROBID is the sole automatic source for bibliography records.  This module never
-uses an LLM or fuzzy similarity to create a citation edge: a missing match can
-be retried later, while an incorrect match would fabricate scientific history.
+#225的模型仅在上传解析期核对给定候选；提交、批准和公开读取复用有效依据。
 """
 
 from __future__ import annotations
@@ -11,7 +9,6 @@ from datetime import datetime, timezone
 import os
 from pathlib import Path
 import re
-import unicodedata
 from typing import Any
 from xml.etree import ElementTree
 
@@ -19,34 +16,17 @@ import httpx
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.models import Paper, PaperReference, PaperReferenceExtraction
+from backend.models import Paper, PaperReference, PaperReferenceExtraction, CitationMatchCache
+from backend.services.citation_matching import (
+    CitationCatalog, normalize_doi, normalize_title, paper_record, paper_signature, reference_signature,
+    related_reference_scope,
+)
 
 
 GROBID_DEFAULT_URL = "http://grobid:8070"
 GROBID_NAMESPACE = {"tei": "http://www.tei-c.org/ns/1.0"}
 GROBID_TIMEOUT_SECONDS = 90.0
 EXTRACTION_STATUSES = {"succeeded", "partial", "failed", "unavailable"}
-
-
-def normalize_doi(value: object) -> str | None:
-    """Return a stable DOI form without resolver prefixes or trailing punctuation."""
-    if not isinstance(value, str):
-        return None
-    normalized = value.strip().lower()
-    normalized = re.sub(r"^https?://(?:dx\.)?doi\.org/", "", normalized)
-    normalized = re.sub(r"^doi\s*:\s*", "", normalized)
-    normalized = normalized.strip(" \t\r\n.,;:)]}>\"")
-    return normalized or None
-
-
-def normalize_title(value: object) -> str | None:
-    """Normalize only superficial title formatting; this is not fuzzy matching."""
-    if not isinstance(value, str):
-        return None
-    normalized = unicodedata.normalize("NFKC", value).casefold()
-    normalized = re.sub(r"[^\w]+", " ", normalized, flags=re.UNICODE)
-    normalized = " ".join(normalized.split())
-    return normalized[:512] or None
 
 
 def _text(element: ElementTree.Element | None) -> str:
@@ -209,128 +189,160 @@ def _normalized_extraction(extraction: object) -> dict[str, Any]:
     }
 
 
-async def _match_reference(session: AsyncSession, reference: PaperReference) -> None:
-    """Match one reference by DOI, then unique title with non-conflicting year."""
-    candidates: list[Paper] = []
-    method: str | None = None
-    doi = normalize_doi(reference.doi)
-    if doi:
-        result = await session.execute(
-            select(Paper).where(
-                Paper.doi.is_not(None),
-                Paper.review_status == "approved",
-                Paper.approved_revision == Paper.content_revision,
-            )
-        )
-        candidates = [
-            paper for paper in result.scalars()
-            if normalize_doi(paper.doi) == doi
-        ]
-        method = "doi"
-    elif reference.normalized_title:
-        result = await session.execute(
-            select(Paper).where(
-                Paper.title.is_not(None),
-                Paper.review_status == "approved",
-                Paper.approved_revision == Paper.content_revision,
-            )
-        )
-        candidates = [
-            paper for paper in result.scalars()
-            if normalize_title(paper.title) == reference.normalized_title
-            and (reference.year is None or paper.year is None or reference.year == paper.year)
-        ]
-        method = "title_year"
+async def _catalog(session):
+    rows = await session.execute(select(Paper.id, Paper.title, Paper.doi, Paper.year,
+                                        Paper.authors, Paper.content_revision).where(
+        Paper.review_status == 'approved', Paper.approved_revision == Paper.content_revision))
+    return CitationCatalog([dict(row._mapping) for row in rows])
 
+
+def _reference_value(reference):
+    return {key: getattr(reference, key) for key in
+            ('reference_index', 'raw_citation', 'title', 'doi', 'year', 'authors')}
+
+
+def _apply_decision(reference, decision, catalog):
+    target = catalog.papers.get(decision.get('paper_id'))
+    if not target or decision.get('reference_signature') != reference_signature(_reference_value(reference)):
+        return False
+    if decision.get('candidate_signature') != paper_signature(target):
+        return False
+    if decision.get('method') not in ('doi', 'title_year', 'llm2'):
+        return False
+    if decision['method'] != 'llm2':
+        computed = catalog.decide(_reference_value(reference), exclude_id=reference.paper_id)
+        if computed['paper_id'] != target['paper_id'] or computed['method'] != decision['method']:
+            return False
+    reference.cited_paper_id = target['paper_id']
+    reference.match_status = 'matched'
+    reference.match_method = decision['method']
+    reference.match_evidence = decision
     reference.match_checked_at = datetime.now(timezone.utc)
-    if len(candidates) == 1:
-        reference.cited_paper_id = candidates[0].id
-        reference.match_status = "matched"
-        reference.match_method = method
-    else:
-        reference.cited_paper_id = None
-        reference.match_status = "ambiguous" if len(candidates) > 1 else "unmatched"
-        reference.match_method = None
+    return True
+
+
+async def _verified_decision(session, decision):
+    if not isinstance(decision, dict):
+        return None
+    if decision.get('method') != 'llm2':
+        return decision
+    # 草稿的只读元数据不能伪造服务端模型依据。
+    key = decision.get('cache_key')
+    cached = await session.get(CitationMatchCache, key) if key else None
+    payload = cached.payload if cached else {}
+    saved = payload.get('decision') or {}
+    if payload.get('state') != 'completed' or saved.get('method') != 'llm2':
+        return None
+    if saved.get('paper_id') not in (-1, decision.get('paper_id')):
+        return None
+    if any(saved.get(k) != decision.get(k) for k in
+           ('reference_signature', 'candidate_signature', 'model_tag', 'reason')):
+        return None
+    return {**saved, 'paper_id': decision['paper_id'], 'paper': decision.get('paper')}
+
+
+async def _match_reference(session: AsyncSession, reference: PaperReference, catalog=None) -> None:
+    catalog = catalog or await _catalog(session)
+    decision = catalog.decide(_reference_value(reference), exclude_id=reference.paper_id)
+    # 人工决定不被自动重试覆盖；目标仍须满足当前公开审核边界。
+    if reference.match_method == 'manual' and reference.cited_paper_id in catalog.papers:
+        return
+    if decision['paper_id'] is not None and _apply_decision(reference, decision, catalog):
+        return
+    if reference.match_method == 'llm2':
+        saved = await _verified_decision(session, reference.match_evidence)
+        if saved and _apply_decision(reference, saved, catalog):
+            return
+    reference.cited_paper_id = None
+    reference.match_status = 'ambiguous' if len(decision['candidates']) > 1 else 'unmatched'
+    reference.match_method = None
+    reference.match_evidence = None
+    reference.match_checked_at = datetime.now(timezone.utc)
 
 
 async def match_references_for_paper(session: AsyncSession, paper: Paper) -> None:
-    """Re-evaluate all current-version outbound references for one paper."""
-    result = await session.execute(
-        select(PaperReference).where(
-            PaperReference.paper_id == paper.id,
-            PaperReference.paper_revision == paper.content_revision,
-        )
-    )
+    result = await session.execute(select(PaperReference).where(
+        PaperReference.paper_id == paper.id, PaperReference.paper_revision == paper.content_revision))
+    catalog = await _catalog(session)
     for reference in result.scalars():
-        await _match_reference(session, reference)
+        await _match_reference(session, reference, catalog)
 
 
-async def persist_reference_extraction(
-    session: AsyncSession,
-    paper: Paper,
-    extraction: object,
-) -> None:
-    """Replace the current paper-version bibliography with one parsed GROBID result."""
+async def persist_reference_extraction(session: AsyncSession, paper: Paper, extraction: object,
+                                       matching_snapshot=None) -> None:
     data = _normalized_extraction(extraction)
-    await session.execute(
-        delete(PaperReference).where(
-            PaperReference.paper_id == paper.id,
-            PaperReference.paper_revision == paper.content_revision,
-        )
-    )
-    existing = await session.get(
-        PaperReferenceExtraction,
-        (paper.id, paper.content_revision),
-    )
+    old = (await session.scalars(select(PaperReference).where(
+        PaperReference.paper_id == paper.id, PaperReference.paper_revision == paper.content_revision))).all()
+    previous = {reference_signature(_reference_value(r)): r.match_evidence for r in old if r.match_evidence}
+    await session.execute(delete(PaperReference).where(
+        PaperReference.paper_id == paper.id, PaperReference.paper_revision == paper.content_revision))
+    existing = await session.get(PaperReferenceExtraction, (paper.id, paper.content_revision))
     if existing is None:
-        existing = PaperReferenceExtraction(
-            paper_id=paper.id,
-            paper_revision=paper.content_revision,
-            status=data["status"],
-            parser_name=data["parser_name"],
-            parser_version=data["parser_version"],
-            error_message=data["error_message"],
-            processed_at=datetime.now(timezone.utc),
-        )
+        existing = PaperReferenceExtraction(paper_id=paper.id, paper_revision=paper.content_revision)
         session.add(existing)
-    else:
-        existing.status = data["status"]
-        existing.parser_name = data["parser_name"]
-        existing.parser_version = data["parser_version"]
-        existing.error_message = data["error_message"]
-        existing.processed_at = datetime.now(timezone.utc)
-
-    for index, raw_reference in enumerate(data["references"]):
-        if not isinstance(raw_reference, dict):
+    existing.status = data['status']
+    existing.parser_name = data['parser_name']
+    existing.parser_version = data['parser_version']
+    existing.error_message = data['error_message']
+    existing.processed_at = datetime.now(timezone.utc)
+    if isinstance(matching_snapshot, dict):
+        existing.matching_snapshot = matching_snapshot
+    supplied = {r.get('reference_index', index): r.get('decision') for index, r in
+                enumerate((matching_snapshot or {}).get('references', []))}
+    catalog = await _catalog(session)
+    for index, raw in enumerate(data['references']):
+        if not isinstance(raw, dict) or not str(raw.get('raw_citation') or '').strip():
             continue
-        raw_citation = str(raw_reference.get("raw_citation") or "").strip()
-        if not raw_citation:
-            continue
-        reference = PaperReference(
-            paper_id=paper.id,
-            paper_revision=paper.content_revision,
-            reference_index=int(raw_reference.get("reference_index", index)),
-            raw_citation=raw_citation,
-            doi=normalize_doi(raw_reference.get("doi")),
-            title=(str(raw_reference["title"]).strip() if raw_reference.get("title") else None),
-            normalized_title=normalize_title(raw_reference.get("title") or raw_reference.get("normalized_title")),
-            authors=raw_reference.get("authors") if isinstance(raw_reference.get("authors"), list) else None,
-            year=(int(raw_reference["year"]) if isinstance(raw_reference.get("year"), int) else None),
-            match_status="unmatched",
-        )
+        reference = PaperReference(paper_id=paper.id, paper_revision=paper.content_revision,
+            reference_index=int(raw.get('reference_index', index)), raw_citation=str(raw['raw_citation']).strip(),
+            doi=normalize_doi(raw.get('doi')), title=str(raw['title']).strip() if raw.get('title') else None,
+            normalized_title=normalize_title(raw.get('title') or raw.get('normalized_title')),
+            authors=raw.get('authors') if isinstance(raw.get('authors'), list) else None,
+            year=raw.get('year') if isinstance(raw.get('year'), int) else None, match_status='unmatched')
+        decision = supplied.get(reference.reference_index) or previous.get(reference_signature(_reference_value(reference)))
+        verified = await _verified_decision(session, decision)
+        if verified:
+            _apply_decision(reference, verified, catalog)
         session.add(reference)
     await session.flush()
     await match_references_for_paper(session, paper)
 
 
 async def reconcile_after_paper_approval(session: AsyncSession, paper_id: int) -> None:
-    """Retry new paper's own references and all historic unmatched references."""
     paper = await session.get(Paper, paper_id)
-    if paper is None or paper.review_status != "approved" or paper.approved_revision != paper.content_revision:
+    if paper is None or paper.review_status != 'approved' or paper.approved_revision != paper.content_revision:
         return
+    catalog = await _catalog(session)
     await match_references_for_paper(session, paper)
-    result = await session.execute(
-        select(PaperReference).where(PaperReference.match_status.in_(("unmatched", "ambiguous")))
-    )
+    extraction = await session.get(PaperReferenceExtraction, (paper.id, paper.content_revision))
+    snapshot = extraction.matching_snapshot if extraction else None
+    if isinstance(snapshot, dict) and paper_signature(snapshot.get('paper') or {}) == paper_signature(catalog.papers[paper.id]):
+        for incoming in snapshot.get('downstream', []):
+            source = catalog.papers.get((incoming.get('paper') or {}).get('paper_id'))
+            if not source or paper_signature(source) != paper_signature(incoming.get('paper') or {}):
+                continue
+            reference = await session.scalar(select(PaperReference).where(
+                PaperReference.paper_id == (incoming.get('paper') or {}).get('paper_id'),
+                PaperReference.paper_revision == source['revision'],
+                PaperReference.reference_index == incoming.get('reference_index')))
+            if not source or reference is None or reference.paper_revision != source['revision']:
+                continue
+            if reference_signature(_reference_value(reference)) != incoming.get('reference_signature'):
+                continue
+            decision = {**incoming.get('decision', {}), 'paper_id': paper.id,
+                        'paper': catalog.papers[paper.id]}
+            verified = await _verified_decision(session, decision)
+            if verified:
+                _apply_decision(reference, verified, catalog)
+    # 目标升版或身份修订时，先核验原来指向它的关系，不能保留陈旧模型依据。
+    affected = await session.scalars(select(PaperReference).where(PaperReference.cited_paper_id == paper.id))
+    for reference in affected:
+        await _match_reference(session, reference, catalog)
+    result = await session.execute(select(PaperReference).join(Paper, Paper.id == PaperReference.paper_id).where(
+        PaperReference.match_status.in_(('unmatched', 'ambiguous')),
+        related_reference_scope(catalog.papers[paper.id]),
+        PaperReference.paper_revision == Paper.content_revision,
+        Paper.review_status == 'approved', Paper.approved_revision == Paper.content_revision))
     for reference in result.scalars():
-        await _match_reference(session, reference)
+        if catalog.decide(_reference_value(reference), exclude_id=reference.paper_id)['paper_id'] == paper.id:
+            await _match_reference(session, reference, catalog)

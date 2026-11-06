@@ -1,0 +1,32 @@
+{
+  "基线提交": "94d6408bb0b8f5be396ecdae9888fc971972eff6",
+  "初始测试基线": "ef0035504d2df97a5fe93a30f978a4ceb0f54f64",
+  "任务代码SHA256": {
+    "backend/services/citation_graph.py": "d716172586ca38a5b83659cc5889a679d079a689dc0c485944f02548bb55afc9",
+    "backend/services/citation_matching.py": "54a773cd5f9f3aa77ac3cdbdecc440f4015db8ac9486e791a51b864bf0883dce",
+    "backend/tests/test_citation_matching.py": "34d4a67369715a38a40c955f8866f43b219f169d8c847530c1054ca23204d4a5",
+    "backend/tests/test_citation_matching_lifecycle.py": "47c464ed88be9ecd94728e03a00a06c11601a96dc72213318edf00ac2bbfcc12",
+    "alembic/versions/20261106_0225_citation_matching.py": "aa5ce76cd80fa6352cdefae7c83b40d6a680d83d9543b112727ebe92ffa947c4",
+    "frontend/src/pages/KnowledgeGraphPage.tsx": "8052b0f59dea34ea48f3cdc7c0718f70f883ea9abcef2adc9c62b785c1bf20e6",
+    "frontend/src/pages/CitationMatchingPage.tsx": "7187dff3bc6a2e676edc96ee49d1512191fc6ecb68fcc43b8d2ddf7f255ecb57",
+    "frontend/src/lib/citationGraphLayout.ts": "dc7091fba964938524e9c55250d8d9948881033cc26afa8e8bd6bbebd676b49b",
+    "frontend/src/i18n/zh/kg.ts": "743b7e21eb103635dc2a52e58f60d2759be8f18885a4ae77d99fc78f3530026b",
+    "frontend/src/i18n/en/kg.ts": "e099f45f439555de2fc7e10ae0673edf8a8c5bc260e198d18074bc3d632dc043",
+    "frontend/src/LazyRoutes.tsx": "44b7861a8b3b7af60a6ded9c480db1d976b0e389092de55e508f1ab7c4a6ce81",
+    "goserver/handlers/knowledge_graph.go": "adda277f17f5514d9e05995334c7d8318ff2c6b14f14139b89964ef7d5a7473a",
+    "goserver/handlers/knowledge_graph_test.go": "fb895106f316c44a6f2f68fd42e55f35b3a3c11517fdb086c9d500fa0c731c54",
+    "goserver/handlers/citation_graph_225_test.go": "301f498405c2e92ae8a3a07edab7aee731a86a4f990bfd807d1417eac9beef8c",
+    "tests/03_data_search_and_database_discovery/citation-graph-225.test.tsx": "2def7035b0468f484a6e279b0b12ddd936e317a6e9846d48d44d523d38c654ae",
+    "backend/models.py": "78de6e4ce58d0cff747728145cac8860fa10e45a741a8e89238c2c693f7ad6fd",
+    "backend/api/rag.py": "bd607c7973ba7d492bd8b95edb552d8ef2f530de176128b0cb7b8ab3b8e63f43",
+    "backend/ingest/upload_jobs.py": "570349d9b75f683304f4849b93d1a7b52af3731746df80115d3633f4fb769201",
+    "backend/api/upload_tasks.py": "18b64facaf733c442f3d4837fd1be7bad386c5d62189aad59c4f1ef7c8f45c82",
+    "frontend/src/components/UploadParsingDetail.tsx": "bb9cfd371d165df6a2b976ef3af7ec73cd251f322a791a5550c31aa95a88076f"
+  },
+  "依赖文件SHA256": {
+    "backend/ingest/model_memory.py": "bd99ff0571439ff92b6c08539bf1d32f7d9b1a73084f5e814fa1047a9d354723",
+    "backend/ingest/model_runtime.py": "2db543a66881ef674db222800f904f28adc30ddde1b1741c541c5559f4fe34bb",
+    "backend/ingest/scientific_form_filling.py": "c05082273de22cc0bd97ad4c891a72f9929e3cb876c3168f1e169f7ee3264d44"
+  },
+  "说明": "20项本任务代码与隔离全栈验收字节相同；纳入两次新基线依赖后追加58项匹配、运行器、记忆及科学填写回归。"
+}

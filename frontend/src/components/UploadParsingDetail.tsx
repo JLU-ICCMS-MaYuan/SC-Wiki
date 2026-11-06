@@ -43,6 +43,7 @@ interface ParsingDetail {
   preview_phase?: string | null
   citation_extraction_status?: CitationExtractionStatus | null
   citation_extraction_error?: string | null
+  citation_matching_status?: string | null
   citation_reference_count?: number
   summary: { status: string; completed: number; total: number }
   next_poll_ms: number | null
@@ -156,6 +157,12 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
               </Typography>
               {detail.citation_extraction_error && <Alert severity="info" sx={{ mt: 1 }}>{detail.citation_extraction_error}</Alert>}
             </Box>
+          )}
+          {detail.status === 'ready' && ['completed', 'unavailable'].includes(detail.citation_matching_status || '') && (
+            <Button component="a" href={`/upload/tasks/${taskId}/citation-matching`}
+              target="_blank" rel="noopener noreferrer" variant="outlined" sx={{ mb: 2 }}>
+              {t('kg.viewMatching')}
+            </Button>
           )}
           <Tabs
             value={tab}

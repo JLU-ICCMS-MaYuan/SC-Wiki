@@ -1,0 +1,302 @@
+{
+  "same_single_reference_prompts_and_schema": true,
+  "single_reference": {
+    "llm2-single": {
+      "model": "gpt-6.1-sol",
+      "calls": 211,
+      "valid_items": 211,
+      "matched_true_edges": 6,
+      "false_positive": 0,
+      "false_negative": 0,
+      "prompt_tokens": 129456,
+      "completion_tokens": 7180,
+      "total_tokens": 136636,
+      "usage_receipts": 211,
+      "errors": [],
+      "run_meta": {
+        "protocol": "single-reference-json-schema",
+        "concurrency": 4,
+        "elapsed_seconds": 213.971,
+        "items": 211
+      }
+    },
+    "local-fp8-single": {
+      "model": "Qwen/Qwen3-4B-Instruct-2507-FP8",
+      "calls": 211,
+      "valid_items": 211,
+      "matched_true_edges": 6,
+      "false_positive": 2,
+      "false_negative": 0,
+      "prompt_tokens": 127327,
+      "completion_tokens": 4020,
+      "total_tokens": 131347,
+      "usage_receipts": 211,
+      "errors": [
+        {
+          "reference_id": 307,
+          "expected": null,
+          "actual": 1429,
+          "reason": "题名与作者均匹配"
+        },
+        {
+          "reference_id": 1265,
+          "expected": null,
+          "actual": 1204,
+          "reason": "题名和作者匹配，均为氢硫化物高压研究"
+        }
+      ],
+      "run_meta": {
+        "protocol": "single-reference-json-schema",
+        "concurrency": 4,
+        "elapsed_seconds": 112.983,
+        "items": 211
+      }
+    }
+  },
+  "batch_llm2": {
+    "model": "gpt-6.1-sol",
+    "calls": 15,
+    "items": 211,
+    "expected_positive": 6,
+    "true_positive": 6,
+    "false_positive": 0,
+    "false_negative": 0,
+    "errors": [],
+    "elapsed_seconds": 207.712,
+    "prompt_tokens": 29867,
+    "completion_tokens": 7301
+  },
+  "batch_local": {
+    "batches": 15,
+    "valid_batches": 10,
+    "attempted_references": 211,
+    "returned_references": 156,
+    "missing_ids": [
+      342,
+      344,
+      345,
+      346,
+      347,
+      348,
+      349,
+      350,
+      351,
+      352,
+      355,
+      356,
+      357,
+      1177,
+      1178,
+      1179,
+      1180,
+      1181,
+      1182,
+      1183,
+      1184,
+      1185,
+      1186,
+      1188,
+      1189,
+      1190,
+      1191,
+      1192,
+      1193,
+      1194,
+      1195,
+      1196,
+      1197,
+      1198,
+      1199,
+      1200,
+      1201,
+      1202,
+      1203,
+      1205,
+      1206,
+      1207,
+      1208,
+      1278,
+      1280,
+      1281,
+      1282,
+      1284,
+      1286,
+      1287,
+      1289,
+      1290,
+      1291,
+      1292,
+      1293
+    ],
+    "duplicate_ids": [],
+    "invalid_candidate_ids": [
+      {
+        "reference_id": 298,
+        "paper_id": 308,
+        "reason": "原始引文为I A Troyan关于YH6的异常高温超导性，与候选文献1429（H Liu等，2017）作者和主题部分重合，但YH6与La/YH6不同，且年份和作者不完全一致，不构成身份匹配"
+      },
+      {
+        "reference_id": 300,
+        "paper_id": 308,
+        "reason": "原始引文为E Snider关于钇超氢化物在262 K超导，与候选文献1429（H Liu等，2017）主题相关，但作者和年份不一致，不构成身份匹配"
+      }
+    ],
+    "true_positive_in_raw": 6,
+    "false_positive_in_raw": [
+      {
+        "reference_id": 1176,
+        "actual": 1208,
+        "reason": "标题和作者部分匹配：Zha, Liu, Hemley (2012) 关于高压氢红外测量，候选中1208（Wang等，2012）为同一年份且主题相关，但作者不完全一致，且标题不同，不构成身份匹配"
+      },
+      {
+        "reference_id": 1204,
+        "actual": 1429,
+        "reason": "作者N W Ashcroft和Hanyu Liu在原始引文中出现，且标题涉及氢化物超导，与候选论文《Potential high-Tc superconducting lanthanum and yttrium hydrides at high pressure》主题和作者匹配"
+      },
+      {
+        "reference_id": 1227,
+        "actual": 271,
+        "reason": "作者Y Ma和L Zhu在候选271中出现，且均涉及高压氢化物结构预测，主题相关且作者重合"
+      },
+      {
+        "reference_id": 1238,
+        "actual": 271,
+        "reason": "作者Lv J, Wang Y, Zhu L, Ma Y，与候选271作者部分重合，且均涉及高压锂/氢化物结构预测"
+      },
+      {
+        "reference_id": 1258,
+        "actual": 1208,
+        "reason": "作者Tse JS、Tanaka K与候选1208一致，主题为SnH4高压超导，标题相近"
+      },
+      {
+        "reference_id": 1265,
+        "actual": 1204,
+        "reason": "标题涉及H2S的金属化和超导性，作者含Y Li和Y Ma，年份2014匹配"
+      },
+      {
+        "reference_id": 1279,
+        "actual": 1208,
+        "reason": "作者H Liu和H Wang及Y Ma在2012年发表的论文标题为'Quasi-molecular and atomic phases of dense solid hydrogen'，与候选题名'Superconductive sodalite-like clathrate calcium hydride at high pressures'主题不同，但作者和年份匹配，且均涉及高压氢相关研究，但内容不一致，不构成同一论文。"
+      },
+      {
+        "reference_id": 1288,
+        "actual": 1204,
+        "reason": "Papaconstantopoulos等人2015年关于cubic H3S在200 GPa下作为原子氢超导体的论文，与候选题名'Pressure-induced metallization of dense (H2S)2H2 with high-Tc superconductivity'在高压氢超导主题上高度相关，且均涉及H2S体系，作者和年份不完全匹配，但内容主题相近，但非同一论文。"
+      },
+      {
+        "reference_id": 296,
+        "actual": 1208,
+        "reason": "原始引文提及钙氢化物CaH6在172 GPa下达到215 K超导，与候选文献1208（Wang等，2012）主题相近，但年份和具体材料不一致，且候选文献为2012年，原始引文为2022年，不匹配"
+      },
+      {
+        "reference_id": 298,
+        "actual": 308,
+        "reason": "原始引文为I A Troyan关于YH6的异常高温超导性，与候选文献1429（H Liu等，2017）作者和主题部分重合，但YH6与La/YH6不同，且年份和作者不完全一致，不构成身份匹配"
+      },
+      {
+        "reference_id": 300,
+        "actual": 308,
+        "reason": "原始引文为E Snider关于钇超氢化物在262 K超导，与候选文献1429（H Liu等，2017）主题相关，但作者和年份不一致，不构成身份匹配"
+      },
+      {
+        "reference_id": 301,
+        "actual": 1429,
+        "reason": "原始引文为M Somayazulu关于镧超氢化物在兆巴压力下超导性超过260 K，与候选文献1429（H Liu等，2017）标题和主题高度一致，作者和年份匹配，为同一研究"
+      },
+      {
+        "reference_id": 304,
+        "actual": 1204,
+        "reason": "原始引文为Y Li等关于氢硫化物的金属化与超导性，与候选文献1204（Duan等，2014）标题和内容高度一致，作者为Y Li、J Hao、H Liu等，与Duan等不同，但标题和主题一致，且年份均为2014，应为同一研究的不同版本或作者差异，但作者不完全匹配，不构成身份核对"
+      },
+      {
+        "reference_id": 318,
+        "actual": 1429,
+        "reason": "引文涉及LaBeH8在80 GPa下110 K超导，候选1429标题为La和Y氢化物在高压下潜在高Tc超导，主题和体系相近，但未明确对应，且作者不一致，不构成身份匹配"
+      },
+      {
+        "reference_id": 319,
+        "actual": 1429,
+        "reason": "引文为CaYH12在高压下潜在高Tc超导，候选1429标题涉及La和Y氢化物，体系相似，但非完全一致，不构成身份匹配"
+      },
+      {
+        "reference_id": 322,
+        "actual": 1208,
+        "reason": "引文为Yb/Lu取代笼状六氢化物在中压下室温超导，候选1208为钙氢化物在高压下超导，体系不同，不构成身份匹配"
+      },
+      {
+        "reference_id": 324,
+        "actual": 1429,
+        "reason": "引文为La-Y三元氢化物在253 K超导，候选1429标题涉及La和Y氢化物在高压下潜在高Tc超导，体系一致，主题匹配，可视为对应"
+      },
+      {
+        "reference_id": 328,
+        "actual": 1429,
+        "reason": "题名均涉及镧系超氢化物，且作者Z M Geballe与候选1429无直接对应，但1429题为‘Potential high-Tc superconducting lanthanum and yttrium hydrides’，主题相近，但作者不一致，不匹配"
+      },
+      {
+        "reference_id": 329,
+        "actual": 1429,
+        "reason": "题名涉及La超氢化物中室温超导，候选1429主题相关，但作者不一致，非同一论文"
+      },
+      {
+        "reference_id": 334,
+        "actual": 1429,
+        "reason": "题名明确提及LaH10和LaH16，候选1429涉及镧系氢化物，主题相关但非同一论文"
+      },
+      {
+        "reference_id": 335,
+        "actual": 1429,
+        "reason": "涉及钪高氢化物，候选1429主题相关但作者和内容不一致"
+      },
+      {
+        "reference_id": 341,
+        "actual": 1429,
+        "reason": "题名涉及镧系/锕系极端超氢化物，候选1429主题高度相关，但作者和内容不一致，不构成身份匹配"
+      },
+      {
+        "reference_id": 343,
+        "actual": 1208,
+        "reason": "作者和年份匹配：V Labet, P Gonzalez-Morelos, R Hoffmann, N W Ashcroft, 2012；候选题为'Superconductive sodalite-like clathrate calcium hydride at high pressures'，虽主题略有差异，但作者和年份一致，且均涉及高压氢化物，可能为同一研究工作。"
+      },
+      {
+        "reference_id": 354,
+        "actual": 1429,
+        "reason": "作者I Errea，年份2020，候选题为'Potential high-Tc superconducting lanthanum and yttrium hydrides at high pressure'，主题和作者均高度相关，且均涉及镧系氢化物高压超导，可视为对应。"
+      }
+    ],
+    "prompt_tokens": 33057,
+    "completion_tokens": 8904,
+    "total_tokens": 41961,
+    "elapsed_seconds": 252.652
+  },
+  "aggregate_test_tokens": {
+    "llm2": 173804,
+    "local_fp8": 173308
+  },
+  "scope_notes": [
+    "Both protocols attempted the same 211 stored bibliography items against the same four approved paper identities; self-citation excluded.",
+    "Each single-reference prompt and strict output schema has matching SHA256 between providers.",
+    "Batch local false-positive count includes two out-of-candidate IDs; raw outputs retained, no repair.",
+    "Missing batch answers are not the same as missing true citation edges.",
+    "Model tokenizers and service accounting differ; no currency prices inferred."
+  ],
+  "data_preservation": {
+    "papers_unchanged": true,
+    "references_unchanged": true,
+    "reference_count": 211,
+    "matched_reference_count": 3,
+    "business_writes_by_benchmark": 0
+  },
+  "runtime_restoration": {
+    "gpu": "24564 MiB, 16541 MiB, 16.07 W",
+    "embedding_unit": "MainPID=60225\nNRestarts=0\nActiveState=active\n",
+    "embedding_health": 200,
+    "temporary_port_closed": true
+  },
+  "test_calls": {
+    "llm2": 226,
+    "local_fp8": 226
+  },
+  "batch_local_false_positive_count": 24,
+  "batch_local_missing_count": 55
+}

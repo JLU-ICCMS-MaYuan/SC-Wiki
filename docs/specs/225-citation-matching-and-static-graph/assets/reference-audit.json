@@ -1,0 +1,1119 @@
+{
+  "scope": "4 current approved paper identities; all 211 stored current-revision bibliography items; self-citations excluded",
+  "method": "Positive identities cross-checked against original PDF references, title/authors/year and venue/page metadata; similar-topic negatives separately inspected. This is a local small-corpus audit, not a full extraction-completeness evaluation.",
+  "positive_references": [
+    {
+      "reference_id": 305,
+      "paper_id": 1204
+    },
+    {
+      "reference_id": 306,
+      "paper_id": 1208
+    },
+    {
+      "reference_id": 308,
+      "paper_id": 1429
+    },
+    {
+      "reference_id": 1187,
+      "paper_id": 1208
+    },
+    {
+      "reference_id": 1263,
+      "paper_id": 1208
+    },
+    {
+      "reference_id": 1270,
+      "paper_id": 1204
+    }
+  ],
+  "pdf_anchors": {
+    "305": [
+      271,
+      5,
+      12
+    ],
+    "306": [
+      271,
+      5,
+      13
+    ],
+    "308": [
+      271,
+      5,
+      15
+    ],
+    "1187": [
+      1204,
+      6,
+      27
+    ],
+    "1263": [
+      1429,
+      6,
+      17
+    ],
+    "1270": [
+      1429,
+      6,
+      24
+    ]
+  },
+  "labels": [
+    {
+      "reference_id": 294,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 295,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 296,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 297,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 298,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 299,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 300,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 301,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 302,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 303,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 304,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 305,
+      "source_paper_id": 271,
+      "paper_id": 1204
+    },
+    {
+      "reference_id": 306,
+      "source_paper_id": 271,
+      "paper_id": 1208
+    },
+    {
+      "reference_id": 307,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 308,
+      "source_paper_id": 271,
+      "paper_id": 1429
+    },
+    {
+      "reference_id": 309,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 310,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 311,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 312,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 313,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 314,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 315,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 316,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 317,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 318,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 319,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 320,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 321,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 322,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 323,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 324,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 325,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 326,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 327,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 328,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 329,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 330,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 331,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 332,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 333,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 334,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 335,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 336,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 337,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 338,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 339,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 340,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 341,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 342,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 343,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 344,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 345,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 346,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 347,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 348,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 349,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 350,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 351,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 352,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 353,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 354,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 355,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 356,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 357,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 358,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 359,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 360,
+      "source_paper_id": 271,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1161,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1162,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1163,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1164,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1165,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1166,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1167,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1168,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1169,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1170,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1171,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1172,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1173,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1174,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1175,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1176,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1177,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1178,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1179,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1180,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1181,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1182,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1183,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1184,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1185,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1186,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1187,
+      "source_paper_id": 1204,
+      "paper_id": 1208
+    },
+    {
+      "reference_id": 1188,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1189,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1190,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1191,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1192,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1193,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1194,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1195,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1196,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1197,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1198,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1199,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1200,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1201,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1202,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1203,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1204,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1205,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1206,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1207,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1208,
+      "source_paper_id": 1204,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1209,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1210,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1211,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1212,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1213,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1214,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1215,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1216,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1217,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1218,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1219,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1220,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1221,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1222,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1223,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1224,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1225,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1226,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1227,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1228,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1229,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1230,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1231,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1232,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1233,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1234,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1235,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1236,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1237,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1238,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1239,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1240,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1241,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1242,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1243,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1244,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1245,
+      "source_paper_id": 1208,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1246,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1247,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1248,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1249,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1250,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1251,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1252,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1253,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1254,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1255,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1256,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1257,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1258,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1259,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1260,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1261,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1262,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1263,
+      "source_paper_id": 1429,
+      "paper_id": 1208
+    },
+    {
+      "reference_id": 1264,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1265,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1266,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1267,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1268,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1269,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1270,
+      "source_paper_id": 1429,
+      "paper_id": 1204
+    },
+    {
+      "reference_id": 1271,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1272,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1273,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1274,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1275,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1276,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1277,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1278,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1279,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1280,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1281,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1282,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1283,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1284,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1285,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1286,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1287,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1288,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1289,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1290,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1291,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1292,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1293,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1294,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1295,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1296,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1297,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1298,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1299,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1300,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1301,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1302,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1303,
+      "source_paper_id": 1429,
+      "paper_id": null
+    },
+    {
+      "reference_id": 1304,
+      "source_paper_id": 1429,
+      "paper_id": null
+    }
+  ]
+}

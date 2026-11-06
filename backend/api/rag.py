@@ -1615,6 +1615,8 @@ async def put_upload_draft(
                 normalized["paper"]["research_materials"] = _derived_research_materials(normalized["material_states"])
             # citation_extraction 是服务端 GROBID 产物，不能接受浏览器回传值覆盖。
             normalized["citation_extraction"] = previous.get("citation_extraction")
+            from backend.services.citation_matching import preserve_matching_snapshot
+            preserve_matching_snapshot(normalized, previous)
             for field in ("bibliography_sources", "bibliography_conflicts", "parsing_conflicts"):
                 if field in previous:
                     normalized[field] = previous[field]
@@ -2031,7 +2033,8 @@ async def _create_pending_paper(
 
                 citation_extraction = draft.get("citation_extraction")
                 if isinstance(citation_extraction, dict):
-                    await persist_reference_extraction(session, paper, citation_extraction)
+                    await persist_reference_extraction(session, paper, citation_extraction,
+                                                       matching_snapshot=draft.get('citation_matching'))
 
                 extracted_root = md_path.parent / task_id
                 if source_files and extracted_root.is_dir():
@@ -2812,7 +2815,8 @@ async def _rewrite_paper_scientific_draft_in_tx(
     if citation_extraction is not None:
         from backend.services.citation_graph import persist_reference_extraction
 
-        await persist_reference_extraction(session, paper, citation_extraction)
+        await persist_reference_extraction(session, paper, citation_extraction,
+                                           matching_snapshot=full_draft.get('citation_matching'))
     from backend.services.paper_history import append_paper_history_event
 
     await session.flush()

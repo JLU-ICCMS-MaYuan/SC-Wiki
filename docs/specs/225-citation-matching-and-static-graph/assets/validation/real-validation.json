@@ -1,0 +1,109 @@
+{
+  "isolated_database": "test_issue225_9978508136",
+  "business_database_changed": false,
+  "legacy_rows_preserved_by_migration": true,
+  "sources": [
+    {
+      "paper_id": 271,
+      "sha256": "7fccce6780e71f826519256542a5416f5b256e1aa2b546b68e194468688e2bbd",
+      "status": "succeeded",
+      "references": 67
+    },
+    {
+      "paper_id": 1204,
+      "sha256": "22ebd3113ca0cd514ee1c92d3d22e7da5374f2ba682f582350f5b10508d379ef",
+      "status": "succeeded",
+      "references": 48
+    },
+    {
+      "paper_id": 1208,
+      "sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "status": "succeeded",
+      "references": 37
+    },
+    {
+      "paper_id": 1429,
+      "sha256": "bf06c039e4a673454f1240a7febb8f14b5a9cb1762f89bbfd517bb09d0a117e8",
+      "status": "succeeded",
+      "references": 59
+    }
+  ],
+  "true_edges": [
+    [
+      271,
+      1204
+    ],
+    [
+      271,
+      1208
+    ],
+    [
+      271,
+      1429
+    ],
+    [
+      1204,
+      1208
+    ],
+    [
+      1429,
+      1204
+    ],
+    [
+      1429,
+      1208
+    ]
+  ],
+  "controlled_metadata_replay": [
+    {
+      "index": 11,
+      "original_title": "Pressure-induced metallization of dense (H 2 S) 2 H 2 with high-T c superconductivity",
+      "mode": "incomplete_extracted_title"
+    },
+    {
+      "index": 14,
+      "original_title": "Potential high-T c superconducting lanthanum and yttrium hydrides at high pressure",
+      "mode": "incomplete_extracted_title"
+    }
+  ],
+  "real_model_events": [
+    {
+      "thinking": "provider_default",
+      "output_started": true,
+      "usage": {
+        "completion_tokens": 103,
+        "prompt_tokens": 802,
+        "total_tokens": 905,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "stop",
+      "phase": "citation_matching",
+      "model": "gpt-6.1-sol",
+      "prompt_hash": "7d1301548c01ea1bc11417cc491b450d5f7a2b4501d1a0edd1ebb61a68fbcf8f",
+      "attempt": 1,
+      "status": "completed",
+      "elapsed_seconds": 5.17909687498468,
+      "input_chars": 1830,
+      "output_chars": 188,
+      "tokens": null,
+      "input_tokens_estimate": 458,
+      "output_tokens_estimate": 47
+    }
+  ],
+  "cache_repeat_added_calls": 0,
+  "default_model_restored": true,
+  "formal_llm2_rows_reread": 2,
+  "tasks": {
+    "271": "1c6daa9cae8e4311b8b276e9f830297b",
+    "1204": "71855713de6f4c248b1c38d5ce7b962c",
+    "1208": "c982b7df573e499f9c65d51935e61911",
+    "1429": "991aa500ef154c4f9a788b915d7c04aa"
+  },
+  "downgrade_with_evidence_refused": true,
+  "branch_scope": "citation branch using preassembled scientific draft; whole scientific extraction not rerun",
+  "business_rows_unchanged": true,
+  "isolated_services_stopped": true,
+  "isolated_database_removed": true,
+  "owned_object_files_removed": 17
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "IMG-001",
+    "upload_order": 1,
+    "original_name": "codex-clipboard-b4198cfa-e693-46ad-943a-e5dc893acd4d.png",
+    "locator": "assets/IMG-001.png",
+    "status": "local_verified",
+    "user_context": "知识图谱这里有一些问题：\n\n1. 整个知识图谱实现的技术过程是什么\n2. 整个页面非常卡顿，而且里面的元素在不停的微小乱漂移\n3. 而我我希望把一个节点移动到一个位置之后就定住不动了，这样也可以让我临时调整位置，刷新页面之后又回到之前默认的位置即可。\n4. 点击显示上下游的功能后没有把对应的论文显示出来。",
+    "related": [
+      "US3"
+    ],
+    "sha256": "90f93b155408326f926593b312d508ac8acf3a56e98eb299d4008e5f93cdc438",
+    "media_type": "image/png",
+    "dimensions_px": [
+      2048,
+      1039
+    ],
+    "verification": "原始PNG字节归档后重新解码，核对尺寸和SHA256；远程链接未发布。"
+  },
+  {
+    "id": "IMG-002",
+    "upload_order": 2,
+    "original_name": null,
+    "locator": "assets/IMG-002.png",
+    "status": "local_verified",
+    "user_context": "对的，我希望这一步匹配结果完成之后，可以在解析页面给出来参考文献匹配的链接，点击后跳转到一个新的标签页，这个标签页里面展示方式如上图。当前论文的引文如果在当前数据库中存在，那么就填好颜色，表示命中了。引用了当前论文的论文就列在前面，也填充颜色。如果当前数据库的论文没有引用当前解析论文，就不需要列出来了。",
+    "related": [
+      "US2"
+    ],
+    "sha256": "ed29e2e4206fc6cf8635abcadb8c7d8f500465785732d47cbee2caa431be5a21",
+    "media_type": "image/png",
+    "dimensions_px": [
+      768,
+      484
+    ],
+    "verification": "原始PNG字节归档后重新解码，核对尺寸和SHA256；远程链接未发布。 会话未提供原始文件名，归档名不冒充原名。"
+  }
+]

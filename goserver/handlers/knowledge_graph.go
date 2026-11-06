@@ -56,6 +56,9 @@ type graphMarkRow struct {
 
 const publicPaperScope = "p.review_status = 'approved' AND p.approved_revision = p.content_revision"
 
+// 只用于判断是否填写，不改写原题名；兼容表单中常见的空白字符。
+const graphHasTitleScope = "NULLIF(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(p.knowledge_graph_title, ''), CHAR(9), ''), CHAR(10), ''), CHAR(13), ''), '　', ''), ' ', '')), '') IS NOT NULL"
+
 func InitKnowledgeGraph() {}
 
 func graphError(c *gin.Context, status int, code, message string) {
@@ -142,7 +145,7 @@ func graphNodeRows(filter string, args []interface{}, limit int) ([]graphNodeRow
 		return nil, 0, err
 	}
 	query := `SELECT p.id AS paper_id,
- COALESCE(NULLIF(p.knowledge_graph_title, ''), p.title, '') AS label,
+ CASE WHEN ` + graphHasTitleScope + ` THEN p.knowledge_graph_title ELSE COALESCE(p.title, '') END AS label,
  COALESCE(p.title, '') AS title,
  p.year AS year,
  p.superconductor_kind AS superconductor_kind,
@@ -257,7 +260,7 @@ func KGOverview(c *gin.Context) {
 	if !ok {
 		return
 	}
-	nodes, total, err := graphNodes(filter, args, limit)
+	nodes, total, err := graphNodes(filter+" AND "+graphHasTitleScope, args, limit)
 	if err != nil {
 		graphError(c, http.StatusInternalServerError, "graph_query_failed", "读取引用图谱失败")
 		return
@@ -318,7 +321,7 @@ func graphNeighborRows(centerID uint, direction string, limit, offset int) ([]gr
 		return nil, 0, err
 	}
 	query := `SELECT p.id AS paper_id,
- COALESCE(NULLIF(p.knowledge_graph_title, ''), p.title, '') AS label,
+ CASE WHEN ` + graphHasTitleScope + ` THEN p.knowledge_graph_title ELSE COALESCE(p.title, '') END AS label,
  COALESCE(p.title, '') AS title,
  p.year AS year, p.superconductor_kind AS superconductor_kind,
  COUNT(DISTINCT CASE WHEN citing.id IS NOT NULL THEN incoming.paper_id END) AS citation_count
@@ -384,13 +387,19 @@ func KGPaperNeighbors(c *gin.Context) {
 		graphError(c, http.StatusInternalServerError, "graph_query_failed", "读取论文邻居详情失败")
 		return
 	}
-	edges := make([]graphEdge, 0, len(nodes))
-	for _, node := range nodes {
-		if direction == "upstream" {
-			edges = append(edges, graphEdge{CitingPaperID: centerID, CitedPaperID: node.PaperID})
-		} else {
-			edges = append(edges, graphEdge{CitingPaperID: node.PaperID, CitedPaperID: centerID})
+	visible := append([]uint{centerID}, graphNodeIDs(nodes)...)
+	for _, value := range c.QueryArray("visible_paper_id") {
+		id, parseErr := strconv.ParseUint(value, 10, 32)
+		if parseErr != nil || id == 0 {
+			graphError(c, http.StatusBadRequest, "invalid_graph_filter", "可见论文 ID 无效")
+			return
 		}
+		visible = append(visible, uint(id))
+	}
+	edges, err := graphEdgesBetween(visible)
+	if err != nil {
+		graphError(c, http.StatusInternalServerError, "graph_query_failed", "读取可见引用关系失败")
+		return
 	}
 	remaining := total - int64(offset) - int64(len(nodes))
 	if remaining < 0 {

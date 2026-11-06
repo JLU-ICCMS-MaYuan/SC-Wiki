@@ -1,0 +1,3722 @@
+{
+  "papers": [
+    {
+      "id": 271,
+      "title": "Predicted hot superconductivity in LaSc2H24 under pressure",
+      "doi": "10.1073/pnas.2401840121",
+      "year": 2024,
+      "authors": [
+        "Xin-Ling He",
+        "Wenbo Zhao",
+        "Yu Xie",
+        "Andreas Hermann",
+        "Russell J. Hemley",
+        "Hanyu Liu",
+        "Yanming Ma"
+      ],
+      "content_revision": 1
+    },
+    {
+      "id": 1204,
+      "title": "Pressure-induced metallization of dense (H2S)2H2 with high-Tc superconductivity",
+      "doi": "10.1038/srep06968",
+      "year": 2014,
+      "authors": [
+        "Defang Duan",
+        "Yunxian Liu",
+        "Fubo Tian",
+        "Da Li",
+        "Xiaoli Huang",
+        "Zhonglong Zhao",
+        "Hongyu Yu",
+        "Bingbing Liu",
+        "Wenjing Tian",
+        "Tian Cui"
+      ],
+      "content_revision": 1
+    },
+    {
+      "id": 1208,
+      "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+      "doi": "10.1073/pnas.1118168109",
+      "year": 2012,
+      "authors": [
+        "Hui Wang",
+        "John S Tse",
+        "Kaori Tanaka",
+        "Toshiaki Iitaka",
+        "Yanming Ma"
+      ],
+      "content_revision": 1
+    },
+    {
+      "id": 1429,
+      "title": "Potential high-Tc superconducting lanthanum and yttrium hydrides at high pressure",
+      "doi": "10.1073/pnas.1704505114",
+      "year": 2017,
+      "authors": [
+        "Hanyu Liu",
+        "Ivan I Naumov",
+        "Roald Hoffmann",
+        "N W Ashcroft",
+        "Russell J Hemley"
+      ],
+      "content_revision": 1
+    }
+  ],
+  "references": [
+    {
+      "id": 294,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 0,
+      "raw_citation": "Conventional superconductivity at 203 kelvin at high pressures in the sulfur hydride system A P Drozdov M I Eremets I A Troyan V Ksenofontov S I Shylin Nature 525 2015",
+      "title": "Conventional superconductivity at 203 kelvin at high pressures in the sulfur hydride system",
+      "doi": null,
+      "year": 2015,
+      "authors": [
+        "A P Drozdov",
+        "M I Eremets",
+        "I A Troyan",
+        "V Ksenofontov",
+        "S I Shylin"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 295,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 1,
+      "raw_citation": "Crystal structure of the superconducting phase of sulfur hydride M Einaga Nat. Phys 12 2016",
+      "title": "Crystal structure of the superconducting phase of sulfur hydride",
+      "doi": null,
+      "year": 2016,
+      "authors": [
+        "M Einaga"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 296,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 2,
+      "raw_citation": "High-temperature superconducting phase in clathrate calcium hydride CaH 6 up to 215 K at a pressure of 172 GPa L Ma Phys. Rev. Lett 128 167001 2022",
+      "title": "High-temperature superconducting phase in clathrate calcium hydride CaH 6 up to 215 K at a pressure of 172 GPa",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "L Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 297,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 3,
+      "raw_citation": "Superconductivity above 200 K discovered in superhydrides of calcium Z Li Nat. Commun 13 2863 2022",
+      "title": "Superconductivity above 200 K discovered in superhydrides of calcium",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "Z Li"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 298,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 4,
+      "raw_citation": "Anomalous high-temperature superconductivity in YH 6 I A Troyan Adv. Mater 33 2006832. 2021",
+      "title": "Anomalous high-temperature superconductivity in YH 6",
+      "doi": null,
+      "year": 2021,
+      "authors": [
+        "I A Troyan"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 299,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 5,
+      "raw_citation": "Superconductivity up to 243 K in the yttrium-hydrogen system under high pressure P Kong Nat. Commun 12 5075 2021",
+      "title": "Superconductivity up to 243 K in the yttrium-hydrogen system under high pressure",
+      "doi": null,
+      "year": 2021,
+      "authors": [
+        "P Kong"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 300,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 6,
+      "raw_citation": "Synthesis of yttrium superhydride superconductor with a transition temperature up to 262 K by catalytic hydrogenation at high pressures E Snider Phys. Rev. Lett 126 117003 2021",
+      "title": "Synthesis of yttrium superhydride superconductor with a transition temperature up to 262 K by catalytic hydrogenation at high pressures",
+      "doi": null,
+      "year": 2021,
+      "authors": [
+        "E Snider"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 301,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 7,
+      "raw_citation": "Evidence for superconductivity above 260 K in lanthanum superhydride at megabar pressures M Somayazulu Phys. Rev. Lett 122 27001 2019",
+      "title": "Evidence for superconductivity above 260 K in lanthanum superhydride at megabar pressures",
+      "doi": null,
+      "year": 2019,
+      "authors": [
+        "M Somayazulu"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 302,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 8,
+      "raw_citation": "Superconductivity at 250 K in lanthanum hydride under high pressures A P Drozdov Nature 569 2019",
+      "title": "Superconductivity at 250 K in lanthanum hydride under high pressures",
+      "doi": null,
+      "year": 2019,
+      "authors": [
+        "A P Drozdov"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 303,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 9,
+      "raw_citation": "Superconductivity of lanthanum superhydride investigated using the standard fourprobe configuration under high pressures F Hong Chin. Phys. Lett 37 107401 2020",
+      "title": "Superconductivity of lanthanum superhydride investigated using the standard fourprobe configuration under high pressures",
+      "doi": null,
+      "year": 2020,
+      "authors": [
+        "F Hong"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 304,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 10,
+      "raw_citation": "The metallization and superconductivity of dense hydrogen sulfide Y Li J Hao H Liu Y Li Y Ma J. Chem. Phys 140 174712 2014",
+      "title": "The metallization and superconductivity of dense hydrogen sulfide",
+      "doi": null,
+      "year": 2014,
+      "authors": [
+        "Y Li",
+        "J Hao",
+        "H Liu",
+        "Y Li",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 305,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 11,
+      "raw_citation": "Pressure-induced metallization of dense (H 2 S) 2 H 2 with high-T c superconductivity D Duan Sci. Rep 4 6968 2014",
+      "title": "Pressure-induced metallization of dense (H 2 S) 2 H 2 with high-T c superconductivity",
+      "doi": null,
+      "year": 2014,
+      "authors": [
+        "D Duan"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 306,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 12,
+      "raw_citation": "Superconductive sodalite-like clathrate calcium hydride at high pressures H Wang J S Tse K Tanaka T Iitaka Y Ma Proc. Natl. Acad. Sci. U.S.A 109 2012",
+      "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "H Wang",
+        "J S Tse",
+        "K Tanaka",
+        "T Iitaka",
+        "Y Ma"
+      ],
+      "match_status": "matched",
+      "cited_paper_id": 1208,
+      "match_method": "title_year"
+    },
+    {
+      "id": 307,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 13,
+      "raw_citation": "Hydrogen clathrate structures in rare earth hydrides at high pressures: Possible route to room-temperature superconductivity F Peng Phys. Rev. Lett 119 107001 2017",
+      "title": "Hydrogen clathrate structures in rare earth hydrides at high pressures: Possible route to room-temperature superconductivity",
+      "doi": null,
+      "year": 2017,
+      "authors": [
+        "F Peng"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 308,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 14,
+      "raw_citation": "Potential high-T c superconducting lanthanum and yttrium hydrides at high pressure H Liu I I Naumov R Hoffmann N W Ashcroft R J Hemley Proc. Natl. Acad. Sci. USA 114 2017",
+      "title": "Potential high-T c superconducting lanthanum and yttrium hydrides at high pressure",
+      "doi": null,
+      "year": 2017,
+      "authors": [
+        "H Liu",
+        "I I Naumov",
+        "R Hoffmann",
+        "N W Ashcroft",
+        "R J Hemley"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 309,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 15,
+      "raw_citation": "A perspective on conventional high-temperature superconductors at high pressure: Methods and materials J A Flores-Livas Phys. Rep 856 2020",
+      "title": "A perspective on conventional high-temperature superconductors at high pressure: Methods and materials",
+      "doi": null,
+      "year": 2020,
+      "authors": [
+        "J A Flores-Livas"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 310,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 16,
+      "raw_citation": "The 2021 room-temperature superconductivity roadmap L Boeri J. Phys.: Condens. Matter 34 183002 2022",
+      "title": "The 2021 room-temperature superconductivity roadmap",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "L Boeri"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 311,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 17,
+      "raw_citation": "Tuning chemical precompression: Theoretical design and crystal chemistry of novel hydrides in the quest for warm and light superconductivity at ambient pressures K P Hilleke E Zurek J. Appl. Phys 131 70901 2022",
+      "title": "Tuning chemical precompression: Theoretical design and crystal chemistry of novel hydrides in the quest for warm and light superconductivity at ambient pressures",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "K P Hilleke",
+        "E Zurek"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 312,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 18,
+      "raw_citation": "Thermodynamically stable room-temperature superconductors in Li-Na hydrides under high pressures D An 10.48550/arXiv.2303.09805 2023. 17 March 2023",
+      "title": "Thermodynamically stable room-temperature superconductors in Li-Na hydrides under high pressures",
+      "doi": "10.48550/arxiv.2303.09805",
+      "year": 2023,
+      "authors": [
+        "D An"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 313,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 19,
+      "raw_citation": "Route to a superconducting phase above room temperature in electron-doped hydride compounds under high pressure Y Sun J Lv Y Xie H Liu Y Ma Phys. Rev. Lett 123 97001 2019",
+      "title": "Route to a superconducting phase above room temperature in electron-doped hydride compounds under high pressure",
+      "doi": null,
+      "year": 2019,
+      "authors": [
+        "Y Sun",
+        "J Lv",
+        "Y Xie",
+        "H Liu",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 314,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 20,
+      "raw_citation": "Metallization of magnesium polyhydrides under pressure D C Lonie J Hooper B Altintas E Zurek Phys. Rev. B 87 54107 2013",
+      "title": "Metallization of magnesium polyhydrides under pressure",
+      "doi": null,
+      "year": 2013,
+      "authors": [
+        "D C Lonie",
+        "J Hooper",
+        "B Altintas",
+        "E Zurek"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 315,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 21,
+      "raw_citation": "Towards high-T c low-pressure superconductivity in ternary superhydrides S Di Cataldo C Heil W Der Linden L. Boeri, LaBH 8 20511 2021 Phys. Rev. B",
+      "title": "Towards high-T c low-pressure superconductivity in ternary superhydrides",
+      "doi": null,
+      "year": 2021,
+      "authors": [
+        "S Di Cataldo",
+        "C Heil",
+        "W Der Linden"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 316,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 22,
+      "raw_citation": "Prediction of high-T c superconductivity in ternary lanthanum borohydrides X Liang Phys. Rev. B 104 134501 2021",
+      "title": "Prediction of high-T c superconductivity in ternary lanthanum borohydrides",
+      "doi": null,
+      "year": 2021,
+      "authors": [
+        "X Liang"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 317,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 23,
+      "raw_citation": "Design principles for high-temperature superconductors with a hydrogen-based alloy backbone at moderate pressure Z Zhang Phys. Rev. Lett 128 47001 2022",
+      "title": "Design principles for high-temperature superconductors with a hydrogen-based alloy backbone at moderate pressure",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "Z Zhang"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 318,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 24,
+      "raw_citation": "Stoichiometric ternary superhydride LaBeH 8 as a new template for high-temperature superconductivity at 110 K under 80 GPa Y Song Phys. Rev. Lett 130 266001 2023",
+      "title": "Stoichiometric ternary superhydride LaBeH 8 as a new template for high-temperature superconductivity at 110 K under 80 GPa",
+      "doi": null,
+      "year": 2023,
+      "authors": [
+        "Y Song"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 319,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 25,
+      "raw_citation": "Potential high-T c superconductivity in CaYH 12 under pressure X Liang Phys. Rev. B 99 R 100505 2019",
+      "title": "Potential high-T c superconductivity in CaYH 12 under pressure",
+      "doi": null,
+      "year": 2019,
+      "authors": [
+        "X Liang"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 320,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 26,
+      "raw_citation": "Near-room-temperature superconductivity of Mg/Ca substituted metal hexahydride under pressure W Sukmas P Tsuppayakorn-Aek U Pinsook T Bovornratanaraks J. Alloys Compd 849 156434 2020",
+      "title": "Near-room-temperature superconductivity of Mg/Ca substituted metal hexahydride under pressure",
+      "doi": null,
+      "year": 2020,
+      "authors": [
+        "W Sukmas",
+        "P Tsuppayakorn-Aek",
+        "U Pinsook",
+        "T Bovornratanaraks"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 321,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 27,
+      "raw_citation": "Potential high-T c superconductivity in YCeH x and LaCeH x under pressure P Song Z Hou K Nakano K Hongo R Maezono Mater. Today Phys 28 100873 2022",
+      "title": "Potential high-T c superconductivity in YCeH x and LaCeH x under pressure",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "P Song",
+        "Z Hou",
+        "K Nakano",
+        "K Hongo",
+        "R Maezono"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 322,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 28,
+      "raw_citation": "Room-temperature superconductivity in Yb/Lu substituted clathrate hexahydrides under moderate pressure M Du H Song Z Zhang D Duan T Cui Research 2022 9784309 2022",
+      "title": "Room-temperature superconductivity in Yb/Lu substituted clathrate hexahydrides under moderate pressure",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "M Du",
+        "H Song",
+        "Z Zhang",
+        "D Duan",
+        "T Cui"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 323,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 29,
+      "raw_citation": "Generic rules for achieving room-temperature superconductivity in ternary hydrides with clathrate structures L Liu Phys. Rev. B 107 20504 2023",
+      "title": "Generic rules for achieving room-temperature superconductivity in ternary hydrides with clathrate structures",
+      "doi": null,
+      "year": 2023,
+      "authors": [
+        "L Liu"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 324,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 30,
+      "raw_citation": "Superconductivity at 253 K in lanthanum-yttrium ternary hydrides D V Semenok Mater. Today 48 2021",
+      "title": "Superconductivity at 253 K in lanthanum-yttrium ternary hydrides",
+      "doi": null,
+      "year": 2021,
+      "authors": [
+        "D V Semenok"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 325,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 31,
+      "raw_citation": "Giant enhancement of superconducting critical temperature in substitutional alloy J Bi Nat. Commun 13 5952 2022 La, Ce)H 9",
+      "title": "Giant enhancement of superconducting critical temperature in substitutional alloy",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "J Bi"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 326,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 32,
+      "raw_citation": "Enhancement of superconducting properties in the La-Ce-H system at moderate pressures W Chen Nat. Commun 14 2660 2023",
+      "title": "Enhancement of superconducting properties in the La-Ce-H system at moderate pressures",
+      "doi": null,
+      "year": 2023,
+      "authors": [
+        "W Chen"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 327,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 33,
+      "raw_citation": "Effect of magnetic impurities on superconductivity in LaH 10 D V Semenok Adv. Mater 34 2204038 2022",
+      "title": "Effect of magnetic impurities on superconductivity in LaH 10",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "D V Semenok"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 328,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 34,
+      "raw_citation": "Synthesis and stability of lanthanum superhydrides Z M Geballe Angew. Chem. Int. Ed. Engl 130 2018",
+      "title": "Synthesis and stability of lanthanum superhydrides",
+      "doi": null,
+      "year": 2018,
+      "authors": [
+        "Z M Geballe"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 329,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 35,
+      "raw_citation": "Room-temperature superconductivity in boron-and nitrogen-doped lanthanum superhydride Y Ge F Zhang R J Hemley Phys. Rev. B 104 214505 2021",
+      "title": "Room-temperature superconductivity in boron-and nitrogen-doped lanthanum superhydride",
+      "doi": null,
+      "year": 2021,
+      "authors": [
+        "Y Ge",
+        "F Zhang",
+        "R J Hemley"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 330,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 36,
+      "raw_citation": "Crystal structure prediction via particle-swarm optimization Y Wang J Lv L Zhu Y Ma Phys. Rev. B 82 94116 2010",
+      "title": "Crystal structure prediction via particle-swarm optimization",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "Y Wang",
+        "J Lv",
+        "L Zhu",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 331,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 37,
+      "raw_citation": "CALYPSO: A method for crystal structure prediction Y Wang J Lv L Zhu Y Ma Comput. Phys. Commun 183 2012",
+      "title": "CALYPSO: A method for crystal structure prediction",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "Y Wang",
+        "J Lv",
+        "L Zhu",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 332,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 38,
+      "raw_citation": "Structure of phase III of solid hydrogen C J Pickard R J Needs Nat. Phys 3 2007",
+      "title": "Structure of phase III of solid hydrogen",
+      "doi": null,
+      "year": 2007,
+      "authors": [
+        "C J Pickard",
+        "R J Needs"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 333,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 39,
+      "raw_citation": "Quasi-molecular and atomic phases of dense solid hydrogen H Liu H Wang Y Ma J. Phys. Chem. C 116 2012",
+      "title": "Quasi-molecular and atomic phases of dense solid hydrogen",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "H Liu",
+        "H Wang",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 334,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 40,
+      "raw_citation": "Superconductivity of LaH 10 and LaH 16 polyhydrides I A Kruglov Phys. Rev. B 101 24508 2020",
+      "title": "Superconductivity of LaH 10 and LaH 16 polyhydrides",
+      "doi": null,
+      "year": 2020,
+      "authors": [
+        "I A Kruglov"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 335,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 41,
+      "raw_citation": "High hydrides of scandium under pressure: Potential superconductors X Ye N Zarifi E Zurek R Hoffmann N W Ashcroft J. Phys. Chem. C 122 2018",
+      "title": "High hydrides of scandium under pressure: Potential superconductors",
+      "doi": null,
+      "year": 2018,
+      "authors": [
+        "X Ye",
+        "N Zarifi",
+        "E Zurek",
+        "R Hoffmann",
+        "N W Ashcroft"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 336,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 42,
+      "raw_citation": "Novel reentrant high pressure phase transtion in lanthanum F Porsch W B Holzapfel Phys. Rev. Lett 70 1993",
+      "title": "Novel reentrant high pressure phase transtion in lanthanum",
+      "doi": null,
+      "year": 1993,
+      "authors": [
+        "F Porsch",
+        "W B Holzapfel"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 337,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 43,
+      "raw_citation": "Superconductivity and equation of state of lanthanum at megabar pressures W Chen Phys. Rev. B 102 134510 2020",
+      "title": "Superconductivity and equation of state of lanthanum at megabar pressures",
+      "doi": null,
+      "year": 2020,
+      "authors": [
+        "W Chen"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 338,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 44,
+      "raw_citation": "Phase transitions and properties of lanthanum under high pressures L Chen J. Phys.: Condens. Matter 34 204005 2022",
+      "title": "Phase transitions and properties of lanthanum under high pressures",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "L Chen"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 339,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 45,
+      "raw_citation": "New helical chain structure for scandium at 240 GPa Y Akahama H Fujihisa H Kawamura Phys. Rev. Lett 94 195503 2005",
+      "title": "New helical chain structure for scandium at 240 GPa",
+      "doi": null,
+      "year": 2005,
+      "authors": [
+        "Y Akahama",
+        "H Fujihisa",
+        "H Kawamura"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 340,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 46,
+      "raw_citation": "Die struktur von aluminiumborid AlB 2 W Hofmann W Jäniche Z. Phys. Chem. 31B 1936",
+      "title": "Die struktur von aluminiumborid AlB 2",
+      "doi": null,
+      "year": 1936,
+      "authors": [
+        "W Hofmann",
+        "W Jäniche"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 341,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 47,
+      "raw_citation": "Prediction of above-room-temperature superconductivity in lanthanide/actinide extreme superhydrides X Zhong J. Am. Chem. Soc 144 2022",
+      "title": "Prediction of above-room-temperature superconductivity in lanthanide/actinide extreme superhydrides",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "X Zhong"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 342,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 48,
+      "raw_citation": "The database of zeolite structures",
+      "title": "The database of zeolite structures",
+      "doi": null,
+      "year": null,
+      "authors": null,
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 343,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 49,
+      "raw_citation": "A fresh look at dense hydrogen under pressure. I. An introduction to the problem, and an index probing equalization of H-H distances V Labet P Gonzalez-Morelos R Hoffmann N W Ashcroft J. Chem. Phys 136 74501 2012",
+      "title": "A fresh look at dense hydrogen under pressure. I. An introduction to the problem, and an index probing equalization of H-H distances",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "V Labet",
+        "P Gonzalez-Morelos",
+        "R Hoffmann",
+        "N W Ashcroft"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 344,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 50,
+      "raw_citation": "Ground-state structures of atomic metallic hydrogen J M Mcmahon D M Ceperley Phys. Rev. Lett 106 165302 2011",
+      "title": "Ground-state structures of atomic metallic hydrogen",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "J M Mcmahon",
+        "D M Ceperley"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 345,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 51,
+      "raw_citation": "Sr-doped superionic hydrogen glass: Synthesis and properties of SrH 22 D V Semenok Adv. Mater 34 2200924 2022",
+      "title": "Sr-doped superionic hydrogen glass: Synthesis and properties of SrH 22",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "D V Semenok"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 346,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 52,
+      "raw_citation": "Pressure-stabilized sodium polyhydrides: NaH n (n > 1) P Baettig E Zurek Phys. Rev. Lett 106 237002 2011",
+      "title": "Pressure-stabilized sodium polyhydrides: NaH n (n > 1)",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "P Baettig",
+        "E Zurek"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 347,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 53,
+      "raw_citation": "Phase stability and superconductivity of lead hydrides at high pressure B Chen Phys. Rev. B 103 35131 2021",
+      "title": "Phase stability and superconductivity of lead hydrides at high pressure",
+      "doi": null,
+      "year": 2021,
+      "authors": [
+        "B Chen"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 348,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 54,
+      "raw_citation": "Emergence of near room-temperature superconductivity in hydrides with H 2 molecular units Z Liu Phys. Rev. B 109 180501 2024",
+      "title": "Emergence of near room-temperature superconductivity in hydrides with H 2 molecular units",
+      "doi": null,
+      "year": 2024,
+      "authors": [
+        "Z Liu"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 349,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 55,
+      "raw_citation": "Rational design of superconducting metal hydrides via chemical pressure tuning K P Hilleke E Zurek Angew. Chem. Int. Ed. Engl 61 202207589 2022",
+      "title": "Rational design of superconducting metal hydrides via chemical pressure tuning",
+      "doi": null,
+      "year": 2022,
+      "authors": [
+        "K P Hilleke",
+        "E Zurek"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 350,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 56,
+      "raw_citation": "Ab initio eliashberg theory: Making genuine predictions of superconducting features A Sanna J. Phys. Soc. Jpn 87 41012 2018",
+      "title": "Ab initio eliashberg theory: Making genuine predictions of superconducting features",
+      "doi": null,
+      "year": 2018,
+      "authors": [
+        "A Sanna"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 351,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 57,
+      "raw_citation": "The elk code, which is an all-electron full-potential linearised augmented-plane wave code with many advanced features",
+      "title": "The elk code, which is an all-electron full-potential linearised augmented-plane wave code with many advanced features",
+      "doi": null,
+      "year": null,
+      "authors": null,
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 352,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 58,
+      "raw_citation": "First-principles theory of anharmonicity and the inverse isotope effect in superconducting palladiumhydride compounds I Errea M Calandra F Mauri Phys. Rev. Lett 111 177002 2013",
+      "title": "First-principles theory of anharmonicity and the inverse isotope effect in superconducting palladiumhydride compounds",
+      "doi": null,
+      "year": 2013,
+      "authors": [
+        "I Errea",
+        "M Calandra",
+        "F Mauri"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 353,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 59,
+      "raw_citation": "High-pressure hydrogen sulfide from first principles: A strongly anharmonic phononmediated superconductor I Errea Phys. Rev. Lett 114 157004 2015",
+      "title": "High-pressure hydrogen sulfide from first principles: A strongly anharmonic phononmediated superconductor",
+      "doi": null,
+      "year": 2015,
+      "authors": [
+        "I Errea"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 354,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 60,
+      "raw_citation": "Quantum crystal structure in the 250-kelvin superconducting lanthanum hydride I Errea Nature 578 2020",
+      "title": "Quantum crystal structure in the 250-kelvin superconducting lanthanum hydride",
+      "doi": null,
+      "year": 2020,
+      "authors": [
+        "I Errea"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 355,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 61,
+      "raw_citation": "The stochastic self-consistent harmonic approximation: Calculating vibrational properties of materials with full quantum and anharmonic effects L Monacelli J. Phys.: Condens. Matter 33 363001 2021",
+      "title": "The stochastic self-consistent harmonic approximation: Calculating vibrational properties of materials with full quantum and anharmonic effects",
+      "doi": null,
+      "year": 2021,
+      "authors": [
+        "L Monacelli"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 356,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 62,
+      "raw_citation": "Generalized gradient approximation made simple J P Perdew K Burke M Ernzerhof Phys. Rev. Lett 77 1996",
+      "title": "Generalized gradient approximation made simple",
+      "doi": null,
+      "year": 1996,
+      "authors": [
+        "J P Perdew",
+        "K Burke",
+        "M Ernzerhof"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 357,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 63,
+      "raw_citation": "Efficient iterative schemes for ab initio total-energy calculations using a plane-wave basis set G Kresse J Furthmüller Phys. Rev. B 54 1996",
+      "title": "Efficient iterative schemes for ab initio total-energy calculations using a plane-wave basis set",
+      "doi": null,
+      "year": 1996,
+      "authors": [
+        "G Kresse",
+        "J Furthmüller"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 358,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 64,
+      "raw_citation": "Projector augmented-wave method P E Blöchl Phys. Rev. B 50 1994",
+      "title": "Projector augmented-wave method",
+      "doi": null,
+      "year": 1994,
+      "authors": [
+        "P E Blöchl"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 359,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 65,
+      "raw_citation": "QUANTUM ESPRESSO: A modular and open-source software project for quantum simulations of materials P Giannozzi J. Phys.: Condens. Matter 21 395502 2009",
+      "title": "QUANTUM ESPRESSO: A modular and open-source software project for quantum simulations of materials",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "P Giannozzi"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 360,
+      "paper_id": 271,
+      "paper_revision": 1,
+      "reference_index": 66,
+      "raw_citation": "Precision and efficiency in solid-state pseudopotential calculations G Prandini A Marrazzo I E Castelli N Mounet N Marzari Comput. Mater 4 72 2018",
+      "title": "Precision and efficiency in solid-state pseudopotential calculations",
+      "doi": null,
+      "year": 2018,
+      "authors": [
+        "G Prandini",
+        "A Marrazzo",
+        "I E Castelli",
+        "N Mounet",
+        "N Marzari"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1161,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 0,
+      "raw_citation": "Vos, W. L., Finger, L. W., Hemley, R. J. & Mao, H.-K. Novel H 2 -H 2 O clathrates at high pressures. Phys. Rev. Lett. 71, 3150-3153 (1993).",
+      "title": "Novel H 2 -H 2 O clathrates at high pressures",
+      "doi": null,
+      "year": 1993,
+      "authors": [
+        "W L Vos",
+        "L W Finger",
+        "R J Hemley",
+        "H.-K Mao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1162,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 1,
+      "raw_citation": "Strobel, T. A., Ganesh, P., Somayazulu, M., Kent, P. R. C. & Hemley, R. J. Novel Cooperative Interactions and Structural Ordering in H 2 S-H 2 . Phys. Rev. Lett. 107, 255503 (2011).",
+      "title": "Novel Cooperative Interactions and Structural Ordering in H 2 S-H 2",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "T A Strobel",
+        "P Ganesh",
+        "M Somayazulu",
+        "P R C Kent",
+        "R J Hemley"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1163,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 2,
+      "raw_citation": "Somayazulu, M. S., Finger, L. W., Hemley, R. J. & Mao, H. K. High-Pressure Compounds in Methane-Hydrogen Mixtures. Science 271, 1400-1402 (1996).",
+      "title": "High-Pressure Compounds in Methane-Hydrogen Mixtures",
+      "doi": null,
+      "year": 1996,
+      "authors": [
+        "M S Somayazulu",
+        "L W Finger",
+        "R J Hemley",
+        "H K Mao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1164,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 3,
+      "raw_citation": "Strobel, T. A., Somayazulu, M. & Hemley, R. J. Novel Pressure-Induced Interactions in Silane-Hydrogen. Phys. Rev. Lett. 103, 065701-065704 (2009).",
+      "title": "Novel Pressure-Induced Interactions in Silane-Hydrogen",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "T A Strobel",
+        "M Somayazulu",
+        "R J Hemley"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1165,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 4,
+      "raw_citation": "Wang, S. B., Mao, H. K., Chen, X. J. & Mao, W. L. High pressure chemistry in the H 2 -SiH 4 system. Proc. Natl. Acad. Sci. USA 106, 14763-14767 (2009).",
+      "title": "High pressure chemistry in the H 2 -SiH 4 system",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "S B Wang",
+        "H K Mao",
+        "X J Chen",
+        "W L Mao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1166,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 5,
+      "raw_citation": "Strobel, T. A., Chen, X.-J., Somayazulu, M. & Hemley, R. J. Vibrational dynamics, intermolecular interactions, and compound formation in GeH 4 -H 2 under pressure. J. Chem. Phys. 133, 164512-164519 (2010).",
+      "title": "Vibrational dynamics, intermolecular interactions, and compound formation in GeH 4 -H 2 under pressure",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "T A Strobel",
+        "X.-J Chen",
+        "M Somayazulu",
+        "R J Hemley"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1167,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 6,
+      "raw_citation": "Lin, Y., Mao, W. L. & Mao, H. Storage of molecular hydrogen in an ammonia borane compound at high pressure. Proc. Natl. Acad. Sci. USA 106, 8113 (2009).",
+      "title": "Storage of molecular hydrogen in an ammonia borane compound at high pressure",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "Y Lin",
+        "W L Mao",
+        "H Mao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1168,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 7,
+      "raw_citation": "Chellappa, R. S., Somayazulu, M., Struzhkin, V. V., Autrey, T. & Hemley, R. J. Pressure-induced complexation of NH 3 BH 3 -H 2 . J. Chem. Phys. 131, 224515-224519 (2009).",
+      "title": "Pressure-induced complexation of NH 3 BH 3 -H 2",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "R S Chellappa",
+        "M Somayazulu",
+        "V V Struzhkin",
+        "T Autrey",
+        "R J Hemley"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1169,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 8,
+      "raw_citation": "Loubeyre, P., Letoullec, R. & Pinceaux, J.-P. Compression of Ar(H 2 ) 2 up to 175 GPa: A new path for the dissociation of molecular hydrogen? Phys. Rev. Lett. 72, 1360 (1994).",
+      "title": "Compression of Ar(H 2 ) 2 up to 175 GPa: A new path for the dissociation of molecular hydrogen?",
+      "doi": null,
+      "year": 1994,
+      "authors": [
+        "P Loubeyre",
+        "R Letoullec",
+        "J.-P Pinceaux"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1170,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 9,
+      "raw_citation": "Kleppe, A. K., Amboage, M. & Jephcoat, A. P. New high-pressure van der Waals compound Kr(H 2 ) 4 discovered in the krypton-hydrogen binary system. Sci. Rep. 4, 4989 (2014).",
+      "title": "New high-pressure van der Waals compound Kr(H 2 ) 4 discovered in the krypton-hydrogen binary system",
+      "doi": null,
+      "year": 2014,
+      "authors": [
+        "A K Kleppe",
+        "M Amboage",
+        "A P Jephcoat"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1171,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 10,
+      "raw_citation": "Somayazulu, M. et al. Pressure-induced bonding and compound formation in xenon-hydrogen solids. Nat. Chem. 2, 50-53 (2010).",
+      "title": "Pressure-induced bonding and compound formation in xenon-hydrogen solids",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "M Somayazulu"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1172,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 11,
+      "raw_citation": "Mao, W. L. & Mao, H. K. Hydrogen storage in molecular compounds. Proc. Natl. Acad. Sci. USA 101, 708 (2004).",
+      "title": "Hydrogen storage in molecular compounds",
+      "doi": null,
+      "year": 2004,
+      "authors": [
+        "W L Mao",
+        "H K Mao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1173,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 12,
+      "raw_citation": "Wigner, E. & Huntington, H. B. On the Possibility of a Metallic Modification of Hydrogen. J. Chem. Phys. 3, 764-770 (1935).",
+      "title": "On the Possibility of a Metallic Modification of Hydrogen",
+      "doi": null,
+      "year": 1935,
+      "authors": [
+        "E Wigner",
+        "H B Huntington"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1174,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 13,
+      "raw_citation": "Ashcroft, N. W. Metallic Hydrogen: A High-Temperature Superconductor? Phys. Rev. Lett. 21, 1748 (1968).",
+      "title": "Metallic Hydrogen: A High-Temperature Superconductor?",
+      "doi": null,
+      "year": 1968,
+      "authors": [
+        "N W Ashcroft"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1175,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 14,
+      "raw_citation": "Eremets, M. I. & Troyan, I. A. Conductive dense hydrogen. Nat. Mater. 10, 927-931 (2011).",
+      "title": "Conductive dense hydrogen",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "M I Eremets",
+        "I A Troyan"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1176,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 15,
+      "raw_citation": "Zha, C.-S., Liu, Z. & Hemley, R. J. Synchrotron Infrared Measurements of Dense Hydrogen to 360 GPa. Phys. Rev. Lett. 108, 146402 (2012).",
+      "title": "Synchrotron Infrared Measurements of Dense Hydrogen to 360 GPa",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "C.-S Zha",
+        "Z Liu",
+        "R J Hemley"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1177,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 16,
+      "raw_citation": "Gao, G. et al. Metallic and superconducting gallane under high pressure. Phys. Rev. B 84, 064118 (2011).",
+      "title": "Metallic and superconducting gallane under high pressure",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "G Gao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1178,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 17,
+      "raw_citation": "Abe, K. & Ashcroft, N. W. Quantum disproportionation: The high hydrides at elevated pressures. Phys. Rev. B 88, 174110 (2013).",
+      "title": "Quantum disproportionation: The high hydrides at elevated pressures",
+      "doi": null,
+      "year": 2013,
+      "authors": [
+        "K Abe",
+        "N W Ashcroft"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1179,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 18,
+      "raw_citation": "Jin, X. et al. Superconducting high-pressure phases of disilane. Proc. Natl. Acad. Sci. USA 107, 9969-9973 (2010).",
+      "title": "Superconducting high-pressure phases of disilane",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "X Jin"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1180,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 19,
+      "raw_citation": "Flores-Livas, J. A. et al. High-Pressure Structures of Disilane and Their Superconducting Properties. Phys. Rev. Lett. 108, 117004 (2012).",
+      "title": "High-Pressure Structures of Disilane and Their Superconducting Properties",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "J A Flores-Livas"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1181,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 20,
+      "raw_citation": "Chen, X.-J. et al. Pressure-Induced Metallization of Silane. Proc. Natl. Acad. Sci. USA 105, 20-23 (2008).",
+      "title": "Pressure-Induced Metallization of Silane",
+      "doi": null,
+      "year": 2008,
+      "authors": [
+        "X.-J Chen"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1182,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 21,
+      "raw_citation": "Eremets, M. I., Trojan, I. A., Medvedev, S. A., Tse, J. S. & Yao, Y. Superconductivity in Hydrogen Dominant Materials: Silane. Science 319, 1506-1509 (2008).",
+      "title": "Superconductivity in Hydrogen Dominant Materials: Silane. Science",
+      "doi": null,
+      "year": 2008,
+      "authors": [
+        "M I Eremets",
+        "I A Trojan",
+        "S A Medvedev",
+        "J S Tse",
+        "Y Yao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1183,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 22,
+      "raw_citation": "Chen, X.-J. et al. Superconducting Behavior in Compressed Solid SiH 4 with a Layered Structure. Phys. Rev. Lett. 101, 077002 (2008).",
+      "title": "Superconducting Behavior in Compressed Solid SiH 4 with a Layered Structure",
+      "doi": null,
+      "year": 2008,
+      "authors": [
+        "X.-J Chen"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1184,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 23,
+      "raw_citation": "Martinez-Canales, M. et al. Novel Structures and Superconductivity of Silane under Pressure. Phys. Rev. Lett. 102, 087005-087004 (2009).",
+      "title": "Novel Structures and Superconductivity of Silane under Pressure",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "M Martinez-Canales"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1185,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 24,
+      "raw_citation": "Gao, G. et al. Superconducting High Pressure Phase of Germane. Phys. Rev. Lett. 101, 107002-107004 (2008).",
+      "title": "Superconducting High Pressure Phase of Germane",
+      "doi": null,
+      "year": 2008,
+      "authors": [
+        "G Gao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1186,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 25,
+      "raw_citation": "Zhou, D. et al. Ab initio study revealing a layered structure in hydrogen-rich KH 6 under high pressure. Phys. Rev. B 86, 014118 (2012).",
+      "title": "Ab initio study revealing a layered structure in hydrogen-rich KH 6 under high pressure",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "D Zhou"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1187,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 26,
+      "raw_citation": "Wang, H., Tse, J. S., Tanaka, K., Iitaka, T. & Ma, Y. Superconductive sodalite-like clathrate calcium hydride at high pressures. Proc. Natl. Acad. Sci. USA 109, 6463-6466 (2012).",
+      "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "H Wang",
+        "J S Tse",
+        "K Tanaka",
+        "T Iitaka",
+        "Y Ma"
+      ],
+      "match_status": "matched",
+      "cited_paper_id": 1208,
+      "match_method": "title_year"
+    },
+    {
+      "id": 1188,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 27,
+      "raw_citation": "Li, Y. et al. Superconductivity at 100 K in dense SiH 4 (H 2 ) 2 predicted by first principles. Proc. Natl. Acad. Sci. USA 107, 15708-15711 (2010).",
+      "title": "Superconductivity at 100 K in dense SiH 4 (H 2 ) 2 predicted by first principles",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "Y Li"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1189,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 28,
+      "raw_citation": "Zhong, G. et al. Structural, Electronic, Dynamical, and Superconducting Properties in Dense GeH 4 (H 2 ) 2 . J. Phys. Chem. C 116, 5225-5234 (2012).",
+      "title": "Structural, Electronic, Dynamical, and Superconducting Properties in Dense GeH 4 (H 2 ) 2",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "G Zhong"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1190,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 29,
+      "raw_citation": "Oganov, A. R. & Glass, C. W. Crystal structure prediction using ab initio evolutionary techniques: Principles and applications. J. Chem. Phys. 124, 244704-244715 (2006).",
+      "title": "Crystal structure prediction using ab initio evolutionary techniques: Principles and applications",
+      "doi": null,
+      "year": 2006,
+      "authors": [
+        "A R Oganov",
+        "C W Glass"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1191,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 30,
+      "raw_citation": "Oganov, A. R., Lyakhov, A. O. & Valle, M. How Evolutionary Crystal Structure Prediction Works-and Why. Acc. Chem. Res. 44, 227-237 (2011).",
+      "title": "How Evolutionary Crystal Structure Prediction Works-and Why",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "A R Oganov",
+        "A O Lyakhov",
+        "M Valle"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1192,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 31,
+      "raw_citation": "Lyakhov, A. O., Oganov, A. R., Stokes, H. T. & Zhu, Q. New developments in evolutionary structure prediction algorithm USPEX. Comput. Phys. Commun. 184, 1172-1182 (2013).",
+      "title": "New developments in evolutionary structure prediction algorithm USPEX",
+      "doi": null,
+      "year": 2013,
+      "authors": [
+        "A O Lyakhov",
+        "A R Oganov",
+        "H T Stokes",
+        "Q Zhu"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1193,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 32,
+      "raw_citation": "Pickard, C. J. & Needs, R. J. Structure of phase III of solid hydrogen. Nat. Phys. 3, 473-476 (2007).",
+      "title": "Structure of phase III of solid hydrogen",
+      "doi": null,
+      "year": 2007,
+      "authors": [
+        "C J Pickard",
+        "R J Needs"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1194,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 33,
+      "raw_citation": "Degtyareva, O. et al. Novel chain structures in group VI elements. Nat. Mater. 4, 152-155 (2005).",
+      "title": "Novel chain structures in group VI elements",
+      "doi": null,
+      "year": 2005,
+      "authors": [
+        "O Degtyareva"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1195,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 34,
+      "raw_citation": "Luo, H., Greene, R. G. & Ruoff, A. L. b-Po phase of sulfur at 162 GPa: X-ray diffraction study to 212 GPa. Phys. Rev. Lett. 71, 2943-2946 (1993).",
+      "title": "b-Po phase of sulfur at 162 GPa: X-ray diffraction study to 212 GPa",
+      "doi": null,
+      "year": 1993,
+      "authors": [
+        "H Luo",
+        "R G Greene",
+        "A L Ruoff"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1196,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 35,
+      "raw_citation": "Li, Y., Hao, J., Liu, H., Li, Y. & Ma, Y. The metallization and superconductivity of dense hydrogen sulfide. J. Chem. Phys. 140, 174712 (2014).",
+      "title": "The metallization and superconductivity of dense hydrogen sulfide",
+      "doi": null,
+      "year": 2014,
+      "authors": [
+        "Y Li",
+        "J Hao",
+        "H Liu",
+        "Y Li",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1197,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 36,
+      "raw_citation": "Simon, A. Superconductivity and Chemistry. Angew. Chem., Int. Ed. 36, 1788-1806 (1997).",
+      "title": "Superconductivity and Chemistry",
+      "doi": null,
+      "year": 1997,
+      "authors": [
+        "A Simon"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1198,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 37,
+      "raw_citation": "Azadi, S. & Foulkes, W. M. C. Fate of density functional theory in the study of high-pressure solid hydrogen. Phys. Rev. B 88, 014115 (2013).",
+      "title": "Fate of density functional theory in the study of high-pressure solid hydrogen",
+      "doi": null,
+      "year": 2013,
+      "authors": [
+        "S Azadi",
+        "W M C Foulkes"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1199,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 38,
+      "raw_citation": "Allen, P. B. Neutron Spectroscopy of Superconductors. Phys. Rev. B 6, 2577-2579 (1972).",
+      "title": "Neutron Spectroscopy of Superconductors",
+      "doi": null,
+      "year": 1972,
+      "authors": [
+        "P B Allen"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1200,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 39,
+      "raw_citation": "Ashcroft, N. W. Hydrogen Dominant Metallic Alloys: High Temperature Superconductors? Phys. Rev. Lett. 92, 187002 (2004).",
+      "title": "Hydrogen Dominant Metallic Alloys: High Temperature Superconductors?",
+      "doi": null,
+      "year": 2004,
+      "authors": [
+        "N W Ashcroft"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1201,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 40,
+      "raw_citation": "Allen, P. B. & Dynes, R. C. Transition temperature of strong-coupled superconductors reanalyzed. Phys. Rev. B 12, 905-922 (1975).",
+      "title": "Transition temperature of strong-coupled superconductors reanalyzed",
+      "doi": null,
+      "year": 1975,
+      "authors": [
+        "P B Allen",
+        "R C Dynes"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1202,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 41,
+      "raw_citation": "Yao, Y. & Klug, D. D. High-pressure phase transition and metallization in Ar(H 2 ) 2 . Phys. Rev. B 83, 020105 (2011).",
+      "title": "High-pressure phase transition and metallization in Ar(H 2 ) 2",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "Y Yao",
+        "D D Klug"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1203,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 42,
+      "raw_citation": "Perdew, J. P., Burke, K. & Ernzerhof, M. Generalized Gradient Approximation Made Simple. Phys. Rev. Lett. 77, 3865-3868 (1996).",
+      "title": "Generalized Gradient Approximation Made Simple",
+      "doi": null,
+      "year": 1996,
+      "authors": [
+        "J P Perdew",
+        "K Burke",
+        "M Ernzerhof"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1204,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 43,
+      "raw_citation": "Kresse, G. & Furthmu ¨ller, J. Efficient iterative schemes for ab initio total-energy calculations using a plane-wave basis set. Phys. Rev. B 54, 11169-11186 (1996).",
+      "title": "Efficient iterative schemes for ab initio total-energy calculations using a plane-wave basis set",
+      "doi": null,
+      "year": 1996,
+      "authors": [
+        "G Kresse",
+        "J Furthmu ¨ller"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1205,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 44,
+      "raw_citation": "Kresse, G. & Joubert, D. From ultrasoft pseudopotentials to the projector augmented-wave method. Phys. Rev. B 59, 1758-1775 (1999).",
+      "title": "From ultrasoft pseudopotentials to the projector augmented-wave method",
+      "doi": null,
+      "year": 1999,
+      "authors": [
+        "G Kresse",
+        "D Joubert"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1206,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 45,
+      "raw_citation": "Baroni, S., de Gironcoli, S., Dal Corso, A. & Giannozzi, P. Phonons and related crystal properties from density-functional perturbation theory. Rev. Mod. Phys. 73, 515-562 (2001).",
+      "title": "Phonons and related crystal properties from density-functional perturbation theory",
+      "doi": null,
+      "year": 2001,
+      "authors": [
+        "S Baroni",
+        "S De Gironcoli",
+        "A Dal Corso",
+        "P Giannozzi"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1207,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 46,
+      "raw_citation": "Vanderbilt, D. Soft self-consistent pseudopotentials in a generalized eigenvalue formalism. Phys. Rev. B 41, 7892 (1990).",
+      "title": "Soft self-consistent pseudopotentials in a generalized eigenvalue formalism",
+      "doi": null,
+      "year": 1990,
+      "authors": [
+        "D Vanderbilt"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1208,
+      "paper_id": 1204,
+      "paper_revision": 1,
+      "reference_index": 47,
+      "raw_citation": "Paolo, G. et al. QUANTUM ESPRESSO: a modular and open-source software project for quantum simulations of materials. J. Phys.: Condens. Matter 21, 395502 (2009).",
+      "title": "QUANTUM ESPRESSO: a modular and open-source software project for quantum simulations of materials",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "G Paolo"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1209,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 0,
+      "raw_citation": "Ashcroft NW (2004) Hydrogen dominant metallic alloys: High temperature super- conductors? Phys Rev Lett 92:187002.",
+      "title": "Hydrogen dominant metallic alloys: High temperature superconductors?",
+      "doi": null,
+      "year": 2004,
+      "authors": [
+        "N W Ashcroft"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1210,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 1,
+      "raw_citation": "Eremets MI, Trojan IA, Medvedev SA, Tse JS, Yao Y (2008) Superconductivity in hydro- gen dominant materials: Silane. Science 319:1506-1509.",
+      "title": "Superconductivity in hydrogen dominant materials: Silane",
+      "doi": null,
+      "year": 2008,
+      "authors": [
+        "M I Eremets",
+        "I A Trojan",
+        "S A Medvedev",
+        "J S Tse",
+        "Y Yao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1211,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 2,
+      "raw_citation": "Degtyareva O, Proctor JE, Guillaume CL, Gregoryanz E, Hanfland M (2009) Formation of transition metal hydrides at high pressures. Solid State Commun 149:1583-1586.",
+      "title": "Formation of transition metal hydrides at high pressures",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "O Degtyareva",
+        "J E Proctor",
+        "C L Guillaume",
+        "E Gregoryanz",
+        "M Hanfland"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1212,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 3,
+      "raw_citation": "Hanfland M, Proctor JE, Guillaume CL, Degtyareva O, Gregoryanz E (2011) High-pres- sure synthesis, amorphization, and decomposition of silane. Phys Rev Lett 106:095503.",
+      "title": "High-pressure synthesis, amorphization, and decomposition of silane",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "M Hanfland",
+        "J E Proctor",
+        "C L Guillaume",
+        "O Degtyareva",
+        "E Gregoryanz"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1213,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 4,
+      "raw_citation": "Strobel TA, et al. (2011) High-pressure study of silane to 150 GPa. Phys Rev B 83:144102.",
+      "title": "High-pressure study of silane to 150 GPa",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "T A Strobel"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1214,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 5,
+      "raw_citation": "Feng J, et al. (2006) Structures and potential superconductivity in SiH4 at high pressure: En route to \"metallic hydrogen\". Phys Rev Lett 96:017006.",
+      "title": "Structures and potential superconductivity in SiH4 at high pressure: En route to \"metallic hydrogen",
+      "doi": null,
+      "year": 2006,
+      "authors": [
+        "J Feng"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1215,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 6,
+      "raw_citation": "Tse JS, Yao Y, Tanaka K (2007) Novel superconductivity in metallic SnH4 under high pressure. Phys Rev Lett 98:117004.",
+      "title": "Novel superconductivity in metallic SnH4 under high pressure",
+      "doi": null,
+      "year": 2007,
+      "authors": [
+        "J S Tse",
+        "Y Yao",
+        "K Tanaka"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1216,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 7,
+      "raw_citation": "Gao G, et al. (2008) Superconducting high pressure phase of germane. Phys Rev Lett 101:107002.",
+      "title": "Superconducting high pressure phase of germane",
+      "doi": null,
+      "year": 2008,
+      "authors": [
+        "G Gao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1217,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 8,
+      "raw_citation": "Martinez-Canales M, et al. (2009) Novel structures and superconductivity of silane under pressure. Phys Rev Lett 102:087005.",
+      "title": "Novel structures and superconductivity of silane under pressure",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "M Martinez-Canales"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1218,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 9,
+      "raw_citation": "Kim DY, Scheicher RH, Mao H-K, Kang TW, Ahuja R (2010) General trend for pressurized superconducting hydrogen-dense materials. Proc Natl Acad Sci USA 107:2793-2796.",
+      "title": "General trend for pressurized superconducting hydrogen-dense materials",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "D Y Kim",
+        "R H Scheicher",
+        "H-K Mao",
+        "T W Kang",
+        "R Ahuja"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1219,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 10,
+      "raw_citation": "Li Y, et al. (2010) Superconductivity at ∼100 K in dense SiH 4 ðH 2 Þ2 predicted by first principles. Proc Natl Acad Sci USA 107:15708-15711.",
+      "title": "Superconductivity at ∼100 K in dense SiH 4 ðH 2 Þ2 predicted by first principles",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "Y Li"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1220,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 11,
+      "raw_citation": "Jin X, et al. (2010) Superconducting high-pressure phases of disilane. Proc Natl Acad Sci USA 107:9969-9973.",
+      "title": "Superconducting high-pressure phases of disilane",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "X Jin"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1221,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 12,
+      "raw_citation": "Goncharenko I, et al. (2008) Pressure-induced hydrogen-dominant metallic state in aluminum hydride. Phys Rev Lett 100:045504.",
+      "title": "Pressure-induced hydrogen-dominant metallic state in aluminum hydride",
+      "doi": null,
+      "year": 2008,
+      "authors": [
+        "I Goncharenko"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1222,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 13,
+      "raw_citation": "Neaton JB, Ashcroft NW (1999) Pairing in dense lithium. Nature 400:141-144.",
+      "title": "Pairing in dense lithium",
+      "doi": null,
+      "year": 1999,
+      "authors": [
+        "J B Neaton",
+        "N W Ashcroft"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1223,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 14,
+      "raw_citation": "Tamblyn I, Raty J-Y, Bonev SA (2008) Tetrahedral clustering in molten lithium under pressure. Phys Rev Lett 101:075703.",
+      "title": "Tetrahedral clustering in molten lithium under pressure",
+      "doi": null,
+      "year": 2008,
+      "authors": [
+        "I Tamblyn",
+        "J-Y Raty",
+        "S A Bonev"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1224,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 15,
+      "raw_citation": "Tse JS (2005) Crystallography of selected high pressure elemental solids. Zeitschrift für Kristallographie 220:521-530.",
+      "title": "Crystallography of selected high pressure elemental solids",
+      "doi": null,
+      "year": 2005,
+      "authors": [
+        "J S Tse"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1225,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 16,
+      "raw_citation": "Zurek E, Hoffmann R, Ashcroft NW, Oganov AR, Lyakhov AO (2009) A little bit of lithium does a lot for hydrogen. Proc Natl Acad Sci USA 106:17640-17643.",
+      "title": "A little bit of lithium does a lot for hydrogen",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "E Zurek",
+        "R Hoffmann",
+        "N W Ashcroft",
+        "A R Oganov",
+        "A O Lyakhov"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1226,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 17,
+      "raw_citation": "Baettig P, Zurek E (2011) Pressure-stabilized sodium polyhydrides: NaH n (n > 1). Phys Rev Lett 106:237002.",
+      "title": "Pressure-stabilized sodium polyhydrides: NaH n (n > 1)",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "P Baettig",
+        "E Zurek"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1227,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 18,
+      "raw_citation": "Wang Y, Lv J, Zhu L, Ma Y (2010) Crystal structure prediction via particle-swarm opti- mization. Phys Rev B 82:094116.",
+      "title": "Crystal structure prediction via particle-swarm optimization",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "Y Wang",
+        "J Lv",
+        "L Zhu",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1228,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 19,
+      "raw_citation": "Ma Y, Tse JS (2007) Ab initio determination of crystal lattice constants and thermal expansion for germanium isotopes. Solid State Commun 143:161-165.",
+      "title": "Ab initio determination of crystal lattice constants and thermal expansion for germanium isotopes",
+      "doi": null,
+      "year": 2007,
+      "authors": [
+        "Y Ma",
+        "J S Tse"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1229,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 20,
+      "raw_citation": "Richard FWB (1990) Atoms in molecules: a quantum theory (Oxford University Press, Oxford).",
+      "title": "Atoms in molecules: a quantum theory",
+      "doi": null,
+      "year": 1990,
+      "authors": [
+        "Fwb Richard"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1230,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 21,
+      "raw_citation": "Jahn HA, Teller E (1937) Stability of polyatomic molecules in degenerate electronic states. I. Orbital degeneracy. Proc Roy Soc A 161:220-235.",
+      "title": "Stability of polyatomic molecules in degenerate electronic states. I. Orbital degeneracy",
+      "doi": null,
+      "year": 1937,
+      "authors": [
+        "H A Jahn",
+        "E Teller"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1231,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 22,
+      "raw_citation": "Ma Y, et al. (2005) First-principles study of electron-phonon coupling in hole-and electron-doped diamonds in the virtual crystal approximation. Phys Rev B 72:014306.",
+      "title": "First-principles study of electron-phonon coupling in hole-and electron-doped diamonds in the virtual crystal approximation",
+      "doi": null,
+      "year": 2005,
+      "authors": [
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1232,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 23,
+      "raw_citation": "Laflamme Janssen J, Côté M, Louie SG, Cohen ML (2010) Electron-phonon coupling in C 60 using hybrid functionals. Phys Rev B 81:073106.",
+      "title": "Electron-phonon coupling in C 60 using hybrid functionals",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "Laflamme Janssen",
+        "J Côté",
+        "M Louie",
+        "S G Cohen",
+        "M L"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1233,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 24,
+      "raw_citation": "Schlüter M, Lannoo M, Needels M, Baraff GA, Tománek D (1992) Superconductivity in alkali intercalated C 60 . J Phys Chem Solids 53:1473-1485.",
+      "title": "Superconductivity in alkali intercalated C 60",
+      "doi": null,
+      "year": 1992,
+      "authors": [
+        "M Schlüter",
+        "M Lannoo",
+        "M Needels",
+        "G A Baraff",
+        "D Tománek"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1234,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 25,
+      "raw_citation": "Eliashberg GM (1960) Interactions between electrons and lattice vibrations in a superconductor. Sov Phys JETP 11:696.",
+      "title": "Interactions between electrons and lattice vibrations in a superconductor",
+      "doi": null,
+      "year": 1960,
+      "authors": [
+        "G M Eliashberg"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1235,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 26,
+      "raw_citation": "Yao Y, Tse JS, Tanaka K, Marsiglio F, Ma Y (2009) Superconductivity in lithium under high pressure investigated with density functional and Eliashberg theory. Phys Rev B 79:054524.",
+      "title": "Superconductivity in lithium under high pressure investigated with density functional and Eliashberg theory",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "Y Yao",
+        "J S Tse",
+        "K Tanaka",
+        "F Marsiglio",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1236,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 27,
+      "raw_citation": "Rousseau B, Bergara A (2010) Giant anharmonicity suppresses superconductivity in AlH 3 under pressure. Phys Rev B 82:104504.",
+      "title": "Giant anharmonicity suppresses superconductivity in AlH 3 under pressure",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "B Rousseau",
+        "A Bergara"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1237,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 28,
+      "raw_citation": "Garland JW, Bennemann KH, Mueller FM (1968) Effect of lattice disorder on the super- conducting transition temperature. Phys Rev Lett 21:1315.",
+      "title": "Effect of lattice disorder on the superconducting transition temperature",
+      "doi": null,
+      "year": 1968,
+      "authors": [
+        "J W Garland",
+        "K H Bennemann",
+        "F M Mueller"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1238,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 29,
+      "raw_citation": "Lv J, Wang Y, Zhu L, Ma Y (2011) Predicted novel high-pressure phases of lithium. Phys Rev Lett 106:015503.",
+      "title": "Predicted novel high-pressure phases of lithium",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "J Lv",
+        "Y Wang",
+        "L Zhu",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1239,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 30,
+      "raw_citation": "Li P, Gao G, Wang Y, Ma Y (2010) Crystal structures and exotic behavior of magnesium under pressure. J Phys Chem C 114:21745-21749.",
+      "title": "Crystal structures and exotic behavior of magnesium under pressure",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "P Li",
+        "G Gao",
+        "Y Wang",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1240,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 31,
+      "raw_citation": "Zhu L, et al. (2011) Substitutional alloy of Bi and Te at high pressure. Phys Rev Lett 106:145501.",
+      "title": "Substitutional alloy of Bi and Te at high pressure",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "L Zhu"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1241,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 32,
+      "raw_citation": "Guillaume CL, et al. (2011) Cold melting and solid structures of dense lithium. Nat Phys 7:211-214.",
+      "title": "Cold melting and solid structures of dense lithium",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "C L Guillaume"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1242,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 33,
+      "raw_citation": "Perdew JP, Burke K, Ernzerhof M (1996) Generalized gradient approximation made simple. Phys Rev Lett 77:3865.",
+      "title": "Generalized gradient approximation made simple",
+      "doi": null,
+      "year": 1996,
+      "authors": [
+        "J P Perdew",
+        "K Burke",
+        "M Ernzerhof"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1243,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 34,
+      "raw_citation": "Kresse G, Furthmüller J (1996) Efficient iterative schemes for ab initio total-energy calculations using a plane-wave basis set. Phys Rev B 54:11169.",
+      "title": "Efficient iterative schemes for ab initio total-energy calculations using a plane-wave basis set",
+      "doi": null,
+      "year": 1996,
+      "authors": [
+        "G Kresse",
+        "J Furthmüller"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1244,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 35,
+      "raw_citation": "Blöchl PE (1994) Projector augmented-wave method. Phys Rev B 50:17953.",
+      "title": "Projector augmented-wave method",
+      "doi": null,
+      "year": 1994,
+      "authors": [
+        "P E Blöchl"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1245,
+      "paper_id": 1208,
+      "paper_revision": 1,
+      "reference_index": 36,
+      "raw_citation": "Giannozzi P, et al. (2009) QUANTUM ESPRESSO: A modular and open-source software project for quantum simulations of materials. J Phys: Condens Matter 21:395502.",
+      "title": "QUANTUM ESPRESSO: A modular and open-source software project for quantum simulations of materials",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "P Giannozzi"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1246,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 0,
+      "raw_citation": "of Basic Energy Sciences under Award DE-SC0001057. The infrastruc- ture and facilities used are supported by the US Department of Energy/ National Nuclear Security Administration (Grant DE-NA-0002006, Capital/Depart- ment of Energy Alliance Center).",
+      "title": "Basic Energy Sciences under Award DE-SC0001057. The infrastructure and facilities used are supported by the US Department of Energy/ National Nuclear Security Administration (Grant DE-NA-0002006",
+      "doi": null,
+      "year": null,
+      "authors": null,
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1247,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 1,
+      "raw_citation": "Ashcroft NW (1968) Metallic hydrogen: A high-temperature superconductor? Phys Rev Lett 21:1748.",
+      "title": "Metallic hydrogen: A high-temperature superconductor?",
+      "doi": null,
+      "year": 1968,
+      "authors": [
+        "N W Ashcroft"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1248,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 2,
+      "raw_citation": "Ashcroft NW (2004) Hydrogen dominant metallic alloys: High temperature super- conductors? Phys Rev Lett 92:187002.",
+      "title": "Hydrogen dominant metallic alloys: High temperature superconductors?",
+      "doi": null,
+      "year": 2004,
+      "authors": [
+        "N W Ashcroft"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1249,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 3,
+      "raw_citation": "Bardeen J, Cooper LN, Schrieffer JR (1957) Microscopic theory of superconductivity. Phys Rev 106:162.",
+      "title": "Microscopic theory of superconductivity",
+      "doi": null,
+      "year": 1957,
+      "authors": [
+        "J Bardeen",
+        "L N Cooper",
+        "J R Schrieffer"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1250,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 4,
+      "raw_citation": "Eremets MI, Trojan IA, Medvedev SA, Tse JS, Yao Y (2008) Superconductivity in hy- drogen dominant materials: Silane. Science 319:1506-1509.",
+      "title": "Superconductivity in hydrogen dominant materials: Silane",
+      "doi": null,
+      "year": 2008,
+      "authors": [
+        "M I Eremets",
+        "I A Trojan",
+        "S A Medvedev",
+        "J S Tse",
+        "Y Yao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1251,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 5,
+      "raw_citation": "Chen XJ, et al. (2008) Superconducting behavior in compressed solid SiH 4 with a layered structure. Phys Rev Lett 101:077002.",
+      "title": "Superconducting behavior in compressed solid SiH 4 with a layered structure",
+      "doi": null,
+      "year": 2008,
+      "authors": [
+        "X J Chen"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1252,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 6,
+      "raw_citation": "Zurek E, Hoffmann R, Ashcroft NW, Oganov AR, Lyakhov AO (2009) A little bit of lithium does a lot for hydrogen. Proc Natl Acad Sci USA 106:17640-17643.",
+      "title": "A little bit of lithium does a lot for hydrogen",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "E Zurek",
+        "R Hoffmann",
+        "N W Ashcroft",
+        "A R Oganov",
+        "A O Lyakhov"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1253,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 7,
+      "raw_citation": "Strobel TA, et al. (2011) High-pressure study of silane to 150 GPa. Phys Rev B 83: 144102.",
+      "title": "High-pressure study of silane to 150 GPa",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "T A Strobel"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1254,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 8,
+      "raw_citation": "Shamp A, Zurek E (2015) Superconducting high-pressure phases composed of hy- drogen and iodine. J Phys Chem Lett 6:4067-4072.",
+      "title": "Superconducting high-pressure phases composed of hydrogen and iodine",
+      "doi": null,
+      "year": 2015,
+      "authors": [
+        "A Shamp",
+        "E Zurek"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1255,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 9,
+      "raw_citation": "Struzhkin VV, et al. (2016) Synthesis of sodium polyhydrides at high pressures. Nat Commun 7:12267.",
+      "title": "Synthesis of sodium polyhydrides at high pressures",
+      "doi": null,
+      "year": 2016,
+      "authors": [
+        "V V Struzhkin"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1256,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 10,
+      "raw_citation": "Shamp A, Zurek E (2017) Superconductivity in hydrides doped with main group ele- ments under pressure. Novel Supercond Mat 3:14-22.",
+      "title": "Superconductivity in hydrides doped with main group elements under pressure",
+      "doi": null,
+      "year": 2017,
+      "authors": [
+        "A Shamp",
+        "E Zurek"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1257,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 11,
+      "raw_citation": "Feng J, et al. (2006) Structures and potential superconductivity in at high pressure: En route to \"metallic hydrogen\". Phys Rev Lett 96:017006.",
+      "title": "Structures and potential superconductivity in at high pressure: En route to \"metallic hydrogen",
+      "doi": null,
+      "year": 2006,
+      "authors": [
+        "J Feng"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1258,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 12,
+      "raw_citation": "Tse JS, Yao Y, Tanaka K (2007) Novel superconductivity in metallic SnH 4 under high pressure. Phys Rev Lett 98:117004.",
+      "title": "Novel superconductivity in metallic SnH 4 under high pressure",
+      "doi": null,
+      "year": 2007,
+      "authors": [
+        "J S Tse",
+        "Y Yao",
+        "K Tanaka"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1259,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 13,
+      "raw_citation": "Gao G, et al. (2008) Superconducting high pressure phase of germane. Phys Rev Lett 101:107002.",
+      "title": "Superconducting high pressure phase of germane",
+      "doi": null,
+      "year": 2008,
+      "authors": [
+        "G Gao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1260,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 14,
+      "raw_citation": "Li Y, et al. (2010) Superconductivity at approximately 100 K in dense SiH4(H2)2 pre- dicted by first principles. Proc Natl Acad Sci USA 107:15708-15711.",
+      "title": "Superconductivity at approximately 100 K in dense SiH4(H2)2 predicted by first principles",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "Y Li"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1261,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 15,
+      "raw_citation": "Chen Y, Hu QM, Yang R (2012) Predicted suppression of the superconducting tran- sition of new high-pressure yttrium phases with increasing pressure from first- principles calculations. Phys Rev Lett 109:157004.",
+      "title": "Predicted suppression of the superconducting transition of new high-pressure yttrium phases with increasing pressure from firstprinciples calculations",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "Y Chen",
+        "Q M Hu",
+        "R Yang"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1262,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 16,
+      "raw_citation": "Kim DY, Scheicher RH, Ahuja R (2009) Predicted high-temperature superconducting state in the hydrogen-dense transition-metal hydride YH 3 at 40 K and 17.7 GPa. Phys Rev Lett 103:077002.",
+      "title": "Predicted high-temperature superconducting state in the hydrogen-dense transition-metal hydride YH 3 at 40 K and 17.7 GPa",
+      "doi": null,
+      "year": 2009,
+      "authors": [
+        "D Y Kim",
+        "R H Scheicher",
+        "R Ahuja"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1263,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 17,
+      "raw_citation": "Wang H, Tse JS, Tanaka K, Iitaka T, Ma Y (2012) Superconductive sodalite-like clathrate calcium hydride at high pressures. Proc Natl Acad Sci USA 109:6463-6466.",
+      "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "H Wang",
+        "J S Tse",
+        "K Tanaka",
+        "T Iitaka",
+        "Y Ma"
+      ],
+      "match_status": "matched",
+      "cited_paper_id": 1208,
+      "match_method": "title_year"
+    },
+    {
+      "id": 1264,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 18,
+      "raw_citation": "Gao G, et al. (2013) Theoretical study of the ground-state structures and properties of niobium hydrides under pressure. Phys Rev B 88:184104.",
+      "title": "Theoretical study of the ground-state structures and properties of niobium hydrides under pressure",
+      "doi": null,
+      "year": 2013,
+      "authors": [
+        "G Gao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1265,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 19,
+      "raw_citation": "Li Y, Hao J, Liu H, Li Y, Ma Y (2014) The metallization and superconductivity of dense hydrogen sulfide. J Chem Phys 140:174712.",
+      "title": "The metallization and superconductivity of dense hydrogen sulfide",
+      "doi": null,
+      "year": 2014,
+      "authors": [
+        "Y Li",
+        "J Hao",
+        "H Liu",
+        "Y Li",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1266,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 20,
+      "raw_citation": "Drozdov AP, Eremets MI, Troyan IA, Ksenofontov V, Shylin SI (2015) Conventional superconductivity at 203 kelvin at high pressures in the sulfur hydride system. Nature 525:73-76.",
+      "title": "Conventional superconductivity at 203 kelvin at high pressures in the sulfur hydride system",
+      "doi": null,
+      "year": 2015,
+      "authors": [
+        "A P Drozdov",
+        "M I Eremets",
+        "I A Troyan",
+        "V Ksenofontov",
+        "S I Shylin"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1267,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 21,
+      "raw_citation": "Errea I, et al. (2015) High-pressure hydrogen sulfide from first principles: A strongly anharmonic phonon-mediated superconductor. Phys Rev Lett 114:157004.",
+      "title": "High-pressure hydrogen sulfide from first principles: A strongly anharmonic phonon-mediated superconductor",
+      "doi": null,
+      "year": 2015,
+      "authors": [
+        "I Errea"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1268,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 22,
+      "raw_citation": "Li Y, et al. (2015) Dissociation products and structures of solid H2S at strong com- pression. Phys Rev B 93:020103.",
+      "title": "Dissociation products and structures of solid H2S at strong compression",
+      "doi": null,
+      "year": 2015,
+      "authors": [
+        "Y Li"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1269,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 23,
+      "raw_citation": "Einaga M, et al. (2016) Crystal structure of the superconducting phase of sulfur hy- dride. Nat Phys 12:835-838.",
+      "title": "Crystal structure of the superconducting phase of sulfur hydride",
+      "doi": null,
+      "year": 2016,
+      "authors": [
+        "M Einaga"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1270,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 24,
+      "raw_citation": "Duan D, et al. (2014) Pressure-induced metallization of dense (H 2 S) 2 H 2 with high-Tc superconductivity. Sci Rep 4:6968.",
+      "title": "Pressure-induced metallization of dense (H 2 S) 2 H 2 with high-Tc superconductivity",
+      "doi": null,
+      "year": 2014,
+      "authors": [
+        "D Duan"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1271,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 25,
+      "raw_citation": "Drozdov AP, Eremets MI, Troyan IA (2015) Superconductivity above 100 K in PH 3 at high pressures. arXiv:1508.06224.",
+      "title": "Superconductivity above 100 K in PH 3 at high pressures",
+      "doi": null,
+      "year": 2015,
+      "authors": [
+        "A P Drozdov",
+        "M I Eremets",
+        "I A Troyan"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1272,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 26,
+      "raw_citation": "Shamp A, et al. (2016) Decomposition products of phosphine under pressure: PH 2 stable and superconducting? J Am Chem Soc 138:1884-1892.",
+      "title": "Decomposition products of phosphine under pressure: PH 2 stable and superconducting?",
+      "doi": null,
+      "year": 2016,
+      "authors": [
+        "A Shamp"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1273,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 27,
+      "raw_citation": "Liu H, Li Y, Gao G, Tse JS, Naumov II (2016) Crystal structure and superconductivity of PH 3 at high pressures. J Phys Chem C 120:3458-3461.",
+      "title": "Crystal structure and superconductivity of PH 3 at high pressures",
+      "doi": null,
+      "year": 2016,
+      "authors": [
+        "H Liu",
+        "Y Li",
+        "G Gao",
+        "J S Tse",
+        "I I Naumov"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1274,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 28,
+      "raw_citation": "Flores-Livas JA, et al. (2016) Superconductivity in metastable phases of phosphorus- hydride compounds under high pressure. Phys Rev B 93:020508.",
+      "title": "Superconductivity in metastable phases of phosphorushydride compounds under high pressure",
+      "doi": null,
+      "year": 2016,
+      "authors": [
+        "J A Flores-Livas"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1275,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 29,
+      "raw_citation": "Feng X, Zhang J, Gao G, Liu H, Wang H (2015) Compressed sodalite-like MgH6 as a potential high-temperature superconductor. RSC Adv 5:59292-59296.",
+      "title": "Compressed sodalite-like MgH6 as a potential high-temperature superconductor",
+      "doi": null,
+      "year": 2015,
+      "authors": [
+        "X Feng",
+        "J Zhang",
+        "G Gao",
+        "H Liu",
+        "H Wang"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1276,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 30,
+      "raw_citation": "Li Y, et al. (2015) Pressure-stabilized superconductive yttrium hydrides. Sci Rep 5:9948.",
+      "title": "Pressure-stabilized superconductive yttrium hydrides",
+      "doi": null,
+      "year": 2015,
+      "authors": [
+        "Y Li"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1277,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 31,
+      "raw_citation": "Wang Y, Lv J, Zhu L, Ma Y (2010) Crystal structure prediction via particle-swarm op- timization. Phys Rev B 82:094116.",
+      "title": "Crystal structure prediction via particle-swarm optimization",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "Y Wang",
+        "J Lv",
+        "L Zhu",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1278,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 32,
+      "raw_citation": "Wang Y, Lv J, Zhu L, Ma Y (2012) CALYPSO: A method for crystal structure prediction. Comput Phys Commun 183:2063-2070.",
+      "title": "CALYPSO: A method for crystal structure prediction",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "Y Wang",
+        "J Lv",
+        "L Zhu",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1279,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 33,
+      "raw_citation": "Liu H, Wang H, Ma Y (2012) Quasi-molecular and atomic phases of dense solid hy- drogen. J Phys Chem C 116:9221-9226.",
+      "title": "Quasi-molecular and atomic phases of dense solid hydrogen",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "H Liu",
+        "H Wang",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1280,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 34,
+      "raw_citation": "Zhu L, et al. (2011) Substitutional alloy of Bi and Te at high pressure. Phys Rev Lett 106:145501.",
+      "title": "Substitutional alloy of Bi and Te at high pressure",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "L Zhu"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1281,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 35,
+      "raw_citation": "Zhang M, et al. (2015) Two-dimensional boron-nitrogen-carbon monolayers with tunable direct band gaps. Nanoscale 7:12023-12029.",
+      "title": "Two-dimensional boron-nitrogen-carbon monolayers with tunable direct band gaps",
+      "doi": null,
+      "year": 2015,
+      "authors": [
+        "M Zhang"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1282,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 36,
+      "raw_citation": "Miao MS (2013) Caesium in high oxidation states and as a p-block element. Nat Chem 5:846-852.",
+      "title": "Caesium in high oxidation states and as a p-block element",
+      "doi": null,
+      "year": 2013,
+      "authors": [
+        "M S Miao"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1283,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 37,
+      "raw_citation": "Zhu L, Liu H, Pickard CJ, Zou G, Ma Y (2014) Reactions of xenon with iron and nickel are predicted in the Earth's inner core. Nat Chem 6:644-648.",
+      "title": "Reactions of xenon with iron and nickel are predicted in the Earth's inner core",
+      "doi": null,
+      "year": 2014,
+      "authors": [
+        "L Zhu",
+        "H Liu",
+        "C J Pickard",
+        "G Zou",
+        "Y Ma"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1284,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 38,
+      "raw_citation": "Yong X, et al. (2016) Crystal structures and dynamical properties of dense CO 2 . Proc Natl Acad Sci USA 113:11110-11115.",
+      "title": "Crystal structures and dynamical properties of dense CO 2",
+      "doi": null,
+      "year": 2016,
+      "authors": [
+        "X Yong"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1285,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 39,
+      "raw_citation": "Liu H, Naumov II, Hemley RJ (2016) Dense hydrocarbon structures at megabar pres- sures. J Phys Chem Lett 7:4218-4222.",
+      "title": "Dense hydrocarbon structures at megabar pressures",
+      "doi": null,
+      "year": 2016,
+      "authors": [
+        "H Liu",
+        "I I Naumov",
+        "R J Hemley"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1286,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 40,
+      "raw_citation": "Perdew JP, Burke K, Ernzerhof M (1996) Generalized gradient approximation made simple. Phys Rev Lett 77:3865-3868.",
+      "title": "Generalized gradient approximation made simple",
+      "doi": null,
+      "year": 1996,
+      "authors": [
+        "J P Perdew",
+        "K Burke",
+        "M Ernzerhof"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1287,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 41,
+      "raw_citation": "Amri M, Clarkson GJ, Walton RI (2010) Anisotropic thermal expansion of SiO2 and AlPO 4 clathrasils with the AST-type structure. J Phys Chem C 114:6726-6733.",
+      "title": "Anisotropic thermal expansion of SiO2 and AlPO 4 clathrasils with the AST-type structure",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "M Amri",
+        "G J Clarkson",
+        "R I Walton"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1288,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 42,
+      "raw_citation": "Papaconstantopoulos D, Klein B, Mehl M, Pickett W (2015) Cubic H 3 S around 200 GPa: An atomic hydrogen superconductor stabilized by sulfur. Phys Rev B 91:184511.",
+      "title": "Cubic H 3 S around 200 GPa: An atomic hydrogen superconductor stabilized by sulfur",
+      "doi": null,
+      "year": 2015,
+      "authors": [
+        "D Papaconstantopoulos",
+        "B Klein",
+        "M Mehl",
+        "W Pickett"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1289,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 43,
+      "raw_citation": "McMahon JM, Ceperley DM (2011) Ground-state structures of atomic metallic hy- drogen. Phys Rev Lett 106:165302.",
+      "title": "Ground-state structures of atomic metallic hydrogen",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "J M Mcmahon",
+        "D M Ceperley"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1290,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 44,
+      "raw_citation": "Dynes R (1972) McMillan's equation and the T c of superconductors. Solid State Commun 10:615-618.",
+      "title": "McMillan's equation and the T c of superconductors",
+      "doi": null,
+      "year": 1972,
+      "authors": [
+        "R Dynes"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1291,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 45,
+      "raw_citation": "Nixon LW, Papaconstantopoulos DA, Mehl MJ (2008) Electronic structure and super- conducting properties of lanthanum. Phys Rev B 78:214510.",
+      "title": "Electronic structure and superconducting properties of lanthanum",
+      "doi": null,
+      "year": 2008,
+      "authors": [
+        "L W Nixon",
+        "D A Papaconstantopoulos",
+        "M J Mehl"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1292,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 46,
+      "raw_citation": "Ba gci S, Tutuncu H, Duman S, Srivastava G (2010) Phonons and superconductivity in fcc and dhcp lanthanum. Phys Rev B 81:144507.",
+      "title": "Phonons and superconductivity in fcc and dhcp lanthanum",
+      "doi": null,
+      "year": 2010,
+      "authors": [
+        "S Ba Gci",
+        "H Tutuncu",
+        "S Duman",
+        "G Srivastava"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1293,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 47,
+      "raw_citation": "Dronskowski R, Bloechl PE (1993) Crystal Orbital Hamilton Populations (COHP). Energy-resolved visualization of chemical bonding in solids based on density-functional calculations. J Phys Chem 97:8617-8624.",
+      "title": "Energy-resolved visualization of chemical bonding in solids based on density-functional calculations",
+      "doi": null,
+      "year": 1993,
+      "authors": [
+        "R Dronskowski",
+        "P E Bloechl"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1294,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 48,
+      "raw_citation": "Tissen VG, Ponyatovskii EG, Nefedova MV, Porsch F, Holzapfel WB (1996) Effect of pressure on the superconducting T c of lanthanum. Phys Rev B: Condens Matter 53: 8238-8240.",
+      "title": "Effect of pressure on the superconducting T c of lanthanum",
+      "doi": null,
+      "year": 1996,
+      "authors": [
+        "V G Tissen",
+        "E G Ponyatovskii",
+        "M V Nefedova",
+        "F Porsch",
+        "W B Holzapfel"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1295,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 49,
+      "raw_citation": "Hamlin J, Tissen V, Schilling J (2006) Superconductivity at 17 K in yttrium metal under nearly hydrostatic pressures up to 89 GPa. Phys Rev B 73:094522.",
+      "title": "Superconductivity at 17 K in yttrium metal under nearly hydrostatic pressures up to 89 GPa",
+      "doi": null,
+      "year": 2006,
+      "authors": [
+        "J Hamlin",
+        "V Tissen",
+        "J Schilling"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1296,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 50,
+      "raw_citation": "Errea I (2016) Approaching the strongly anharmonic limit with ab initio calculations of materials--Vibrational properties colloquium. Eur Phys J B 89:237.",
+      "title": "Approaching the strongly anharmonic limit with ab initio calculations of materials--Vibrational properties colloquium",
+      "doi": null,
+      "year": 2016,
+      "authors": [
+        "I Errea"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1297,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 51,
+      "raw_citation": "Borinaga M, et al. (2016) Anharmonic enhancement of superconductivity in metallic molecular Cmca-4 hydrogen at high pressure: A first-principles study. J Phys: Condens Matter 28:494001.",
+      "title": "Anharmonic enhancement of superconductivity in metallic molecular Cmca-4 hydrogen at high pressure: A first-principles study",
+      "doi": null,
+      "year": 2016,
+      "authors": [
+        "M Borinaga"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1298,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 52,
+      "raw_citation": "Borinaga M, Errea I, Calandra M, Mauri F, Bergara A (2016) Anharmonic effects in atomic hydrogen: Superconductivity and lattice dynamical stability. Phys Rev B 93: 174308.",
+      "title": "Anharmonic effects in atomic hydrogen: Superconductivity and lattice dynamical stability",
+      "doi": null,
+      "year": 2016,
+      "authors": [
+        "M Borinaga",
+        "I Errea",
+        "M Calandra",
+        "F Mauri",
+        "A Bergara"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1299,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 53,
+      "raw_citation": "Garland J, Bennemann K, Mueller F (1968) Effect of lattice disorder on the super- conducting transition temperature. Phys Rev Lett 21:1315.",
+      "title": "Effect of lattice disorder on the superconducting transition temperature",
+      "doi": null,
+      "year": 1968,
+      "authors": [
+        "J Garland",
+        "K Bennemann",
+        "F Mueller"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1300,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 54,
+      "raw_citation": "Samudrala GK, Tsoi GM, Vohra YK (2012) Structural phase transitions in yttrium under ultrahigh pressures. J Phys Condens Matter 24:362201.",
+      "title": "Structural phase transitions in yttrium under ultrahigh pressures",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "G K Samudrala",
+        "G M Tsoi",
+        "Y K Vohra"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1301,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 55,
+      "raw_citation": "Zaleski-Ejgierd P, Labet V, Strobel TA, Hoffmann R, Ashcroft NW (2012) WH(n) under pressure. J Phys: Condens Matter 24:155701.",
+      "title": "WH(n) under pressure",
+      "doi": null,
+      "year": 2012,
+      "authors": [
+        "P Zaleski-Ejgierd",
+        "V Labet",
+        "T A Strobel",
+        "R Hoffmann",
+        "N W Ashcroft"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1302,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 56,
+      "raw_citation": "Zaleski-Ejgierd P, Hoffmann R, Ashcroft NW (2011) High pressure stabilization and emergent forms of PbH 4 . Phys Rev Lett 107:037002.",
+      "title": "High pressure stabilization and emergent forms of PbH 4",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "P Zaleski-Ejgierd",
+        "R Hoffmann",
+        "N W Ashcroft"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1303,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 57,
+      "raw_citation": "Zhong X, et al. (2016) Tellurium hydrides at high pressures: High-temperature su- perconductors. Phys Rev Lett 116:057002.",
+      "title": "Tellurium hydrides at high pressures: High-temperature superconductors",
+      "doi": null,
+      "year": 2016,
+      "authors": [
+        "X Zhong"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    },
+    {
+      "id": 1304,
+      "paper_id": 1429,
+      "paper_revision": 1,
+      "reference_index": 58,
+      "raw_citation": "Kim DY, Scheicher RH, Pickard CJ, Needs RJ, Ahuja R (2011) Predicted formation of superconducting platinum-hydride crystals under pressure in the presence of molec- ular hydrogen. Phys Rev Lett 107:117002.",
+      "title": "Predicted formation of superconducting platinum-hydride crystals under pressure in the presence of molecular hydrogen",
+      "doi": null,
+      "year": 2011,
+      "authors": [
+        "D Y Kim",
+        "R H Scheicher",
+        "C J Pickard",
+        "R J Needs",
+        "R Ahuja"
+      ],
+      "match_status": "unmatched",
+      "cited_paper_id": null,
+      "match_method": null
+    }
+  ]
+}

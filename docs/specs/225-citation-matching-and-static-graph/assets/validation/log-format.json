@@ -1,0 +1,57 @@
+{
+  "处理": "仅去ANSI控制符与行尾空格，保留测试和错误正文",
+  "日志": {
+    "go-all.log": {
+      "原始SHA256": "46d1bd55b894d74dc4b15f80f9a501afa9e5c842b253c33fe464b32247f0f9f4",
+      "可读副本SHA256": "8ecf2e656047eca570c762ecb129a52d3ddaf825d9d6e6e6f087e41a516ea8c5"
+    },
+    "go-head-baseline.log": {
+      "原始SHA256": "4b8f662cce9df62ec59b5a896625d03b885f7748724eace094c1aa1186600a28",
+      "可读副本SHA256": "4b8f662cce9df62ec59b5a896625d03b885f7748724eace094c1aa1186600a28"
+    },
+    "node26-head-baseline.log": {
+      "原始SHA256": "6ae2773e68efd13634959e2efb467da23410c6361fe2606b711002b8365131ba",
+      "可读副本SHA256": "cbb31fb40ef9d49d4ecfa800c38cb840fa6300e65d8b441a38c4b16ecbf6d6d4"
+    },
+    "projected-build.log": {
+      "原始SHA256": "ad60e6d29f086ccd4581457548dd120ec48c477f7bbd4f8f92b91c70d59eedda",
+      "可读副本SHA256": "ad60e6d29f086ccd4581457548dd120ec48c477f7bbd4f8f92b91c70d59eedda"
+    },
+    "projected-citation-regression.log": {
+      "原始SHA256": "0ac5dc4454e5953129ac48bf130d9449a13054d8b383b8d5951c59258cf922b7",
+      "可读副本SHA256": "0ac5dc4454e5953129ac48bf130d9449a13054d8b383b8d5951c59258cf922b7"
+    },
+    "projected-field.log": {
+      "原始SHA256": "dca5472aaa353c5a13006a4ec152bb3bda7425c62ba05cf9e9668c5d99a79188",
+      "可读副本SHA256": "dca5472aaa353c5a13006a4ec152bb3bda7425c62ba05cf9e9668c5d99a79188"
+    },
+    "projected-final-python.log": {
+      "原始SHA256": "28302f2ace8cbd20f33086d7c58152e634cace09e2bc2e5f664c19431ca1b18e",
+      "可读副本SHA256": "28302f2ace8cbd20f33086d7c58152e634cace09e2bc2e5f664c19431ca1b18e"
+    },
+    "projected-form.log": {
+      "原始SHA256": "777152c3011273e28678bc21ba921356181e4668da0cda9eae13c82fdd900487",
+      "可读副本SHA256": "4c20031d0824c5d32630100386b929673a53d212fb4547ecb5005eac5ccaaf23"
+    },
+    "projected-go.log": {
+      "原始SHA256": "7b1c4d54dac35007c4def5a648c6014532981fc1f95222f82faa58315692658e",
+      "可读副本SHA256": "7b1c4d54dac35007c4def5a648c6014532981fc1f95222f82faa58315692658e"
+    },
+    "projected-mutation.log": {
+      "原始SHA256": "ce8862c6532cebe0548866a17624875ff939a59cd2da61d13adf565a06cd3f2f",
+      "可读副本SHA256": "ce8862c6532cebe0548866a17624875ff939a59cd2da61d13adf565a06cd3f2f"
+    },
+    "projected-ui.log": {
+      "原始SHA256": "597e262623cfb02eba951b980c88f366d09df44d8245fc86c17da3c1b2e982e3",
+      "可读副本SHA256": "38e2310f47bf5fceaa5178112181ad7a87cb641e9c6ca835188304b337f049f2"
+    },
+    "rewrite-fresh.log": {
+      "原始SHA256": "c0d94b65dcae8be4feb6a78cbe2005795b00890b3fc6a4ee0647de80bab6b860",
+      "可读副本SHA256": "ee5dbc7be6e0257f5affd896c41ab769ae191db7d9bdc6adaf0727144b47cb9f"
+    },
+    "rewrite-head-baseline.log": {
+      "原始SHA256": "1bfc836a7248565562a1c33a720cfe56b2fda36d1cd9f8e7ffa754f5b13da7fc",
+      "可读副本SHA256": "564faeffa8300f8c9a8bd3fa8e1b97654965b8d1e18344b5df9ab7a57d49d5c4"
+    }
+  }
+}

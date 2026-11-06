@@ -1,0 +1,251 @@
+{
+  "batch_id": "271-000",
+  "model_requested": "Qwen/Qwen3-4B-Instruct-2507-FP8",
+  "source_paper_id": 271,
+  "reference_count": 16,
+  "prompt_sha256": "efc64317f84e17396c08d731a9fa56b12f0c1e021a81fca713051f59c6e186af",
+  "system_prompt": "你执行参考文献身份核对。任务是判断原始参考文献是否就是给定库内候选之一，不是判断研究主题是否相关。\n只根据提供的原始引文、提取字段及候选题名/作者/年份/DOI判断。引文中的空格、上下标、连字符、换行、作者姓名缩写和期刊缩写可能来自排版或提取差异；应比较作品身份。不同化学式、不同论文、不同作者工作不能因为主题类似而认作同一篇。引文可能混合了相邻条目，证据不足或互相冲突时允许不确定。\n不得凭记忆补造引用，不得选择候选之外的论文。不能证明对应任何候选时返回paper_id为null。对每条输入恰好返回一次，保留reference_id。reason仅用简短中文说明书目信息依据，不输出推理过程。\n只输出JSON对象，结构为 {\"matches\":[{\"reference_id\":整数,\"paper_id\":候选ID或null,\"reason\":\"简短依据\"}]}。",
+  "user_prompt": {
+    "batch_id": "271-000",
+    "source_paper_id": 271,
+    "candidates": [
+      {
+        "id": 1204,
+        "title": "Pressure-induced metallization of dense (H2S)2H2 with high-Tc superconductivity",
+        "authors": [
+          "Defang Duan",
+          "Yunxian Liu",
+          "Fubo Tian",
+          "Da Li",
+          "Xiaoli Huang",
+          "Zhonglong Zhao",
+          "Hongyu Yu",
+          "Bingbing Liu",
+          "Wenjing Tian",
+          "Tian Cui"
+        ],
+        "year": 2014,
+        "doi": "10.1038/srep06968"
+      },
+      {
+        "id": 1208,
+        "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+        "authors": [
+          "Hui Wang",
+          "John S Tse",
+          "Kaori Tanaka",
+          "Toshiaki Iitaka",
+          "Yanming Ma"
+        ],
+        "year": 2012,
+        "doi": "10.1073/pnas.1118168109"
+      },
+      {
+        "id": 1429,
+        "title": "Potential high-Tc superconducting lanthanum and yttrium hydrides at high pressure",
+        "authors": [
+          "Hanyu Liu",
+          "Ivan I Naumov",
+          "Roald Hoffmann",
+          "N W Ashcroft",
+          "Russell J Hemley"
+        ],
+        "year": 2017,
+        "doi": "10.1073/pnas.1704505114"
+      }
+    ],
+    "references": [
+      {
+        "raw_citation": "Conventional superconductivity at 203 kelvin at high pressures in the sulfur hydride system A P Drozdov M I Eremets I A Troyan V Ksenofontov S I Shylin Nature 525 2015",
+        "title": "Conventional superconductivity at 203 kelvin at high pressures in the sulfur hydride system",
+        "authors": [
+          "A P Drozdov",
+          "M I Eremets",
+          "I A Troyan",
+          "V Ksenofontov",
+          "S I Shylin"
+        ],
+        "year": 2015,
+        "doi": null,
+        "reference_id": 294
+      },
+      {
+        "raw_citation": "Crystal structure of the superconducting phase of sulfur hydride M Einaga Nat. Phys 12 2016",
+        "title": "Crystal structure of the superconducting phase of sulfur hydride",
+        "authors": [
+          "M Einaga"
+        ],
+        "year": 2016,
+        "doi": null,
+        "reference_id": 295
+      },
+      {
+        "raw_citation": "High-temperature superconducting phase in clathrate calcium hydride CaH 6 up to 215 K at a pressure of 172 GPa L Ma Phys. Rev. Lett 128 167001 2022",
+        "title": "High-temperature superconducting phase in clathrate calcium hydride CaH 6 up to 215 K at a pressure of 172 GPa",
+        "authors": [
+          "L Ma"
+        ],
+        "year": 2022,
+        "doi": null,
+        "reference_id": 296
+      },
+      {
+        "raw_citation": "Superconductivity above 200 K discovered in superhydrides of calcium Z Li Nat. Commun 13 2863 2022",
+        "title": "Superconductivity above 200 K discovered in superhydrides of calcium",
+        "authors": [
+          "Z Li"
+        ],
+        "year": 2022,
+        "doi": null,
+        "reference_id": 297
+      },
+      {
+        "raw_citation": "Anomalous high-temperature superconductivity in YH 6 I A Troyan Adv. Mater 33 2006832. 2021",
+        "title": "Anomalous high-temperature superconductivity in YH 6",
+        "authors": [
+          "I A Troyan"
+        ],
+        "year": 2021,
+        "doi": null,
+        "reference_id": 298
+      },
+      {
+        "raw_citation": "Superconductivity up to 243 K in the yttrium-hydrogen system under high pressure P Kong Nat. Commun 12 5075 2021",
+        "title": "Superconductivity up to 243 K in the yttrium-hydrogen system under high pressure",
+        "authors": [
+          "P Kong"
+        ],
+        "year": 2021,
+        "doi": null,
+        "reference_id": 299
+      },
+      {
+        "raw_citation": "Synthesis of yttrium superhydride superconductor with a transition temperature up to 262 K by catalytic hydrogenation at high pressures E Snider Phys. Rev. Lett 126 117003 2021",
+        "title": "Synthesis of yttrium superhydride superconductor with a transition temperature up to 262 K by catalytic hydrogenation at high pressures",
+        "authors": [
+          "E Snider"
+        ],
+        "year": 2021,
+        "doi": null,
+        "reference_id": 300
+      },
+      {
+        "raw_citation": "Evidence for superconductivity above 260 K in lanthanum superhydride at megabar pressures M Somayazulu Phys. Rev. Lett 122 27001 2019",
+        "title": "Evidence for superconductivity above 260 K in lanthanum superhydride at megabar pressures",
+        "authors": [
+          "M Somayazulu"
+        ],
+        "year": 2019,
+        "doi": null,
+        "reference_id": 301
+      },
+      {
+        "raw_citation": "Superconductivity at 250 K in lanthanum hydride under high pressures A P Drozdov Nature 569 2019",
+        "title": "Superconductivity at 250 K in lanthanum hydride under high pressures",
+        "authors": [
+          "A P Drozdov"
+        ],
+        "year": 2019,
+        "doi": null,
+        "reference_id": 302
+      },
+      {
+        "raw_citation": "Superconductivity of lanthanum superhydride investigated using the standard fourprobe configuration under high pressures F Hong Chin. Phys. Lett 37 107401 2020",
+        "title": "Superconductivity of lanthanum superhydride investigated using the standard fourprobe configuration under high pressures",
+        "authors": [
+          "F Hong"
+        ],
+        "year": 2020,
+        "doi": null,
+        "reference_id": 303
+      },
+      {
+        "raw_citation": "The metallization and superconductivity of dense hydrogen sulfide Y Li J Hao H Liu Y Li Y Ma J. Chem. Phys 140 174712 2014",
+        "title": "The metallization and superconductivity of dense hydrogen sulfide",
+        "authors": [
+          "Y Li",
+          "J Hao",
+          "H Liu",
+          "Y Li",
+          "Y Ma"
+        ],
+        "year": 2014,
+        "doi": null,
+        "reference_id": 304
+      },
+      {
+        "raw_citation": "Pressure-induced metallization of dense (H 2 S) 2 H 2 with high-T c superconductivity D Duan Sci. Rep 4 6968 2014",
+        "title": "Pressure-induced metallization of dense (H 2 S) 2 H 2 with high-T c superconductivity",
+        "authors": [
+          "D Duan"
+        ],
+        "year": 2014,
+        "doi": null,
+        "reference_id": 305
+      },
+      {
+        "raw_citation": "Superconductive sodalite-like clathrate calcium hydride at high pressures H Wang J S Tse K Tanaka T Iitaka Y Ma Proc. Natl. Acad. Sci. U.S.A 109 2012",
+        "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+        "authors": [
+          "H Wang",
+          "J S Tse",
+          "K Tanaka",
+          "T Iitaka",
+          "Y Ma"
+        ],
+        "year": 2012,
+        "doi": null,
+        "reference_id": 306
+      },
+      {
+        "raw_citation": "Hydrogen clathrate structures in rare earth hydrides at high pressures: Possible route to room-temperature superconductivity F Peng Phys. Rev. Lett 119 107001 2017",
+        "title": "Hydrogen clathrate structures in rare earth hydrides at high pressures: Possible route to room-temperature superconductivity",
+        "authors": [
+          "F Peng"
+        ],
+        "year": 2017,
+        "doi": null,
+        "reference_id": 307
+      },
+      {
+        "raw_citation": "Potential high-T c superconducting lanthanum and yttrium hydrides at high pressure H Liu I I Naumov R Hoffmann N W Ashcroft R J Hemley Proc. Natl. Acad. Sci. USA 114 2017",
+        "title": "Potential high-T c superconducting lanthanum and yttrium hydrides at high pressure",
+        "authors": [
+          "H Liu",
+          "I I Naumov",
+          "R Hoffmann",
+          "N W Ashcroft",
+          "R J Hemley"
+        ],
+        "year": 2017,
+        "doi": null,
+        "reference_id": 308
+      },
+      {
+        "raw_citation": "A perspective on conventional high-temperature superconductors at high pressure: Methods and materials J A Flores-Livas Phys. Rep 856 2020",
+        "title": "A perspective on conventional high-temperature superconductors at high pressure: Methods and materials",
+        "authors": [
+          "J A Flores-Livas"
+        ],
+        "year": 2020,
+        "doi": null,
+        "reference_id": 309
+      }
+    ]
+  },
+  "valid": false,
+  "model_returned": "Qwen/Qwen3-4B-Instruct-2507-FP8",
+  "response_id": "chatcmpl-ffbb3bbe40ab4c1ab06ef96ff2e47089",
+  "finish_reason": "stop",
+  "raw_output": "{\n  \"matches\": [\n    {\n      \"reference_id\": 294,\n      \"paper_id\": null,\n      \"reason\": \"原始引文作者为A P Drozdov等，标题涉及硫化氢系统在高压下的超导性，与候选文献1204（Duan等，2014）主题不同，且作者和年份不匹配\"\n    },\n    {\n      \"reference_id\": 295,\n      \"paper_id\": null,\n      \"reason\": \"原始引文为M Einaga关于硫化氢超导相的晶体结构，无对应候选文献\"\n    },\n    {\n      \"reference_id\": 296,\n      \"paper_id\": 1208,\n      \"reason\": \"原始引文提及钙氢化物CaH6在172 GPa下达到215 K超导，与候选文献1208（Wang等，2012）主题相近，但年份和具体材料不一致，且候选文献为2012年，原始引文为2022年，不匹配\"\n    },\n    {\n      \"reference_id\": 297,\n      \"paper_id\": null,\n      \"reason\": \"原始引文为Z Li关于钙超氢化物超导性，无对应候选文献\"\n    },\n    {\n      \"reference_id\": 298,\n      \"paper_id\": 308,\n      \"reason\": \"原始引文为I A Troyan关于YH6的异常高温超导性，与候选文献1429（H Liu等，2017）作者和主题部分重合，但YH6与La/YH6不同，且年份和作者不完全一致，不构成身份匹配\"\n    },\n    {\n      \"reference_id\": 299,\n      \"paper_id\": null,\n      \"reason\": \"原始引文为P Kong关于钇氢体系超导性，无对应候选文献\"\n    },\n    {\n      \"reference_id\": 300,\n      \"paper_id\": 308,\n      \"reason\": \"原始引文为E Snider关于钇超氢化物在262 K超导，与候选文献1429（H Liu等，2017）主题相关，但作者和年份不一致，不构成身份匹配\"\n    },\n    {\n      \"reference_id\": 301,\n      \"paper_id\": 1429,\n      \"reason\": \"原始引文为M Somayazulu关于镧超氢化物在兆巴压力下超导性超过260 K，与候选文献1429（H Liu等，2017）标题和主题高度一致，作者和年份匹配，为同一研究\"\n    },\n    {\n      \"reference_id\": 302,\n      \"paper_id\": null,\n      \"reason\": \"原始引文为A P Drozdov关于镧氢化物在高压下250 K超导，与候选文献1204或1429无直接作者或标题匹配\"\n    },\n    {\n      \"reference_id\": 303,\n      \"paper_id\": null,\n      \"reason\": \"原始引文为F Hong关于镧超氢化物的四探针研究，无对应候选文献\"\n    },\n    {\n      \"reference_id\": 304,\n      \"paper_id\": 1204,\n      \"reason\": \"原始引文为Y Li等关于氢硫化物的金属化与超导性，与候选文献1204（Duan等，2014）标题和内容高度一致，作者为Y Li、J Hao、H Liu等，与Duan等不同，但标题和主题一致，且年份均为2014，应为同一研究的不同版本或作者差异，但作者不完全匹配，不构成身份核对\"\n    },\n    {\n      \"reference_id\": 305,\n      \"paper_id\": 1204,\n      \"reason\": \"原始引文为D Duan关于(H2S)2H2在高压下的金属化与高Tc超导性，与候选文献1204（Duan等，2014）作者为Defang Duan，标题完全一致，年份相同，为同一文献\"\n    },\n    {\n      \"reference_id\": 306,\n      \"paper_id\": 1208,\n      \"reason\": \"原始引文为H Wang等关于钙氢化物超导性，与候选文献1208（Wang等，2012）作者、标题、年份完全一致，为同一文献\"\n    },\n    {\n      \"reference_id\": 307,\n      \"paper_id\": null,\n      \"reason\": \"原始引文为F Peng关于稀土氢化物的结构研究，无对应候选文献\"\n    },\n    {\n      \"reference_id\": 308,\n      \"paper_id\": 1429,\n      \"reason\": \"原始引文为H Liu等关于镧和钇氢化物的高Tc超导潜力，与候选文献1429（H Liu等，2017）作者、标题、年份完全一致，为同一文献\"\n    },\n    {\n      \"reference_id\": 309,\n      \"paper_id\": null,\n      \"reason\": \"原始引文为J A Flores-Livas关于高压高温超导的综述，无对应候选文献\"\n    }\n  ]\n}",
+  "error_type": "ValueError",
+  "http_status": null,
+  "elapsed_seconds": 35.572,
+  "usage": {
+    "completion_tokens": 1203,
+    "prompt_tokens": 2415,
+    "total_tokens": 3618,
+    "completion_tokens_details": null,
+    "prompt_tokens_details": null
+  }
+}

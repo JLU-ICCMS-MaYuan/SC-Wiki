@@ -32,6 +32,10 @@
 | `/structures/:recordId` 结构查看与编辑入口 | StructuralRecordPage | 已定位，未做本轮性能验收 |
 | 跨页面共享配置及目录控件 | LlmProviderSwitcher、ClassificationAutocomplete、PaperReviewStatusSelect | 已定位，按实际使用页面关联验收，不单独宣称全站通过 |
 
+## 引用匹配只读入口（#225）
+
+`/upload/tasks/:taskId/citation-matching` 为解析页新标签链接，只读已保存上下游结果，不新增科学编辑宿主。图谱筛选与拖动只改本页视图；解析页仅增加链接和匹配状态，不改变科学字段保存。隔离源码重跑四宿主form-contract 210项和8项渲染／4项漏红变异均通过，见[#225验收](../225-citation-matching-and-static-graph/validation.md)；不据此声称全站性能已验收。
+
 ## 已核实的必要请求示例
 
 `UsernameField.handleBlur` 在失焦后先做本地格式检查，合法时查询用户名可用性。它有明确业务用途，不能因为科学表单输入不应调用模型而删除此请求。异步新旧值保护仍须在该入口的实际验收中检查，当前没有完成此项。

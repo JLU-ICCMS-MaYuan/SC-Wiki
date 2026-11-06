@@ -11,11 +11,13 @@
   - `GET /api/knowledge-graph/papers/:paperId/neighbors`
   - `GET /api/knowledge-graph/search`
   - `GET /api/knowledge-graph/stats`
-- 概览默认最多返回 30 个节点；可按论文级 Material family 多选和 `papers.superconductor_kind` 筛选。 `unknown` 不进入常规/非常规筛选，但仍可被搜索并固定。
+- 概览只选择图谱标题去空白后非空的当前已审核论文，默认最多返回 30 个节点；可按论文级 Material family 多选和 `papers.superconductor_kind` 筛选。 `unknown` 不进入常规/非常规筛选，但仍可被搜索并固定。
 - 节点短标题优先使用 `knowledge_graph_title`，同时返回原标题、年份、Material family、Superconductor type、库内被引次数和人工里程碑标记。
 - 边方向固定为 `citing_paper_id -> cited_paper_id`。上游是当前论文引用的论文，下游是引用当前论文的论文。
 - 邻居接口单方向分页，默认每次 5 篇，按库内被引次数降序、`paper_id` 升序排序，并返回 `remaining_count`。服务端不递归加载整棵图。
 - 标题或 DOI 搜索从全部当前已审核论文中执行，搜索到的节点可以加入当前图视图。
+- 默认坐标由稳定ID与顺序生成，连线为直线；关闭物理模拟、动态曲线及自动布局。拖动后位置仅存于当前页，支持再次拖动，刷新恢复默认。展开只为新增节点分配空位，不移动旧节点。
+- 邻居请求携带当前可见论文ID，返回可见节点之间的实际交叉引用边，避免只画中心到邻居的边。
 
 ## 数据约束
 
