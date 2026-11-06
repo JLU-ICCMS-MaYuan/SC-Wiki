@@ -21,3 +21,7 @@
 record_assignments为受限模型控制数组，条目仅有candidate_state_key、module_key、record_key、target_index、status、source_ids、reason。未覆盖的记录沿原父assignments去向；指定记录仅有一个纠正去向，完整复制原科学值和稳定身份，并追加由当前来源目录取回的原文依据。状态和属性记录仍使用既有业务结构，标准科学字段、契约摘要、数据库结构均不变。
 
 规划请求和响应分别保存，原始提取仍留档，可追溯初始候选、引用图页、纠正理由及输出。规划的supported/uncertain是候选归属判断，不是字段科学通过或人工确认；最终选择的引用仍由既有统一核对及正式交接保存。
+
+## 仅范围Tc材料的收录审计
+
+workflow_assessment.tc_material_scope为程序核验后的任务元数据，rule_version=specific-tc-materials-v1。materials保留材料身份、has_specific_tc、has_range_tc、各窗口理由及原文依据；excluded_materials只包含全部已读窗口均无具体Tc但报告范围/界限的材料。任一窗口有具体Tc即保留，汇总不能抹掉这个事实。该审计不是科学表单新字段，不写入标准契约，也不批量改写历史数据。

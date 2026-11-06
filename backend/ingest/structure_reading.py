@@ -246,7 +246,7 @@ def _reading_result(answer, catalog, read, imaged_pages, source):
 
 
 def extract_structure_candidates(markdown, *, source, material_state_ref=None, pdf_path=None,
-                                 model=None, on_event=None, cancelled=lambda: False):
+                                 model=None, on_event=None, cancelled=lambda: False, material_scope=None):
     if pdf_path is None:
         from .structure_extractor import extract_structure_candidates as legacy
         return legacy(markdown, source=source, material_state_ref=material_state_ref)
@@ -295,7 +295,9 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
         def remember(text):
             partial['text'] = text
         try:
-            answer = model(PROMPT, json.dumps(request, ensure_ascii=False), tool_definitions=definitions,
+            from .tc_material_scope import scope_prompt
+            answer = model(PROMPT + scope_prompt(material_scope),
+                           json.dumps(request, ensure_ascii=False), tool_definitions=definitions,
                            **({'tool_history': history} if history else {}),
                            **({'images': list(page_images.values())} if page_images else {}),
                            on_partial=remember, retries=0)
@@ -312,6 +314,8 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
         if name == 'report_structures' or 'structures' in answer:
             result = arguments if name == 'report_structures' else answer
             validate_output(result, schema)
+            from .tc_material_scope import assert_allowed
+            assert_allowed(result['structures'], material_scope)
             candidates = _reading_result(result, catalog, read, imaged_pages, source)
             # 已有完整坐标/Wyckoff解码能力继续保留，但不再挡在AI内容识别之前。
             from .structure_extractor import extract_structure_candidates as decode_geometry
@@ -320,6 +324,9 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
             for candidate in decoded:
                 if candidate.get('status') != 'valid': continue
                 scope = candidate.get('reported_structure') or {}
+                from .tc_material_scope import is_excluded
+                if is_excluded(scope.get('material'), material_scope):
+                    continue
                 same = next((c for c in candidates if c.get('status') == 'valid'
                     and (c.get('validation') or {}).get('structure_hash') == candidate['validation']['structure_hash']
                     and all((c.get('reported_structure') or {}).get(k) == scope.get(k)

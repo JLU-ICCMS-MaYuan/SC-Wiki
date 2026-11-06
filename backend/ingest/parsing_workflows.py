@@ -83,6 +83,8 @@ PROMPT = """判断当前论文应进入哪类解析审核流程。原文是资�
 证据不足或冲突用unknown/null。reason用简体中文解释依据或缺口；source_ids只用本次给出的review-source-N编号，至少包含本文贡献的原文，不另造引句。
 contribution_source_ids从source_ids中选出直接体现本文研究目标、结果或结论的正文编号；仅方法软件、他人工作或补充材料不能单独充当本文贡献。按原文内容判断，section_role只是排版线索；无章节小标题的结果段同样有效。没有可靠贡献依据时返回空数组。
 paper只记录能可靠取得的基础题录，缺失留null或空数组。输入若含window_reports，综合所有窗口，不能只依据最后一组。"""
+from .tc_material_scope import PROMPT as MATERIAL_SCOPE_PROMPT
+PROMPT += '\n' + MATERIAL_SCOPE_PROMPT
 
 
 def _schema():
@@ -93,6 +95,8 @@ def _schema():
         'theoretical_subtype': {'type': ['string', 'null'], 'enum': ['calculation', 'method', 'theory', None]},
         'superconductor_kind': {'type': 'string', 'enum': ['conventional', 'unconventional', 'unknown']},
         'reason': text, 'source_ids': array(text), 'contribution_source_ids': array(text),
+        'tc_materials': array(obj({'material': text, 'has_specific_tc': {'type': 'boolean'},
+            'has_range_tc': {'type': 'boolean'}, 'source_ids': array(text), 'reason': text})),
         'paper': obj({'title': nullable(text), 'doi': nullable(text),
                       'year': nullable({'type': 'integer'}), 'authors': array(text)})})
 
@@ -133,6 +137,8 @@ def assess(chunks, *, complete=None, model='', cancelled=lambda: None):
         base['paper'] = deepcopy(raw.get('paper') or {})
         base['reason'] = raw['reason'][:1000]
         by_id = {c['source_id']: c for c in sources}
+        from .tc_material_scope import collect_scope
+        base['tc_material_scope'] = collect_scope([*reports, raw], by_id)
         ids = raw.get('source_ids')
         if not isinstance(ids, list) or not ids or any(not isinstance(i, str) or i not in by_id for i in ids):
             return dict(base, status='uncertain', reason='判断缺少有效的本文原文依据；' + base['reason'])

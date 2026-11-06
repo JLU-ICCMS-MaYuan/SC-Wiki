@@ -268,7 +268,7 @@ def _structure_reading_cancelled(task_id: str) -> bool:
     return False
 
 
-def _extract_pdf_structure_candidates(task_id, markdown, file_source, file_item):
+def _extract_pdf_structure_candidates(task_id, markdown, file_source, file_item, *, material_scope=None):
     def save_structure_reading(event):
         directory = artifact_directory(task_id) / 'structure_reading' / str(file_item['file_id'])
         directory.mkdir(parents=True, exist_ok=True)
@@ -277,6 +277,7 @@ def _extract_pdf_structure_candidates(task_id, markdown, file_source, file_item)
         source={'file_id': file_item.get('file_id'),
                 'filename': file_item.get('original_filename') or file_source.name,
                 'role': file_item.get('role'), 'sha256': file_item.get('sha256')},
+        material_scope=material_scope,
         on_event=save_structure_reading, cancelled=lambda: _structure_reading_cancelled(task_id))
 
 
@@ -506,12 +507,15 @@ def _read_chunk(
     profile = (source or {}).get("parser_profile", "legacy")
     structured = profile != "legacy" and (source or {}).get("kind") == "pdf"
     system_prompt = CHUNK_SYSTEM_PROMPT
+    from .tc_material_scope import scope_prompt, assert_allowed
+    material_scope = (source or {}).get('tc_material_scope')
     if structured:
         from backend.ingest.domain_extraction import DOMAIN_SYSTEM_PROMPT, COMPLEMENTARY_SYSTEM_PROMPT, normalize_extraction, EXTRACTION_OUTPUT_SCHEMA
         from backend.ingest.scientific_output_schema import bind_extraction_sources
         system_prompt = COMPLEMENTARY_SYSTEM_PROMPT if profile == "complementary" else DOMAIN_SYSTEM_PROMPT
         generation_schema = bind_extraction_sources(EXTRACTION_OUTPUT_SCHEMA, json.loads(chunk.content),
                                                     allow_block_references=profile == "complementary")
+    system_prompt += scope_prompt(material_scope)
     from backend.ingest.scientific_context import CONTEXT_VERSION
     from backend.rag.llm_context import get_llm_config
     config = get_llm_config()
@@ -555,6 +559,12 @@ def _read_chunk(
     result = complete_json(system_prompt, prompt, **schema_options, **callbacks)
     if attempt_directory:
         _atomic_write_json(attempt_directory / "raw.json", result)
+    if material_scope:
+        from backend.rag.structured_output import StructuredOutputError
+        try:
+            assert_allowed(result.get('material_states') or [], material_scope)
+        except ValueError as exc:
+            raise StructuredOutputError(str(exc)) from exc
     if structured:
         from backend.ingest.scientific_output_schema import decode_optional_containers
         result = decode_optional_containers(result)
@@ -2084,7 +2094,8 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                     markdown = _extract_markdown(file_state, file_source)
                     file_md.write_text(markdown, encoding="utf-8")
                 if not structure_format and str(file_item.get("kind") or file_state.get("file_kind") or "").lower() == "pdf":
-                    structure_candidates.extend(_extract_pdf_structure_candidates(task_id, markdown, file_source, file_item))
+                    structure_candidates.extend(_extract_pdf_structure_candidates(task_id, markdown, file_source, file_item,
+                        material_scope=(state.get('workflow_assessment') or {}).get('tc_material_scope')))
 
             except Exception as extraction_exc:
                 if multi_file:
@@ -2213,11 +2224,13 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
             manifest[completed - 1]["status"] = "processing"
             _save_chunk_manifest(task_id, manifest)
             try:
+                extraction_source = {**file_item, 'tc_material_scope':
+                    (state.get('workflow_assessment') or {}).get('tc_material_scope')}
                 with call_phase("chunk_extraction"):
                     if multi_file:
-                        candidates.append(_read_chunk(task_id, chunk, file_item["file_id"], file_item))
+                        candidates.append(_read_chunk(task_id, chunk, file_item["file_id"], extraction_source))
                     elif state.get("parser_profile", "legacy") != "legacy":
-                        candidates.append(_read_chunk(task_id, chunk, source=file_item))
+                        candidates.append(_read_chunk(task_id, chunk, source=extraction_source))
                     else:
                         candidates.append(_read_chunk(task_id, chunk))
                 manifest[completed - 1]["status"] = "completed"
@@ -2463,6 +2476,7 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
             plan_states(draft, [
                 {**source, "file_role": source.get("file_role", source.get("role", "main"))}
                 for source in form_sources(document_set, scientific_sources)], complete_json, files=state.get('files') or [], target_id=task_id,
+                material_scope=(state.get('workflow_assessment') or {}).get('tc_material_scope'),
                 on_request=lambda request: _atomic_write_json(
                     artifact_directory(task_id) / "material_state_inventory_request.json", request),
                 on_response=lambda response: _atomic_write_json(

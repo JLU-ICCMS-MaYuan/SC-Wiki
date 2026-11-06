@@ -90,28 +90,44 @@ def _stream_json(
     actions: dict[int, dict] = {}
     call_ids: dict[int, str] = {}
     finish_reason = None
-    for chunk in stream:
-        if getattr(chunk, "usage", None):
-            _call_stats.set({**_call_stats.get(), "usage": chunk.usage.model_dump()})
-        if not chunk.choices:
-            continue
-        delta_object = chunk.choices[0].delta
-        delta = delta_object.content
-        finish_reason = getattr(chunk.choices[0], "finish_reason", None) or finish_reason
-        for call in getattr(delta_object, "tool_calls", None) or []:
-            if getattr(call, "id", None):
-                call_ids[call.index] = call.id
-            action = actions.setdefault(call.index, {"name": "", "arguments": ""})
-            if call.function is not None:
-                action["name"] += call.function.name or ""
-                action["arguments"] += call.function.arguments or ""
-            if on_partial:
-                on_partial(json.dumps({"tool_calls": list(actions.values())}, ensure_ascii=False))
-        if not delta:
-            continue
-        accumulated.append(delta)
-        if on_partial is not None:
-            on_partial("".join(accumulated))
+    last_progress = time.monotonic()
+    try:
+        for chunk in stream:
+            now = time.monotonic()
+            made_progress = False
+            if getattr(chunk, "usage", None):
+                _call_stats.set({**_call_stats.get(), "usage": chunk.usage.model_dump()})
+            if not chunk.choices:
+                if now - last_progress >= read_timeout:
+                    raise RuntimeError("模型持续返回空白或空响应，超过现有读取超时")
+                continue
+            delta_object = chunk.choices[0].delta
+            delta = delta_object.content
+            made_progress = bool(delta and delta.strip())
+            finish_reason = getattr(chunk.choices[0], "finish_reason", None) or finish_reason
+            for call in getattr(delta_object, "tool_calls", None) or []:
+                if getattr(call, "id", None):
+                    call_ids[call.index] = call.id
+                action = actions.setdefault(call.index, {"name": "", "arguments": ""})
+                if call.function is not None:
+                    action["name"] += call.function.name or ""
+                    action["arguments"] += call.function.arguments or ""
+                    made_progress = made_progress or bool((call.function.name or "").strip()
+                        or (call.function.arguments or "").strip())
+                if on_partial:
+                    on_partial(json.dumps({"tool_calls": list(actions.values())}, ensure_ascii=False))
+            if delta:
+                accumulated.append(delta)
+                if on_partial is not None:
+                    on_partial("".join(accumulated))
+            if made_progress:
+                last_progress = now
+            elif now - last_progress >= read_timeout:
+                raise RuntimeError("模型持续返回空白或空响应，超过现有读取超时")
+    finally:
+        close = getattr(stream, "close", None)
+        if callable(close):
+            close()
     _call_stats.set({**_call_stats.get(), "finish_reason": finish_reason})
     if actions:
         from .structured_output import StructuredOutputError, validate_tool_action

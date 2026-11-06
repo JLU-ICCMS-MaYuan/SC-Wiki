@@ -68,9 +68,11 @@ def _evidence(ids, sources):
              'quote': sources[key]['content']} for key in dict.fromkeys(ids)]
 
 
-def apply_inventory(draft, sources, response):
+def apply_inventory(draft, sources, response, *, material_scope=None):
     """计划完整后一次替换；科学值和记录来源由原候选带入，不由规划模型重写。"""
     from .material_state_contract import state_metadata, ensure_state_keys
+    from .tc_material_scope import assert_allowed
+    assert_allowed([e.get('values') or {} for e in response.get('states') or []], material_scope)
     original = deepcopy(draft.get('material_states') or [])
     ensure_state_keys(original)
     by_key = {s['state_key']: s for s in original}
@@ -203,7 +205,8 @@ def referenced_pages(draft, sources):
     return requested
 
 
-def plan_states(draft, chunks, model, *, on_response=None, on_request=None, files=(), target_id=None):
+def plan_states(draft, chunks, model, *, on_response=None, on_request=None, files=(), target_id=None,
+                material_scope=None):
     from .scientific_context import build_context
     from .material_state_contract import ensure_state_keys
     ensure_state_keys(draft.get('material_states') or [])
@@ -238,7 +241,8 @@ def plan_states(draft, chunks, model, *, on_response=None, on_request=None, file
     request = {'sources': sources, 'candidates': draft['material_states'], 'original_pages': pages}
     if on_request:
         on_request({**deepcopy(request), 'image_count': len(images)})
-    response = model(PROMPT, json.dumps(request, ensure_ascii=False), **options)
+    from .tc_material_scope import scope_prompt
+    response = model(PROMPT + scope_prompt(material_scope), json.dumps(request, ensure_ascii=False), **options)
     if on_response:
         on_response(response)
-    return apply_inventory(draft, sources, response)
+    return apply_inventory(draft, sources, response, material_scope=material_scope)
