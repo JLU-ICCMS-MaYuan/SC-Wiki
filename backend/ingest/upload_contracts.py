@@ -18,7 +18,7 @@ UPLOAD_STATE_SCHEMA_VERSION = 1
 SCIENTIFIC_DRAFT_SCHEMA_VERSION = 2
 TASK_TTL = 24 * 60 * 60
 MAX_UPLOAD_BYTES = 50 * 1024 * 1024
-RUNNING_STATUSES = {"uploading", "queued", "extracting", "reading", "summarizing", "submitting", "cancelling"}
+RUNNING_STATUSES = {"uploading", "queued", "extracting", "reading", "summarizing", "submitting", "cancelling", "pausing"}
 FIXED_TERMINAL_STATUSES = {"failed", "duplicate", "cancelled"}
 FINAL_STATUSES = FIXED_TERMINAL_STATUSES | {"submitted"}
 FILE_ROLES = {"main", "supplementary", "attachment"}
@@ -26,6 +26,7 @@ USER_FILE_ROLE_POLICY = "user-specified-v1"
 FILE_SUFFIXES = {".pdf", ".txt", ".md", ".cif", ".poscar", ".vasp"}
 PUBLIC_TASK_FIELDS = {"task_id", "status", "stage", "progress", "processing_status", "processing_error", "error_code", "created_at", "updated_at", "cleanup_at", "filename", "file_kind", "files", "revision", "state_schema_version", "duplicate", "existing_paper_id", "existing_paper_status", "allowed_actions", "duplicate_reason", "paper_id", "llm_provider", "consistency", "completed_chunks", "total_chunks", "stage_index", "stage_total", "parser_profile", "parser_runs", "reading_state", "role_assessment", "extraction_timing"}
 PUBLIC_TASK_FIELDS |= {"workflow_policy", "workflow_assessment", "_parsing_workflow"}
+PUBLIC_TASK_FIELDS |= {"model_activity", "execution_heartbeat", "execution_resumable"}
 PUBLIC_FILE_FIELDS = {"file_id", "role", "declared_role", "original_filename", "media_type", "kind", "size", "sha256", "sort_order", "upload_status", "extraction_status", "error"}
 
 
@@ -51,7 +52,7 @@ def _advance_extraction_timing(state: dict[str, Any], target: str, now: int) -> 
     timing = dict(timing)
     running_since = timing["running_since"]
     stopped = target in {"ready", "failed", "cancelled", "duplicate"}
-    paused = target in {"needs_role_review", "needs_workflow", "queued"}
+    paused = target in {"needs_role_review", "needs_workflow", "queued", "pausing", "paused"}
     if running_since is not None and (stopped or paused):
         timing["elapsed_seconds"] += max(0, now - running_since)
         timing["running_since"] = None
@@ -79,6 +80,11 @@ class CleanupContext:
 def apply_state_changes(state: dict[str, Any], *, now: int, **changes: Any) -> dict[str, Any]:
     current = str(state.get("status") or "uploading")
     target = str(changes.get("status") or current)
+    resuming = bool(changes.pop("resume", False))
+    if current in {"pausing", "paused"} and target not in {current, "paused", "cancelling", "cancelled"}:
+        if not (current == "paused" and target == "queued" and resuming):
+            from .model_runtime import ExecutionStopped
+            raise ExecutionStopped("停止中的任务不能被迟到进度恢复")
     if current == "cancelling" and target not in {"cancelling", "cancelled", "failed", "submitted"}:
         raise UploadCancelled("上传任务已请求取消，迟到进度不能恢复处理")
     retrying_failed = current == "failed" and target == "queued" and bool(changes.pop("retry", False))
@@ -95,7 +101,7 @@ def apply_state_changes(state: dict[str, Any], *, now: int, **changes: Any) -> d
             result["last_user_activity_at"] = now; result["cleanup_at"] = now + TASK_TTL; result.pop("terminal_at", None)
         elif target in FIXED_TERMINAL_STATUSES:
             result["terminal_at"] = now; result["cleanup_at"] = now + TASK_TTL
-        elif target in RUNNING_STATUSES:
+        elif target in RUNNING_STATUSES or target == "paused":
             result["cleanup_at"] = None; result.pop("terminal_at", None)
         elif target == "submitted": result["cleanup_at"] = None
     return result

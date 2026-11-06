@@ -18,6 +18,7 @@ import UploadTaskCenter from '../components/UploadTaskCenter'
 import MultiFileUploadPanel from '../components/MultiFileUploadPanel'
 import UploadRoleReview from '../components/UploadRoleReview'
 import UploadParsingDetail from '../components/UploadParsingDetail'
+import UploadModelActivity from '../components/UploadModelActivity'
 import { api } from '../lib/api'
 import { buildLlmHeaders } from '../lib/llmProvider'
 import {
@@ -104,7 +105,7 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
         const state = unwrapData(response)
         setTaskState(state)
         setError('')
-        if (state.processing_status === 'processing') timer = window.setTimeout(poll, 2000)
+        if (['processing', 'pausing'].includes(state.processing_status)) timer = window.setTimeout(poll, 2000)
       } catch (reason: any) {
         if (stopped || reason.name === 'AbortError') return
         if (reason.code === 'UPLOAD_TASK_SUBMITTED' && Number.isSafeInteger(reason.submittedPaperId) && reason.submittedPaperId > 0) {
@@ -468,25 +469,9 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                     </Box>
                   )}
 
-                  {taskState?.processing_status === 'processing' && (
-                    <Alert severity="info" sx={{ mt: 2 }}>
-                      {t('upload.serverProgressNote')}
-                    </Alert>
-                  )}
-                  {taskState?.processing_status === 'failed' && (
-                    <Alert severity="error" sx={{ mt: 2 }}>
-                      <Typography variant="body2" fontWeight={700}>
-                        {t('upload.stageFailed', { index: taskState.stage_index, total: taskState.stage_total })}
-                      </Typography>
-                      <Typography variant="body2">{taskState.processing_error || t('upload.noFailureReason')}</Typography>
-                      <Box sx={{ display: 'flex', gap: 1, mt: 1.5, flexWrap: 'wrap' }}>
-                        <Button size="small" variant="contained" startIcon={<ReplayIcon />}
-                          disabled={taskLoading} onClick={() => void retryTask()}>{t('upload.retryParse')}</Button>
-                        <Button size="small" variant="outlined" startIcon={<EditNoteIcon />}
-                          disabled={taskLoading} onClick={() => void openManualDraft()}>{t('upload.manualFill')}</Button>
-                      </Box>
-                    </Alert>
-                  )}
+                  {taskState && <UploadModelActivity task={taskState}
+                    onUpdated={updated => { setTaskState(updated); setTaskPollTick(value => value + 1); setTaskCenterTick(value => value + 1) }}
+                    onRetry={() => void retryTask()} onManual={() => void openManualDraft()} />}
                   {taskState?.duplicate && taskState.existing_paper_id && (
                     <Alert severity="warning" sx={{ mt: 2 }}
                       action={taskState.allowed_actions?.includes('view')

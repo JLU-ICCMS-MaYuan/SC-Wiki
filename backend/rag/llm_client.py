@@ -22,7 +22,7 @@ def get_llm_client(*, read_timeout: float = 90.0) -> OpenAI:
     )
 
 
-def get_langchain_llm() -> ChatOpenAI:
+def get_langchain_llm(*, read_timeout: float | None = None, max_retries: int = 2) -> ChatOpenAI:
     config = get_llm_config()
     if not config.api_key:
         raise RuntimeError("LLM API key 未配置")
@@ -33,4 +33,6 @@ def get_langchain_llm() -> ChatOpenAI:
         base_url=base_url,
         temperature=0.3,
         max_tokens=2000,
+        timeout=read_timeout,
+        max_retries=max_retries,
     )

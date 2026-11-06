@@ -18,6 +18,7 @@ from backend.rag.llm_context import get_llm_config
 
 _call_observer: ContextVar[Callable[[dict], None] | None] = ContextVar("llm_call_observer", default=None)
 _call_phase: ContextVar[str] = ContextVar("llm_call_phase", default="")
+_call_scope: ContextVar[dict] = ContextVar("llm_call_scope", default={})
 _call_stats: ContextVar[dict] = ContextVar("llm_call_stats", default={})
 
 
@@ -30,12 +31,14 @@ def reset_call_observer(token) -> None:
 
 
 @contextmanager
-def call_phase(name: str):
+def call_phase(name: str, **scope):
     token = _call_phase.set(name)
+    scope_token = _call_scope.set(scope)
     try:
         yield
     finally:
         _call_phase.reset(token)
+        _call_scope.reset(scope_token)
 
 
 def _client(read_timeout: float) -> OpenAI:
@@ -76,7 +79,13 @@ def _stream_json(
     messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_content}]
     if tool_history:
         messages.extend(tool_history)
-    stream = _client(read_timeout).chat.completions.create(
+    client = _client(read_timeout)
+    from backend.ingest.model_runtime import current_execution
+    runtime = current_execution()
+    if runtime:
+        runtime.check()
+        runtime.register_client(client)
+    stream = client.chat.completions.create(
         model=config.model,
         messages=messages,
         response_format=response_format or {"type": "json_object"},
@@ -124,6 +133,9 @@ def _stream_json(
                 accumulated.append(delta)
                 if on_partial is not None:
                     on_partial("".join(accumulated))
+            if made_progress and runtime:
+                runtime.receiving.set()
+                runtime.check()
             if made_progress:
                 last_progress = now
             elif now - last_progress >= read_timeout:
@@ -182,7 +194,7 @@ def _retryable_unstarted_service_error(error):
                 and all(value is True for value in retryable))
 
 
-def complete_json(
+def _complete_json(
     system_prompt: str,
     user_prompt: str,
     *,
@@ -194,6 +206,7 @@ def complete_json(
     response_schema: dict | None = None,
     tool_definitions: list[dict] | None = None,
     tool_history: list[dict] | None = None,
+    _single_attempt: bool = False,
 ) -> dict[str, Any]:
     """流式请求并校验JSON；明确未输出的可重试503最多额外两次，其余沿原预算。"""
     from .structured_output import StructuredOutputError, output_format, validate_output
@@ -221,7 +234,7 @@ def complete_json(
                       "input_chars": len(system_prompt) + len(user_prompt), "tokens": None,
                       "input_tokens_estimate": (len(system_prompt) + len(user_prompt) + 3) // 4})
     last_error: Exception | None = None
-    for attempt in range(max(retries, 2) + 1):
+    for attempt in range(1 if _single_attempt else max(retries, 2) + 1):
         started = time.monotonic()
         _call_stats.set({"output_started": False})
         try:
@@ -251,9 +264,11 @@ def complete_json(
         except APIStatusError as exc:
             service_retryable = _retryable_unstarted_service_error(exc)
             _call_stats.set({**_call_stats.get(), "unstarted_service_retryable": service_retryable,
-                             "retry_scheduled": attempt < 2 and service_retryable})
+                             "retry_scheduled": not _single_attempt and attempt < 2 and service_retryable})
             record_failure(exc, attempt, started)
-            if attempt < 2 and service_retryable:
+            if _single_attempt:
+                raise  # 运行器需要原始错误码识别上下文超限；不能提前包装成结构错误。
+            if not _single_attempt and attempt < 2 and service_retryable:
                 print(f"  [LLM] 上游503明确未输出，{attempt + 1}/2 次传输重试")
                 time.sleep(min(2 ** attempt, 8))
                 continue
@@ -266,9 +281,18 @@ def complete_json(
             last_error = exc
             if (response_schema is not None or tool_definitions) and isinstance(exc, (json.JSONDecodeError, RuntimeError)):
                 raise StructuredOutputError("严格输出未返回完整有效JSON；原响应保留，未自动纠错") from exc
-            if attempt >= retries:
+            if _single_attempt or attempt >= retries:
                 break
             print(f"  [LLM] 请求或响应格式异常，{attempt + 1}/{retries} 次重试")
             time.sleep(min(2 ** attempt, 8))
     assert last_error is not None
     raise last_error
+
+
+def complete_json(system_prompt: str, user_prompt: str, **options) -> dict[str, Any]:
+    """上传执行使用持久运行器；其他宿主保留原有调用契约。"""
+    from backend.ingest.model_runtime import current_execution
+    runtime = current_execution()
+    if runtime:
+        return runtime.call(_complete_json, system_prompt, user_prompt, **options)
+    return _complete_json(system_prompt, user_prompt, **options)

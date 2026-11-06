@@ -274,7 +274,15 @@ def update_state(task_id: str, **changes: Any) -> dict[str, Any]:
                 raw = pipeline.get(key)
                 if not raw:
                     raise KeyError("上传任务不存在或已过期")
-                state = apply_state_changes(authoritative_state(task_id) or json.loads(raw), now=int(time.time()), **changes)
+                cached = json.loads(raw)
+                previous = authoritative_state(task_id) or cached
+                from .model_runtime import current_execution, ExecutionStopped
+                runtime = current_execution()
+                if runtime and runtime.task_id == task_id and (
+                        previous.get("execution_generation") != runtime.generation or
+                        cached.get("execution_generation") != runtime.generation):
+                    raise ExecutionStopped("旧执行不能回写新任务状态")
+                state = apply_state_changes(previous, now=int(time.time()), **changes)
                 pipeline.multi()
                 cleanup_at = state.get("cleanup_at")
                 if cleanup_at:
@@ -318,6 +326,13 @@ def handle_upload_job_failure(
             return True
         if state.get('job_id') and getattr(job, 'id', None) and state['job_id'] != job.id:
             return True  # 旧轮次迟到的失败不能覆盖已经开始的新轮次。
+        if state.get('execution_resumable'):
+            from .model_runtime import digest
+            update_state(task_id, status='paused', processing_status='paused',
+                execution_generation=int(state.get('execution_generation') or 0)+1,
+                execution_draft_hash=digest(get_draft(task_id)),
+                processing_error='后台执行已中断，完整进度已保留，可继续', error_code='execution_interrupted')
+            return True
         failed_stage = state.get("stage")
         update_state(
             task_id,
@@ -338,6 +353,16 @@ def handle_upload_job_failure(
         # 回调失败不能遮蔽原始 job 异常或阻断 RQ 的 FailedJobRegistry 写入。
         log.exception("无法同步上传任务的 Worker 失败状态: task_id=%s", task_id)
     return True
+
+
+def handle_upload_job_stopped(job, _connection):
+    """RQ主动stop不经过普通失败处理器，单独确认本任务停止完成。"""
+    from .model_runtime import reconcile_execution
+    if job.args and isinstance(job.args[0], str):
+        task_id = job.args[0]
+        state = get_state(task_id) or {}
+        if state.get('job_id') == job.id:
+            reconcile_execution(task_id, state)
 
 
 def list_user_tasks(user_id: int) -> list[dict[str, Any]]:
@@ -811,12 +836,14 @@ def enqueue_processing(task_id: str, *, preserve_llm_config: bool = False) -> st
         raise ValueError("原解析模型配置已过期，请重新发起任务")
     if not preserve_llm_config:
         save_llm_config(task_id, config)
+    update_state(task_id, execution_claimed=False)
     job = upload_queue().enqueue(
         process_upload_task,
         task_id,
         job_timeout=-1,
         result_ttl=TASK_TTL,
         failure_ttl=TASK_TTL,
+        on_stopped=handle_upload_job_stopped,
     )
     state = update_state(
         task_id, job_id=job.id, processing_status="processing", processing_error=None,
@@ -937,7 +964,7 @@ def cleanup_upload_task(
                     )
                 return
             if state and (
-                state.get("status") in RUNNING_STATUSES
+                state.get("status") in RUNNING_STATUSES | {"paused"}
                 or state.get("submission_status") == "submitting"
             ):
                 if state.get("submission_status") == "submitting" and not state.get("status"):

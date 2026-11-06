@@ -26,7 +26,7 @@ function countdownParts(
 // 任务状态 → upload.status.<value> 字典键（UploadTaskStatus 的可显示子集）
 const STATUS_KEYS = [
   'uploading', 'queued', 'extracting', 'needs_role_review', 'needs_workflow', 'reading', 'summarizing', 'ready',
-  'submitting', 'failed', 'duplicate', 'cancelling', 'cancelled',
+  'submitting', 'failed', 'duplicate', 'cancelling', 'cancelled', 'pausing', 'paused',
 ] as const
 
 interface Props {
@@ -235,7 +235,7 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey }) => {
                 <OpenInNewIcon aria-hidden="true" sx={{ color: 'text.disabled', fontSize: 18 }} />
                 {running
                   ? <Button sx={{ position: 'relative', zIndex: 2 }} size="small" color="warning" onClick={event => void cancel(event, task.task_id)}>{t('upload.cancel')}</Button>
-                  : ['failed', 'duplicate', 'cancelled'].includes(task.status || '')
+                  : ['failed', 'duplicate', 'cancelled', 'paused'].includes(task.status || '')
                     ? <Button sx={{ position: 'relative', zIndex: 2 }} size="small" color="error" onClick={event => void remove(event, task.task_id)}>{t('upload.clean')}</Button>
                     : null}
               </CardContent>

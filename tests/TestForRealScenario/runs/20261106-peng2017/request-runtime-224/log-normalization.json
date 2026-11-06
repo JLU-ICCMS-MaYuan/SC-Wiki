@@ -1,0 +1,32 @@
+{
+  "isolated-backend.txt": {
+    "raw_sha256": "d6f0db26dce8fc88796e153bc4d95c202dd6cac7dc1d71064444155d0fa92c70",
+    "normalized_sha256": "d6f0db26dce8fc88796e153bc4d95c202dd6cac7dc1d71064444155d0fa92c70",
+    "normalization": "仅移除行尾空白与末尾多余空行，原始输出保留在/tmp/scwiki-224-isolated-*"
+  },
+  "isolated-form.txt": {
+    "raw_sha256": "4482b7621beda3a328a9ede4bb98cd5b0e7e25837bf53db350cbe8259f564003",
+    "normalized_sha256": "2706a0d18beb3aeb97a76e693566b119b4feabc69786804ae49408399ad31959",
+    "normalization": "仅移除行尾空白与末尾多余空行，原始输出保留在/tmp/scwiki-224-isolated-*"
+  },
+  "isolated-mutation.txt": {
+    "raw_sha256": "ce8862c6532cebe0548866a17624875ff939a59cd2da61d13adf565a06cd3f2f",
+    "normalized_sha256": "ce8862c6532cebe0548866a17624875ff939a59cd2da61d13adf565a06cd3f2f",
+    "normalization": "仅移除行尾空白与末尾多余空行，原始输出保留在/tmp/scwiki-224-isolated-*"
+  },
+  "isolated-field.txt": {
+    "raw_sha256": "dca5472aaa353c5a13006a4ec152bb3bda7425c62ba05cf9e9668c5d99a79188",
+    "normalized_sha256": "dca5472aaa353c5a13006a4ec152bb3bda7425c62ba05cf9e9668c5d99a79188",
+    "normalization": "仅移除行尾空白与末尾多余空行，原始输出保留在/tmp/scwiki-224-isolated-*"
+  },
+  "isolated-ui.txt": {
+    "raw_sha256": "91fa2b825ad7685dd3e7bef20a814a7f3215c3a2543c8d855318aafce012adc1",
+    "normalized_sha256": "28fa5a75399cf35933c7420973028309f156177940147a44f03e6e3070b525a8",
+    "normalization": "仅移除行尾空白与末尾多余空行，原始输出保留在/tmp/scwiki-224-isolated-*"
+  },
+  "isolated-build.txt": {
+    "raw_sha256": "59cc54ebd4a9bf54339a1a58f3f1444f762fcd0aa38176b859319ede9aff5427",
+    "normalized_sha256": "59cc54ebd4a9bf54339a1a58f3f1444f762fcd0aa38176b859319ede9aff5427",
+    "normalization": "仅移除行尾空白与末尾多余空行，原始输出保留在/tmp/scwiki-224-isolated-*"
+  }
+}

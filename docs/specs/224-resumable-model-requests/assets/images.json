@@ -1,0 +1,18 @@
+[
+  {
+    "image_id": "figure-1",
+    "order": 1,
+    "path": "figure-1.png",
+    "sha256": "26509fe5db1d1afbd027be47b2bfa136815978f465108938eea628a412a61988",
+    "user_description": "图 1 放置显示真实请求状态，当然了也放置各种解析过程中模型正在处理什么，填写什么，整个过程的思考过程。",
+    "status": "local_verified",
+    "original_filename": "codex-clipboard-92262b53-1268-4018-bbd0-fb6e127c501c.png",
+    "media_type": "image/png",
+    "width": 3840,
+    "height": 1952,
+    "related": [
+      "FR-001",
+      "US1"
+    ]
+  }
+]

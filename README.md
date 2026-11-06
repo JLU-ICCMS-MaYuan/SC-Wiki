@@ -21,6 +21,8 @@ Embedding 与聊天模型独立配置。百炼 `text-embedding-v4` 的接入参�
 
 上传表单并发数由本机 `.env` 的 `UPLOAD_LLM_CONCURRENCY` 决定；本机当前配置为 `10`。本地启动脚本继承该配置，上传 Worker 重启后生效。排队中的活动记录数量与同时解析数量分别统计，详见[部署与运行时](docs/overview/02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md)。
 
+上传解析详情的五步条下显示请求与错误动态，支持“停止并保留进度／继续解析”；暂停记录保留到主动清理。依赖清单已包含 `langmem==0.0.30`，安装到项目 `sc-wiki` 环境，用于旧过程摘要；当前科学依据独立保留。传输重试不代表科学核对通过，详见 [#224](docs/specs/224-resumable-model-requests/spec.md)。
+
 Apple Silicon Mac 在项目根目录直接使用以下命令，无需 Lima 或 Docker：
 
 ```bash

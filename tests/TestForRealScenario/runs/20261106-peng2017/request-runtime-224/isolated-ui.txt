@@ -1,0 +1,22 @@
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v2.1.9 /private/tmp/scwiki-224-verified-tree
+
+ ✓ tests/01_decentralized_uploading/upload-model-activity.test.tsx (4 tests) 173ms
+stderr | tests/01_decentralized_uploading/upload-task-workspace.test.tsx > 论文上传工作区 > 任务详情地址在已提交=true 时跳转论文或明确提示
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/01_decentralized_uploading/upload-task-workspace.test.tsx (17 tests) 7456ms
+   ✓ 论文上传工作区 > 作者保持单行并可标记通讯作者和共同第一作者 465ms
+   ✓ 论文上传工作区 > 按材料状态显示压强与空间群，并以新契约保存 1771ms
+   ✓ 论文上传工作区 > 晶体结构只在所属材料状态内显示且材料状态列表占满页面 2551ms
+   ✓ 论文上传工作区 > 只读预览展示局部草稿字段但不提供编辑操作 375ms
+   ✓ 论文上传工作区 > 切换上传任务后只读预览重置为新任务的局部草稿 588ms
+   ✓ 论文上传工作区 > 轮询更新局部草稿时只读预览实时刷新内容 406ms
+   ✓ 论文上传工作区 > 分段阅读中的只读预览展示局部草稿的分类与材料状态 363ms
+
+ Test Files  2 passed (2)
+      Tests  21 passed (21)
+   Start at  16:33:45
+   Duration  9.20s (transform 353ms, setup 0ms, collect 1.68s, tests 7.63s, environment 224ms, prepare 63ms)

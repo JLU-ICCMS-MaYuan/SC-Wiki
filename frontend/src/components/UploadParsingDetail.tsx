@@ -146,29 +146,6 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
       {!detail && !error && <LinearProgress aria-label={t('upload.loadingDetailAria')} />}
       {detail && (
         <>
-          {detail.status === 'failed' && (
-            <Alert
-              severity="error"
-              sx={{ mb: 1.5 }}
-              action={
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button color="inherit" size="small" disabled={actionPending} onClick={() => void runAction('retry')}>
-                    {t('upload.retryParse')}
-                  </Button>
-                  {(detail.workflow_policy !== 'typed-parsing-v1' || detail._parsing_workflow) && <Button color="inherit" size="small" disabled={actionPending} onClick={() => void runAction('manual')}>
-                    {t('upload.manualFill')}
-                  </Button>}
-                </Box>
-              }
-            >
-              {t('upload.parseFailed', {
-                stage: detail.failed_stage
-                  ? t('upload.stageSuffix', { label: failedStageLabel(detail.failed_stage) })
-                  : '',
-                error: detail.processing_error || t('upload.unknownError'),
-              })}
-            </Alert>
-          )}
           {detail.status !== 'ready' && detail.citation_extraction_status && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2" fontWeight={700}>

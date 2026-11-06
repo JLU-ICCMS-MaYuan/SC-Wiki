@@ -241,6 +241,10 @@ def _schedule_terminal_cleanup(task_id: str) -> None:
 
 
 def _ensure_not_cancelled(task_id: str) -> dict[str, Any]:
+    from .model_runtime import current_execution
+    runtime = current_execution()
+    if runtime and runtime.task_id == task_id:
+        runtime.check()
     state = get_state(task_id)
     if not state:
         raise UploadCancelled("上传任务已被清理")
@@ -270,12 +274,13 @@ def _extract_pdf_structure_candidates(task_id, markdown, file_source, file_item,
         directory = artifact_directory(task_id) / 'structure_reading' / str(file_item['file_id'])
         directory.mkdir(parents=True, exist_ok=True)
         _atomic_write_json(directory / f"call-{event['iteration']}-{event['status']}.json", event)
-    return extract_structure_candidates(markdown, pdf_path=file_source,
-        source={'file_id': file_item.get('file_id'),
-                'filename': file_item.get('original_filename') or file_source.name,
-                'role': file_item.get('role'), 'sha256': file_item.get('sha256')},
-        material_scope=material_scope,
-        on_event=save_structure_reading, cancelled=lambda: _structure_reading_cancelled(task_id))
+    with call_phase('structure_reading'):
+        return extract_structure_candidates(markdown, pdf_path=file_source,
+            source={'file_id': file_item.get('file_id'),
+                    'filename': file_item.get('original_filename') or file_source.name,
+                    'role': file_item.get('role'), 'sha256': file_item.get('sha256')},
+            material_scope=material_scope,
+            on_event=save_structure_reading, cancelled=lambda: _structure_reading_cancelled(task_id))
 
 
 def _original_path(state: dict[str, Any]) -> Path:
@@ -454,6 +459,13 @@ def _chunk_result_path(
 
 
 def _atomic_write_json(path: Path, payload: Any) -> None:
+    from .model_runtime import current_execution, atomic_json
+    runtime = current_execution()
+    if runtime:
+        with runtime.lock():
+            runtime.check()
+            atomic_json(path, payload)
+        return
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     temporary.replace(path)
@@ -972,7 +984,7 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
                 public["status"] = "failed"
                 public["error"] = "分段结果不可读取"
         chunks.append(public)
-    stable = state.get("status") in {"ready", "failed", "duplicate", "cancelled", "submitted", "needs_workflow"}
+    stable = state.get("status") in {"ready", "failed", "duplicate", "cancelled", "submitted", "needs_workflow", "paused"}
     task_status = state.get("status")
     if task_status in {"summarizing", "failed"}:
         partial_draft = state.get("partial_draft")
@@ -997,6 +1009,8 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
         "stage": state.get("stage"),
         "processing_error": state.get("processing_error"),
         "failed_stage": state.get("failed_stage"),
+        "model_activity": state.get("model_activity"),
+        "execution_resumable": state.get("execution_resumable", False),
         "citation_extraction_status": state.get("citation_extraction_status"),
         "citation_extraction_error": state.get("citation_extraction_error"),
         "citation_reference_count": state.get("citation_reference_count", 0),
@@ -1847,6 +1861,7 @@ def process_upload_task(task_id: str) -> dict[str, Any]:
     """Run a task with its short-lived request-scoped LLM configuration."""
     from backend.rag.llm_context import reset_llm_config, resolve_llm_config, set_llm_config
     from backend.rag.llm import reset_call_observer, set_call_observer
+    from .model_runtime import ExecutionStopped
 
     config = load_llm_config(task_id)
     state = (get_state(task_id) or {}) if config is None else {}
@@ -1871,11 +1886,23 @@ def process_upload_task(task_id: str) -> dict[str, Any]:
     started = time.monotonic()
     cpu_started = time.process_time()
     try:
-        from .upload_resume import resume_spectra
-        resumed = resume_spectra(task_id)
-        if resumed is not None:
-            return resumed
-        return _process_upload_task(task_id)
+        from .model_runtime import start_runtime, execution_context
+        runtime = start_runtime(task_id)
+        with execution_context(runtime):
+            from .upload_resume import resume_spectra
+            resumed = resume_spectra(task_id)
+            if resumed is not None:
+                return resumed
+            return _process_upload_task(task_id)
+    except ExecutionStopped:
+        current = get_state(task_id) or {}
+        if current.get('status') == 'pausing':
+            return update_state(task_id, status='paused', processing_status='paused',
+                processing_error=None, model_activity={**(current.get('model_activity') or {}),
+                    'status':'paused', 'retry_at':None})
+        if current.get('status') == 'cancelling':
+            return update_state(task_id, status='cancelled', processing_status='cancelled', processing_error=None)
+        return current
     finally:
         try:
             _atomic_write_json(artifact_directory(task_id) / "llm_calls.json", {"calls": calls,
@@ -1890,7 +1917,7 @@ def process_upload_task(task_id: str) -> dict[str, Any]:
                               latency=time.monotonic()-started, cpu=time.process_time()-cpu_started)
         except Exception:
             logging.getLogger(__name__).warning("解析运行元数据保存失败 task=%s", task_id)
-        if (get_state(task_id) or {}).get("status") != "needs_role_review":
+        if (get_state(task_id) or {}).get("status") in {"ready", "failed", "cancelled", "submitted", "duplicate"}:
             delete_llm_config(task_id)
         reset_llm_config(token)
         try:
@@ -1918,7 +1945,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         _ensure_not_cancelled(task_id)
         update_state(task_id, status='extracting', stage='extracting', stage_index=2,
             processing_status='processing', processing_error=None, error_code=None,
-            workflow_policy=POLICY, workflow_assessment=None, **{BINDING: None})
+            reading_state='extracting_sources', workflow_policy=POLICY, workflow_assessment=None, **{BINDING: None})
         source = _original_path(state)
         files = state.get('files') or [dict(file_id='main', role='main',
             kind=state.get('file_kind'), original_filename=state.get('filename'),
@@ -1935,8 +1962,19 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             file_state = dict(state, file_id=item['file_id'],
                 file_kind=item.get('kind') or path.suffix.lstrip('.'),
                 file_sha256=item.get('sha256') or state.get('file_sha256'))
-            text = _extract_markdown(file_state, path)
-            (directory / f"{item['file_id']}.md").write_text(text, encoding='utf-8')
+            from .model_runtime import current_execution
+            runtime = current_execution()
+            if runtime:
+                runtime.event('processing', phase='extracting_sources', filename=item.get('original_filename'),
+                              attempt=0, pages=[], action=None, note=None, error=None, retry_at=None)
+            cached_text = directory / f"{item['file_id']}.md"
+            if state.get('execution_resume_requested') and cached_text.is_file():
+                if item.get('sha256') and sha256_file(path) != item['sha256']:
+                    raise ValueError('原文件哈希已变化，不能复用解析上下文')
+                text = cached_text.read_text(encoding='utf-8')
+            else:
+                text = _extract_markdown(file_state, path)
+                cached_text.write_text(text, encoding='utf-8')
             combined.append(text)
             item.update(extraction_status='completed', error=None)
         markdown_path(task_id).write_text('\n\n'.join(combined), encoding='utf-8')
@@ -2223,7 +2261,10 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
             try:
                 extraction_source = {**file_item, 'tc_material_scope':
                     (state.get('workflow_assessment') or {}).get('tc_material_scope')}
-                with call_phase("chunk_extraction"):
+                chunk_page = getattr(chunk, 'source_page', None)
+                chunk_end = getattr(chunk, 'source_page_end', None) or chunk_page
+                with call_phase("chunk_extraction", filename=file_item.get('original_filename'),
+                                pages=list(range(chunk_page, chunk_end + 1)) if chunk_page else []):
                     if multi_file:
                         candidates.append(_read_chunk(task_id, chunk, file_item["file_id"], extraction_source))
                     elif state.get("parser_profile", "legacy") != "legacy":

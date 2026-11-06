@@ -61,6 +61,8 @@ def _owned_state(task_id: str, user: User) -> dict[str, Any]:
     is_admin = user.role in {"admin", "superadmin"} and user.is_approved
     if int(state.get("user_id") or 0) != user.id and not is_admin:
         raise _error(403, "UPLOAD_TASK_FORBIDDEN", "无权访问该上传任务")
+    from backend.ingest.model_runtime import reconcile_execution
+    state = reconcile_execution(task_id, state)
     return state
 
 
@@ -293,12 +295,47 @@ def cancel_upload_task(task_id: str, current_user: User = Depends(get_current_us
     return JSONResponse(status_code=202, content={"ok": True, "data": public_task_state(state)})
 
 
+@router.post("/{task_id}/pause")
+def pause_upload_task(task_id: str, current_user: User = Depends(get_current_user)):
+    from backend.ingest.model_runtime import pause_task
+    state = _owned_state(task_id, current_user)
+    if int(state.get("user_id") or 0) != current_user.id:
+        raise _error(403, "UPLOAD_TASK_FORBIDDEN", "只有上传者可以停止解析")
+    try:
+        return JSONResponse(status_code=202, content={"ok": True, "data": public_task_state(pause_task(task_id))})
+    except (ValueError, TimeoutError) as exc:
+        raise _error(409, "PAUSE_NOT_ALLOWED", str(exc)) from exc
+
+
+@router.post("/{task_id}/resume")
+def resume_upload_task(task_id: str, current_user: User = Depends(get_current_user)):
+    from backend.ingest.model_runtime import resume_task
+    state = _owned_state(task_id, current_user)
+    if int(state.get("user_id") or 0) != current_user.id:
+        raise _error(403, "UPLOAD_TASK_FORBIDDEN", "只有上传者可以继续解析")
+    try:
+        return JSONResponse(status_code=202, content={"ok": True, "data": public_task_state(resume_task(task_id))})
+    except (ValueError, TimeoutError) as exc:
+        raise _error(409, "RESUME_NOT_ALLOWED", str(exc)) from exc
+
+
 @router.get("/{task_id}/parsing")
 def get_parsing_detail(task_id: str, current_user: User = Depends(get_current_user)):
     from backend.ingest.upload_jobs import public_parsing_detail
 
     _owned_state(task_id, current_user)
     return {"ok": True, "data": public_parsing_detail(task_id)}
+
+
+@router.get("/{task_id}/model-activity")
+def get_model_activity(task_id: str, before: float | None = None,
+                       limit: int = Query(100, ge=1, le=100), current_user: User = Depends(get_current_user)):
+    from backend.ingest.model_runtime import read_events, input_identity
+    from backend.ingest.upload_tasks import artifact_directory, upload_task_lock
+    state = _owned_state(task_id, current_user)
+    directory = artifact_directory(task_id) / 'model-runtime' / (state.get('execution_input_hash') or input_identity(state))
+    with upload_task_lock(task_id):
+        return {'ok':True, 'data':read_events(directory, before=before, limit=limit)}
 
 
 @router.get("/{task_id}/chunks")
@@ -398,7 +435,7 @@ def delete_upload_task(task_id: str, current_user: User = Depends(get_current_us
     from backend.ingest.upload_tasks import delete_task_record, submitted_paper_id
 
     state = _owned_state(task_id, current_user)
-    if state.get("status") not in {"failed", "duplicate", "cancelled"}:
+    if state.get("status") not in {"failed", "duplicate", "cancelled", "paused"}:
         raise _error(409, "UPLOAD_TASK_NOT_CLEARABLE", "运行中或待校对任务不能直接清理")
     if submitted_paper_id(task_id) is not None:
         raise _error(409, "UPLOAD_TASK_PERSISTED", "任务已经生成正式论文，不能删除文件")

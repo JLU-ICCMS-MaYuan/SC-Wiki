@@ -6,9 +6,9 @@ import type {
 import { convertLegacyPropertyModules, PROPERTY_SCHEMA_VERSION } from './propertyModules'
 
 export type ProcessingStage = 'saving_file' | 'queued' | 'extracting' | 'reading' | 'summarizing' | 'ready'
-export type ProcessingStatus = 'processing' | 'succeeded' | 'failed' | 'cancelled'
+export type ProcessingStatus = 'processing' | 'succeeded' | 'failed' | 'cancelled' | 'pausing' | 'paused'
 export type UploadTaskStatus = 'uploading' | 'queued' | 'extracting' | 'reading' | 'summarizing' |
-  'ready' | 'needs_role_review' | 'needs_workflow' | 'submitting' | 'submitted' | 'failed' | 'duplicate' | 'cancelling' | 'cancelled'
+  'ready' | 'needs_role_review' | 'needs_workflow' | 'submitting' | 'submitted' | 'failed' | 'duplicate' | 'cancelling' | 'cancelled' | 'pausing' | 'paused'
 
 export interface UploadTaskFile {
   file_id: string
@@ -252,6 +252,8 @@ export interface UploadExtractionTiming {
 }
 
 export interface UploadTaskState {
+  model_activity?: ModelActivity | null
+  execution_resumable?: boolean
   _parsing_workflow?: ParsingWorkflowBinding
   workflow_assessment?: WorkflowAssessment
   task_id: string
@@ -279,6 +281,21 @@ export interface UploadTaskState {
   files?: UploadTaskFile[]
   revision?: number
   role_assessment?: UploadRoleAssessment
+}
+
+export interface ModelActivity {
+  status: string
+  phase?: string
+  attempt?: number
+  started_at?: number
+  updated_at?: number
+  retry_at?: number | null
+  filename?: string | null
+  pages?: number[]
+  action?: string | null
+  note?: string | null
+  error?: { status_code?: number; code?: string; message?: string; request_id?: string; output_started?: boolean } | null
+  history?: ModelActivity[]
 }
 
 export interface UploadAcceptedResponse extends Partial<UploadTaskState> {
