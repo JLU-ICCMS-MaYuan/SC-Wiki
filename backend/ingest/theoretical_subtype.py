@@ -21,9 +21,9 @@ CLASSIFY_PROMPT = """你是超导论文的全文分类审核员。输入包含�
 - theory：以解析推导、理论模型或物理机制解释为主要贡献，而非主要报告计算结果。
 “新路线”或使用 USPEX、VASP、DFT 等不单独证明开发了新方法。引用他人工作和参考文献不代表本文贡献。
 通读研究目标、摘要、结果、讨论、结论及方法后，返回 JSON：
-{"value":"calculation|method|theory|null","reason":"简体中文简述主要贡献及排除另两类的依据，不超过180字", "evidences":[{"source_id":"review-source-N"}]}。
-只返回本次提供的 source_id，不另写 quote，服务器取回完整原文。至少一个编号的 section_role 应为 abstract/result/discussion/conclusion。
-选择类别需 1–3 条代表性原句，至少一条来自摘要、结果、讨论或结论，不能只用 Methods；无法确定时 value 为 null、说明缺口且不编造引句。"""
+{"value":"calculation|method|theory|null","reason":"简体中文简述主要贡献及排除另两类的依据，不超过180字", "evidences":[{"source_id":"review-source-N"}], "contribution_source_ids":["review-source-N"]}。
+只返回本次提供的 source_id，不另写 quote，服务器取回完整原文。
+选择类别需1–3条代表性原文；contribution_source_ids从evidences中选出体现本文研究目标、结果或结论的正文编号。按内容判断，section_role只是排版线索，无章节小标题的结果同样有效；仅方法软件、他人工作或补充材料不能单独证明本文贡献。无法确定时value为null、贡献编号为空数组，说明缺口且不编造引句。"""
 
 WINDOW_PROMPT = """你在阅读一篇论文的其中一组连续原文。只记录本文作者的研究目标、实际结果、是否开发新方法或提出理论机制。
 不得把参考文献或方法软件名直接当分类结论。返回 JSON：{"summary":"简短事实摘要","evidences":[{"source_id":"review-source-N"}]}。
@@ -60,12 +60,33 @@ def assess_candidate(chunks: list[dict], raw: dict, *, model: str = "",
         found = locate(item, chunks)
         if found and found not in evidence:
             evidence.append(found)
-    has_contribution = any(str(item.get("section_role") or "").lower() in CONTRIBUTION_SECTIONS
-                           for item in evidence)
+    contributions = raw.get('contribution_source_ids')
+    if contributions is None:  # 旧汇总及冻结分类继续沿用原资格，不改写历史。
+        has_contribution = any(str(item.get("section_role") or "").lower() in CONTRIBUTION_SECTIONS
+                               for item in evidence)
+    else:
+        selected = []
+        valid = isinstance(contributions, list) and bool(contributions)
+        for source_id in contributions if valid else []:
+            resolved = resolve_review_sources([{'source_id': source_id}], chunks)
+            located = locate(resolved[0], chunks) if resolved else None
+            source = next((c for c in chunks if located and
+                str(c['file_id']) == str(located['file_id']) and c['chunk_index'] == located['chunk_index']), {})
+            if (not isinstance(source_id, str) or not located or located not in evidence
+                    or source.get('file_role', 'main') != 'main'
+                    or source.get('section_role') in {'reference', 'references'}):
+                valid = False
+                break
+            if located not in selected:
+                selected.append(located)
+        has_contribution = valid
+        if valid:
+            evidence = selected
     if value not in SUBTYPES or not reason or not has_contribution:
         return {**base, "status": "uncertain", "value": None,
                 "reason": reason or "无法根据全文可靠判断理论二级类型", "evidences": evidence}
-    return {**base, "status": "completed", "value": value, "reason": reason, "evidences": evidence}
+    return {**base, "status": "completed", "value": value, "reason": reason, "evidences": evidence,
+            **({'contribution_basis': 'content'} if contributions is not None else {})}
 
 
 def classify(chunks: list[dict], *, complete: Callable | None = None, model: str = "") -> dict:

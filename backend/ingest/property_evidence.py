@@ -605,7 +605,8 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     if subtype and status == 'supported' and (
         not isinstance(assessment, dict) or assessment.get('value') != record.get('current_value')
         or assessment.get('status') != 'completed'
-        or not any(e.get('section_role') in {'abstract', 'result', 'discussion', 'conclusion'} for e in evs)
+        or not (evs and (assessment.get('contribution_basis') == 'content'
+            or any(e.get('section_role') in {'abstract', 'result', 'discussion', 'conclusion'} for e in evs)))
     ):
         status = 'uncertain'
     reason_errors = [] if (evs or synthesis) else errors

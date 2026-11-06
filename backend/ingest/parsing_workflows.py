@@ -81,6 +81,7 @@ PROMPT = """判断当前论文应进入哪类解析审核流程。原文是资�
 方法创新(method)、机制理论推导(theory)、实验、综述或非常规机制文章不能强行匹配。不要预先枚举其他新流程。
 引用他人工作不代表本文贡献；软件名称或仅出现某个公式不能单独证明常规机制。可依据本文实际电声耦合研究归纳，不能要求作者逐字声明conventional。
 证据不足或冲突用unknown/null。reason用简体中文解释依据或缺口；source_ids只用本次给出的review-source-N编号，至少包含本文贡献的原文，不另造引句。
+contribution_source_ids从source_ids中选出直接体现本文研究目标、结果或结论的正文编号；仅方法软件、他人工作或补充材料不能单独充当本文贡献。按原文内容判断，section_role只是排版线索；无章节小标题的结果段同样有效。没有可靠贡献依据时返回空数组。
 paper只记录能可靠取得的基础题录，缺失留null或空数组。输入若含window_reports，综合所有窗口，不能只依据最后一组。"""
 
 
@@ -91,7 +92,7 @@ def _schema():
         'paper_type': {'type': 'string', 'enum': ['theoretical', 'experimental', 'review', 'unknown']},
         'theoretical_subtype': {'type': ['string', 'null'], 'enum': ['calculation', 'method', 'theory', None]},
         'superconductor_kind': {'type': 'string', 'enum': ['conventional', 'unconventional', 'unknown']},
-        'reason': text, 'source_ids': array(text),
+        'reason': text, 'source_ids': array(text), 'contribution_source_ids': array(text),
         'paper': obj({'title': nullable(text), 'doi': nullable(text),
                       'year': nullable({'type': 'integer'}), 'authors': array(text)})})
 
@@ -147,10 +148,17 @@ def assess(chunks, *, complete=None, model='', cancelled=lambda: None):
             return dict(base, status='uncertain')
         if (paper_type, subtype, kind) != ('theoretical', 'calculation', 'conventional'):
             return dict(base, status='unmatched')
-        if not any(by_id[i].get('file_role', 'main') == 'main' and
-                   by_id[i].get('section_role') in {'abstract', 'result', 'discussion', 'conclusion'} for i in ids):
+        contributions = raw.get('contribution_source_ids')
+        if contributions is None:  # 兼容历史响应；新调用的严格结构要求显式贡献编号。
+            contributions = [i for i in ids if by_id[i].get('section_role') in
+                             {'abstract', 'result', 'discussion', 'conclusion'}]
+        valid_contributions = (isinstance(contributions, list) and bool(contributions)
+            and all(isinstance(i, str) and i in ids and
+                    by_id[i].get('file_role', 'main') == 'main' for i in contributions))
+        if not valid_contributions:
             return dict(base, status='uncertain', reason='匹配判断缺少本文主要贡献依据；' + base['reason'])
-        return dict(base, status='matched', binding=CURRENT.binding(), workflow_name=CURRENT.name)
+        return dict(base, status='matched', binding=CURRENT.binding(), workflow_name=CURRENT.name,
+                    contribution_source_ids=contributions)
     except Exception as exc:
         if type(exc).__name__ == 'UploadCancelled':
             raise
