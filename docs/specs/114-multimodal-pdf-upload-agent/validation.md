@@ -250,3 +250,9 @@ GitHub #114、#120、#122 的正文及相关旧评论也已同步新策略，三
 定向保护24项通过；字段契约、198项四宿主表单及12项变异检查通过。相邻套件53通过/9失败，其中9失败与独立未修改d3dad500基线50通过/9失败的测试名及错误一致：8项旧夹具含已退役experimental_conditions，1项旧测试期望严格输出重试。未删除测试或放宽科学契约。证据在tests/TestForRealScenario/runs/20261106-labeh8/window-{before,after,baseline,safety,field,form,mutation}.txt及window-replay-report.json。
 
 T051完成静态分段及保护验证；相同PDF新模型提取与五阶段网页业务由T052继续，不能用本节结果声称整篇解析或业务流程完成。
+
+### 相同PDF网页新上传及外部阻塞
+
+48e1f238提交后，Safari正常组件新上传同角色同SHA256的正文/SI，新任务8c6708deb895419585b86aadeb9bc56d。通过正常网页同任务重新解析，三次处理分别在SI结构读取发生APITimeoutError、HTTP 503、HTTP 503，均未进入科学提取窗口。实际任务调用分别11/15/15次，失败响应与终态独立归档；前次遗留文件不当作本次新调用，当前以每次llm_calls及对应终态判读。
+
+原模型短请求及真实SI首次请求隔离重放另行成功，不能替代网页恢复或由此宣布服务稳定。当前failed且无正式论文；T052及五阶段业务保持未完成，等待用户选择本轮切换现有DeepSeek或保留原模型等待恢复，不擅改默认模型、科学保护或延长超时。证据见tests/TestForRealScenario/runs/20261106-labeh8-r2/及本轮LaBeH8测试报告。
