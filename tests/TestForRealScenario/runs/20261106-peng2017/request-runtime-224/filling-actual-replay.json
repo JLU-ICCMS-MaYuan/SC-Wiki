@@ -1,0 +1,9 @@
+{
+  "scope": "真实当前状态/原始IR的生产填表输入重放，不调用模型、不写业务数据",
+  "status": "paused",
+  "states": 37,
+  "model_callback_reached": true,
+  "original_input_chars": 296946,
+  "wire_input_chars": 150869,
+  "stop_reason": "no_new_sources"
+}

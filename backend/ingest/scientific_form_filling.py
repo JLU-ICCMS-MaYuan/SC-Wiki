@@ -397,14 +397,29 @@ def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=N
                    "must_finalize": finalizing or number == max_rounds - 1,
                    "remaining_rounds": max_rounds - number}
         content = json.dumps(request, ensure_ascii=False, separators=(",", ":"))
+        wire_prompt = PROMPT
+        report['original_input_chars'] = len(content)
+        if len(content) > 250000:
+            from .model_memory import prepare_fixed_request, ContextBudgetError
+            from .scientific_output_schema import filling_schema
+            try:
+                wire = prepare_fixed_request({'system_prompt':PROMPT,'user_prompt':content,
+                                              'response_schema':filling_schema()})
+                wire_prompt, content = wire['system_prompt'], wire['user_prompt']
+            except ContextBudgetError as exc:
+                error = str(exc)
+                report['stop_reason'] = 'context_budget'
+                break
         report["input_chars"] = len(content)
         if len(content) > 250000:
             error = "整理输入超过预算，保留候选；未假装完成全文阅读"
             report["stop_reason"] = "context_budget"
             break
         attempt = {"round": number + 1, "read_source_ids": list(read), "input_chars": len(content), "input": request}
+        if wire_prompt != PROMPT:
+            attempt['wire_input'] = json.loads(content)
         try:
-            response = model(PROMPT, content)
+            response = model(wire_prompt, content)
             if cancelled:
                 cancelled()
             attempt["response"] = deepcopy(response)

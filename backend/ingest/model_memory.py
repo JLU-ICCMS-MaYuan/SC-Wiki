@@ -91,13 +91,15 @@ def _compact_source_texts(request):
     return {**request, 'system_prompt':request['system_prompt'] + instruction, 'user_prompt':packed}
 
 
+def _cites_source_ids(schema):
+    if isinstance(schema, dict):
+        return 'source_ids' in (schema.get('properties') or {}) or any(_cites_source_ids(v) for v in schema.values())
+    return isinstance(schema, list) and any(_cites_source_ids(v) for v in schema)
+
+
 def _compact_source_catalog(request):
     """引用选择模型读全部原文，程序保留完整定位；与原有source_id写回契约一致。"""
-    def cites_source_ids(schema):
-        if isinstance(schema, dict):
-            return 'source_ids' in (schema.get('properties') or {}) or any(cites_source_ids(v) for v in schema.values())
-        return isinstance(schema, list) and any(cites_source_ids(v) for v in schema)
-    if request.get('tool_definitions') or not cites_source_ids(request.get('response_schema')):
+    if request.get('tool_definitions') or not _cites_source_ids(request.get('response_schema')):
         return request
     try:
         payload = json.loads(request['user_prompt'])
@@ -153,7 +155,7 @@ def _compact_source_catalog(request):
 
 
 def validate_context_output(response, request):
-    if not any(marker in request.get('user_prompt','') for marker in ('"_context_texts"','"_context_source_catalog"')):
+    if not any(marker in request.get('user_prompt','') for marker in ('"_context_texts"','"_context_source_catalog"','"_context_unread_index"')):
         return
     payload = json.loads(request['user_prompt'])
     texts = payload.get('_context_texts') if isinstance(payload, dict) else None
@@ -161,7 +163,7 @@ def validate_context_output(response, request):
     from backend.rag.structured_output import StructuredOutputError
     def visit(value):
         if isinstance(value, dict):
-            if set(value) & {'_context_text_ref', '_context_texts', '_context_source_catalog'}:
+            if set(value) & {'_context_text_ref', '_context_texts', '_context_source_catalog', '_context_unread_index'}:
                 raise StructuredOutputError('模型返回内部传输引用，未提供实际字段内容')
             for item in value.values(): visit(item)
         elif isinstance(value, list):
@@ -169,6 +171,44 @@ def validate_context_output(response, request):
         elif isinstance(value, str) and any(key in value for key in texts):
             raise StructuredOutputError('模型把内部传输标识写入字段，未作为有效结果保存')
     visit(response)
+
+
+def _compact_unread_index(request):
+    try:
+        payload = json.loads(request['user_prompt'])
+    except (KeyError, ValueError, TypeError):
+        return request
+    rows = payload.get('source_index') if isinstance(payload,dict) else None
+    allowed = {'source_id','file_id','block_id','page_start','page_end','pdf_page','preview'}
+    if request.get('tool_definitions') or not _cites_source_ids(request.get('response_schema')) or not rows or not isinstance(rows,list) or any(
+            not isinstance(row,dict) or set(row)-allowed or not row.get('source_id') or not row.get('file_id') for row in rows):
+        return request
+    groups = {}
+    seen = set()
+    for row in rows:
+        if row['source_id'] in seen:
+            raise ContextBudgetError('未读目录引用身份重复，未隐藏错误')
+        seen.add(row['source_id'])
+        group = groups.setdefault(row['file_id'], {'file_id':row['file_id'],'entries':[]})
+        group['entries'].append({key:value for key,value in row.items() if key not in {'file_id','block_id'}})
+    payload['source_index'] = {'_context_unread_index':list(groups.values())}
+    instruction = ('\nsource_index._context_unread_index是按真实file_id分组的未读目录，entries保留全部原source_id、'
+        '页码及原preview。preview只是未读预览，不是已读原文，不可当作引用依据。需返回read_source_ids'
+        '再读取完整内容；只有当前sources中已读来源可引用。程序保留完整原始块定位，不得用组下标代替来源。\n')
+    return {**request,'system_prompt':request['system_prompt']+instruction,
+            'user_prompt':json.dumps(payload,ensure_ascii=False,separators=(',',':'))}
+
+
+def prepare_fixed_request(request, *, budget=96000):
+    """纯传输准备；供旧字符预算门之前复用，不调用模型、不写当前科学数据。"""
+    prepared = dict(request)
+    for compact in (_compact_source_texts, _compact_source_catalog, _compact_unread_index):
+        if _fixed_token_estimate(prepared) < budget:
+            return prepared
+        prepared = compact(prepared)
+    if _fixed_token_estimate(prepared) >= budget:
+        raise ContextBudgetError('当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据')
+    return prepared
 
 
 def _groups(history):
@@ -281,17 +321,9 @@ def compact_history(history, path, *, model=None, budget=16000):
 
 
 def prepare_request(request, directory, *, model=None, budget=96000, force=False):
-    prepared = dict(request)
+    prepared = prepare_fixed_request(request, budget=budget)
     history = list(request.get("tool_history") or [])
     fixed_tokens = _fixed_token_estimate(prepared)
-    if fixed_tokens >= budget:
-        prepared = _compact_source_texts(prepared)
-        fixed_tokens = _fixed_token_estimate(prepared)
-    if fixed_tokens >= budget:
-        prepared = _compact_source_catalog(prepared)
-        fixed_tokens = _fixed_token_estimate(prepared)
-    if fixed_tokens >= budget:
-        raise ContextBudgetError("当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据")
     size = count_tokens_approximately(_messages(history)) if history else 0
     if not force and fixed_tokens + size <= budget:
         return prepared

@@ -238,3 +238,22 @@ def test_measured_tc_keeps_experimental_conditions_and_does_not_get_theory_group
     record=result[0]['property_modules'][0]['records'][0]
     assert record['record_type']=='measured_tc' and record['method_code']=='resistivity'
     assert record['payload']==base['payload']
+
+
+def test_large_source_index_is_encoded_before_existing_character_guard(monkeypatch):
+    from backend.ingest import scientific_form_filling as filling
+    import hashlib
+    state,_=fixture();file_id=hashlib.sha256(b'file').hexdigest()[:32]
+    sources=[{'source_id':f'source-{i}','file_id':file_id,'file_role':'supplementary','source_sha256':hashlib.sha256(b'PDF').hexdigest(),
+              'source_version':1,'block_id':hashlib.sha256(f'block-{i}'.encode()).hexdigest(),'page_start':i%34+1,'page_end':i%34+1,
+              'content':f'Unique source {i}: YH10 at 400 GPa.'} for i in range(1100)]
+    monkeypatch.setattr(filling,'build_context',lambda *_,**__: {'sources':sources,'source_fingerprint':'fixture','gaps':[]})
+    calls=[]
+    def model(prompt,content):
+        calls.append((prompt,content));assert len(content)<250000
+        return {'done':False,'read_source_ids':[],'search':[]}
+    _,report=filling.fill_scientific_forms([state],sources,model,max_rounds=1)
+    assert len(calls)==1
+    assert report['stop_reason']!='context_budget'
+    assert report['original_input_chars']>250000
+    assert report['input_chars']<250000
