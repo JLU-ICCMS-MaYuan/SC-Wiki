@@ -242,3 +242,11 @@ GitHub #114、#120、#122 的正文及相关旧评论也已同步新策略，三
 证据位于tests/TestForRealScenario/runs/20261104T043104Z-lah-324f7fe6/eighth-coverage-before/after.txt、eighth-coverage-failed-artifacts、eighth-coverage-live及tests/TestForRealScenario/fixtures/lah-coverage-40-to-34.json。该固定/隔离/真实分类验证不代替第九轮网页上传及完整送审、拒绝、返修、批准和探索；字段/表单/变异及最终隔离候选仍待本轮收尾复核。
 
 最终隔离候选52项受影响回归、163四宿主、字段契约及12变异检出通过；原旧领域用例的8失败已独立HEAD证明，未冒充通过。源码摘要见eighth-coverage-candidate-manifest.json。真实分类成功不代表正式表单已保存或送审。
+
+## 2026-11-06 LaBeH8提取窗口
+
+用户已明确选择较小提取窗口并保留500000硬上限。真实SI第20—22页表S1夹具的新增回归先2失败/1保护通过；分离48000正常窗口后，3项新增全部通过。原正文7页由1窗变6窗，SI51页由2窗变24窗；带完整邻页上下文的最大输入分别64201与63536字符，原选定块集合、单元格原文、表头及行身份均保持。不可再拆完整块使用原硬上限，超限仍明确拒绝。
+
+定向保护24项通过；字段契约、198项四宿主表单及12项变异检查通过。相邻套件53通过/9失败，其中9失败与独立未修改d3dad500基线50通过/9失败的测试名及错误一致：8项旧夹具含已退役experimental_conditions，1项旧测试期望严格输出重试。未删除测试或放宽科学契约。证据在tests/TestForRealScenario/runs/20261106-labeh8/window-{before,after,baseline,safety,field,form,mutation}.txt及window-replay-report.json。
+
+T051完成静态分段及保护验证；相同PDF新模型提取与五阶段网页业务由T052继续，不能用本节结果声称整篇解析或业务流程完成。

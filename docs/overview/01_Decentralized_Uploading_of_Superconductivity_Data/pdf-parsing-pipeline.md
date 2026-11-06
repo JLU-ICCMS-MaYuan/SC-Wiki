@@ -130,6 +130,7 @@ flowchart TD
 
 - `chunker.py` 把合并前的各文件 Markdown 切成 `Chunk`，`_chunks_with_preamble` 为每个文件补一个前言段；分段清单写入 `review_artifacts/{task_id}/chunk_manifest.json`，每段状态在 `waiting / processing / completed / failed` 间流转。
 - 读取前由 `_merge_extraction_windows` 把相邻小段合并为约 12000 字符的提取窗口（`EXTRACTION_WINDOW_CHARS`），页码取窗口起点所在页，再逐窗口调用 `_read_chunk`（使用当前请求选择的 OpenAI 兼容 LLM），减少过细分段造成的上下文断裂与调用次数。分段中的 AI 生成研究材料、方法和核心发现必须为英文；服务端在写入 `review_artifacts/{task_id}/chunks/` 前拒绝这些字段中的中日韩字符。论文标题、摘要和 `quote` 属于来源文本，保持输入语言，不翻译也不拦截；`quote` 可能来自 PDF 文本提取或 OCR，不承诺与扫描版逐字一致。
+- 结构化PDF走`structured_chunks`：正常窗口48000字符，单次硬上限500000字符；表格按完整行拆分并保留真实表头、跨行单元格和页内说明，边界补充有界的完整邻页非表格原块。不能再拆的完整原块可超过正常窗口，超过硬上限则明确失败；原文与来源身份不因分段而改写。窗口回归通过不代表模型提取或整篇业务验收通过，见[#114](../../specs/114-multimodal-pdf-upload-agent/spec.md)。
 - 分段结果以 JSON 存到 `review_artifacts/{task_id}/chunks/`；未能通过既有有限纠错的科学格式、来源及生成语言错误会使任务失败。不完整的排除提议单独进入覆盖审查，不等于科学结果可放行。
 - 每完成一段更新 `completed_chunks / total_chunks`，前端进度条（如“4/28 段”）即来源于此。分段缓存契约版本为 14（`CHUNK_RESULT_SCHEMA_VERSION`），旧缓存重读时重新提取。
 
