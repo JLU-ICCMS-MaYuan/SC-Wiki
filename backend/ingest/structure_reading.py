@@ -245,6 +245,31 @@ def _reading_result(answer, catalog, read, imaged_pages, source):
     return output
 
 
+def _compact_structure_history(history, read):
+    """已在本次sources提供的同一原行只传引用；原始工具回执另行完整归档。"""
+    result = []
+    for message in history:
+        if message.get('role') != 'tool':
+            result.append(deepcopy(message))
+            continue
+        observation = json.loads(message['content'])
+        blocks, changed = [], False
+        for block in observation.get('blocks', []):
+            row = read.get((block.get('metadata') or {}).get('source_id'))
+            if (row and row['block_id'] == block.get('block_id')
+                    and row['pdf_page'] == block.get('pdf_page') and row['content'] == block.get('text')):
+                blocks.append({key: row[key] for key in ('source_id', 'block_id', 'pdf_page')})
+                changed = True
+            else:
+                blocks.append(block)
+        if changed:
+            observation['blocks'] = blocks
+            result.append({**message, 'content': json.dumps(observation, ensure_ascii=False)})
+        else:
+            result.append(deepcopy(message))
+    return result
+
+
 def extract_structure_candidates(markdown, *, source, material_state_ref=None, pdf_path=None,
                                  model=None, on_event=None, cancelled=lambda: False, material_scope=None):
     if pdf_path is None:
@@ -282,13 +307,17 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
         if cancelled(): raise InterruptedError('结构读取已取消')
         request = {'document': {'file_id': source['file_id'], 'role': source.get('role'),
             'filename': source.get('filename'), 'pages': [p.pdf_page for p in ir.pages], 'sha256': source['sha256']},
-            'sources': list(read.values()), 'source_index': [{k: v for k, v in row.items() if k != 'content'} |
-                ({} if key in read else {'preview': row['content'][:100]}) for key, row in catalog.items()],
+            'sources': list(read.values()), 'source_index': [
+                {k: row[k] for k in ('source_id', 'pdf_page')} if key in read else
+                {k: v for k, v in row.items() if k != 'content'} | {'preview': row['content'][:100]}
+                for key, row in catalog.items()],
             'attached_page_images': [{'image_index': index, 'file_id': source['file_id'],
                 'pdf_page': page, 'source_sha256': source['sha256']}
                 for index, page in enumerate(page_images, 1)],
             'observation': observation, 'remaining_actions': tools.budget.max_actions - tools.budget.actions}
-        event = {'iteration': iteration, 'request': request, 'tool_history': history,
+        model_history = _compact_structure_history(history, read)
+        event = {'iteration': iteration, 'request': request, 'tool_history': model_history,
+                 'raw_tool_history': deepcopy(history),
                  'image_pages': list(page_images), 'image_count': len(page_images)}
         if on_event: on_event({**event, 'status': 'started'})
         partial = {'text': ''}
@@ -298,7 +327,7 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
             from .tc_material_scope import scope_prompt
             answer = model(PROMPT + scope_prompt(material_scope),
                            json.dumps(request, ensure_ascii=False), tool_definitions=definitions,
-                           **({'tool_history': history} if history else {}),
+                           **({'tool_history': model_history} if model_history else {}),
                            **({'images': list(page_images.values())} if page_images else {}),
                            on_partial=remember, retries=0)
         except Exception as error:
