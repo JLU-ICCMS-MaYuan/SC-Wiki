@@ -29,6 +29,10 @@ PUBLIC_TASK_FIELDS |= {"workflow_policy", "workflow_assessment", "_parsing_workf
 PUBLIC_FILE_FIELDS = {"file_id", "role", "declared_role", "original_filename", "media_type", "kind", "size", "sha256", "sort_order", "upload_status", "extraction_status", "error"}
 
 
+class UploadCancelled(RuntimeError):
+    """任务已请求取消，Worker 应停止且不得写回成功状态。"""
+
+
 def new_extraction_timing() -> dict[str, int | None]:
     """新一轮解析尚未开始；排队时间不计入用时。"""
     return {"elapsed_seconds": 0, "started_at": None, "running_since": None, "finished_at": None}
@@ -75,6 +79,8 @@ class CleanupContext:
 def apply_state_changes(state: dict[str, Any], *, now: int, **changes: Any) -> dict[str, Any]:
     current = str(state.get("status") or "uploading")
     target = str(changes.get("status") or current)
+    if current == "cancelling" and target not in {"cancelling", "cancelled", "failed", "submitted"}:
+        raise UploadCancelled("上传任务已请求取消，迟到进度不能恢复处理")
     retrying_failed = current == "failed" and target == "queued" and bool(changes.pop("retry", False))
     if current in FINAL_STATUSES and target not in {current, "submitted"} and not retrying_failed:
         raise ValueError("终态任务不能恢复为运行状态")

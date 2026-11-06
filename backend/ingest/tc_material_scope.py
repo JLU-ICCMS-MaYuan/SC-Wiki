@@ -11,6 +11,10 @@ For each material
 give its chemical formula (or exact reported name), has_specific_tc, has_range_tc, source_ids and reason.
 A specific Tc includes a reported approximate numeric value and explicitly paired Tc/mu_star points.
 A range, upper/lower bound, curve alone or its inferred endpoints is not a specific Tc.
+has_range_tc is true ONLY for an explicitly reported NUMERICAL Tc interval or inequality in the
+current-paper text. A Tc figure/caption WITHOUT readable reported numbers is NOT a numerical range:
+set BOTH flags false and retain the material. Do not infer a Tc range from a plot, a pressure/stability
+interval, a general high-Tc statement or another paper's results. Missing Tc is not range-only Tc.
 Read all body and SI windows. A material is excluded from specialized extraction and the form ONLY
 when the whole paper/SI reports range/bounds Tc and NO specific Tc for that material. If any window
 reports a specific Tc, preserve that material. Do not exclude materials merely because Tc is absent.

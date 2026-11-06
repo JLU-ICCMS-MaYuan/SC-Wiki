@@ -22,3 +22,7 @@
 ## 依赖
 
 #26 使用本 Feature 的任务、文件清单和提交幂等键；#27 使用状态机和公开 DTO；#28 使用正式论文 ID 与权限结果。
+
+## 2026-11-06 迟到阶段进度与取消竞态
+
+共享UploadCancelled定义放入纯状态契约，upload_jobs继续导入并对外兼容原入口。apply_state_changes在当前状态为cancelling时拒绝恢复活动/待校对阶段；update_state已有WATCH事务使用该规则，Worker原有异常分支负责cancelled收尾。文件、分段和汇总边界保留协作停止，不引入强行中断模型的新产品承诺。固定任务迟到reading及ready的反例、真实Worker派发控制流与原有生命周期/耗时回归分开验证。

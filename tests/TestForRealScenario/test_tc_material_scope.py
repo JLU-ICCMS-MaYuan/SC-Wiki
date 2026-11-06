@@ -50,6 +50,15 @@ def test_scope_with_forged_sources_does_not_silently_discard_material():
     assert report["status"] != "matched"
 
 
+def test_unquantified_figure_or_missing_tc_is_not_range_only():
+    entries = [material(name="YH6", specific=False, ranged=False),
+               material(name="LaH6", specific=False, ranged=False), material()]
+    report = workflows.assess([SOURCE], complete=lambda *_a, **_kw: answer(entries))
+    scope = report["tc_material_scope"]
+    assert len(scope["materials"]) == 3
+    assert [item["material"] for item in scope["excluded_materials"]] == ["LaH9"]
+
+
 def test_inventory_cannot_reintroduce_excluded_material():
     from backend.ingest.state_inventory import apply_inventory, FIELDS
     draft = {"material_states": []}

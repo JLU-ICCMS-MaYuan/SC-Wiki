@@ -42,6 +42,7 @@ from backend.ingest.upload_tasks import (
     delete_llm_config,
 )
 from backend.ingest.upload_contracts import (
+    UploadCancelled,
     UPLOAD_STATE_SCHEMA_VERSION,
     USER_FILE_ROLE_POLICY,
     validate_file_roles,
@@ -229,10 +230,6 @@ issue_number 是期号文本，可为 S1、3-4；不得从年份或卷号猜测�
 
 
 SUMMARY_SYSTEM_PROMPT += METHOD_SEMANTICS_PROMPT
-
-
-class UploadCancelled(RuntimeError):
-    """任务已请求取消，Worker 应停止且不得写回成功状态。"""
 
 
 def _schedule_terminal_cleanup(task_id: str) -> None:
