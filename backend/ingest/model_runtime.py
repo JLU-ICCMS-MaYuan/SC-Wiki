@@ -476,6 +476,37 @@ def reconcile_execution(task_id, state):
             model_activity={**(latest.get('model_activity') or {}), 'status':'paused', 'retry_at':None})
 
 
+def checkpoint_generated_draft(task_id, draft):
+    """只登记当前执行刚保存的自动稿；不采纳并发人工稿作为旧执行检查点。"""
+    runtime = current_execution()
+    if runtime is not None and runtime.task_id == task_id:
+        runtime.check()
+        runtime.write_state(execution_draft_hash=digest(draft))
+
+
+def _unchanged_legacy_generated_draft(task_id, state, draft):
+    """只恢复旧版初次解析保存AI稿后漏更新空稿检查点的特定失败。"""
+    from .upload_tasks import artifact_path
+    from .evidence_audit import current_change_events
+    if (state.get('error_code') != 'automatic_review_incomplete'
+            or state.get('execution_draft_hash') != digest(None)
+            or draft is None or current_change_events(state) or current_change_events(draft)):
+        return False
+    try:
+        snapshot = read_json(artifact_path(task_id), {})
+    except (ValueError, OSError):
+        return False
+    return (isinstance(snapshot, dict) and snapshot.get('task_id') == task_id
+            and 'paper_id' in snapshot and snapshot['paper_id'] is None
+            and 'user_values' in snapshot and snapshot['user_values'] is None
+            and isinstance(snapshot.get('evidence'), dict)
+            and snapshot.get('ai_values') == draft
+            and ('execution_input_hash' not in snapshot
+                 or snapshot['execution_input_hash'] == state.get('execution_input_hash'))
+            and ('execution_generation' not in snapshot
+                 or snapshot['execution_generation'] == state.get('execution_generation')))
+
+
 def resume_task(task_id):
     from .upload_tasks import get_state, get_draft, update_state, upload_task_lock, enqueue_processing, redis_client, draft_key
     from backend.rag.llm_context import get_llm_config
@@ -487,7 +518,10 @@ def resume_task(task_id):
             raise ValueError("当前任务不能继续")
         if state.get("execution_input_hash") and state["execution_input_hash"] != input_identity(state):
             raise ValueError("输入文件或角色已变化，不能沿用旧解析上下文")
-        if state.get("execution_draft_hash") and state["execution_draft_hash"] != digest(get_draft(task_id)):
+        draft = get_draft(task_id)
+        draft_hash = digest(draft)
+        if (state.get("execution_draft_hash") and state["execution_draft_hash"] != draft_hash
+                and not _unchanged_legacy_generated_draft(task_id, state, draft)):
             raise ValueError("当前草稿已变化，不能用旧上下文覆盖，请保留草稿后处理")
         identity = state.get("execution_model") or {}
         config = get_llm_config()
@@ -499,6 +533,7 @@ def resume_task(task_id):
         raw_draft = redis_client().get(draft_key(task_id))
         update_state(task_id, status="queued", resume=True, retry=state.get("status") == "failed",
             execution_claimed=False, execution_resume_requested=True, processing_status="processing",
+            execution_draft_hash=draft_hash,
             reparse_expected_draft_hash=hashlib.sha256(raw_draft.encode()).hexdigest() if raw_draft else None,
             processing_error=None, error_code=None,
             model_activity={**(state.get('model_activity') or {}), 'status':'queued', 'retry_at':None, 'error':None})

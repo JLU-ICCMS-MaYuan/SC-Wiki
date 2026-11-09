@@ -130,6 +130,66 @@ def test_resume_is_idempotent_and_rejects_changed_draft(monkeypatch):
     assert len(enqueued)==1
 
 
+@pytest.mark.parametrize('snapshot_override', [
+    None, {'task_id': 'foreign'}, {'user_values': {'paper': {}}},
+    {'execution_input_hash': 'other-input'}, {'execution_generation': 999},
+])
+def test_resume_accepts_only_unchanged_automatically_saved_legacy_draft(tmp_path, monkeypatch, snapshot_override):
+    from backend.ingest import upload_tasks, model_runtime
+    from backend.ingest.upload_contracts import apply_state_changes
+    import json
+    task_id = 'a' * 32
+    draft = {'paper': {'title': 'Original generated title'}, 'material_states': []}
+    state = {'status': 'failed', 'error_code': 'automatic_review_incomplete', 'user_id': 1, 'files': [],
+             'execution_draft_hash': model_runtime.digest(None)}
+    saved = {'task_id': task_id, 'paper_id': None, 'ai_values': draft,
+             'user_values': None, 'evidence': {}}
+    if snapshot_override:
+        saved.update(snapshot_override)
+    path = tmp_path / 'result.json'
+    path.write_text(json.dumps(saved))
+    enqueued = []
+    monkeypatch.setattr(upload_tasks, 'get_state', lambda _: dict(state))
+    monkeypatch.setattr(upload_tasks, 'get_draft', lambda _: json.loads(json.dumps(draft)))
+    monkeypatch.setattr(upload_tasks, 'artifact_path', lambda _: path)
+    monkeypatch.setattr(upload_tasks, 'upload_task_lock', lambda _: nullcontext())
+    monkeypatch.setattr(upload_tasks, 'redis_client', lambda: NS(get=lambda _: None))
+    monkeypatch.setattr(upload_tasks, 'enqueue_processing', lambda _: enqueued.append(1))
+    monkeypatch.setattr(upload_tasks, 'update_state',
+        lambda _, **changes: (state.update(apply_state_changes(state, now=100, **changes)) or dict(state)))
+    from backend.rag import llm_context
+    monkeypatch.setattr(llm_context, 'get_llm_config', lambda: NS(provider='fixture', model='fixture', catalog_id=None))
+    if snapshot_override:
+        with pytest.raises(ValueError, match='草稿已变化'):
+            model_runtime.resume_task(task_id)
+        assert not enqueued
+        return
+    assert model_runtime.resume_task(task_id)['status'] == 'queued'
+    assert state['execution_draft_hash'] == model_runtime.digest(draft)
+    assert len(enqueued) == 1
+    # 人工值即使旧AI快照仍存在也不能通过兼容路径。
+    state.update(status='failed', error_code='automatic_review_incomplete',
+                 execution_draft_hash=model_runtime.digest(None))
+    draft['paper']['title'] = 'Human edited title'
+    with pytest.raises(ValueError, match='草稿已变化'):
+        model_runtime.resume_task(task_id)
+    assert len(enqueued) == 1
+
+
+def test_generated_checkpoint_requires_same_live_execution(tmp_path, monkeypatch):
+    from backend.ingest.model_runtime import checkpoint_generated_draft, digest, ExecutionStopped
+    runtime, context, state = setup_runtime(tmp_path, monkeypatch)
+    generated = {'paper': {'title': 'Generated draft'}}
+    with context(runtime):
+        checkpoint_generated_draft('a' * 32, generated)
+        assert state['execution_draft_hash'] == digest(generated)
+        state.update(status='paused', execution_generation=2)
+        with pytest.raises(ExecutionStopped):
+            checkpoint_generated_draft('a' * 32, {'paper': {'title': 'Late draft'}})
+    checkpoint_generated_draft('a' * 32, {'paper': {'title': 'Human draft'}})
+    assert state['execution_draft_hash'] == digest(generated)
+
+
 def test_pause_and_resume_require_owner_even_for_admin(monkeypatch):
     from backend.api.upload_tasks import pause_upload_task,resume_upload_task
     from backend.ingest import upload_tasks

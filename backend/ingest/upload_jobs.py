@@ -2799,6 +2799,8 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                     {
                         "task_id": task_id,
                         "paper_id": None,
+                        "execution_input_hash": current_state.get("execution_input_hash"),
+                        "execution_generation": current_state.get("execution_generation"),
                         "ai_values": ai_values,
                         "user_values": None,
                         "evidence": {
@@ -2825,7 +2827,9 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                 ),
                 encoding="utf-8",
             )
-            save_draft(task_id, draft)
+            saved_draft = save_draft(task_id, draft)
+            from .model_runtime import checkpoint_generated_draft
+            checkpoint_generated_draft(task_id, saved_draft)
         artifact_manifest = None
         from backend.storage.paths import object_mode, publish_tree
         if object_mode():

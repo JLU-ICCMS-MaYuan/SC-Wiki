@@ -1,0 +1,57 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_resume_accepts_only_unchanged_automatically_saved_legacy_draft ______
+
+tmp_path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-270/test_resume_accepts_only_uncha0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x117036fc0>
+
+    def test_resume_accepts_only_unchanged_automatically_saved_legacy_draft(tmp_path, monkeypatch):
+        from backend.ingest import upload_tasks, model_runtime
+        from backend.ingest.upload_contracts import apply_state_changes
+        import json
+        task_id = 'a' * 32
+        draft = {'paper': {'title': 'Original generated title'}, 'material_states': []}
+        state = {'status': 'failed', 'error_code': 'automatic_review_incomplete', 'user_id': 1, 'files': [],
+                 'execution_draft_hash': model_runtime.digest(None)}
+        saved = {'task_id': task_id, 'paper_id': None, 'ai_values': draft,
+                 'user_values': None, 'evidence': {}}
+        path = tmp_path / 'result.json'
+        path.write_text(json.dumps(saved))
+        enqueued = []
+        monkeypatch.setattr(upload_tasks, 'get_state', lambda _: dict(state))
+        monkeypatch.setattr(upload_tasks, 'get_draft', lambda _: json.loads(json.dumps(draft)))
+        monkeypatch.setattr(upload_tasks, 'artifact_path', lambda _: path)
+        monkeypatch.setattr(upload_tasks, 'upload_task_lock', lambda _: nullcontext())
+        monkeypatch.setattr(upload_tasks, 'redis_client', lambda: NS(get=lambda _: None))
+        monkeypatch.setattr(upload_tasks, 'enqueue_processing', lambda _: enqueued.append(1))
+        monkeypatch.setattr(upload_tasks, 'update_state',
+            lambda _, **changes: (state.update(apply_state_changes(state, now=100, **changes)) or dict(state)))
+        from backend.rag import llm_context
+        monkeypatch.setattr(llm_context, 'get_llm_config', lambda: NS(provider='fixture', model='fixture', catalog_id=None))
+>       assert model_runtime.resume_task(task_id)['status'] == 'queued'
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_model_runtime.py:153:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task_id = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+
+    def resume_task(task_id):
+        from .upload_tasks import get_state, get_draft, update_state, upload_task_lock, enqueue_processing, redis_client, draft_key
+        from backend.rag.llm_context import get_llm_config
+        with upload_task_lock(task_id):
+            state = get_state(task_id) or {}
+            if state.get("status") == "queued" and state.get("execution_resume_requested"):
+                return state
+            if state.get("paper_id") or state.get("status") not in {"paused", "failed"}:
+                raise ValueError("当前任务不能继续")
+            if state.get("execution_input_hash") and state["execution_input_hash"] != input_identity(state):
+                raise ValueError("输入文件或角色已变化，不能沿用旧解析上下文")
+            if state.get("execution_draft_hash") and state["execution_draft_hash"] != digest(get_draft(task_id)):
+>               raise ValueError("当前草稿已变化，不能用旧上下文覆盖，请保留草稿后处理")
+E               ValueError: 当前草稿已变化，不能用旧上下文覆盖，请保留草稿后处理
+
+backend/ingest/model_runtime.py:492: ValueError
+=========================== short test summary info ============================
+FAILED backend/tests/test_model_runtime.py::test_resume_accepts_only_unchanged_automatically_saved_legacy_draft
+1 failed in 0.69s
