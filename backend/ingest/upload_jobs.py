@@ -2011,6 +2011,9 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         from .chart_reading import enrich_document
         from .document_ir import DocumentIR
         update_state(task_id, processing_phase='chart_reading')
+        def chart_cancelled():
+            _ensure_not_cancelled(task_id)
+            return False
         for item in files:
             if item.get('role') not in {'main', 'supplementary'} or item.get('kind') != 'pdf':
                 continue
@@ -2025,7 +2028,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                 _atomic_write_json(artifact_directory(task_id) / 'chart_reading' / item['file_id'] /
                     f"{event['stage']}-{key}.json", event)
             enrich_document(ir, _source_path(state, item, source), chart_source, complete_json,
-                cancelled=lambda: bool(_ensure_not_cancelled(task_id)), on_event=save_chart_event)
+                cancelled=chart_cancelled, on_event=save_chart_event)
             _save_document_ir(task_id, item['file_id'], ir)
             (directory / f"{item['file_id']}.md").write_text(_ir_to_markdown(ir), encoding='utf-8')
         update_state(task_id, reading_state='selecting_workflow', processing_phase='workflow_selection')
