@@ -236,7 +236,7 @@ describe('论文上传工作区', () => {
     expect(await screen.findByRole('tab', { name: '解析草稿' })).toBeVisible()
     expect(screen.getByRole('tab', { name: '分段解析与证据' })).toBeVisible()
     expect(await screen.findByText('只读预览')).toBeVisible()
-    expect(screen.getByText('正在提取论文正文，完成后逐段解析。')).toBeVisible()
+    expect(screen.getByText('正在读取正文与补充材料、选择适用流程；随后提取分段候选。')).toBeVisible()
     expect(screen.getByText('参考文献解析')).toBeVisible()
     expect(screen.getByText('解析服务不可用 · 已解析 0 条参考文献')).toBeVisible()
     expect(screen.getByText('GROBID 尚未就绪')).toBeVisible()
@@ -541,7 +541,7 @@ describe('论文上传工作区', () => {
     render(<UploadParsingDetail taskId={'g'.repeat(32)} />)
 
     expect(await screen.findByText('只读预览')).toBeVisible()
-    expect(screen.getByText('正在分段解析 1/2，字段随分段完成逐步点亮。')).toBeVisible()
+    expect(screen.getByText('正在分段提取 1/2；完成后检查候选出处与覆盖。')).toBeVisible()
     expect(screen.getByLabelText('标题')).toHaveValue('Li2MgH16 study')
     expect(screen.getByText('Ying Sun')).toBeVisible()
     expect(screen.getByText('材料状态 #1')).toBeVisible()
@@ -648,7 +648,7 @@ describe('论文上传工作区', () => {
       { timeout: 3000 },
     )
     expect(screen.getByText('只读预览')).toBeVisible()
-    expect(screen.getByText('正在分段解析 2/2，字段随分段完成逐步点亮。')).toBeVisible()
+    expect(screen.getByText('正在分段提取 2/2；完成后检查候选出处与覆盖。')).toBeVisible()
   })
 
   it('分段阅读中的只读预览展示局部草稿的分类与材料状态', async () => {

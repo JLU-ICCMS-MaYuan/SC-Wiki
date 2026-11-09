@@ -116,13 +116,17 @@ PDF提取在前置收录判断之前读取科学图表：模型结合原图、�
 
 | 步骤 | status / stage | 行为 | 主要产物 |
 | --- | --- | --- | --- |
-| 1 | 保存原始文件 | 文件落盘并记录哈希 | `upload_PDFs/{task_id}/` |
-| 2 | `extracting` | 提取论文正文 | `parsed_markdown/{task_id}/{file_id}.md`、合并稿 `parsed_markdown/{task_id}.md` |
-| 3 | `reading` | AI 分段阅读 | `review_artifacts/{task_id}/` 分段结果与 manifest |
-| 4 | `summarizing` | AI 汇总草稿 | 归一化草稿（Redis）、`result.json` 快照 |
+| 1 | `saving_file` | 保存上传文件：接收文件并记录哈希 | 原文件及上传清单 |
+| 2 | `extracting` | 读取文档与选择流程：通用读取、适用性判断及所选流程的来源准备 | 文档 IR、带来源正文及流程绑定 |
+| 3 | `reading` | 分段提取与出处检查：提取科学候选、必要补证及覆盖检查 | `review_artifacts/{task_id}/` 分段候选、出处及覆盖记录 |
+| 4 | `summarizing` | 填写表单与自动核对：论文级字段填写、材料状态与科学记录整理、字段核对、引用匹配及适用的谱处理 | 草稿、核对结果与解析制品 |
 | 5 | `ready` | 等待用户校对 | 终态清理排程 |
 
-### 第 2 步：提取论文正文（extracting）
+五步条、任务列表和失败阶段提示共用上述显示名称，后台状态键和阶段编号保持原协议。第 3 步的分段计数只表示候选提取进度；全部分段完成后仍有出处／覆盖检查。第 4 步内部的 `paper_summary` 在科学表单整理与自动字段核对之前填写题录、论文总结和分类等论文级字段，并非核对完成后的最终全表汇总；后续依次进入材料状态与记录整理、字段核对、引用匹配、保存及适用的谱处理，具体当前位置沿用已有解析动态和预览提示。相关运行动态入口见 [#224](../../specs/224-resumable-model-requests/spec.md)。
+
+`paper_summary` 是一次模型调用的阶段名，`paper.summary` 是表单中的论文总结字段；后者属于有来源支撑的归纳内容，不能把不要求逐字照抄理解为不需要科学依据。本次只修正显示名称及说明，不改变解析顺序、模型调用、字段契约或核对规则。
+
+### 第 2 步：读取文档与选择流程（extracting）
 
 - PDF 经 `pdf_extractor.py` 转为带页标记（`<!-- page: N -->`）的 Markdown；TXT/MD 直接读取；已提取过的文件直接复用缓存的 `.md`。
 - CIF/POSCAR 原生附件不走文本提取，而是经 ASE 校验（`structure_extractor.build_structure_candidate`）生成结构候选；校验失败的候选标记为 `blocked`，等待人工处理。
@@ -132,7 +136,7 @@ PDF提取在前置收录判断之前读取科学图表：模型结合原图、�
 - 文件身份检查不比较人工校对表单，不调用模型。真正冲突时，提交确认框列出具体文件、字段和两边值；确认令牌绑定当前差异、文件角色及哈希，过期确认不能继续。历史误报仅经已授权定向修正处理，不自动批量重写其他草稿。验证边界见 [#135 身份检查修复](../../specs/135-multi-file-main-detection/identity-consistency-validation.md)。
 - 正文为空时直接失败（`论文正文为空，无法生成可校对草稿`）。
 
-### 第 3 步：AI 分段阅读（reading）
+### 第 3 步：分段提取与出处检查（reading）
 
 结构化候选先校验计算条件扩展结构，再执行方法语义与原文依据检查。扩展使用带非空键的对象数组；空值／空对象转为空数组，本次已识别的 `electron_phonon → phonon_method` 文本分组有界转为标准数组。其他对象形状、非对象数组项，以及没有阶段标记的已知条件扩展明确拒绝，避免结构错误使检查崩溃或绕过软件归属检查。现有有限纠错和失败次数不变，不能通过丢弃条件或撤销原文检查来获得成功。见 [#172](../../specs/172-phonon-method-parsing/spec.md)。
 
@@ -146,7 +150,7 @@ PDF提取在前置收录判断之前读取科学图表：模型结合原图、�
 - 分段结果以 JSON 存到 `review_artifacts/{task_id}/chunks/`；未能通过既有有限纠错的科学格式、来源及生成语言错误会使任务失败。不完整的排除提议单独进入覆盖审查，不等于科学结果可放行。
 - 每完成一段更新 `completed_chunks / total_chunks`，前端进度条（如“4/28 段”）即来源于此。分段缓存契约版本为 14（`CHUNK_RESULT_SCHEMA_VERSION`），旧缓存重读时重新提取。
 
-### 第 4 步：AI 汇总草稿（summarizing）
+### 第 4 步：填写表单与自动核对（summarizing）
 
 - `_summary_classification_candidates` 先过滤掉非当前论文的过期证据，再把分段候选交给 `complete_json(SUMMARY_SYSTEM_PROMPT, ...)` 汇总为一份结构化草稿。
 - 理论论文的 `theoretical_subtype` 先检查主汇总给出的结论、理由与本文贡献引句；合格时采用首轮结果，不合格时才由专门 LLM 阅读有效正文与补充材料。参考文献不作本文贡献，只有软件名也不足以确认类型。重试仍无可靠依据时留给人工核对，已有首值保留为待审候选。（[#128](../../specs/128-fulltext-theoretical-subtype/spec.md)）
