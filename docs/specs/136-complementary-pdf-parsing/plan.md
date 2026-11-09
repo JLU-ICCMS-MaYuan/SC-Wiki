@@ -8,6 +8,8 @@
 
 ## 组件与职责
 
+`structured_pdf.run_parser_worker`给本次子进程的`NO_PROXY`/`no_proxy`追加`127.0.0.1`、`localhost`、`::1`，保留各自既有条目和外网代理；父进程及系统代理设置不改。适用于三种解析器的本地子服务调用，既有超时、取消和原始制品保存继续有效。
+
 - backend/ingest/complementary_pdf.py：唯一解析器 composite；先读取完整 MinerU，按内容信号建立 Docling 表格页和 Marker 公式/OCR/读序页任务，固定原 PDF 哈希及文件身份。
 - backend/ingest/complementary_ir.py：保留 MinerU 普通正文；表格优先采用具有更完整行列/单元定位的补强；备选原块及不同数字/符号记录保留。生成一个可校验 IR，并为下游只提供已选内容与必要冲突，避免重复全文膨胀。
 - backend/ingest/marker_pdf.py、structured_pdf.py、pdf_parser_worker.py：复用三引擎转换，Marker 从独立解释器执行；补强按页创建临时子 PDF，响应映射回原始页码。保存配置、原始 JSON、stdout/stderr 和运行记录。超时/取消终止本次子进程及其自建子服务。

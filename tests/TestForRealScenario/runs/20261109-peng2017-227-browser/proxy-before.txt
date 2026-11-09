@@ -1,0 +1,451 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___ test_parser_subprocess_reaches_loopback_without_changing_parent[docling] ___
+
+tmp_path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-229/test_parser_subprocess_reaches0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x112655dc0>
+parser = 'docling'
+
+    @pytest.mark.parametrize('parser', ['docling', 'mineru', 'marker'])
+    def test_parser_subprocess_reaches_loopback_without_changing_parent(tmp_path, monkeypatch, parser):
+        hits = []
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *_):
+                pass
+            def do_GET(self):
+                hits.append(self.path)
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b'{"status":"ok"}')
+        server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        # 一个不监听的代理明确检出“本机请求误走代理”，不依赖测试机器的系统设置。
+        for key in ('HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'http_proxy', 'https_proxy', 'all_proxy'):
+            monkeypatch.setenv(key, 'http://127.0.0.1:1')
+        monkeypatch.setenv('NO_PROXY', 'existing.example.org')
+        monkeypatch.setenv('no_proxy', 'other.example.org')
+        monkeypatch.setenv('SC_WIKI_MARKER_PYTHON', sys.executable)
+        monkeypatch.setenv('SC_WIKI_LLAMA_SERVER', sys.executable)
+        import os
+        parent = dict(os.environ)
+        popen = subprocess.Popen
+        captured = []
+        def worker(_command, **kwargs):
+            captured.append(kwargs['env'])
+            response = _command[-1]
+            code = (
+                'import httpx,json,pathlib; '
+                f'r=httpx.get("http://127.0.0.1:{server.server_port}/health",timeout=2); '
+                'r.raise_for_status(); '
+                f'pathlib.Path({str(response)!r}).write_text(json.dumps(r.json()))'
+            )
+            return popen([sys.executable, '-c', code], **kwargs)
+        monkeypatch.setattr(subprocess, 'Popen', worker)
+        pdf = tmp_path / 'source.pdf'
+        pdf.write_bytes(b'%PDF-source-unchanged')
+        try:
+>           result = run_parser_worker(parser, pdf, ParseOptions(profile='layout', parser_options={
+                'artifact_directory': str(tmp_path / 'artifacts'), 'timeout_seconds': 10}))
+
+backend/tests/test_parser_loopback_proxy.py:54:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'docling'
+path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-229/test_parser_subprocess_reaches0/source.pdf')
+options = ParseOptions(profile='layout', task_id=None, parser_options={'artifact_directory': '/private/var/folders/j8/21skwz6d3c...000gn/T/pytest-of-mayuan/pytest-229/test_parser_subprocess_reaches0/artifacts', 'timeout_seconds': 10}, cancelled=None)
+
+    def run_parser_worker(name, path, options):
+        from .document_parsers import ParserError
+        from contextlib import ExitStack
+        import shutil
+        import time
+
+        def error(code):
+            return ParserError(code, "解析组件执行失败，请检查运行制品或重试",
+                               profile=options.profile, parser=name)
+
+        timeout = options.parser_options.get("timeout_seconds", 900)
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or not 0 < timeout <= 1800:
+            raise error("parser_invalid_options")
+        tier = options.parser_options.get("mineru_tier", "basic")
+        mode = options.parser_options.get("mineru_parse_mode", "ocr")
+        if tier not in {"flash", "basic", "standard", "advanced"} or mode not in {"txt", "ocr"}:
+            raise error("parser_invalid_options")
+        with ExitStack() as stack:
+            destination = options.parser_options.get("artifact_directory")
+            root = Path(destination) if destination else Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="scwiki-parser-")))
+            root.mkdir(parents=True, exist_ok=True)
+            request, response = root / "request.json", root / "raw.json"
+            if response.exists():
+                raise error("parser_artifact_exists")
+            selected = options.parser_options.get("pages")
+            input_path = path.resolve()
+            if selected is not None:
+                import pymupdf
+                with pymupdf.open(path) as original:
+                    if (not selected or len(set(selected)) != len(selected) or
+                        any(type(page) is not int or not 1 <= page <= len(original) for page in selected)):
+                        raise error("parser_invalid_options")
+                    selected = sorted(selected)
+                    input_path = root / "selected-pages.pdf"
+                    with pymupdf.open() as subset:
+                        for page in selected:
+                            subset.insert_pdf(original, from_page=page-1, to_page=page-1)
+                        subset.save(input_path)
+            request.write_text(json.dumps({"parser": name, "path": str(input_path),
+                                          "options": {"mineru_tier": tier, "mineru_parse_mode": mode},
+                                          "page_map": selected}), encoding="utf-8")
+            env = os.environ.copy()
+            env.update(HF_HUB_DISABLE_TELEMETRY="1", HF_HUB_DISABLE_IMPLICIT_TOKEN="1",
+                       TOKENIZERS_PARALLELISM="false", MINERU_CONFIG=str(root / "mineru.yaml"))
+            (root / "mineru.yaml").write_text("{}", encoding="utf-8")
+            python = sys.executable
+            if name == "marker":
+                repository = Path(__file__).resolve().parents[2]
+                python = os.environ.get("SC_WIKI_MARKER_PYTHON") or str(repository / ".local/pdf-tools/marker/bin/python")
+                if not Path(python).is_file():
+                    raise error("parser_dependency_unavailable")
+                env.update(SURYA_INFERENCE_BACKEND="llamacpp", SURYA_INFERENCE_PARALLEL="2",
+                           SURYA_INFERENCE_KEEP_ALIVE="0")
+                env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
+                managed_binary = repository / ".local/pdf-tools/llama/llama-server"
+                binary = os.environ.get("SC_WIKI_LLAMA_SERVER") or (str(managed_binary) if managed_binary.is_file() else shutil.which("llama-server"))
+                if not binary or not Path(binary).is_file():
+                    raise error("parser_dependency_unavailable")
+                env["LLAMA_CPP_BINARY"] = binary
+            started = time.monotonic()
+            stdout = stack.enter_context((root / "stdout.log").open("w", encoding="utf-8"))
+            stderr = stack.enter_context((root / "stderr.log").open("w", encoding="utf-8"))
+            process = subprocess.Popen(
+                [python, "-m", "backend.ingest.pdf_parser_worker", str(request), str(response)],
+                cwd=Path(__file__).resolve().parents[2], env=env, stdout=stdout, stderr=stderr, start_new_session=True,
+            )
+            try:
+                while process.poll() is None:
+                    if options.cancelled and options.cancelled():
+                        raise error("parser_cancelled")
+                    if time.monotonic()-started > timeout:
+                        raise error("parser_timeout")
+                    time.sleep(min(.2, timeout))
+            except BaseException:
+                if process.poll() is None:
+                    # 先给子进程 finally 机会停止其创建的本机模型服务。
+                    os.killpg(process.pid, signal.SIGTERM)
+                    try:
+                        process.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(process.pid, signal.SIGKILL)
+                        process.wait()
+                raise
+            finally:
+                (root / "run.json").write_text(json.dumps({
+                    "parser": name, "elapsed_seconds": time.monotonic()-started,
+                    "exit_code": process.poll(), "requested_pages": selected,
+                }), encoding="utf-8")
+            if process.returncode != 0 or not response.is_file():
+>               raise error("parser_execution_failed")
+E               backend.ingest.document_parsers.ParserError: 解析组件执行失败，请检查运行制品或重试
+
+backend/ingest/structured_pdf.py:106: ParserError
+___ test_parser_subprocess_reaches_loopback_without_changing_parent[mineru] ____
+
+tmp_path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-229/test_parser_subprocess_reaches1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x112423c80>
+parser = 'mineru'
+
+    @pytest.mark.parametrize('parser', ['docling', 'mineru', 'marker'])
+    def test_parser_subprocess_reaches_loopback_without_changing_parent(tmp_path, monkeypatch, parser):
+        hits = []
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *_):
+                pass
+            def do_GET(self):
+                hits.append(self.path)
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b'{"status":"ok"}')
+        server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        # 一个不监听的代理明确检出“本机请求误走代理”，不依赖测试机器的系统设置。
+        for key in ('HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'http_proxy', 'https_proxy', 'all_proxy'):
+            monkeypatch.setenv(key, 'http://127.0.0.1:1')
+        monkeypatch.setenv('NO_PROXY', 'existing.example.org')
+        monkeypatch.setenv('no_proxy', 'other.example.org')
+        monkeypatch.setenv('SC_WIKI_MARKER_PYTHON', sys.executable)
+        monkeypatch.setenv('SC_WIKI_LLAMA_SERVER', sys.executable)
+        import os
+        parent = dict(os.environ)
+        popen = subprocess.Popen
+        captured = []
+        def worker(_command, **kwargs):
+            captured.append(kwargs['env'])
+            response = _command[-1]
+            code = (
+                'import httpx,json,pathlib; '
+                f'r=httpx.get("http://127.0.0.1:{server.server_port}/health",timeout=2); '
+                'r.raise_for_status(); '
+                f'pathlib.Path({str(response)!r}).write_text(json.dumps(r.json()))'
+            )
+            return popen([sys.executable, '-c', code], **kwargs)
+        monkeypatch.setattr(subprocess, 'Popen', worker)
+        pdf = tmp_path / 'source.pdf'
+        pdf.write_bytes(b'%PDF-source-unchanged')
+        try:
+>           result = run_parser_worker(parser, pdf, ParseOptions(profile='layout', parser_options={
+                'artifact_directory': str(tmp_path / 'artifacts'), 'timeout_seconds': 10}))
+
+backend/tests/test_parser_loopback_proxy.py:54:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'mineru'
+path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-229/test_parser_subprocess_reaches1/source.pdf')
+options = ParseOptions(profile='layout', task_id=None, parser_options={'artifact_directory': '/private/var/folders/j8/21skwz6d3c...000gn/T/pytest-of-mayuan/pytest-229/test_parser_subprocess_reaches1/artifacts', 'timeout_seconds': 10}, cancelled=None)
+
+    def run_parser_worker(name, path, options):
+        from .document_parsers import ParserError
+        from contextlib import ExitStack
+        import shutil
+        import time
+
+        def error(code):
+            return ParserError(code, "解析组件执行失败，请检查运行制品或重试",
+                               profile=options.profile, parser=name)
+
+        timeout = options.parser_options.get("timeout_seconds", 900)
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or not 0 < timeout <= 1800:
+            raise error("parser_invalid_options")
+        tier = options.parser_options.get("mineru_tier", "basic")
+        mode = options.parser_options.get("mineru_parse_mode", "ocr")
+        if tier not in {"flash", "basic", "standard", "advanced"} or mode not in {"txt", "ocr"}:
+            raise error("parser_invalid_options")
+        with ExitStack() as stack:
+            destination = options.parser_options.get("artifact_directory")
+            root = Path(destination) if destination else Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="scwiki-parser-")))
+            root.mkdir(parents=True, exist_ok=True)
+            request, response = root / "request.json", root / "raw.json"
+            if response.exists():
+                raise error("parser_artifact_exists")
+            selected = options.parser_options.get("pages")
+            input_path = path.resolve()
+            if selected is not None:
+                import pymupdf
+                with pymupdf.open(path) as original:
+                    if (not selected or len(set(selected)) != len(selected) or
+                        any(type(page) is not int or not 1 <= page <= len(original) for page in selected)):
+                        raise error("parser_invalid_options")
+                    selected = sorted(selected)
+                    input_path = root / "selected-pages.pdf"
+                    with pymupdf.open() as subset:
+                        for page in selected:
+                            subset.insert_pdf(original, from_page=page-1, to_page=page-1)
+                        subset.save(input_path)
+            request.write_text(json.dumps({"parser": name, "path": str(input_path),
+                                          "options": {"mineru_tier": tier, "mineru_parse_mode": mode},
+                                          "page_map": selected}), encoding="utf-8")
+            env = os.environ.copy()
+            env.update(HF_HUB_DISABLE_TELEMETRY="1", HF_HUB_DISABLE_IMPLICIT_TOKEN="1",
+                       TOKENIZERS_PARALLELISM="false", MINERU_CONFIG=str(root / "mineru.yaml"))
+            (root / "mineru.yaml").write_text("{}", encoding="utf-8")
+            python = sys.executable
+            if name == "marker":
+                repository = Path(__file__).resolve().parents[2]
+                python = os.environ.get("SC_WIKI_MARKER_PYTHON") or str(repository / ".local/pdf-tools/marker/bin/python")
+                if not Path(python).is_file():
+                    raise error("parser_dependency_unavailable")
+                env.update(SURYA_INFERENCE_BACKEND="llamacpp", SURYA_INFERENCE_PARALLEL="2",
+                           SURYA_INFERENCE_KEEP_ALIVE="0")
+                env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
+                managed_binary = repository / ".local/pdf-tools/llama/llama-server"
+                binary = os.environ.get("SC_WIKI_LLAMA_SERVER") or (str(managed_binary) if managed_binary.is_file() else shutil.which("llama-server"))
+                if not binary or not Path(binary).is_file():
+                    raise error("parser_dependency_unavailable")
+                env["LLAMA_CPP_BINARY"] = binary
+            started = time.monotonic()
+            stdout = stack.enter_context((root / "stdout.log").open("w", encoding="utf-8"))
+            stderr = stack.enter_context((root / "stderr.log").open("w", encoding="utf-8"))
+            process = subprocess.Popen(
+                [python, "-m", "backend.ingest.pdf_parser_worker", str(request), str(response)],
+                cwd=Path(__file__).resolve().parents[2], env=env, stdout=stdout, stderr=stderr, start_new_session=True,
+            )
+            try:
+                while process.poll() is None:
+                    if options.cancelled and options.cancelled():
+                        raise error("parser_cancelled")
+                    if time.monotonic()-started > timeout:
+                        raise error("parser_timeout")
+                    time.sleep(min(.2, timeout))
+            except BaseException:
+                if process.poll() is None:
+                    # 先给子进程 finally 机会停止其创建的本机模型服务。
+                    os.killpg(process.pid, signal.SIGTERM)
+                    try:
+                        process.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(process.pid, signal.SIGKILL)
+                        process.wait()
+                raise
+            finally:
+                (root / "run.json").write_text(json.dumps({
+                    "parser": name, "elapsed_seconds": time.monotonic()-started,
+                    "exit_code": process.poll(), "requested_pages": selected,
+                }), encoding="utf-8")
+            if process.returncode != 0 or not response.is_file():
+>               raise error("parser_execution_failed")
+E               backend.ingest.document_parsers.ParserError: 解析组件执行失败，请检查运行制品或重试
+
+backend/ingest/structured_pdf.py:106: ParserError
+___ test_parser_subprocess_reaches_loopback_without_changing_parent[marker] ____
+
+tmp_path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-229/test_parser_subprocess_reaches2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1123f7650>
+parser = 'marker'
+
+    @pytest.mark.parametrize('parser', ['docling', 'mineru', 'marker'])
+    def test_parser_subprocess_reaches_loopback_without_changing_parent(tmp_path, monkeypatch, parser):
+        hits = []
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *_):
+                pass
+            def do_GET(self):
+                hits.append(self.path)
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b'{"status":"ok"}')
+        server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        # 一个不监听的代理明确检出“本机请求误走代理”，不依赖测试机器的系统设置。
+        for key in ('HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'http_proxy', 'https_proxy', 'all_proxy'):
+            monkeypatch.setenv(key, 'http://127.0.0.1:1')
+        monkeypatch.setenv('NO_PROXY', 'existing.example.org')
+        monkeypatch.setenv('no_proxy', 'other.example.org')
+        monkeypatch.setenv('SC_WIKI_MARKER_PYTHON', sys.executable)
+        monkeypatch.setenv('SC_WIKI_LLAMA_SERVER', sys.executable)
+        import os
+        parent = dict(os.environ)
+        popen = subprocess.Popen
+        captured = []
+        def worker(_command, **kwargs):
+            captured.append(kwargs['env'])
+            response = _command[-1]
+            code = (
+                'import httpx,json,pathlib; '
+                f'r=httpx.get("http://127.0.0.1:{server.server_port}/health",timeout=2); '
+                'r.raise_for_status(); '
+                f'pathlib.Path({str(response)!r}).write_text(json.dumps(r.json()))'
+            )
+            return popen([sys.executable, '-c', code], **kwargs)
+        monkeypatch.setattr(subprocess, 'Popen', worker)
+        pdf = tmp_path / 'source.pdf'
+        pdf.write_bytes(b'%PDF-source-unchanged')
+        try:
+>           result = run_parser_worker(parser, pdf, ParseOptions(profile='layout', parser_options={
+                'artifact_directory': str(tmp_path / 'artifacts'), 'timeout_seconds': 10}))
+
+backend/tests/test_parser_loopback_proxy.py:54:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'marker'
+path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-229/test_parser_subprocess_reaches2/source.pdf')
+options = ParseOptions(profile='layout', task_id=None, parser_options={'artifact_directory': '/private/var/folders/j8/21skwz6d3c...000gn/T/pytest-of-mayuan/pytest-229/test_parser_subprocess_reaches2/artifacts', 'timeout_seconds': 10}, cancelled=None)
+
+    def run_parser_worker(name, path, options):
+        from .document_parsers import ParserError
+        from contextlib import ExitStack
+        import shutil
+        import time
+
+        def error(code):
+            return ParserError(code, "解析组件执行失败，请检查运行制品或重试",
+                               profile=options.profile, parser=name)
+
+        timeout = options.parser_options.get("timeout_seconds", 900)
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or not 0 < timeout <= 1800:
+            raise error("parser_invalid_options")
+        tier = options.parser_options.get("mineru_tier", "basic")
+        mode = options.parser_options.get("mineru_parse_mode", "ocr")
+        if tier not in {"flash", "basic", "standard", "advanced"} or mode not in {"txt", "ocr"}:
+            raise error("parser_invalid_options")
+        with ExitStack() as stack:
+            destination = options.parser_options.get("artifact_directory")
+            root = Path(destination) if destination else Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="scwiki-parser-")))
+            root.mkdir(parents=True, exist_ok=True)
+            request, response = root / "request.json", root / "raw.json"
+            if response.exists():
+                raise error("parser_artifact_exists")
+            selected = options.parser_options.get("pages")
+            input_path = path.resolve()
+            if selected is not None:
+                import pymupdf
+                with pymupdf.open(path) as original:
+                    if (not selected or len(set(selected)) != len(selected) or
+                        any(type(page) is not int or not 1 <= page <= len(original) for page in selected)):
+                        raise error("parser_invalid_options")
+                    selected = sorted(selected)
+                    input_path = root / "selected-pages.pdf"
+                    with pymupdf.open() as subset:
+                        for page in selected:
+                            subset.insert_pdf(original, from_page=page-1, to_page=page-1)
+                        subset.save(input_path)
+            request.write_text(json.dumps({"parser": name, "path": str(input_path),
+                                          "options": {"mineru_tier": tier, "mineru_parse_mode": mode},
+                                          "page_map": selected}), encoding="utf-8")
+            env = os.environ.copy()
+            env.update(HF_HUB_DISABLE_TELEMETRY="1", HF_HUB_DISABLE_IMPLICIT_TOKEN="1",
+                       TOKENIZERS_PARALLELISM="false", MINERU_CONFIG=str(root / "mineru.yaml"))
+            (root / "mineru.yaml").write_text("{}", encoding="utf-8")
+            python = sys.executable
+            if name == "marker":
+                repository = Path(__file__).resolve().parents[2]
+                python = os.environ.get("SC_WIKI_MARKER_PYTHON") or str(repository / ".local/pdf-tools/marker/bin/python")
+                if not Path(python).is_file():
+                    raise error("parser_dependency_unavailable")
+                env.update(SURYA_INFERENCE_BACKEND="llamacpp", SURYA_INFERENCE_PARALLEL="2",
+                           SURYA_INFERENCE_KEEP_ALIVE="0")
+                env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
+                managed_binary = repository / ".local/pdf-tools/llama/llama-server"
+                binary = os.environ.get("SC_WIKI_LLAMA_SERVER") or (str(managed_binary) if managed_binary.is_file() else shutil.which("llama-server"))
+                if not binary or not Path(binary).is_file():
+                    raise error("parser_dependency_unavailable")
+                env["LLAMA_CPP_BINARY"] = binary
+            started = time.monotonic()
+            stdout = stack.enter_context((root / "stdout.log").open("w", encoding="utf-8"))
+            stderr = stack.enter_context((root / "stderr.log").open("w", encoding="utf-8"))
+            process = subprocess.Popen(
+                [python, "-m", "backend.ingest.pdf_parser_worker", str(request), str(response)],
+                cwd=Path(__file__).resolve().parents[2], env=env, stdout=stdout, stderr=stderr, start_new_session=True,
+            )
+            try:
+                while process.poll() is None:
+                    if options.cancelled and options.cancelled():
+                        raise error("parser_cancelled")
+                    if time.monotonic()-started > timeout:
+                        raise error("parser_timeout")
+                    time.sleep(min(.2, timeout))
+            except BaseException:
+                if process.poll() is None:
+                    # 先给子进程 finally 机会停止其创建的本机模型服务。
+                    os.killpg(process.pid, signal.SIGTERM)
+                    try:
+                        process.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(process.pid, signal.SIGKILL)
+                        process.wait()
+                raise
+            finally:
+                (root / "run.json").write_text(json.dumps({
+                    "parser": name, "elapsed_seconds": time.monotonic()-started,
+                    "exit_code": process.poll(), "requested_pages": selected,
+                }), encoding="utf-8")
+            if process.returncode != 0 or not response.is_file():
+>               raise error("parser_execution_failed")
+E               backend.ingest.document_parsers.ParserError: 解析组件执行失败，请检查运行制品或重试
+
+backend/ingest/structured_pdf.py:106: ParserError
+=========================== short test summary info ============================
+FAILED backend/tests/test_parser_loopback_proxy.py::test_parser_subprocess_reaches_loopback_without_changing_parent[docling]
+FAILED backend/tests/test_parser_loopback_proxy.py::test_parser_subprocess_reaches_loopback_without_changing_parent[mineru]
+FAILED backend/tests/test_parser_loopback_proxy.py::test_parser_subprocess_reaches_loopback_without_changing_parent[marker]
+3 failed in 1.60s

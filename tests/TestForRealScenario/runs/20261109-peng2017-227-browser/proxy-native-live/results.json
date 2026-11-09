@@ -1,0 +1,52 @@
+[
+  {
+    "engine": "marker",
+    "role": "main",
+    "pages": [
+      4
+    ],
+    "version": "2.0.0",
+    "blocks": 11,
+    "tables": 0,
+    "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+    "seconds": 18.199389416957274,
+    "ir_roundtrip": true
+  },
+  {
+    "engine": "marker",
+    "role": "supplementary",
+    "pages": [
+      31
+    ],
+    "version": "2.0.0",
+    "blocks": 282,
+    "tables": 1,
+    "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+    "seconds": 34.044861375004984,
+    "ir_roundtrip": true
+  },
+  {
+    "engine": "mineru",
+    "role": "main",
+    "pages": null,
+    "version": "4.0.6",
+    "blocks": 139,
+    "tables": 0,
+    "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+    "seconds": 25.99806879204698,
+    "ir_roundtrip": true
+  },
+  {
+    "engine": "docling",
+    "role": "supplementary",
+    "pages": [
+      31
+    ],
+    "version": "2.130.0",
+    "blocks": 223,
+    "tables": 1,
+    "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+    "seconds": 8.970991792040877,
+    "ir_roundtrip": true
+  }
+]

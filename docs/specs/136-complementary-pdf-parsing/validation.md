@@ -157,3 +157,14 @@ H3S 的新模型提取及 Claim 验证在 `demo/complementary-pdf/four-tool-veri
 
 证据在 `linux-parse/`：组件 raw/IR/log/run.json、marker.ir.json、grobid-retry/document.json、document.ir.json；`linux-marker-retry.log` 为实际成功摘要。独立 Marker 的 shutdown_models 输出显示子 llama.cpp 服务退出。Docling 的 Linux 表格页验证结果另随收尾补记。全新 slim 基底完整重建和其他架构不冒充已验收。
 Linux Docling 2.130.0 实际完成 H3S 补充原第 4/5 页，转换回原页码并输出 2 个表格；证据 `linux-docling.log`、`linux-parse/docling-linux/` 和 docling.ir.json。四工具在 Linux arm64 均有真实运行证据；最终成功镜像标识为 `scwiki-issue136-runtime-gl:20261014`，制品基于缓存生产底层，不称全新基础镜像验收。
+# 2026-11-09 本机解析子服务代理补正
+
+Peng2017网页任务`a9f7f398895249f58cf3fd6137176746`停在正文Marker初始化。本机llama服务直接health为200，默认httpx访问为502且空响应；环境变量无代理地址，实际继承系统代理。与远端科学模型503分开记录，不以本机服务PID或监听端口证明请求链正常。先通过网页“停止并保留进度”停止任务，确认RQ停止及10Worker空闲后修复，原15个制品/状态已保留。
+
+`run_parser_worker`仅在子进程追加回环直连条目，外网代理、已有排除项和父进程环境保持。三种解析器的真实子进程HTTP回归在旧实现3项失败；新实现和既有结构解析回归共13通过、3项可选真实解析测试跳过。跳过项未冒充通过，下面原PDF运行另计。
+
+原正文第4页Marker 18.20秒、SI第31页Marker 34.04秒；正文全文MinerU 26.00秒、SI第31页Docling 8.97秒。各自执行正式IR转换，原文件哈希、原页及IR序列化重读相等。脚本首版错误地把MinerU当按页补强，正式完整页数保护检出missing pages；保留失败，仅修正隔离脚本为生产规定的全文主干，未放宽产品保护。本轮新生成的两份Marker结果明确复用，未宣称再次提取。
+
+扩大至既有四工具回归后为34通过、3可选跳过、1旧失败。失败用例仍要求严格JSON损坏后自动生成新答案，与后续严格结构错误停止规则不符；未修改HEAD的独立backend源码副本同样失败，见`proxy-baseline.txt`。不放宽正式严格输出保护，也不把该旧断言计作本次通过。
+
+证据：`tests/TestForRealScenario/runs/20261109-peng2017-227-browser/`下的`proxy-observation.json`、`proxy-before.txt`、`proxy-after.txt`、`proxy-final.txt`、`proxy-baseline.txt`、`paused-proxy-a9f7/`、`proxy-native-live/`及脚本。此次没有重跑远端科学提取，也没有送审/批准；仍须从原PDF完成新的正式网页解析与五阶段验收。

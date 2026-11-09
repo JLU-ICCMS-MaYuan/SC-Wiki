@@ -10,6 +10,8 @@ POST /api/upload-tasks 接受 parser_profile 缺省/null/complementary，固定�
 
 ## 解析运行
 
+解析子进程的回环服务直连：在其`NO_PROXY`/`no_proxy`中追加`127.0.0.1`、`localhost`、`::1`，保留原条目和外网代理。不得把本机模型健康但代理返回502误报成模型本身不可用；父进程和系统代理不变。
+
 MinerU 全文 basic OCR；Docling 处理表格页；Marker 处理公式/图像、损坏或空文字页。补强裁剪真实 PDF 并映射回原页。组件失败不换其他全篇方案。默认子进程超时 900 秒，最大 1800 秒；取消/超时先 SIGTERM，10 秒仍未退出则终止进程组。Marker finally 清理本次模型服务。
 
 GROBID 调用本机 processFulltextDocument，禁用外部 consolidation。header 与 back/listBibl 分别消费；无参考表时不把 header 当自引。不可用保留状态/诊断和题录缺口。GROBID HTTP 取消在请求前后检查，单次请求最长 90 秒。

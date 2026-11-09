@@ -56,6 +56,10 @@ def run_parser_worker(name, path, options):
                                       "options": {"mineru_tier": tier, "mineru_parse_mode": mode},
                                       "page_map": selected}), encoding="utf-8")
         env = os.environ.copy()
+        # 本机解析服务不能被系统/外网代理接管；仅补充子进程的回环直连规则。
+        for key in ('NO_PROXY', 'no_proxy'):
+            bypass = [item.strip() for item in env.get(key, '').split(',') if item.strip()]
+            env[key] = ','.join(dict.fromkeys([*bypass, '127.0.0.1', 'localhost', '::1']))
         env.update(HF_HUB_DISABLE_TELEMETRY="1", HF_HUB_DISABLE_IMPLICIT_TOKEN="1",
                    TOKENIZERS_PARALLELISM="false", MINERU_CONFIG=str(root / "mineru.yaml"))
         (root / "mineru.yaml").write_text("{}", encoding="utf-8")

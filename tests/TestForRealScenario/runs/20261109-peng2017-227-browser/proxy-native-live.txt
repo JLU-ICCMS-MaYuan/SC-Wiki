@@ -1,0 +1,9 @@
+{"engine": "marker", "role": "main", "pages": [4], "version": "2.0.0", "blocks": 11, "tables": 0, "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846", "seconds": 18.199389416957274, "ir_roundtrip": true}
+{"engine": "marker", "role": "supplementary", "pages": [31], "version": "2.0.0", "blocks": 282, "tables": 1, "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93", "seconds": 34.044861375004984, "ir_roundtrip": true}
+Traceback (most recent call last):
+  File "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261109-peng2017-227-browser/verify_native_proxy_live.py", line 31, in <module>
+    ir = {'marker': convert_marker, 'mineru': convert_mineru, 'docling': convert_docling}[engine](raw, source, options, version)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/mayuan/Codes/SC-Wiki/backend/ingest/structured_pdf.py", line 280, in convert_mineru
+    raise ValueError("missing pages")
+ValueError: missing pages

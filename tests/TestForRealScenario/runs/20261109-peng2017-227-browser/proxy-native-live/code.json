@@ -1,0 +1,5 @@
+{
+  "sha": "d493b4678a43d2aea5aa3a6c47ec43fb6cd62897",
+  "structured_pdf_sha256": "34c47049dc6ba5c44e809fd3ab16f24a0b5cdc0e642f09407ec42f359e4434b3",
+  "scope": "原PDF重新执行三解析器及正式IR转换；未复用旧文本或旧模型回答；未执行科学提取或五阶段业务"
+}

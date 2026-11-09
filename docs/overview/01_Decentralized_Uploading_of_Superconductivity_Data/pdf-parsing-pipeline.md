@@ -338,6 +338,8 @@ coverage.json 供审计。2014 H3S 实测：补充材料覆盖检查 complete（
 当前待审标题优先核对正文主 PDF 首页，作者优先核对首页署名；已批准论文不批量改写。
 历史审核条目不因此获得旧版本 PDF 浏览能力。
 
+本地解析子进程给`NO_PROXY`/`no_proxy`追加回环直连条目，保留原排除项及外网代理；父进程和系统代理不改，避免本机模型健康却被系统代理返回502。真实原PDF及IR重读范围见[#136验证](../../specs/136-complementary-pdf-parsing/validation.md)。
+
 四工具默认已按维护者 2026-10-14 的明确确认接入，真实 H3S/补充和 CaH6 的边界见 [四工具验证](../../specs/136-complementary-pdf-parsing/validation.md)，不以少量案例宣称所有版式准确率。原生 PDF LLM 质量不属于当前默认验收。此前隔离环境
 已通过 HTTP/JWT、Redis/RQ、MySQL、Go 审核与返修端到端；模型响应固定注入，向量
 发布使用测试替身。本机已执行 #114 三张定位表的增量迁移，不代表其他部署实例已

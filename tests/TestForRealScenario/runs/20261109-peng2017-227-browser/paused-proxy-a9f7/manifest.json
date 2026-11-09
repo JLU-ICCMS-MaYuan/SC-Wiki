@@ -1,0 +1,77 @@
+[
+  {
+    "path": "task-state.json",
+    "size": 4493,
+    "sha256": "111f229497bf5c373cb5fa336d894ec3bbe7f2b335b86d11884c511eff6aa9d0"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/mineru/request.json",
+    "size": 316,
+    "sha256": "6a4e205b166efbd95aad2f4ccb6493c76fd8bec834433b895731243685579e0f"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/mineru/stderr.log",
+    "size": 6694,
+    "sha256": "8b6d02fcad37026da9a7fc3912a4d95e0ec1230448eaab6b419b826b77d79f48"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/mineru/mineru.yaml",
+    "size": 2,
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/mineru/ir.json",
+    "size": 133126,
+    "sha256": "1a56ac7844300c45b94a18514ae53374ab5ae06a0337929bebe59f8d38bf1efe"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/mineru/raw.json",
+    "size": 77176,
+    "sha256": "1bad139b35fcfb8943a61e983a70cb4d09bf4f5d122ba2a7072dac14742290c9"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/mineru/stdout.log",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/mineru/run.json",
+    "size": 100,
+    "sha256": "a560ef8c496e8fa746ff206b8e83cd11507743c7b938e81da4ace3278a100355"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/marker/request.json",
+    "size": 306,
+    "sha256": "e1b658b0994462496db6c8a3c27c1307ebfb498719dfd1a7e966c5d749bd38e5"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/marker/selected-pages.pdf",
+    "size": 1162592,
+    "sha256": "60e47814d0a95dbf1f9d4e61a4ca5eb0a0d30572f7196a0fbbb96d8ba48f33a3"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/marker/stderr.log",
+    "size": 206,
+    "sha256": "2f802f562eaf6b9c24437ac480ccd548cd2c2bdbd8f65541452fc55dba917106"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/marker/mineru.yaml",
+    "size": 2,
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/marker/raw.json",
+    "size": 37,
+    "sha256": "cbf25fc446808e738621d46233bc5e31f8c10631e81a3042f02def93c89a0b23"
+  },
+  {
+    "path": "artifacts/four_tools/bd81077aa3b64c03990ea2e2c8fbd653/2e092169b5374fffaed284b0dcaea35f/marker/stdout.log",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "artifacts/model-runtime/dbbfaeaf5e38ec4d5fbd52bda4ea21d9869f0630412d5addc7d80261fbf532f3/events.jsonl",
+    "size": 219,
+    "sha256": "c7bd85232d5ff67b9ba5ef047542a5de6faf245db47a01b3c21d0652a46ac1fc"
+  }
+]
