@@ -157,7 +157,7 @@ H3S 的新模型提取及 Claim 验证在 `demo/complementary-pdf/four-tool-veri
 
 证据在 `linux-parse/`：组件 raw/IR/log/run.json、marker.ir.json、grobid-retry/document.json、document.ir.json；`linux-marker-retry.log` 为实际成功摘要。独立 Marker 的 shutdown_models 输出显示子 llama.cpp 服务退出。Docling 的 Linux 表格页验证结果另随收尾补记。全新 slim 基底完整重建和其他架构不冒充已验收。
 Linux Docling 2.130.0 实际完成 H3S 补充原第 4/5 页，转换回原页码并输出 2 个表格；证据 `linux-docling.log`、`linux-parse/docling-linux/` 和 docling.ir.json。四工具在 Linux arm64 均有真实运行证据；最终成功镜像标识为 `scwiki-issue136-runtime-gl:20261014`，制品基于缓存生产底层，不称全新基础镜像验收。
-# 2026-11-09 本机解析子服务代理补正
+## 2026-11-09 本机解析子服务代理补正
 
 Peng2017网页任务`a9f7f398895249f58cf3fd6137176746`停在正文Marker初始化。本机llama服务直接health为200，默认httpx访问为502且空响应；环境变量无代理地址，实际继承系统代理。与远端科学模型503分开记录，不以本机服务PID或监听端口证明请求链正常。先通过网页“停止并保留进度”停止任务，确认RQ停止及10Worker空闲后修复，原15个制品/状态已保留。
 
@@ -168,3 +168,9 @@ Peng2017网页任务`a9f7f398895249f58cf3fd6137176746`停在正文Marker初始�
 扩大至既有四工具回归后为34通过、3可选跳过、1旧失败。失败用例仍要求严格JSON损坏后自动生成新答案，与后续严格结构错误停止规则不符；未修改HEAD的独立backend源码副本同样失败，见`proxy-baseline.txt`。不放宽正式严格输出保护，也不把该旧断言计作本次通过。
 
 证据：`tests/TestForRealScenario/runs/20261109-peng2017-227-browser/`下的`proxy-observation.json`、`proxy-before.txt`、`proxy-after.txt`、`proxy-final.txt`、`proxy-baseline.txt`、`paused-proxy-a9f7/`、`proxy-native-live/`及脚本。此次没有重跑远端科学提取，也没有送审/批准；仍须从原PDF完成新的正式网页解析与五阶段验收。
+
+### 同一代理问题的主进程GROBID补齐
+
+新任务`18bcd84689cf40828cc1674cbe3db722`已真实完成正文MinerU、Marker并请求图4读取，但GROBID仍unavailable。健康请求默认502空响应、直接200/true，证实此前子进程修复遗漏主进程调用；网页停止保留后补齐健康、题录和旧引用入口，仅回环直连，非回环目标及调用者客户端保持原代理行为。3项真实HTTP回归先失败，新回归11项通过；组合引用/四工具回归41通过，1项前述独立HEAD已证明的旧严格JSON断言失败。
+
+原正文新GROBID 0.8.1返回正确标题、规范化小写DOI、69引用和89正文锚点，原PDF哈希一致；旧引用入口真实状态partial，部分元数据缺失未伪造补全。隔离脚本最初错误地要求旧引用全部succeeded、DOI逐字大小写相同，断言失败后按既有状态与DOI规范化规则修正脚本；产品规则未改。已完成的新GROBID结果明确重读，未当作又一次请求。53个已完成/中断制品另存，证据`grobid-proxy-observation.json`、`grobid-proxy-before/after.txt`、`grobid-proxy-live/`、`paused-grobid-18bc/`。五阶段仍未完成。

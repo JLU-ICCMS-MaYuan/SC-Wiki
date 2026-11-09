@@ -13,6 +13,7 @@ from typing import Any
 from xml.etree import ElementTree
 
 import httpx
+from backend.services.http_transport import uses_environment_proxy
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -118,6 +119,7 @@ def extract_references_from_pdf(
         with pdf_path.open("rb") as source:
             request_client = client or httpx.Client(
                 timeout=httpx.Timeout(GROBID_TIMEOUT_SECONDS, connect=10.0),
+                trust_env=uses_environment_proxy(target),
             )
             try:
                 response = request_client.post(

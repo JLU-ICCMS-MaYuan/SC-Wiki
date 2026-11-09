@@ -1,0 +1,13 @@
+{
+  "health": true,
+  "document_status": "succeeded",
+  "references_status": "partial",
+  "version": "0.8.1",
+  "doi": "10.1103/physrevlett.119.107001",
+  "title": "Hydrogen Clathrate Structures in Rare Earth Hydrides at High Pressures: Possible Route to Room-Temperature Superconductivity",
+  "document_reference_count": 69,
+  "legacy_reference_count": 69,
+  "citations": 89,
+  "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+  "scope": "原正文新GROBID请求；本轮完成的题录/引用结果重读，不再重发；旧引用入口真实partial保留，未伪造元数据补全；未调用科学模型、未写业务数据"
+}

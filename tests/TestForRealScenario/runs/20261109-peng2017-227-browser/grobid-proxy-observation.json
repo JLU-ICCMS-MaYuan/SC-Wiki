@@ -1,0 +1,15 @@
+{
+  "source": "本轮工具实际观察，任务已网页停止保留",
+  "task_id": "18bcd84689cf40828cc1674cbe3db722",
+  "health_default": {
+    "status": 502,
+    "body": ""
+  },
+  "health_direct": {
+    "status": 200,
+    "body": "true"
+  },
+  "artifact_status": "unavailable",
+  "artifact_error_type": "HTTPStatusError",
+  "scope": "GROBID主进程调用未被此前子进程NO_PROXY修复覆盖"
+}

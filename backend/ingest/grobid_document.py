@@ -12,6 +12,8 @@ from xml.etree import ElementTree as ET
 
 import httpx
 
+from backend.services.http_transport import uses_environment_proxy
+
 NS = {"t": "http://www.tei-c.org/ns/1.0"}
 
 
@@ -19,7 +21,7 @@ def service_available():
     """启动时探测当前服务，不覆盖历史任务的解析状态。"""
     endpoint = (os.environ.get('GROBID_URL') or 'http://127.0.0.1:8070').rstrip('/')
     try:
-        response = httpx.get(endpoint + '/api/isalive', timeout=3)
+        response = httpx.get(endpoint + '/api/isalive', timeout=3, trust_env=uses_environment_proxy(endpoint))
         return response.is_success and response.text.strip().lower() == 'true'
     except httpx.HTTPError:
         return False
@@ -75,7 +77,7 @@ def extract_document(source, directory, *, timeout=90):
               "source_sha256": source.resolved_sha256(), "file_id": source.file_id}
     endpoint = (os.environ.get("GROBID_URL") or "http://127.0.0.1:8070").rstrip("/")
     try:
-        with httpx.Client(timeout=httpx.Timeout(timeout, connect=10)) as client:
+        with httpx.Client(timeout=httpx.Timeout(timeout, connect=10), trust_env=uses_environment_proxy(endpoint)) as client:
             version = client.get(endpoint+"/api/version")
             if version.is_success:
                 result["parser_version"] = version.text.strip()[:64]
