@@ -48,3 +48,26 @@ def task_source_chunks(task_id: str, state: dict[str, Any], root: Path, *,
         chunks.extend({**chunk, "source_name": source["source_name"], "file_role": source["role"]}
                       for chunk in source_chunks(source["content"], source["file_id"]))
     return chunks
+
+
+def paper_source_chunks(task_id: str, state: dict[str, Any], root: Path) -> list[dict]:
+    """论文先行只读原解析文本；后加的图像派生事实不能改变已完成论文阶段的输入。"""
+    from .upload_tasks import artifact_directory
+    from .chart_cache import load_document_ir
+    from .upload_jobs import _ir_to_markdown
+    chunks = []
+    manifest = {str(item['file_id']): item for item in state.get('files') or []}
+    for source in text_sources(task_id, state, root):
+        item = manifest.get(source['file_id'], {})
+        path = artifact_directory(task_id)/'document_ir'/f"{source['file_id']}.json"
+        if str(item.get('kind') or 'pdf').lower() == 'pdf' and path.is_file():
+            ir = load_document_ir(path)
+            if item.get('sha256') and ir.source_sha256 != item['sha256']:
+                raise ValueError('论文阶段IR与当前原文件摘要不一致')
+            ir.blocks = [b for b in ir.blocks if 'chart_reading' not in b.metadata and 'chart_unresolved' not in b.metadata]
+            content = _ir_to_markdown(ir)
+        else:
+            content = source['content']
+        chunks.extend({**chunk, 'source_name': source['source_name'], 'file_role': source['role']}
+                      for chunk in source_chunks(content, source['file_id']))
+    return chunks

@@ -35,3 +35,5 @@ material_state_contract.research_materials_for_save统一规范化值选择；�
 结构归属在开始组循环前完成；原防丢门按各组填写后、字段核对前的只读副本核验，避免用之后合法纠正值倒查旧候选。各组在核对前执行原来源门，最终完整性是程序验证，不加全表模型合稿。保存所有模型请求/响应到组制品，正式草稿报告递归去除请求全文，避免嵌套attempts把整包上下文带回后续阶段。
 
 运行元数据material_batch保存index/total/state_count/completed_states/action；详情复用现有轮询显示，不增加科学键、数据库表或请求。
+
+论文检查点输入仅来自原解析文本；续跑时从IR排除读图器标记的chart_reading/chart_unresolved派生块后生成同一文本窗口。材料阶段仍使用全部派生事实。该选择恢复先论文后材料的既定所有权，不让后加图像资料使已保存论文重跑；文件摘要、原始解析文字、模型/端点变化仍按原规则使缓存失效，不改变旧source_identity算法或手工复制检查点。

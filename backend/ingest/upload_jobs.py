@@ -2009,7 +2009,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         markdown_path(task_id).write_text('\n\n'.join(combined), encoding='utf-8')
         state = update_state(task_id, files=files if state.get('files') else [])
         from .paper_first import prepare_paper
-        prepare_paper(task_id, state, task_source_chunks(task_id, state, root))
+        from .upload_source_bundle import paper_source_chunks
+        prepare_paper(task_id, state, paper_source_chunks(task_id, state, root))
         # 论文级核对保存后再读科学图源，供适用性及材料状态阶段共同使用。
         from .chart_reading import enrich_document
         from .chart_cache import load_document_ir
