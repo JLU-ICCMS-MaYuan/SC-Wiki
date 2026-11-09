@@ -1,0 +1,1 @@
+{"provider": "server:LLM2", "model": "gpt-6.1-sol", "fields": 12, "statuses": {"supported": 12}, "review_errors": [], "scope": "原失败字段组，原PDF/IR及正式review_fields完整工具循环；不写字段决定或业务草稿"}

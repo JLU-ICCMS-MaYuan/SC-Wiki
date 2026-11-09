@@ -45,6 +45,28 @@ def test_required_current_evidence_is_never_truncated(tmp_path):
     assert '4.4788' in payload['user_prompt']
 
 
+def test_scientific_tool_history_reserves_space_before_fixed_input_compaction(tmp_path):
+    from backend.ingest.model_memory import prepare_request, _fixed_token_estimate, expand_source_texts
+    import json
+    quote = 'Original YH10 evidence: Tc 303 K at 400 GPa, mu*=0.1. ' * 90
+    payload = {'records': [{'id': i, 'tc': 303, 'quote': quote} for i in range(12)]}
+    history = [
+        {'role': 'assistant', 'content': None, 'tool_calls': [{'id': 'page-4', 'type': 'function',
+            'function': {'name': 'read_original_page', 'arguments': '{"page":4}'}}]},
+        {'role': 'tool', 'tool_call_id': 'page-4', 'content': json.dumps({
+            'file_id': 'original', 'blocks': [{'text': f'Independent scientific row {i}, pressure 400 GPa'}
+                                             for i in range(150)], 'original_page': 4})},
+    ]
+    request = {'system_prompt': 'Read all current evidence.', 'user_prompt': json.dumps(payload),
+               'tool_history': history, 'images': ['data:image/png;base64,UNCHANGED']}
+    budget = _fixed_token_estimate(request) + 100
+    prepared = prepare_request(request, tmp_path, budget=budget)
+    assert prepared['tool_history'] == history
+    assert prepared['images'] == request['images']
+    assert expand_source_texts(json.loads(prepared['user_prompt'])) == payload
+    assert _fixed_token_estimate(prepared) < _fixed_token_estimate(request) / 2
+
+
 def test_prepare_compacts_only_referenced_receipts_preserving_current_source(tmp_path):
     from backend.ingest.model_memory import prepare_request
     import json

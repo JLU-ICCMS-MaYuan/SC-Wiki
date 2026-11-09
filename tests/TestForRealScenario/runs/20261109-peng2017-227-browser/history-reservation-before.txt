@@ -1,0 +1,70 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__ test_scientific_tool_history_reserves_space_before_fixed_input_compaction ___
+
+tmp_path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-260/test_scientific_tool_history_r0')
+
+    def test_scientific_tool_history_reserves_space_before_fixed_input_compaction(tmp_path):
+        from backend.ingest.model_memory import prepare_request, _fixed_token_estimate, expand_source_texts
+        import json
+        quote = 'Original YH10 evidence: Tc 303 K at 400 GPa, mu*=0.1. ' * 90
+        payload = {'records': [{'id': i, 'tc': 303, 'quote': quote} for i in range(12)]}
+        history = [
+            {'role': 'assistant', 'content': None, 'tool_calls': [{'id': 'page-4', 'type': 'function',
+                'function': {'name': 'read_original_page', 'arguments': '{"page":4}'}}]},
+            {'role': 'tool', 'tool_call_id': 'page-4', 'content': json.dumps({
+                'file_id': 'original', 'blocks': [{'text': f'Independent scientific row {i}, pressure 400 GPa'}
+                                                 for i in range(150)], 'original_page': 4})},
+        ]
+        request = {'system_prompt': 'Read all current evidence.', 'user_prompt': json.dumps(payload),
+                   'tool_history': history, 'images': ['data:image/png;base64,UNCHANGED']}
+        budget = _fixed_token_estimate(request) + 100
+>       prepared = prepare_request(request, tmp_path, budget=budget)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_model_memory.py:63:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+request = {'system_prompt': 'Read all current evidence.', 'user_prompt': '{"records": [{"id": 0, "tc": 303, "quote": "Original Y...pendent scientific row 149, pressure 400 GPa"}], "original_page": 4}'}], 'images': ['data:image/png;base64,UNCHANGED']}
+directory = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-260/test_scientific_tool_history_r0')
+model = None, budget = 28212, force = False
+
+    def prepare_request(request, directory, *, model=None, budget=96000, force=False):
+        prepared = prepare_fixed_request(request, budget=budget)
+        history = list(request.get("tool_history") or [])
+        fixed_tokens = _fixed_token_estimate(prepared)
+        size = count_tokens_approximately(_messages(history)) if history else 0
+        if not force and fixed_tokens + size <= budget:
+            return prepared
+        if not history:
+            raise ContextBudgetError("没有可压缩的旧过程，必要原文仍须完整保留")
+        # 只有已在当前sources完整提供的原文回执才可转为旧过程摘要。
+        try:
+            payload = json.loads(request["user_prompt"])
+            known = {row["source_id"] for row in payload.get("sources", []) if row.get("content")}
+        except (ValueError, TypeError, AttributeError, KeyError):
+            known = set()
+        groups = _groups(history)
+        protected, eligible = [], []
+        for group in groups[:-1]:
+            safe = True
+            for row in group:
+                if row.get("role") != "tool":
+                    continue
+                try:
+                    receipt = json.loads(row.get("content") or "")
+                    safe = (isinstance(receipt, dict) and receipt.get("source_text_location") == "request.sources"
+                            and bool(receipt.get("source_ids")) and set(receipt["source_ids"]) <= known)
+                except (ValueError, TypeError):
+                    safe = False
+                if not safe:
+                    break
+            (eligible if safe else protected).extend(group)
+        if not eligible:
+>           raise ContextBudgetError("旧工具结果尚有独立科学依据，不能用过程摘要替代")
+E           backend.ingest.model_memory.ContextBudgetError: 旧工具结果尚有独立科学依据，不能用过程摘要替代
+
+backend/ingest/model_memory.py:442: ContextBudgetError
+=========================== short test summary info ============================
+FAILED backend/tests/test_model_memory.py::test_scientific_tool_history_reserves_space_before_fixed_input_compaction
+1 failed in 0.45s

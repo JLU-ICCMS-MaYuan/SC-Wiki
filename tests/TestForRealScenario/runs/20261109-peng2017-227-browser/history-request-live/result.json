@@ -1,0 +1,1 @@
+{"action": {"name": "read_document", "arguments": {"file_id": "ac262d3aa07f48b0a43280ddc72254c3"}}, "_tool_call": {"id": "call_ecf80333cea64f3f9f981ac923ea6289", "type": "function", "function": {"name": "read_document", "arguments": "{\"file_id\":\"ac262d3aa07f48b0a43280ddc72254c3\"}"}}}

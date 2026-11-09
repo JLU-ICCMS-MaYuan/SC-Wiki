@@ -105,3 +105,11 @@ paper_summary原始输入311439字符，候选与原文混合反复携带8段相
 复用本轮已核对PDF文字/IR、29段候选及同输入完整响应；受影响的优化关联、规划、整理和结构归属真实重新请求，不把旧答案计新提取。隔离SQL只读、任务状态/文件副本隔离，is_shadow跳过逐字段建议和科学复核；引用匹配、业务保存、谱和角色交接未覆盖，必须继续真实网页五阶段。脚本早期的隔离属性/父身份/本地路径及Python原生类型比较错误分别留日志，只修测试脚手架，不放宽产品保护。
 
 最终定向120通过、2项条件跳过（旧MySQL外事务回滚及#108隔离库条件），四宿主225、12项变异、字段契约及前端类型/Vite构建通过。扩大范围的5项旧电子方法/范围断言在独立HEAD同样失败，physical-scope-baseline-complete.txt为证；未修改calculation_methods/scientific_context或放宽断言，不计入本次通过。完整证据目录tests/TestForRealScenario/runs/20261109-peng2017-227-browser/；原始失败、各轮真实模型及最终validation-summary-final.json分开保留。
+
+## 原字段组科学工具历史的预算预留
+
+真实79组结束后，942字段中485 supported、18 uncertain、439 unchecked，任务正确停为automatic_review_incomplete，草稿及成功结果保留。35个字段组请求本地ContextBudgetError，消息为“旧工具结果尚有独立科学依据，不能用过程摘要替代”；另3次连接错误已恢复，不混称503。
+
+prepare_request先让固定输入占用完整96000，再加科学工具历史，导致总量超限而错误地走摘要分支。新增回归先失败，修复为按原历史估算先预留空间、对固定输入无损去重；真正放不下仍按原规则仅压缩可摘要旧过程，独立科学依据不删不摘要。35个实际失败请求全量重放通过，固定输入全树、工具历史及图片完全一致，最高95870估算token。未增预算、核对轮次或普通保存模型请求。
+
+真实server:LLM2/gpt-6.1-sol单请求重新发送通过；进一步使用保存草稿的完整字段版本记录，经原review_fields、原PDF/IR和实际只读工具循环，原失败组12字段全部supported、零review_error。只读验证未写字段决定或业务草稿；早期脚手架缺少content_hash的错误保留日志并修为使用正式当前snapshot。证据history-reservation-before/after.txt、history-reservation-replay.json、history-group-live/summary.json及原结果。保留真实任务，从网页继续处理未完成项，五阶段仍待完成。

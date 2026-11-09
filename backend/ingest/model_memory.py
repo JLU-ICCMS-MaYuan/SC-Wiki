@@ -408,10 +408,15 @@ def compact_history(history, path, *, model=None, budget=16000):
 
 
 def prepare_request(request, directory, *, model=None, budget=96000, force=False):
-    prepared = prepare_fixed_request(request, budget=budget)
     history = list(request.get("tool_history") or [])
-    fixed_tokens = _fixed_token_estimate(prepared)
     size = count_tokens_approximately(_messages(history)) if history else 0
+    try:
+        # 工具原文先保留完整空间；不能让固定输入占满后再强迫科学历史做摘要。
+        prepared = prepare_fixed_request(request, budget=max(1, budget - size))
+    except ContextBudgetError:
+        # 确实放不下时，仍只按下方原规则处理可摘要的旧过程。
+        prepared = prepare_fixed_request(request, budget=budget)
+    fixed_tokens = _fixed_token_estimate(prepared)
     if not force and fixed_tokens + size <= budget:
         return prepared
     if not history:

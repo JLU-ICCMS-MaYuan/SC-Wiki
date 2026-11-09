@@ -1,0 +1,40 @@
+.............ss......................................................... [ 58%]
+...................................................                      [100%]
+=============================== warnings summary ===============================
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+backend/tests/test_canonical_structure_assignment.py::test_runtime_request_failure_is_not_swallowed_as_scientific_uncertainty
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:438: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+backend/tests/test_canonical_structure_assignment.py: 26 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/cell.py:106: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error()
+
+backend/tests/test_model_memory.py::test_langmem_summary_is_reused_and_recent_tool_pair_stays
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/trustcall/_base.py:46: LangGraphDeprecatedSinceV10: Importing Send from langgraph.constants is deprecated. Please use 'from langgraph.types import Send' instead. Deprecated in LangGraph V1.0 to be removed in V2.0.
+    from langgraph.constants import Send
+
+backend/tests/test_model_runtime.py::test_pause_and_resume_require_owner_even_for_admin
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] backend/tests/test_state_review_convergence.py:196: 显式本机MySQL外事务回滚验证
+SKIPPED [1] backend/tests/test_state_review_convergence.py:261: 需要已迁移到 #108 的隔离 MySQL 库
+121 passed, 2 skipped, 564 warnings in 5.83s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
