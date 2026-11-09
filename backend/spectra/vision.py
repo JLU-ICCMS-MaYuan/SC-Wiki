@@ -10,11 +10,15 @@ def complete_image_json(system_prompt, user_prompt, *, images, read_timeout=180)
     from backend.rag.llm_client import get_llm_client
     from backend.rag.llm import _extract_json
     config=get_llm_config()
-    response=get_llm_client(read_timeout=read_timeout).chat.completions.create(
-        model=config.model, messages=[dict(role="system",content=system_prompt),
-        dict(role="user",content=[dict(type="text",text=user_prompt),
-             *(dict(type="image_url",image_url=dict(url=url)) for url in images)])],
-        response_format={"type":"json_object"}, stream=False, max_tokens=8192)
+    from backend.rag.token_usage import token_request
+    with token_request() as receive_usage:
+        response=get_llm_client(read_timeout=read_timeout).chat.completions.create(
+            model=config.model, messages=[dict(role="system",content=system_prompt),
+            dict(role="user",content=[dict(type="text",text=user_prompt),
+                 *(dict(type="image_url",image_url=dict(url=url)) for url in images)])],
+            response_format={"type":"json_object"}, stream=False, max_tokens=8192)
+        receipt = getattr(response, "usage", None)
+        receive_usage(receipt.model_dump() if receipt is not None else None)
     if response.choices[0].finish_reason != "stop":
         raise ValueError("模型标定输出未完整结束，保留原图，不采用截断结果")
     return _extract_json(response.choices[0].message.content or "")

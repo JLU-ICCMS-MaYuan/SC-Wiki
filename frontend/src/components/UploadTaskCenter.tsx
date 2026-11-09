@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Alert, Box, Button, Card, CardContent, Checkbox, Chip, CircularProgress, Typography } from '@mui/material'
+import { Alert, Box, Button, Card, CardContent, Checkbox, Chip, CircularProgress, Tooltip, Typography } from '@mui/material'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import { api } from '../lib/api'
 import { UploadTaskState, unwrapData } from '../lib/paperProcessing'
 import { useLanguage } from '../context/LanguageContext'
 import { extractionElapsedSeconds } from '../lib/uploadExtractionTiming'
+import { uploadTokenUsage } from '../lib/uploadTokenUsage'
 
 
 // 倒计时归零时的显示文案由 zh 字典 upload.cleanupPending 提供；源码中的「等待清理」
@@ -34,7 +35,7 @@ interface Props {
 }
 
 const UploadTaskCenter: React.FC<Props> = ({ refreshKey }) => {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const [tasks, setTasks] = useState<UploadTaskState[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -191,6 +192,14 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey }) => {
           const duration = elapsed === null ? t('upload.extractionUnrecorded')
             : elapsed === 'notStarted' ? t('upload.extractionNotStarted')
               : t('upload.extractionDuration', { minutes: Math.floor(elapsed / 60), seconds: elapsed % 60 })
+          const usage = uploadTokenUsage(task)
+          const number = (value: number) => value.toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US')
+          const total = usage === null ? t('upload.extractionUnrecorded')
+            : usage === 'notStarted' ? t('upload.extractionNotStarted')
+              : usage.incomplete ? t('upload.parsingTokensIncomplete', { total: number(usage.total_tokens) })
+                : number(usage.total_tokens)
+          const tokenDetails = usage && usage !== 'notStarted'
+            ? t('upload.parsingTokenDetails', { input: number(usage.input_tokens), output: number(usage.output_tokens) }) : ''
           const running = ['uploading', 'queued', 'extracting', 'reading', 'summarizing', 'submitting', 'cancelling']
             .includes(task.status || '')
           const statusText = task.status && (STATUS_KEYS as readonly string[]).includes(task.status)
@@ -207,7 +216,7 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey }) => {
                   inputProps={{ 'aria-label': t('upload.toggleSelectAria', { filename: task.filename || task.files?.[0]?.original_filename || task.task_id }) }}
                 />
                 <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'baseline', columnGap: 1.5, rowGap: 0.25, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+                  <Box sx={{ display: 'flex', alignItems: 'baseline', columnGap: 1.5, rowGap: 0.25, flexWrap: 'wrap' }}>
                     <Typography component="a"
                       href={`/upload/tasks/${encodeURIComponent(task.task_id)}`}
                       target="_blank" rel="noopener"
@@ -219,6 +228,12 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey }) => {
                     <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
                       {t('upload.extractionTime', { duration })}
                     </Typography>
+                    <Tooltip title={tokenDetails} describeChild>
+                      <Typography component="span" variant="body2" color="text.secondary" tabIndex={tokenDetails ? 0 : undefined}
+                        sx={{ position: 'relative', zIndex: 2, flexShrink: 0, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
+                        {t('upload.parsingTokens', { total })}
+                      </Typography>
+                    </Tooltip>
                   </Box>
                   <Typography variant="caption" color="text.secondary">
                     {statusText}

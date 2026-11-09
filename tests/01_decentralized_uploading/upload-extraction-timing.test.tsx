@@ -23,6 +23,46 @@ beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime((start + 205) * 1000) })
 afterEach(() => { cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks(); localStorage.clear() })
 
 describe('上传记录提取用时', () => {
+  const tokenUsage = { run_id: 'round-a', input_tokens: 1500, output_tokens: 300,
+    total_tokens: 1800, request_count: 2, recorded_requests: 2 }
+
+  it('在最终用时旁显示实际token总量与明细，重开后保持且不新增轮询', async () => {
+    const fetcher = vi.fn(async () => response([{ ...task('ready'), extraction_token_usage: tokenUsage }]))
+    vi.stubGlobal('fetch', fetcher)
+    let view = await mount()
+    expect(screen.getByText('解析 token：1,800')).toBeInTheDocument()
+    await act(async () => { screen.getByText('解析 token：1,800').focus() })
+    await advance(1)
+    expect(screen.getByRole('tooltip')).toHaveTextContent('输入：1,500；输出：300')
+    await advance(10)
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    view.unmount()
+    view = await mount()
+    expect(screen.getByText('解析 token：1,800')).toBeInTheDocument()
+  })
+
+  it.each([
+    [undefined, '未记录'],
+    [{ ...tokenUsage, recorded_requests: 0, input_tokens: 0, output_tokens: 0, total_tokens: 0 }, '未记录'],
+    [{ ...tokenUsage, recorded_requests: 1 }, '1,800（统计不完整）'],
+    [{ ...tokenUsage, total_tokens: -1 }, '未记录'],
+    [{ ...tokenUsage, total_tokens: 1801 }, '未记录'],
+    [{ ...tokenUsage, request_count: 0, recorded_requests: 0, input_tokens: 0, output_tokens: 0, total_tokens: 0 }, '0'],
+  ])('区分未知、部分缺失、非法及真实0：%s', async (usage, expected) => {
+    vi.stubGlobal('fetch', vi.fn(async () => response([{ ...task('ready'), extraction_token_usage: usage }])))
+    await mount()
+    expect(screen.getByText('解析 token：' + expected)).toBeInTheDocument()
+  })
+
+  it('英文token用量与明细可读', async () => {
+    localStorage.setItem('sc-wiki.language', 'en')
+    vi.stubGlobal('fetch', vi.fn(async () => response([{ ...task('ready'), extraction_token_usage: tokenUsage }])))
+    await mount()
+    await act(async () => { screen.getByText('Parsing tokens: 1,800').focus() })
+    await advance(1)
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Input: 1,500; output: 300')
+  })
+
   it('按秒显示，自动读到终态后固定，重开仍恢复同一结果', async () => {
     let current = task()
     const fetcher = vi.fn(async () => response([current]))

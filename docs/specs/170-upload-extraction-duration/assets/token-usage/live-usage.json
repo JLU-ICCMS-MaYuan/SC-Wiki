@@ -1,0 +1,36 @@
+{
+  "verified_at": "2026-11-09T08:40:24.655160+00:00",
+  "source_head": "ea3b0ddb7b307b0ced90cf8f1d009b5cba0372a8",
+  "source_files_sha256": {
+    "backend/rag/llm.py": "9b00812c757246c9c9e75f0f94dece837b7915dadc0db31b02f353cd1eb3c375",
+    "backend/rag/token_usage.py": "7e5d5f80e7c66b6dc1ae5da4312640320020199e0c7386b92f3880b6cdfe7595",
+    "backend/ingest/upload_usage.py": "3f69ab774b7f91d1228636780ba2ff1626d8dd0c3dc11733c44880d4d3b6a6ca",
+    "backend/ingest/upload_contracts.py": "3f69e198dfab91820c9120734972a88f73097e6735ac3006b6564cf39d7b1ede",
+    "backend/ingest/upload_tasks.py": "18998b754c93b59c0249d9971f14c6cc4f7c4a88ba52234b9bdf9832479595eb"
+  },
+  "model": "deepseek-v4-pro",
+  "host": "api.deepseek.com",
+  "provider_usage": {
+    "completion_tokens": 5,
+    "prompt_tokens": 39,
+    "total_tokens": 44,
+    "completion_tokens_details": null,
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cache_write_tokens": null,
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 39
+  },
+  "task_usage": {
+    "run_id": "91033ffab64c4a53bda31d74f275968a",
+    "input_tokens": 39,
+    "output_tokens": 5,
+    "total_tokens": 44,
+    "request_count": 1,
+    "recorded_requests": 1
+  },
+  "sqlite_restore_matches": true,
+  "scope": "一次合成验证请求；模型服务真实，任务/Redis传输/SQLite隔离；不是整篇PDF或生产部署验收"
+}

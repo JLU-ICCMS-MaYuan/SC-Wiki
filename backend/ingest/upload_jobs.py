@@ -1908,7 +1908,8 @@ def process_upload_task(task_id: str) -> dict[str, Any]:
     try:
         from .model_runtime import start_runtime, execution_context
         runtime = start_runtime(task_id)
-        with execution_context(runtime):
+        from .upload_usage import collect_upload_usage
+        with execution_context(runtime), collect_upload_usage(task_id):
             from .upload_resume import resume_spectra
             resumed = resume_spectra(task_id)
             if resumed is not None:

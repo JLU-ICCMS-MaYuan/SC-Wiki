@@ -12,6 +12,7 @@ from typing import Any
 
 import httpx
 from openai import APIConnectionError, APITimeoutError, APIStatusError, OpenAI
+from backend.rag.token_usage import token_request
 from backend.rag.llm_client import get_llm_client
 from backend.rag.llm_context import get_llm_config, UserCredentialError
 
@@ -95,102 +96,105 @@ def _stream_json(
     if runtime:
         runtime.check()
         runtime.register_client(client)
-    stream = client.chat.completions.create(
-        model=config.model,
-        messages=messages,
-        response_format=response_format or {"type": "json_object"},
-        temperature=0.1,
-        extra_body=({"thinking": {"type": "disabled"}} if deepseek else {}),
-        **({"max_tokens": 65536, "stream_options": {"include_usage": True}} if deepseek else {}),
-        stream=True,
-        **({"tools": tool_definitions, "parallel_tool_calls": False} if tool_definitions else {}),
-    )
-    accumulated: list[str] = []
-    actions: dict[int, dict] = {}
-    call_ids: dict[int, str] = {}
-    finish_reason = None
-    output_seen = False
-    last_progress = time.monotonic()
-    try:
-        for chunk in stream:
-            now = time.monotonic()
-            made_progress = False
-            if getattr(chunk, "usage", None):
-                _call_stats.set({**_call_stats.get(), "usage": chunk.usage.model_dump()})
-            if not chunk.choices:
-                if now - last_progress >= read_timeout:
+    with token_request() as receive_usage:
+        stream = client.chat.completions.create(
+            model=config.model,
+            messages=messages,
+            response_format=response_format or {"type": "json_object"},
+            temperature=0.1,
+            extra_body=({"thinking": {"type": "disabled"}} if deepseek else {}),
+            **({"max_tokens": 65536} if deepseek else {}),
+            stream_options={"include_usage": True},
+            stream=True,
+            **({"tools": tool_definitions, "parallel_tool_calls": False} if tool_definitions else {}),
+        )
+        accumulated: list[str] = []
+        actions: dict[int, dict] = {}
+        call_ids: dict[int, str] = {}
+        finish_reason = None
+        output_seen = False
+        last_progress = time.monotonic()
+        try:
+            for chunk in stream:
+                now = time.monotonic()
+                made_progress = False
+                if getattr(chunk, "usage", None):
+                    receive_usage(chunk.usage.model_dump())
+                    _call_stats.set({**_call_stats.get(), "usage": chunk.usage.model_dump()})
+                if not chunk.choices:
+                    if now - last_progress >= read_timeout:
+                        if runtime and not output_seen:
+                            raise ModelNoOutputError('模型未返回任何输出，等待响应超时')
+                        if runtime:
+                            raise ModelProgressTimeout('模型输出停滞，超过读取等待时间；未完整响应不进入表单')
+                        raise RuntimeError("模型持续返回空白或空响应，超过现有读取超时")
+                    continue
+                delta_object = chunk.choices[0].delta
+                delta = delta_object.content
+                if not output_seen and (delta or getattr(delta_object, "tool_calls", None)):
+                    output_seen = True
+                    _call_stats.set({**_call_stats.get(), "output_started": True})
+                made_progress = bool(delta and delta.strip())
+                finish_reason = getattr(chunk.choices[0], "finish_reason", None) or finish_reason
+                for call in getattr(delta_object, "tool_calls", None) or []:
+                    if getattr(call, "id", None):
+                        call_ids[call.index] = call.id
+                    action = actions.setdefault(call.index, {"name": "", "arguments": ""})
+                    if call.function is not None:
+                        action["name"] += call.function.name or ""
+                        action["arguments"] += call.function.arguments or ""
+                        made_progress = made_progress or bool((call.function.name or "").strip()
+                            or (call.function.arguments or "").strip())
+                    if on_partial:
+                        on_partial(json.dumps({"tool_calls": list(actions.values())}, ensure_ascii=False))
+                if delta:
+                    accumulated.append(delta)
+                    if on_partial is not None:
+                        on_partial("".join(accumulated))
+                if made_progress and runtime:
+                    runtime.receiving.set()
+                    runtime.check()
+                if made_progress:
+                    last_progress = now
+                elif now - last_progress >= read_timeout:
                     if runtime and not output_seen:
                         raise ModelNoOutputError('模型未返回任何输出，等待响应超时')
                     if runtime:
                         raise ModelProgressTimeout('模型输出停滞，超过读取等待时间；未完整响应不进入表单')
                     raise RuntimeError("模型持续返回空白或空响应，超过现有读取超时")
-                continue
-            delta_object = chunk.choices[0].delta
-            delta = delta_object.content
-            if not output_seen and (delta or getattr(delta_object, "tool_calls", None)):
-                output_seen = True
-                _call_stats.set({**_call_stats.get(), "output_started": True})
-            made_progress = bool(delta and delta.strip())
-            finish_reason = getattr(chunk.choices[0], "finish_reason", None) or finish_reason
-            for call in getattr(delta_object, "tool_calls", None) or []:
-                if getattr(call, "id", None):
-                    call_ids[call.index] = call.id
-                action = actions.setdefault(call.index, {"name": "", "arguments": ""})
-                if call.function is not None:
-                    action["name"] += call.function.name or ""
-                    action["arguments"] += call.function.arguments or ""
-                    made_progress = made_progress or bool((call.function.name or "").strip()
-                        or (call.function.arguments or "").strip())
-                if on_partial:
-                    on_partial(json.dumps({"tool_calls": list(actions.values())}, ensure_ascii=False))
-            if delta:
-                accumulated.append(delta)
-                if on_partial is not None:
-                    on_partial("".join(accumulated))
-            if made_progress and runtime:
-                runtime.receiving.set()
-                runtime.check()
-            if made_progress:
-                last_progress = now
-            elif now - last_progress >= read_timeout:
-                if runtime and not output_seen:
-                    raise ModelNoOutputError('模型未返回任何输出，等待响应超时')
-                if runtime:
-                    raise ModelProgressTimeout('模型输出停滞，超过读取等待时间；未完整响应不进入表单')
-                raise RuntimeError("模型持续返回空白或空响应，超过现有读取超时")
-    finally:
-        close = getattr(stream, "close", None)
-        if callable(close):
-            close()
-    _call_stats.set({**_call_stats.get(), "finish_reason": finish_reason})
-    if runtime and not output_seen and finish_reason in (None, 'stop'):
-        raise ModelNoOutputError('模型连接已结束，但未返回任何输出')
-    if actions:
-        from .structured_output import StructuredOutputError, validate_tool_action
-        if len(actions) != 1 or finish_reason != "tool_calls" or not tool_definitions:
-            raise StructuredOutputError("只接受一次完整的已登记工具调用")
-        index, action = next(iter(actions.items()))
-        raw_arguments = action["arguments"]
-        try:
-            action["arguments"] = json.loads(action["arguments"])
-        except json.JSONDecodeError as exc:
-            raise StructuredOutputError("工具参数未形成完整JSON") from exc
-        validate_tool_action(action, tool_definitions)
-        result = {"action": action}
-        if index in call_ids:
-            result["_tool_call"] = {"id": call_ids[index], "type": "function",
-                "function": {"name": action["name"], "arguments": raw_arguments}}
+        finally:
+            close = getattr(stream, "close", None)
+            if callable(close):
+                close()
+        _call_stats.set({**_call_stats.get(), "finish_reason": finish_reason})
+        if runtime and not output_seen and finish_reason in (None, 'stop'):
+            raise ModelNoOutputError('模型连接已结束，但未返回任何输出')
+        if actions:
+            from .structured_output import StructuredOutputError, validate_tool_action
+            if len(actions) != 1 or finish_reason != "tool_calls" or not tool_definitions:
+                raise StructuredOutputError("只接受一次完整的已登记工具调用")
+            index, action = next(iter(actions.items()))
+            raw_arguments = action["arguments"]
+            try:
+                action["arguments"] = json.loads(action["arguments"])
+            except json.JSONDecodeError as exc:
+                raise StructuredOutputError("工具参数未形成完整JSON") from exc
+            validate_tool_action(action, tool_definitions)
+            result = {"action": action}
+            if index in call_ids:
+                result["_tool_call"] = {"id": call_ids[index], "type": "function",
+                    "function": {"name": action["name"], "arguments": raw_arguments}}
+            return result
+        if finish_reason not in (None, "stop"):
+            raise RuntimeError("模型输出未完整结束")
+        result = _extract_json("".join(accumulated))
+        if tool_definitions and isinstance(result, dict) and "_tool_call" in result:
+            from .structured_output import StructuredOutputError
+            raise StructuredOutputError("模型文本不能伪造工具调用回执")
+        if tool_definitions and isinstance(result, dict) and "action" in result:
+            from .structured_output import validate_tool_action
+            validate_tool_action(result["action"], tool_definitions)
         return result
-    if finish_reason not in (None, "stop"):
-        raise RuntimeError("模型输出未完整结束")
-    result = _extract_json("".join(accumulated))
-    if tool_definitions and isinstance(result, dict) and "_tool_call" in result:
-        from .structured_output import StructuredOutputError
-        raise StructuredOutputError("模型文本不能伪造工具调用回执")
-    if tool_definitions and isinstance(result, dict) and "action" in result:
-        from .structured_output import validate_tool_action
-        validate_tool_action(result["action"], tool_definitions)
-    return result
 
 
 def _retryable_unstarted_service_error(error):

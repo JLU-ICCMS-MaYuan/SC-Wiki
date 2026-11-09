@@ -1,0 +1,62 @@
+{
+  "date": "2026-11-09",
+  "source_branch": "mayuan",
+  "scope": "本机共享工作树；任务级元信息，不改科学字段或解析算法",
+  "red_before_implementation": {
+    "backend": "新增模块缺失，首项失败",
+    "frontend": "8项新增token场景失败，原10项计时场景通过",
+    "direct_calls": "谱读图与原生PDF两项漏计反例先失败"
+  },
+  "verification": {
+    "backend": {
+      "passed": 123,
+      "log": "/tmp/scwiki170-token-backend-final.log"
+    },
+    "frontend": {
+      "passed": 22,
+      "log": "/tmp/scwiki170-token-frontend-final.log"
+    },
+    "form_contract": {
+      "passed": 225,
+      "hosts": [
+        "upload",
+        "revision",
+        "admin",
+        "superadmin"
+      ],
+      "log": "/tmp/scwiki170-token-form.log"
+    },
+    "form_mutation": {
+      "caught": 12,
+      "log": "/tmp/scwiki170-token-mutation.log"
+    },
+    "field_contract": {
+      "passed": true,
+      "paper_fields": 21,
+      "material_fields": 11,
+      "software_groups": 3
+    },
+    "build": {
+      "passed": true,
+      "warning": "既有大分包与依赖弃用提示"
+    },
+    "browser": {
+      "passed": 3,
+      "result": "browser-result.json"
+    },
+    "live_model": {
+      "passed": true,
+      "model": "deepseek-v4-pro",
+      "input_tokens": 39,
+      "output_tokens": 5,
+      "total_tokens": 44,
+      "result": "live-usage.json"
+    }
+  },
+  "limits": [
+    "真实模型为一次合成请求，未重跑整篇PDF科学提取",
+    "Redis传输隔离，受保护快照用SQLite真实保存与恢复",
+    "页面使用生产构建且业务API隔离",
+    "未部署、未推送、未历史回填；Issue远程Spec链接未核验，保持开放"
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "cleanup_at": null,
+  "stage_total": 5,
+  "state_schema_version": 1,
+  "created_at": 1794213623,
+  "revision": 3,
+  "stage": "saving_file",
+  "stage_index": 1,
+  "extraction_token_usage": {
+    "run_id": "91033ffab64c4a53bda31d74f275968a",
+    "input_tokens": 39,
+    "output_tokens": 5,
+    "total_tokens": 44,
+    "request_count": 1,
+    "recorded_requests": 1
+  },
+  "extraction_timing": {
+    "elapsed_seconds": 1,
+    "started_at": 1794213623,
+    "running_since": null,
+    "finished_at": 1794213624
+  },
+  "updated_at": 1794213624,
+  "workflow_policy": "typed-parsing-v1",
+  "task_id": "56e519467dd146898b1700036ce124d1",
+  "files": [],
+  "parser_profile": "complementary",
+  "processing_error": null,
+  "file_kind": "pdf",
+  "filename": "token用量隔离验证.pdf",
+  "reading_state": null,
+  "processing_status": "processing",
+  "total_chunks": 0,
+  "completed_chunks": 0,
+  "parser_runs": [],
+  "status": "ready"
+}

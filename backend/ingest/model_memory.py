@@ -316,13 +316,16 @@ def compact_history(history, path, *, model=None, budget=16000):
                 def request(_system, _user, **_options):
                     request_model = get_langchain_llm(read_timeout=90, max_retries=0)
                     runtime.register_client(request_model.root_client)
-                    message = request_model.bind(max_tokens=1200).invoke(prompt)
-                    text = message.content if isinstance(message.content, str) else ''.join(
-                        part.get('text', '') for part in message.content if isinstance(part, dict))
-                    if not text.strip():
-                        from backend.rag.llm import ModelNoOutputError
-                        raise ModelNoOutputError('摘要请求结束，但模型未返回摘要内容')
-                    return {'text': text, 'usage': message.usage_metadata}
+                    from backend.rag.token_usage import token_request
+                    with token_request() as receive_usage:
+                        message = request_model.bind(max_tokens=1200).invoke(prompt)
+                        receive_usage(message.usage_metadata)
+                        text = message.content if isinstance(message.content, str) else ''.join(
+                            part.get('text', '') for part in message.content if isinstance(part, dict))
+                        if not text.strip():
+                            from backend.rag.llm import ModelNoOutputError
+                            raise ModelNoOutputError('摘要请求结束，但模型未返回摘要内容')
+                        return {'text': text, 'usage': message.usage_metadata}
                 with call_phase('context_summary'):
                     saved = runtime.call(request, '仅压缩旧操作过程，不替代科学依据',
                                          json.dumps(original, ensure_ascii=False))

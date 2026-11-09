@@ -251,7 +251,17 @@ export interface UploadExtractionTiming {
   finished_at: number | null
 }
 
+export interface UploadTokenUsage {
+  run_id: string
+  input_tokens: number
+  output_tokens: number
+  total_tokens: number
+  request_count: number
+  recorded_requests: number
+}
+
 export interface UploadTaskState {
+  extraction_token_usage?: UploadTokenUsage | null
   model_activity?: ModelActivity | null
   execution_resumable?: boolean
   _parsing_workflow?: ParsingWorkflowBinding

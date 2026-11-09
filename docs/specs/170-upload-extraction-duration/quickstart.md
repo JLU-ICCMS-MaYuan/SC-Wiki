@@ -12,3 +12,11 @@
 
 项目运行时：Python `/Users/mayuan/software/miniconda3/envs/sc-wiki/bin/python`、Node `/Users/mayuan/software/miniconda3/envs/sc-wiki/bin/node`。测试需要隔离的 `JWT_SECRET_KEY`；仅作为命令的进程环境传入。系统Node 26不适用于现有Vitest环境。
 浏览器脚本通过 `PLAYWRIGHT_MODULE`、`TIMING_TEST_PYTHON` 指定已安装模块和Python路径，默认Chrome为本机Applications目录。
+
+## token补充验收
+
+1. 创建隔离任务，沿生产SDK边界返回两次实际用量：输入1000/输出200与输入500/输出100；确认公开读取总量1800、输入1500、输出300，并在原用时旁展示。
+2. 验证一次有效回执加一次缺失/中断时明确不完整；全未知、历史缺失和真实0各自展示正确。严格JSON失败但已返回用量仍计入，重复请求回执不重复计入。
+3. 验证同轮停止/继续与检查点读取保留累计，显式失败重试新轮次隔离旧回执；通过实际存取和SQLite快照重读验证恢复。
+4. 保留一次隔离真实模型请求的返回usage、源码与持久汇总对照，在真实生产页面显示该汇总；浏览器仍隔离业务API。该调用不代表整篇科学字段解析重跑或生产部署验收。
+5. 执行原计时、相关LLM/运行器/摘要、前端组件与构建；若涉及表单共享依赖，按AGENTS执行字段/表单/变异契约。结果写入validation.md，不把未完成项标记通过。

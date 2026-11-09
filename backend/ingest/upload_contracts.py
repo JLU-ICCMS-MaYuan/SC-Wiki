@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Any, Iterable, Literal
 from uuid import uuid4
 
+from .upload_usage import new_extraction_token_usage, apply_token_usage_event
+
 from pydantic import BaseModel, Field
 
 from backend.ingest.material_state_contract import MaterialStateContractError, state_metadata, validate_single_geometries
@@ -24,7 +26,7 @@ FINAL_STATUSES = FIXED_TERMINAL_STATUSES | {"submitted"}
 FILE_ROLES = {"main", "supplementary", "attachment"}
 USER_FILE_ROLE_POLICY = "user-specified-v1"
 FILE_SUFFIXES = {".pdf", ".txt", ".md", ".cif", ".poscar", ".vasp"}
-PUBLIC_TASK_FIELDS = {"task_id", "status", "stage", "progress", "processing_status", "processing_error", "error_code", "created_at", "updated_at", "cleanup_at", "filename", "file_kind", "files", "revision", "state_schema_version", "duplicate", "existing_paper_id", "existing_paper_status", "allowed_actions", "duplicate_reason", "paper_id", "llm_provider", "consistency", "completed_chunks", "total_chunks", "stage_index", "stage_total", "parser_profile", "parser_runs", "reading_state", "role_assessment", "extraction_timing"}
+PUBLIC_TASK_FIELDS = {"task_id", "status", "stage", "progress", "processing_status", "processing_error", "error_code", "created_at", "updated_at", "cleanup_at", "filename", "file_kind", "files", "revision", "state_schema_version", "duplicate", "existing_paper_id", "existing_paper_status", "allowed_actions", "duplicate_reason", "paper_id", "llm_provider", "consistency", "completed_chunks", "total_chunks", "stage_index", "stage_total", "parser_profile", "parser_runs", "reading_state", "role_assessment", "extraction_timing", "extraction_token_usage"}
 PUBLIC_TASK_FIELDS |= {"workflow_policy", "workflow_assessment", "_parsing_workflow"}
 PUBLIC_TASK_FIELDS |= {"model_activity", "execution_heartbeat", "execution_resumable"}
 PUBLIC_FILE_FIELDS = {"file_id", "role", "declared_role", "original_filename", "media_type", "kind", "size", "sha256", "sort_order", "upload_status", "extraction_status", "error"}
@@ -78,6 +80,7 @@ class CleanupContext:
         return cls(task_id, int(state["user_id"]) if state.get("user_id") is not None else None, str(state.get("job_id") or "") or None, int(state["existing_paper_id"]) if state.get("existing_paper_id") is not None else None, int(state.get("updated_at") or 0), int(state.get("state_schema_version") or 0))
 
 def apply_state_changes(state: dict[str, Any], *, now: int, **changes: Any) -> dict[str, Any]:
+    usage_event = changes.pop("_token_usage_event", None)
     current = str(state.get("status") or "uploading")
     target = str(changes.get("status") or current)
     resuming = bool(changes.pop("resume", False))
@@ -93,8 +96,12 @@ def apply_state_changes(state: dict[str, Any], *, now: int, **changes: Any) -> d
     result = {**state, **changes, "updated_at": now}
     if retrying_failed:
         result["extraction_timing"] = new_extraction_timing()
+        result["extraction_token_usage"] = new_extraction_token_usage()
+        result["_extraction_token_requests"] = {}
     else:
         _advance_extraction_timing(result, target, now)
+    if not retrying_failed:
+        apply_token_usage_event(result, usage_event)
     if target != current:
         result["revision"] = int(state.get("revision") or 0) + 1
         if target in {"ready", "needs_role_review", "needs_workflow"}:
