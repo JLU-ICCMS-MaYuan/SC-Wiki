@@ -30,6 +30,7 @@ export const readTcPairs = (record: PropertyRecordDraft): [TcPair, TcPair] => {
 export function setTcParameter(record: PropertyRecordDraft, key: Parameter, value: ParameterValue): PropertyRecordDraft['payload'] {
   const parameters = { ...tcParameters(record) }
   const previous = parameters[key] ?? (key === 'omega_log' ? parameters.omega_log_k : undefined)
+  if (object(previous) && typeof value === 'number' && Object.is(previous.value_number, value)) return { ...record.payload, parameters }
   parameters[key] = object(previous) ? { ...previous, value_number: value, value_raw: value == null ? '' : String(value) } : value
   if (key === 'omega_log') delete parameters.omega_log_k
   return { ...record.payload, parameters }

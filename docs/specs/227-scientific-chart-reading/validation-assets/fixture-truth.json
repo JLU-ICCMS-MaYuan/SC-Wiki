@@ -1,0 +1,218 @@
+[
+  {
+    "page": 1,
+    "identity": [
+      "H3S",
+      100,
+      0.1
+    ],
+    "expected": 60,
+    "actual": 60.0,
+    "precision": 0.7,
+    "pass": true
+  },
+  {
+    "page": 1,
+    "identity": [
+      "H3S",
+      150,
+      0.1
+    ],
+    "expected": 110,
+    "actual": 110.0,
+    "precision": 0.7,
+    "pass": true
+  },
+  {
+    "page": 1,
+    "identity": [
+      "H3S",
+      200,
+      0.1
+    ],
+    "expected": 160,
+    "actual": 160.0,
+    "precision": 0.7,
+    "pass": true
+  },
+  {
+    "page": 1,
+    "identity": [
+      "H3S",
+      100,
+      0.13
+    ],
+    "expected": 50,
+    "actual": 50.0,
+    "precision": 0.7,
+    "pass": true
+  },
+  {
+    "page": 1,
+    "identity": [
+      "H3S",
+      150,
+      0.13
+    ],
+    "expected": 100,
+    "actual": 100.0,
+    "precision": 0.7,
+    "pass": true
+  },
+  {
+    "page": 1,
+    "identity": [
+      "H3S",
+      200,
+      0.13
+    ],
+    "expected": 150,
+    "actual": 150.0,
+    "precision": 0.7,
+    "pass": true
+  },
+  {
+    "page": 2,
+    "identity": [
+      "CaH6",
+      150,
+      0.1
+    ],
+    "expected": 100,
+    "actual": 100.0,
+    "precision": 3.0,
+    "pass": true
+  },
+  {
+    "page": 2,
+    "identity": [
+      "CaH6",
+      150,
+      0.13
+    ],
+    "expected": 90,
+    "actual": 90.0,
+    "precision": 2.0,
+    "pass": true
+  },
+  {
+    "page": 2,
+    "identity": [
+      "YH6",
+      120,
+      0.1
+    ],
+    "expected": 200,
+    "actual": 200.0,
+    "precision": 3.0,
+    "pass": true
+  },
+  {
+    "page": 2,
+    "identity": [
+      "YH6",
+      120,
+      0.13
+    ],
+    "expected": 180,
+    "actual": 180.0,
+    "precision": 3.0,
+    "pass": true
+  },
+  {
+    "page": 2,
+    "identity": [
+      "YH10",
+      400,
+      0.1
+    ],
+    "expected": 300,
+    "actual": 300.0,
+    "precision": 3.0,
+    "pass": true
+  },
+  {
+    "page": 2,
+    "identity": [
+      "YH10",
+      400,
+      0.13
+    ],
+    "expected": 270,
+    "actual": 270.0,
+    "precision": 2.0,
+    "pass": true
+  },
+  {
+    "page": 3,
+    "identity": [
+      "ScH6",
+      300,
+      0.1
+    ],
+    "expected": 100,
+    "actual": 102.0,
+    "precision": 4.0,
+    "pass": true
+  },
+  {
+    "page": 3,
+    "identity": [
+      "ScH6",
+      300,
+      0.13
+    ],
+    "expected": 90,
+    "actual": 90.0,
+    "precision": 3.0,
+    "pass": true
+  },
+  {
+    "page": 3,
+    "identity": [
+      "ScH9",
+      400,
+      0.1
+    ],
+    "expected": 180,
+    "actual": 179.0,
+    "precision": 5.0,
+    "pass": true
+  },
+  {
+    "page": 3,
+    "identity": [
+      "ScH9",
+      400,
+      0.13
+    ],
+    "expected": 160,
+    "actual": 161.0,
+    "precision": 5.0,
+    "pass": true
+  },
+  {
+    "page": 3,
+    "identity": [
+      "YH10",
+      400,
+      0.1
+    ],
+    "expected": 300,
+    "actual": 302.0,
+    "precision": 3.0,
+    "pass": true
+  },
+  {
+    "page": 3,
+    "identity": [
+      "YH10",
+      400,
+      0.13
+    ],
+    "expected": 280,
+    "actual": 280.0,
+    "precision": 2.0,
+    "pass": true
+  }
+]

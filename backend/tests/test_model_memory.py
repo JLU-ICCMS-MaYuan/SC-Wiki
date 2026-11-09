@@ -3,6 +3,23 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables import RunnableLambda
 
 
+def test_repeated_long_source_identifiers_fit_without_losing_identity(tmp_path):
+    import hashlib,json
+    from backend.ingest.model_memory import prepare_request, expand_source_texts, _fixed_token_estimate
+    file_id = hashlib.sha256(b'file').hexdigest()[:32]
+    sha = hashlib.sha256(b'original PDF').hexdigest()
+    rows = [{'file_id': file_id, 'sha256': sha, 'source_sha256': sha,
+             'block_id': hashlib.sha256(f'block-{i % 6}'.encode()).hexdigest(),
+             'quote': f'Original coordinate row {i}', 'pressure': i} for i in range(70)]
+    payload = {'candidates': rows}
+    request = {'system_prompt': 'Read exact original identifiers.', 'user_prompt': json.dumps(payload)}
+    budget = _fixed_token_estimate(request) // 2
+    prepared = prepare_request(request, tmp_path, budget=budget)
+    assert _fixed_token_estimate(prepared) < budget
+    assert expand_source_texts(json.loads(prepared['user_prompt'])) == payload
+    assert request['user_prompt'] == json.dumps(payload)
+
+
 def test_langmem_summary_is_reused_and_recent_tool_pair_stays(tmp_path):
     from backend.ingest.model_memory import compact_history
     calls=[]

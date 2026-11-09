@@ -41,6 +41,11 @@ def record_inputs(record, path):
     parameters = payload.get("parameters") or {}
     dependencies = []
     is_value = path.startswith("value_")
+    if path == 'value_number' and record.get('record_type') in {'predicted_tc', 'measured_tc'}:
+        from .scientific_values import approximate_number_matches
+        if (str(record.get('unit_raw') or 'K').casefold() in {'k', 'kelvin'}
+                and approximate_number_matches(record.get('value_number'), record.get('value_raw'), 'K')):
+            dependencies.append('value_raw')
     is_mu = path.startswith("payload.parameters.mu_star") or (
         path.startswith("payload.parameters.extensions.")
         and any(

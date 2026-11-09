@@ -10,7 +10,10 @@ several materials with a common Tc bound/range, create one audit entry for EACH 
 For each material
 give its chemical formula (or exact reported name), has_specific_tc, has_range_tc, source_ids and reason.
 A specific Tc includes a reported approximate numeric value and explicitly paired Tc/mu_star points.
-A range, upper/lower bound, curve alone or its inferred endpoints is not a specific Tc.
+A calibrated original-figure reading with its own material/series/conditions and declared reading
+precision is a specific approximate Tc; include it BEFORE range-only exclusion. A shared textual
+maximum is not each material's detailed point. A range, upper/lower bound, an UNREAD curve alone
+or guessed endpoints without calibrated figure evidence is not a specific Tc.
 has_range_tc is true ONLY for an explicitly reported NUMERICAL Tc interval or inequality in the
 current-paper text. A Tc figure/caption WITHOUT readable reported numbers is NOT a numerical range:
 set BOTH flags false and retain the material. Do not infer a Tc range from a plot, a pressure/stability

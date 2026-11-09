@@ -1,0 +1,28 @@
+{
+  "environment": "本机原生实时开发",
+  "models": "server:LLM2 / gpt-6.1-sol",
+  "backend": {
+    "passed": 202,
+    "skipped": 1,
+    "skip_reason": "旧tc-record-roundtrip需要先运行tc-record-browser.mjs提供TC_BROWSER_PAYLOADS；本轮后续改为真实业务网页验收，未把该项计作通过"
+  },
+  "form_hosts": 225,
+  "mutation_detected": 12,
+  "field_contract": "passed; unchanged digest",
+  "typescript": "passed",
+  "vite": "passed",
+  "source_rerun": {
+    "original_text": "复用未改且哈希已核验的原PDF文字IR",
+    "charts": "实际原PDF/内嵌原图新读取",
+    "structure": "原SI坐标重新AI提取与正式归属",
+    "scope": "有效结果复用",
+    "affected_extraction_filling": "约数后处理修复后新模型调用"
+  },
+  "known_baselines": [
+    "Node26 localStorage 12项，独立HEAD复现",
+    "public detail raw pressure旧回退1项，独立HEAD复现",
+    "Tc temporary exponent旧断言1项，独立HEAD复现",
+    "paused original download绝对路径夹具1项，独立HEAD复现"
+  ],
+  "business_acceptance": "五阶段尚未完成，未送审或批准"
+}

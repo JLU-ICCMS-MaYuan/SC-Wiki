@@ -13,6 +13,76 @@ def candidate():
     return value
 
 
+def test_runtime_request_failure_is_not_swallowed_as_scientific_uncertainty():
+    from backend.ingest.canonical_structure import assign_structures
+    from backend.ingest.model_runtime import ModelRequestError
+    value = draft()
+    def unavailable(*args):
+        raise ModelRequestError('必要原文超过预算')
+    with pytest.raises(ModelRequestError, match='必要原文超过预算'):
+        assign_structures(value, [candidate()], [], unavailable)
+    assert not any(state.get('structure') for state in value['material_states'])
+
+
+def test_upload_assignment_declares_source_contract_and_keeps_geometry(monkeypatch):
+    import json
+    from backend.ingest import upload_jobs
+    from backend.ingest.model_memory import _cites_source_ids
+    value, item = draft(), candidate()
+    def complete(system, prompt, **options):
+        assert _cites_source_ids(options.get('response_schema'))
+        assert json.loads(prompt)['candidates'][0]['candidate_id'] == item['candidate_id']
+        return {'assignments': [{'candidate_id': item['candidate_id'], 'state_key': 'quantum',
+            'structure_optimization': 'sscha', 'geometry_evidence': None, 'new_state': None,
+            'source_ids': ['structure-source-0'], 'reason': '原文明确SSCHA结构'}]}
+    monkeypatch.setattr(upload_jobs, 'complete_json', complete)
+    upload_jobs._bind_structure_candidates(value, [item])
+    assert value['material_states'][1]['structure']['structure_text']
+    assert not value['material_states'][0].get('structure')
+
+
+def test_assignment_reads_methods_page_without_dropping_other_original_sources():
+    import json
+    from backend.ingest.canonical_structure import assign_structures
+    item, value, calls = candidate(), draft(), []
+    sources = [{'file_id': 'main', 'pdf_page': 1, 'content': 'H coordinate table at 100 GPa.'},
+               {'file_id': 'main', 'pdf_page': 2, 'content': 'The tabulated geometry was SSCHA relaxed.'},
+               {'file_id': 'main', 'pdf_page': 3, 'content': 'Other actual original context remains available.'}]
+    def model(system, content):
+        payload = json.loads(content); calls.append(payload)
+        if len(calls) == 1:
+            assert len(payload['sources']) == 1
+            assert {p['page'] for p in payload['unread_pages']} == {2, 3}
+            return {'done': False, 'read_pages': [{'file_id': 'main', 'page': 2}], 'read_source_ids': [], 'search': [], 'assignments': []}
+        assert [s['source_id'] for s in payload['sources']] == ['structure-source-0', 'structure-source-1']
+        assert payload['unread_pages'][0]['page'] == 3
+        return {'done': True, 'assignments': [{'candidate_id': item['candidate_id'], 'state_key': 'quantum',
+            'structure_optimization': 'sscha', 'source_ids': ['structure-source-0', 'structure-source-1'],
+            'reason': '实际方法页明确该几何为SSCHA优化'}]}
+    assign_structures(value, [item], sources, model)
+    assert len(calls) == 2 and value['material_states'][1]['structure']['sources']
+
+
+def test_unread_source_cannot_justify_structure_assignment():
+    from backend.ingest.canonical_structure import assign_structures
+    item, value = candidate(), draft()
+    sources = [{'file_id': 'main', 'pdf_page': 1, 'content': 'H coordinates.'},
+               {'file_id': 'main', 'pdf_page': 2, 'content': 'Unread optimization statement.'}]
+    assign_structures(value, [item], sources, lambda *_: {'assignments': [{
+        'candidate_id': item['candidate_id'], 'state_key': 'quantum', 'structure_optimization': 'sscha',
+        'source_ids': ['structure-source-1'], 'reason': '只在未读目录看见的内容不能作依据'}]})
+    assert not any(state.get('structure') for state in value['material_states'])
+    assert value['structural_extraction_issues']
+
+
+def test_assignment_read_tools_reject_foreign_file():
+    from backend.ingest.canonical_structure import assign_structures
+    from backend.ingest.model_runtime import ModelRequestError
+    with pytest.raises(ModelRequestError, match='未上传'):
+        assign_structures(draft(), [candidate()], [], lambda *_: {'done': False,
+            'read_pages': [{'file_id': 'another-upload', 'page': 1}], 'search': [], 'read_source_ids': []})
+
+
 def draft():
     return {"paper": {}, "material_states": [
         {"state_key": "static", "material": "H", "pressure_value_gpa": 100, "reported_space_group_symbol": "Pm-3m",

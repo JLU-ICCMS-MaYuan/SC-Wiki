@@ -103,3 +103,8 @@ Issue：[#203](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/203)
 以下为用户以“PLEASE IMPLEMENT THIS PLAN:”发出的原文。文中“当前仍处于规划模式”为方案原文；本次明确执行请求已经授权实施。
 
 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
+
+
+## 2026-11-09 已登记数量对象的提取后处理
+
+#227实际链使用既有ScientificQuantity，旧规范化把有效数值对象降为裸数并生成旧式同义扩展的问题已修复。当前数量对象、value_raw与evidences按已登记键保留；单位未知的ωlog不默认变成K。没有变更本权威JSON或lock摘要；旧无value_kind输入的有界兼容继续按原规则处理。当前值约数与图中精度的实施/验证见[#227](../227-scientific-chart-reading/validation.md)。

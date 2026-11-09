@@ -4,7 +4,7 @@ Issue：[#227](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/227)。依据�
 
 ## 实施边界
 
-本计划尚未实施。先审查读图事实的承载契约、标定方案及连续曲线取样策略，再写代码；不以新Spec替代用户审查。Python解析、React四宿主表单、MySQL科学图及对象存储沿现有架构；本机原生测试，10个上传Worker上限不变。
+用户已要求完成本Feature。Python解析、React四宿主表单、MySQL科学图及对象存储沿现有架构；本机原生测试，10个上传Worker上限不变。标定使用既有PyMuPDF/Pillow/NumPy；读图精度保存在现有DocumentIR来源metadata及来源文字中，不新增科学字段。连续线仅在图中标记、原文明确条件或既有字段需要的明确横坐标处取数，不创建任意采样状态。
 
 ## 模块与数据职责
 

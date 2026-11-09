@@ -75,3 +75,8 @@ paper_summary原始输入311439字符，候选与原文混合反复携带8段相
 ## 最新外部环境阻塞
 
 真实37状态、科学整理completed、42组后处理核对记录479 supported/14 uncertain；尚未科学批准。随后并行#225引用匹配报缺match_evidence列；三项schema缺口见citation-schema-block.json。task d2ca41e5f16b4d65bf744f5d5325e855当前failed/summarizing，无正式论文。用户待确认并行迁移责任，本轮不代为执行其他Feature结构变更。SC-005仍未完成，Issue保持OPEN。
+
+
+## 2026-11-09 结构归属预算恢复
+
+原失败估算250202 token的输入及零结构ready现场已保留。3项新回归在独立HEAD真实失败；修复按来源身份无损传输、结构归属显式响应契约和ModelRequestError传播。结构归属先读取几何所需原页，其他原文保留可查目录并按需读取，未读不能引用，不提高96000预算。原SI重新提取37候选、32状态绑定结构，YH10的44原子及4.4788 Å核验通过；模型实际另读SI方法第3页。完整五阶段验收仍未完成，结果及未覆盖范围见[#227验证](../227-scientific-chart-reading/validation.md)及Peng2017测试报告。

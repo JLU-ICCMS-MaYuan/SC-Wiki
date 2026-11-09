@@ -47,7 +47,9 @@ For each result, match the physical quantity, material, phase, calculation and u
 a figure's conditions. An electronic band structure, phonon dispersion, phonon DOS, electronic DOS,
 and alpha2F are different quantities. A nearby figure reference or the word DOS alone is insufficient.
 Read the supplied original referenced figure pages, legends, panel labels and captions, including SI.
-If a page shows a different quantity, do not use its pressure for this result. Do not digitize Tc.
+If a page shows a different quantity, do not use its pressure for this result. Calibrated original-figure
+reading blocks can supply approximate Tc and actual series/conditions. Preserve their source and
+precision; do not guess additional curve values or broadcast a shared textual maximum.
 Keep assignments as the candidate state's overall destination. If an individual record needs another
 existing state's conditions, use record_assignments:[{candidate_state_key,module_key,record_key,
 target_index,status,source_ids,reason}]. Account for the conflicting original interpretation and

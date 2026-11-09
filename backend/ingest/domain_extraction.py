@@ -174,9 +174,18 @@ Measured Tc uses record_type=measured_tc and payload.experimental_conditions; pr
 record_type=predicted_tc and payload.calculation_conditions. Never copy one record's conditions to another.
 Tc belongs to module_code=superconductive_properties, property_code=tc, canonical_unit=K.
 Tc results must describe numeric temperatures/ranges, never a sentence naming calculation methods.
-Do not digitize Tc from curves. A curve-only caption is retained as an out_of_model_scope exclusion
-with its locator, not a text-valued Tc or a representative result. Search supplied body/table/notes
-for reported numbers before deciding information is missing. Keep other methods under other and
+Calibrated original-figure reading blocks are valid numeric sources: preserve their approximate
+value_raw and graph-reading precision in the cited source, never as physical measurement uncertainty.
+For approximate lambda_ep/omega_log parameters, use the already declared ScientificQuantity with
+its approximate value_raw and source evidences; do not add new precision fields to the scientific form.
+Use each detailed material/series/condition point, not a shared textual maximum.
+Missing plot conditions are NOT the host state's established conditions. Read the original context;
+when a graph fact cannot be uniquely assigned under the existing state rules, retain its source and
+an out_of_model_scope/unresolved coverage reason rather than inventing pressure or a form result.
+Do not create an empty-pressure state merely to host an unassigned plot fact. Do not estimate
+additional curve values without an actual calibrated figure-reading source. A curve-only caption
+without a reading remains unresolved/excluded with its locator, not a text-valued Tc. Search body,
+tables, figure-reading blocks and notes before deciding information is missing. Keep other methods under other and
 preserve their actual names in method_raw. Fixed UI labels are not scientific data to generate.
 Keep value_raw/unit_raw as reported, including ranges and uncertainty. Fill ONLY the declared fields.
 Never add payload.description, pressure_ambiguity, manual extensions, or other unregistered keys.

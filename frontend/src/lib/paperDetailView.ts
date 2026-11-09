@@ -11,6 +11,7 @@
  */
 import { dictionaries } from '../i18n'
 import { materialLabel } from './materialIdentity'
+import { scientificNumberText } from './scientificNumberText'
 
 /** 文案解析函数，与 useLanguage 返回的 t 签名对齐。 */
 export type TranslateFn = (key: string) => string
@@ -63,7 +64,7 @@ const valueWithUnit = (value: unknown, unit?: unknown): string => {
  * 单臂区间保持单侧，不补造缺失的一端（Issue #54 的入库语义）。
  */
 const tcValueText = (result: any): string => {
-  if (result?.tc_value_k != null) return `${result.tc_value_k} K`
+  if (result?.tc_value_k != null) return `${scientificNumberText(result.tc_value_k, result.value_raw, 'K')} K`
   const { tc_min_k: min, tc_max_k: max } = result || {}
   if (min != null && max != null) return min === max ? `${max} K` : `${min}–${max} K`
   if (min != null) return `≥ ${min} K`
@@ -102,7 +103,8 @@ const propertyValueText = (property: any): string => {
       ? `${property.value_min}–${property.value_max}${property.unit ? ` ${property.unit}` : ''}`
       : valueWithUnit(property.value_max, property.unit)
   }
-  return valueWithUnit(property?.value_number ?? property?.value_raw, property?.unit)
+  return valueWithUnit(property?.value_number != null
+    ? scientificNumberText(property.value_number, property.value_raw, property.unit) : property?.value_raw, property?.unit)
 }
 
 /**
@@ -151,7 +153,8 @@ export function collectPropertyRows(paper: any, t?: TranslateFn): PaperPropertyR
             const wrapped = rawValue && typeof rawValue === 'object' ? rawValue as Record<string, unknown> : null
             const value = wrapped?.value_kind === 'range'
               ? `${wrapped.value_min ?? '待填写'}–${wrapped.value_max ?? '待填写'}`
-              : wrapped ? wrapped.value_number ?? wrapped.value_raw : rawValue
+              : wrapped ? typeof wrapped.value_number === 'number'
+                ? scientificNumberText(wrapped.value_number, wrapped.value_raw, wrapped.unit_raw) : wrapped.value_raw : rawValue
             if (value == null || value === '') continue
             parameterRows.push({
               key: `parameter-${record?.record_key ?? parameterRows.length}-${label}`,

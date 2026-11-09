@@ -1,0 +1,17 @@
+{
+  "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+  "provider": "server:LLM2",
+  "model": "gpt-6.1-sol",
+  "candidates": 37,
+  "assigned_states": 32,
+  "YH10_atoms": 44,
+  "YH10_cell": [
+    4.4788,
+    4.4788,
+    4.4788,
+    90.0,
+    90.0,
+    90.0
+  ],
+  "issues": 39
+}

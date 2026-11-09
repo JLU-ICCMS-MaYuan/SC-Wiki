@@ -34,9 +34,16 @@ IMPORTANT FORM MEANING: group is a COMMON-PARAMETER GROUP, NOT a result point. T
 MUST NOT be part of the group identity. If ONLY Tc/mu_star differs, reuse the EXACT SAME group string
 and the EXACT SAME method string. Different methods can occupy separate rows in that SAME common
 group when their shared calculation conditions agree. Do not create one group per mu_star.
-Tc is a temperature, not a sentence about how it was computed. No Tc digitization from curves.
-A caption describing an unquantified Tc curve is excluded as curve_only; keep its source and reason.
+Tc is a temperature, not a sentence about how it was computed. Calibrated original-figure readings
+are valid numeric candidates; preserve their approximate qualifiers and source precision, and keep
+each material/series/condition separate. Do not use a shared body maximum for every plotted material.
+Do not estimate new curve values without a calibrated original-figure reading. A caption describing
+an unquantified curve without such a reading is excluded as curve_only; keep its source and reason.
 Only numeric/range Tc records may be emitted. Preserve reported qualifiers in value_raw.
+For graph-estimated lambda_ep/omega_log, keep the existing ScientificQuantity's approximate value_raw
+and evidence instead of flattening it into a falsely exact bare number. Reading precision stays in
+the source facts and is not a physical uncertainty field. Prefer an explicitly reported exact value
+for the same underlying result when the read original context establishes that relationship.
 Only dos_fermi is a standard electronic property in this profile; do not generate band_gap. DOS uses its own units/definitions.
 Reuse parameters.lambda_ep, omega_log, mu_star; do not create synonymous extension fields.
 Unreported omega_log, smearing or QE functional stays empty. Never transfer VASP PBE to QE.

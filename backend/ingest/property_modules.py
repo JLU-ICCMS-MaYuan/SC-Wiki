@@ -214,6 +214,9 @@ def normalize_current_tc_value(record: dict[str, Any], path: str = "record") -> 
     if record.get("record_type") not in {"predicted_tc", "measured_tc"}:
         return record
     item = dict(record)
+    from .scientific_values import approximate_number_matches
+    approximate = (str(item.get('unit_raw') or 'K').casefold() in {'k', 'kelvin'}
+        and approximate_number_matches(item.get('value_number'), item.get('value_raw'), 'K'))
     issues: list[PropertyIssue] = []
     kind = item.get("value_kind")
     for field in ("value_number", "value_min", "value_max", "uncertainty"):
@@ -229,7 +232,7 @@ def normalize_current_tc_value(record: dict[str, Any], path: str = "record") -> 
     item["value_raw"] = ""
     item["unit_raw"] = "K" if kind in {"number", "range"} else None
     if kind == "number" and item.get("value_number") is not None:
-        item["value_raw"] = _tc_number_text(item["value_number"])
+        item["value_raw"] = ('~' if approximate else '') + _tc_number_text(item["value_number"])
     elif kind == "range" and item.get("value_min") is not None and item.get("value_max") is not None:
         item["value_raw"] = f'{_tc_number_text(item["value_min"])}–{_tc_number_text(item["value_max"])}'
     elif kind == "text":

@@ -9,7 +9,6 @@ from typing import Any
 from .property_evidence import source_chunks
 
 
-_REFERENCES = re.compile(r"(?im)^\s*(?:#{1,6}\s*)?(?:references|bibliography|参考文献)\s*$")
 _VALID_ID = re.compile(r"[\w-]+")
 
 
@@ -34,8 +33,8 @@ def text_sources(task_id: str, state: dict[str, Any], root: Path, *,
         if not path.is_file():
             continue
         content = path.read_text(encoding="utf-8")
-        if trim_references and (match := _REFERENCES.search(content)):
-            content = content[:match.start()]
+        # 保留兼容参数，但不能凭References标题切掉后续SI图、表或附录。
+        # 本文/引用工作的科学范围由既有模型判断，程序不把未读内容当作不存在。
         if content.strip():
             result.append({"file_id": file_id, "role": str(item["role"]),
                            "source_name": str(item.get("original_filename") or file_id), "content": content})

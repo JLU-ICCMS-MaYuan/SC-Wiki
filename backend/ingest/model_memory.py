@@ -35,8 +35,17 @@ def _fixed_token_estimate(request):
 def expand_source_texts(payload):
     """仅解开传输字典；原文件、页、块及科学值从不合并。"""
     texts = payload.get('_context_texts') or {}
+    identifiers = payload.get('_context_identifiers') or []
     def expand(value):
         if isinstance(value, dict):
+            if set(value) == {'_context_identifier_ref'}:
+                index = value['_context_identifier_ref']
+                if type(index) is not int or not 0 <= index < len(identifiers):
+                    raise ContextBudgetError('原文身份传输引用无效')
+                item = identifiers[index]
+                if hashlib.sha256(item['value'].encode()).hexdigest() != item['sha256']:
+                    raise ContextBudgetError('原文身份传输摘要不匹配')
+                return item['value']
             if set(value) == {'_context_text_ref'}:
                 key = value['_context_text_ref']
                 text = texts[key]
@@ -47,7 +56,46 @@ def expand_source_texts(payload):
         if isinstance(value, list):
             return [expand(item) for item in value]
         return value
-    return expand({key:value for key,value in payload.items() if key != '_context_texts'})
+    return expand({key:value for key,value in payload.items() if key not in {'_context_texts', '_context_identifiers'}})
+
+
+def _compact_source_identifiers(request):
+    """重复来源身份只传短引用，完整字节留在校验字典，不改变科学来源。"""
+    try:
+        payload = json.loads(request['user_prompt'])
+    except (KeyError, TypeError, ValueError):
+        return request
+    if not isinstance(payload, dict) or '_context_identifiers' in payload:
+        return request
+    keys = {'file_id', 'block_id', 'quote_id', 'sha256', 'source_sha256'}
+    counts = Counter()
+    def visit(value):
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if key in keys and isinstance(item, str) and len(item) >= 32:
+                    counts[item] += 1
+                else:
+                    visit(item)
+        elif isinstance(value, list):
+            for item in value: visit(item)
+    visit(payload)
+    values = [value for value, count in counts.items() if count > 1]
+    if not values: return request
+    index = {value: i for i, value in enumerate(values)}
+    def pack(value):
+        if isinstance(value, dict):
+            return {key: ({'_context_identifier_ref': index[item]}
+                if key in keys and isinstance(item, str) and item in index else pack(item))
+                for key, item in value.items()}
+        if isinstance(value, list): return [pack(item) for item in value]
+        return value
+    packed = pack(payload)
+    packed['_context_identifiers'] = [{'value': v, 'sha256': hashlib.sha256(v.encode()).hexdigest()} for v in values]
+    if expand_source_texts(packed) != expand_source_texts(payload):
+        raise ContextBudgetError('来源身份传输不能无损恢复')
+    result = {**request, 'user_prompt': json.dumps(packed, ensure_ascii=False, separators=(',', ':')),
+        'system_prompt': request.get('system_prompt', '') + '\n_context_identifier_ref是_context_identifiers数组中对应value的无损短引用。先还原文件/块身份再理解来源；输出引用必须使用实际身份或原source_id，不能输出内部短引用或下标。\n'}
+    return result if _fixed_token_estimate(result) < _fixed_token_estimate(request) else request
 
 
 def _compact_source_texts(request):
@@ -155,7 +203,7 @@ def _compact_source_catalog(request):
 
 
 def validate_context_output(response, request):
-    if not any(marker in request.get('user_prompt','') for marker in ('"_context_texts"','"_context_source_catalog"','"_context_unread_index"')):
+    if not any(marker in request.get('user_prompt','') for marker in ('"_context_texts"','"_context_source_catalog"','"_context_unread_index"','"_context_identifiers"')):
         return
     payload = json.loads(request['user_prompt'])
     texts = payload.get('_context_texts') if isinstance(payload, dict) else None
@@ -163,7 +211,7 @@ def validate_context_output(response, request):
     from backend.rag.structured_output import StructuredOutputError
     def visit(value):
         if isinstance(value, dict):
-            if set(value) & {'_context_text_ref', '_context_texts', '_context_source_catalog', '_context_unread_index'}:
+            if set(value) & {'_context_text_ref', '_context_texts', '_context_source_catalog', '_context_unread_index', '_context_identifier_ref', '_context_identifiers'}:
                 raise StructuredOutputError('模型返回内部传输引用，未提供实际字段内容')
             for item in value.values(): visit(item)
         elif isinstance(value, list):
@@ -202,7 +250,7 @@ def _compact_unread_index(request):
 def prepare_fixed_request(request, *, budget=96000):
     """纯传输准备；供旧字符预算门之前复用，不调用模型、不写当前科学数据。"""
     prepared = dict(request)
-    for compact in (_compact_source_texts, _compact_source_catalog, _compact_unread_index):
+    for compact in (_compact_source_texts, _compact_source_catalog, _compact_unread_index, _compact_source_identifiers):
         if _fixed_token_estimate(prepared) < budget:
             return prepared
         prepared = compact(prepared)

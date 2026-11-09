@@ -358,6 +358,19 @@ def _extract_markdown(state: dict[str, Any], source: Path) -> str:
                 cancelled=lambda: (get_state(str(state.get("task_id") or "")) or {}).get("status") in {"cancelling", "cancelled"}))
             task_id = str(state.get("task_id") or "")
             if task_id:
+                from .chart_reading import enrich_document
+                item = next((f for f in state.get('files', []) if f.get('file_id') == source_info.file_id), {})
+                chart_source = {'file_id': source_info.file_id, 'sha256': source_info.resolved_sha256(),
+                    'filename': item.get('original_filename') or source.name,
+                    'role': item.get('role') or 'main'}
+                def save_chart_event(event):
+                    directory = artifact_directory(task_id) / 'chart_reading' / source_info.file_id
+                    directory.mkdir(parents=True, exist_ok=True)
+                    token = hashlib.sha256(json.dumps(event, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:20]
+                    _atomic_write_json(directory / f'{event["stage"]}-{token}.json', event)
+                enrich_document(ir, source, chart_source, complete_json,
+                    cancelled=lambda: (get_state(task_id) or {}).get('status') in {'cancelling', 'cancelled', 'paused'},
+                    on_event=save_chart_event)
                 _save_document_ir(task_id, source_info.file_id, ir)
                 previous_runs = list((get_state(task_id) or {}).get("parser_runs") or [])
                 previous_runs = [item for item in previous_runs if item.get("file_id") != source_info.file_id]
@@ -1437,8 +1450,11 @@ def _legacy_state_superconductor_kind(material_states: list[dict[str, Any]]) -> 
 
 def _bind_structure_candidates(draft: dict[str, Any], candidates: list[dict[str, Any]], *, sources=(), model=None, on_response=None) -> None:
     """模型联合原文确定结构归属；正式草稿只写S.structure。"""
-    from .canonical_structure import assign_structures
-    assign_structures(draft, candidates, sources, model or complete_json, on_response=on_response)
+    from .canonical_structure import assign_structures, assignment_response_schema
+    def complete_assignment(prompt, content):
+        return complete_json(prompt, content, response_schema=assignment_response_schema())
+    with call_phase('structure_assignment'):
+        assign_structures(draft, candidates, sources, model or complete_assignment, on_response=on_response)
 
 
 def _prune_generated_properties(draft: dict[str, Any]) -> list[dict[str, Any]]:

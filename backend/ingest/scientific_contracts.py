@@ -46,6 +46,20 @@ def normalize_parameters(record):
         if value is None:
             parameters.pop(key, None)
             continue
+        if isinstance(value, dict) and value.get('value_kind') == 'number':
+            from .fixed_form_contract import validate_value
+            validate_value(value, 'parameters.' + key)
+            if value.get('value_number') is None:
+                raise ValueError('参数数量对象缺少当前数值')
+            quantity = deepcopy(value); quantity['value_number'] = parse_number(value['value_number'])
+            reported_unit = str(value.get('unit_raw') or ('unknown' if key == 'omega_log' else '1'))
+            allowed_units = {'K', 'kelvin'} if key == 'omega_log' else {'1', 'dimensionless'}
+            if reported_unit not in allowed_units:
+                parameters.pop(key, None)
+                append({**quantity, 'key': key + '_reported', 'unit_raw': reported_unit})
+            else:
+                parameters[key] = quantity
+            continue
         raw = deepcopy(value)
         metadata = {"reported":raw} if isinstance(raw, dict) else {}
         raw_text = str(raw.get("value_raw", raw.get("value_number", raw))) if isinstance(raw, dict) else str(raw)

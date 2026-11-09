@@ -9,6 +9,7 @@ import { completeTcNumber, completeTcMu, expandTcPoints, newTcPoint, selectTcPoi
 import TcScientificField from './TcScientificField'
 import SchemaDrivenRecordForm from './SchemaDrivenRecordForm'
 import PropertyRecordRow from './PropertyRecordRow'
+import { scientificNumberText } from '../lib/scientificNumberText'
 
 interface Props {
   records: PropertyRecordDraft[]
@@ -66,7 +67,7 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
       action={readOnly ? undefined : <Button size="small" onClick={() => onChange(records.map(r => r.value_kind === 'range' ? { ...r, is_representative: false } : r))}>取消旧标记</Button>}>
       旧范围尚未明确代表端点，请选择具体 Tc／μ* 组合。</Alert>}
     <Typography variant="caption" component="p" color="primary" aria-live="polite" sx={{ my: 1 }}>
-      {selected ? `代表结果：${names[selected.record.method_code || ''] || selected.record.method_code} · μ* = ${selected.mu ?? '待填写'} · Tc = ${selected.tc ?? '待填写'} K` : '本组尚未选择代表结果'}
+      {selected ? `代表结果：${names[selected.record.method_code || ''] || selected.record.method_code} · μ* = ${selected.mu ?? '待填写'} · Tc = ${selected.tc == null ? '待填写' : scientificNumberText(selected.tc, selected.record.value_raw, 'K')} K` : '本组尚未选择代表结果'}
     </Typography>
     {methods.map((method, methodIndex) => {
       const members = records.filter(r => tcMethodKey(r) === method), first = members[0]

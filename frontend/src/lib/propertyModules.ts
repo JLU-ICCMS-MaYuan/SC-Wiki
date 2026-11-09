@@ -1,4 +1,5 @@
 import { normalizeDosRecords } from './fermiDos'
+import { scientificNumberText, approximateNumberMatches } from './scientificNumberText'
 
 export const PROPERTY_MODULES = [
   { code: 'superconductive_properties', label: '超导性质' },
@@ -56,7 +57,7 @@ export interface PropertyModuleDraft {
 /** Tc 摘要使用当前规范值，不能以旧原文回填已清空的数值。 */
 export function propertyRecordSummaryValue(record: PropertyRecordDraft): string {
   if (record.record_type === 'property') return record.value_raw
-  if (record.value_kind === 'number') return record.value_number == null ? '待填写 Tc' : `${record.value_number} K`
+  if (record.value_kind === 'number') return record.value_number == null ? '待填写 Tc' : `${scientificNumberText(record.value_number, record.value_raw, 'K')} K`
   if (record.value_kind === 'range') return `${record.value_min ?? '待填写'}–${record.value_max ?? '待填写'} K`
   if (record.value_kind === 'text') return record.value_text || '待填写 Tc'
   return record.value_boolean == null ? '待填写 Tc' : record.value_boolean ? '是' : '否'
@@ -106,7 +107,11 @@ export function normalizeCurrentTcValue(record: PropertyRecordDraft): PropertyRe
   if (record.record_type !== 'measured_tc' && record.record_type !== 'predicted_tc') return record
   const numberText = (value: unknown) => typeof value === 'string' ? value : typeof value === 'number' && Number.isFinite(value) && value >= 0 ? String(value) : ''
   let raw = ''
-  if (record.value_kind === 'number') raw = numberText(record.value_number)
+  if (record.value_kind === 'number') {
+    raw = numberText(record.value_number)
+    if (raw && record.value_number != null && approximateNumberMatches(record.value_number, record.value_raw, 'K')
+      && (!record.unit_raw || ['k', 'kelvin'].includes(record.unit_raw.toLowerCase()))) raw = `~${raw}`
+  }
   if (record.value_kind === 'range') {
     const min = numberText(record.value_min), max = numberText(record.value_max)
     if (min && max) raw = `${min}–${max}`

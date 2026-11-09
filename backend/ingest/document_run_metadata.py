@@ -13,7 +13,10 @@ def save_run_metadata(task_id, state, config, *, latency, cpu):
     fingerprint = content_hash({name:hashlib.sha256((directory / name).read_bytes()).hexdigest()
         for name in ("upload_jobs.py", "domain_extraction.py", "document_claims.py", "claim_evidence.py",
                      "coverage_audit.py", "document_parsers.py", "structured_pdf.py", "complementary_pdf.py",
-                     "complementary_ir.py", "grobid_document.py", "marker_pdf.py", "scientific_contracts.py", "pdf_parser_worker.py")})
+                     "complementary_ir.py", "grobid_document.py", "marker_pdf.py", "scientific_contracts.py", "pdf_parser_worker.py",
+                     "chart_reading.py", "chart_calibration.py", "canonical_structure.py", "model_memory.py",
+                     "upload_source_bundle.py", "tc_material_scope.py", "scientific_form_filling.py",
+                     "property_modules.py", "review_dependencies.py", "scientific_values.py")})
     _atomic_write_json(artifact_directory(task_id) / "run-metadata.json", {
         "task_id":task_id, "parser_profile":state.get("parser_profile", "legacy"),
         "pipeline_revision":"sha256:" + fingerprint, "provider":config.provider, "model":config.model,
