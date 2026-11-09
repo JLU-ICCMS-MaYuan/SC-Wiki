@@ -1003,7 +1003,7 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
         chunks.append(public)
     stable = state.get("status") in {"ready", "failed", "duplicate", "cancelled", "submitted", "needs_workflow", "paused"}
     task_status = state.get("status")
-    if task_status in {"summarizing", "failed"}:
+    if task_status in {"summarizing", "failed", "paused"}:
         partial_draft = state.get("partial_draft")
         if task_status == 'summarizing' and not (partial_draft or {}).get('material_states'):
             candidate = _build_candidate_draft(chunks)

@@ -19,6 +19,26 @@ const response = (data: unknown) => new Response(JSON.stringify(data), {
 const state = {material: 'CaH6', material_name: 'CaH6', state_kind: 'theoretical',
   pressure_value_gpa: 150, tc_results: [], properties: []}
 
+it('论文阶段后暂停仍展示已保存论文，只读且不读取空正式草稿', async () => {
+  const requests: string[] = []
+  vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+    const url = String(input); requests.push(url)
+    if (url.endsWith('/parsing')) return response({ok: true, data: {
+      status: 'paused', processing_phase: 'workflow_selection', stage: 'extracting',
+      partial_draft: {paper: {title: 'Reviewed CaH6 paper', authors: ['Hui Wang'], paper_type: 'theoretical'},
+        material_states: []}, files: [], chunks: [], summary: {completed: 0, total: 0}, next_poll_ms: null,
+    }})
+    return response({ok: true})
+  }))
+  render(<MemoryRouter><UploadParsingDetail taskId={'e'.repeat(32)} /></MemoryRouter>)
+  expect(await screen.findByLabelText('标题')).toHaveValue('Reviewed CaH6 paper')
+  expect(screen.getByLabelText('标题')).toHaveAttribute('readonly')
+  expect(screen.getByText('只读预览')).toBeVisible()
+  expect(screen.getByText('Hui Wang')).toBeVisible()
+  expect(requests.filter(url => url.endsWith('/draft'))).toHaveLength(0)
+  expect(requests.filter(url => /\/check|\/review|\/submit/.test(url))).toHaveLength(0)
+})
+
 it('图片待处理：在现有分段页显示文件和PDF页码，不声称已完成图像核对', async () => {
   vi.stubGlobal('fetch', vi.fn(async () => response({ok: true, data: {
     status: 'failed', stage: 'reading', chunks: [], partial_draft: null, next_poll_ms: null,

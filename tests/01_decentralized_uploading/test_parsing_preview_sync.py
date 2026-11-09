@@ -1,8 +1,25 @@
 """#195：阶段预览与题录更新相互独立，失败保留已生成的科学内容。"""
 from copy import deepcopy
 import json
+import pytest
 
 from backend.ingest import upload_jobs as jobs
+
+
+@pytest.mark.parametrize('states', [[], [{'material': 'CaH6', 'pressure_value_gpa': 150}]])
+def test_paused_detail_retains_paper_and_scientific_checkpoint(tmp_path, monkeypatch, states):
+    preview = {'paper': {'title': 'Reviewed CaH6 paper', 'research_materials': ['Reviewed calcium hydrides']},
+               'material_states': states}
+    state = {'status': 'paused', 'processing_phase': 'workflow_selection',
+             'partial_draft': deepcopy(preview), 'preview_phase': 'reviewing'}
+    before = deepcopy(state)
+    monkeypatch.setattr(jobs, 'get_state', lambda _: deepcopy(state))
+    monkeypatch.setattr(jobs, '_chunk_manifest_path', lambda *a, **k: tmp_path / 'missing.json')
+    from backend.ingest import upload_tasks
+    monkeypatch.setattr(upload_tasks, 'available_published_path', lambda _, path: path)
+    detail = jobs.public_parsing_detail('preview')
+    assert detail['partial_draft'] == preview and state == before
+    assert detail['next_poll_ms'] is None
 
 
 def test_summarizing_does_not_hide_already_extracted_states(tmp_path, monkeypatch):

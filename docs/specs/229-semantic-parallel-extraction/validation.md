@@ -41,3 +41,12 @@
 第四轮真实任务为7615ba8ac23e4ddeaaa99b3837a9b058，实际模型server:LLM2 / gpt-6.1-sol。仅本任务增量投影到7c9e6bed的独立树，后端33项、来源标记/论文所有权四宿主8项及TypeScript/Vite构建通过；未带入原有#226未提交变更。
 
 隔离科学整理真实重跑已完成：79个原候选全部有去向，两个子组各2轮，加上共同父请求的1轮，每候选路径3轮，未扩大四轮上限；报告status=completed、stop_reason=partitioned_by_state、issues=[]。该结果仍不包含后续字段审核、正式保存和角色黑盒。固定真实失败的CaH4 50GPa DOS单元已保留在tests/TestForRealScenario/fixtures/cah6-dos-archive-failed.json；新重放测试1项通过，验证0.02234、单位、原始来源与完整宿主档案存活，输入不变。
+
+
+## 第四轮截至2026-11-10的真实黑盒边界
+
+原CaH6论文1208已通过指定Chrome超管网页删除，其余论文保留。第四轮任务7615ba8ac23e4ddeaaa99b3837a9b058、正文/SI原始SHA不变，实际模型server:LLM2 / gpt-6.1-sol。论文阶段23项数据与存储检查点一致，22项当前核对均以supported保存；正文4页及SI30页逐页图像盘点完成，形成75条标定读数并保留9条未可靠读数记录。这些结果不是整篇科学验收通过。
+
+后续读取正文结构表/图片（第1、2、3页）连续11次上游HTTP503，均output_started=false；第12次请求中通过Safari正常“停止并保留进度”停止。实际status=paused，网页有“继续解析”，没有清理本轮任务。最后错误编号#47920832，请求ID c0c195dd-999e-44ed-b5b1-56bf47920832；本地96k请求预算已通过并实际发出，不是本地context_budget错误。没有切换模型、扩大预算或跳过结构读取。
+
+证据目录tests/TestForRealScenario/runs/20261109T181409Z-4e0a9338，保留来源清单、源码差异/摘要、网页交互、论文检查点与只读存储回执、paused-task-state.json和paused-artifacts完整制品。送审、真实拒绝返修、批准、公开搜索均未完成；相关Issue保持OPEN，远程Spec仍未推送。
