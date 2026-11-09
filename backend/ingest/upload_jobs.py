@@ -340,9 +340,11 @@ def _ir_to_markdown(ir) -> str:
 
 
 def _save_document_ir(task_id: str, file_id: str, ir) -> None:
+    from .document_ir import DocumentIR
+    validated = DocumentIR.model_validate(ir.model_dump(mode="json"))
     path = artifact_directory(task_id) / "document_ir" / f"{file_id}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
-    _atomic_write_json(path, ir.model_dump(mode="json"))
+    _atomic_write_json(path, validated.model_dump(mode="json"))
 
 
 def _extract_markdown(state: dict[str, Any], source: Path) -> str:
@@ -2009,7 +2011,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         prepare_paper(task_id, state, task_source_chunks(task_id, state, root))
         # 论文级核对保存后再读科学图源，供适用性及材料状态阶段共同使用。
         from .chart_reading import enrich_document
-        from .document_ir import DocumentIR
+        from .chart_cache import load_document_ir
         update_state(task_id, processing_phase='chart_reading')
         def chart_cancelled():
             _ensure_not_cancelled(task_id)
@@ -2020,7 +2022,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             ir_path = artifact_directory(task_id) / 'document_ir' / f"{item['file_id']}.json"
             if not ir_path.is_file():
                 continue
-            ir = DocumentIR.model_validate_json(ir_path.read_text())
+            ir = load_document_ir(ir_path)
             chart_source = {'file_id': item['file_id'], 'sha256': item['sha256'],
                 'filename': item.get('original_filename') or item['file_id'], 'role': item['role']}
             def save_chart_event(event):

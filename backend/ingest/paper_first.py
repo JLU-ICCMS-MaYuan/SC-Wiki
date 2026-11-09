@@ -86,12 +86,12 @@ def prepare_paper(task_id, state, sources):
     raw_paper = raw.get('paper', raw)
     # 书目信息仍沿GROBID/原文的既有优先级；科学记录不成为论文填写前置条件。
     from .grobid_document import apply_bibliography
-    from .document_ir import DocumentIR
+    from .chart_cache import load_document_ir
     bibliography = {'paper': raw_paper}
     for item in state.get('files') or []:
         ir_path = artifact_directory(task_id) / 'document_ir' / f"{item['file_id']}.json"
         if item.get('role') == 'main' and ir_path.is_file():
-            ir = DocumentIR.model_validate_json(ir_path.read_text())
+            ir = load_document_ir(ir_path)
             document = ir.coverage.get('grobid') or {}
             from .publication_year import verify_document_year
             apply_bibliography(bibliography, document, main_ir=ir,

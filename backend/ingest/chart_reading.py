@@ -15,7 +15,7 @@ from .chart_calibration import ChartReadingError, approximate, coordinate_value,
 from .document_ir import DocumentBlock, content_hash
 from .scientific_output_schema import obj, array, nullable, TEXT, NUMBER
 
-VERSION = 'scientific-chart-reading-v2'
+VERSION = 'scientific-chart-reading-v3'
 QUANTITIES = ['tc', 'lambda_ep', 'omega_log', 'dos_fermi']
 
 DISCOVERY_PROMPT = '''Inventory EVERY attached PDF page and EVERY figure visible on it, including SI.
@@ -152,7 +152,8 @@ def _chart_image(pdf, page, selected, crop):
         vector_marks = any(mark['rect'].intersects(region) and not bounds.contains(mark['rect'])
                            for mark in page.get_drawings())
         has_mask = any(row[0] == item['xref'] and row[1] for row in page.get_images(full=True))
-        if page.rect.contains(bounds) and not vector_text and not vector_marks and not has_mask:
+        if (page.rect.contains(bounds) and pymupdf.Rect(crop).contains(bounds)
+                and not vector_text and not vector_marks and not has_mask):
             raw = pdf.extract_image(item['xref'])['image']
             image = Image.open(io.BytesIO(raw)).convert('RGB'); output = io.BytesIO(); image.save(output, format='PNG')
             return list(bounds), output.getvalue(), {'image_kind': 'original_embedded_image',
@@ -299,6 +300,16 @@ def append_readings(ir, readings):
         existing.add(block_id)
 
 
+def unresolved_block(source_sha256, issue, reading_order):
+    """同一来源及同一未读事实具有稳定身份；不授予科学通过。"""
+    text = ('ORIGINAL FIGURE READING UNRESOLVED: ' + json.dumps(issue, ensure_ascii=False)
+            + '\nDo not replace this unresolved detailed point with a shared body maximum or another material value.')
+    return DocumentBlock(block_id='chart-unresolved-' + content_hash(source_sha256, issue)[:40],
+        block_type='paragraph', pdf_page=issue['page'], reading_order=reading_order, text=text,
+        bbox=tuple(issue['crop_bbox']) if issue.get('crop_bbox') else None, content_hash=content_hash(text),
+        metadata={'source_kind': 'vision', 'parser': VERSION, 'chart_unresolved': deepcopy(issue)})
+
+
 def enrich_document(ir, pdf_path, source, model, *, cancelled=lambda: False, on_event=lambda event: None):
     from pathlib import Path
     import pymupdf
@@ -312,7 +323,8 @@ def enrich_document(ir, pdf_path, source, model, *, cancelled=lambda: False, on_
         return previous
     regions = chart_regions(ir)
     texts = [{'page': p.pdf_page, 'text': '\n'.join(b.text for b in ir.blocks
-        if b.pdf_page == p.pdf_page and b.text and b.metadata.get('selected_for_reading') is not False)} for p in ir.pages]
+        if b.pdf_page == p.pdf_page and b.text and b.metadata.get('selected_for_reading') is not False
+        and 'chart_reading' not in b.metadata and 'chart_unresolved' not in b.metadata)} for p in ir.pages]
     pages = sorted(p.pdf_page for p in ir.pages)
     targets, excluded, all_readings, unresolved = [], [], [], []
     with pymupdf.open(path) as pdf:
@@ -368,19 +380,38 @@ def enrich_document(ir, pdf_path, source, model, *, cancelled=lambda: False, on_
                     {**source, 'page': page, 'native_pixel_error': native_error}, crop)
                 for reading in readings: reading['image_origin'] = deepcopy(image_origin)
                 all_readings.extend(readings)
-                unresolved.extend({'page': page, 'figure': panel['figure'], 'panel': panel['panel'],
+                unresolved.extend({'page': page, 'region_id': target['region_id'],
+                                   'figure': panel['figure'], 'panel': panel['panel'],
                                    'crop_bbox': crop, **m} for m in missing)
-            unresolved.extend({'page': page, 'reason': note} for note in answer['notes'])
-    append_readings(ir, all_readings)
+            unresolved.extend({'page': page, 'region_id': target['region_id'],
+                               'crop_bbox': crop, 'reason': note} for note in answer['notes'])
+    # 新版本成功前不改旧块；原读数保留供既有来源引用，但不再作为本轮提取事实。
+    candidate = ir.model_copy(deep=True)
+    for block in candidate.blocks:
+        if (block.metadata.get('parser', '').startswith('scientific-chart-reading-')
+                and block.metadata.get('parser') != VERSION
+                and ('chart_reading' in block.metadata or 'chart_unresolved' in block.metadata)):
+            block.metadata.update(selected_for_reading=False, superseded_by=VERSION)
+    append_readings(candidate, all_readings)
+    existing = {block.block_id: block for block in candidate.blocks}
     for issue in unresolved:
-        text = ('ORIGINAL FIGURE READING UNRESOLVED: ' + json.dumps(issue, ensure_ascii=False)
-                + '\nDo not replace this unresolved detailed point with a shared body maximum or another material value.')
-        ir.blocks.append(DocumentBlock(block_id='chart-unresolved-' + content_hash(source['sha256'], issue)[:40],
-            block_type='paragraph', pdf_page=issue['page'], reading_order=len(ir.blocks), text=text,
-            bbox=tuple(issue['crop_bbox']) if issue.get('crop_bbox') else None, content_hash=content_hash(text),
-            metadata={'source_kind': 'vision', 'parser': VERSION, 'chart_unresolved': deepcopy(issue)}))
+        block = unresolved_block(source['sha256'], issue, len(candidate.blocks))
+        previous_block = existing.get(block.block_id)
+        if previous_block:
+            if (previous_block.text != block.text or previous_block.content_hash != block.content_hash
+                    or previous_block.metadata.get('chart_unresolved') != issue):
+                raise ChartReadingError('同一未读来源身份存在冲突')
+            previous_block.metadata.update(block.metadata)
+            previous_block.metadata.pop('selected_for_reading', None)
+            previous_block.metadata.pop('superseded_by', None)
+        else:
+            candidate.blocks.append(block)
+            existing[block.block_id] = block
     report = {'version': VERSION, 'status': 'completed', 'source_sha256': source['sha256'],
               'regions': regions, 'scanned_pages': pages, 'targets': targets, 'excluded': excluded,
               'readings': len(all_readings), 'unresolved': unresolved}
-    ir.coverage['chart_reading'] = report
+    candidate.coverage['chart_reading'] = report
+    from .document_ir import DocumentIR
+    validated = DocumentIR.model_validate(candidate.model_dump(mode='json'))
+    ir.blocks, ir.coverage = validated.blocks, validated.coverage
     return report
