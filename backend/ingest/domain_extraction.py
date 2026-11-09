@@ -308,6 +308,17 @@ def structured_chunks(ir: DocumentIR, *, max_chars: int = 500000,
         if len(encoded([page])) > window_chars:
             from .scientific_context import split_table_page
             parts = split_table_page(page, encoded, window_chars)
+            if parts is None and not page['tables']:
+                # 正文保留完整段落块；表格、公式和原始块不被机械切碎。
+                parts, current_blocks = [], []
+                for block in page['blocks']:
+                    if current_blocks and len(encoded([{**page, 'blocks': [*current_blocks, block]}])) > window_chars:
+                        parts.append({**page, 'blocks': current_blocks}); current_blocks = []
+                    current_blocks.append(block)
+                if current_blocks:
+                    parts.append({**page, 'blocks': current_blocks})
+                if any(len(encoded([part])) > max_chars for part in parts):
+                    parts = None
             if parts is None and len(encoded([page])) > max_chars:
                 parts = split_table_page(page, encoded, max_chars)
             if parts is None and len(encoded([page])) > max_chars:
@@ -320,9 +331,7 @@ def structured_chunks(ir: DocumentIR, *, max_chars: int = 500000,
     for page in split_pages:
         if current and len(encoded([*current, page])) > window_chars:
             groups.append(current)
-            # 保留前一页上下文，便于跨页条件关联；不允许因重叠挤掉新页。
-            previous = current[-1]
-            current = [previous] if len(encoded([previous, page])) <= window_chars else []
+            current = []
         current.append(page)
     if current:
         groups.append(current)
@@ -336,13 +345,20 @@ def structured_chunks(ir: DocumentIR, *, max_chars: int = 500000,
             if neighbor['geometry']['pdf_page'] not in boundaries:
                 continue
             blocks, size = [], 0
-            for block in neighbor['blocks']:
+            # 表格两侧继续保留完整说明；正文只附有限前文，不重复整页或模型回答。
+            table_context = any(p.get('tables') for p in group)
+            if not table_context and neighbor['geometry']['pdf_page'] != min(numbers) - 1:
+                continue
+            preceding = neighbor['blocks'] if table_context else list(reversed(neighbor['blocks']))
+            for block in preceding:
                 if block.get('table_id') or block['block_type'] == 'table':
                     continue
                 length = len(json.dumps(block, ensure_ascii=False))
-                if size + length <= 6000:
+                if size + length <= (6000 if table_context else 2000) or (not table_context and not blocks):
                     blocks.append(block)
                     size += length
+            if not table_context:
+                blocks.reverse()
             if blocks:
                 context = {**neighbor, 'blocks': blocks, 'tables': [], 'context_only': True}
                 if len(encoded([*context_pages, *group, context])) <= max_chars:

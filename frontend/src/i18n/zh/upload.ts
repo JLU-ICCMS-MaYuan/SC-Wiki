@@ -33,6 +33,9 @@ export default {
     ready: '等待校对',
   },
   modelPhase: {
+    paper_info_extraction: '读取论文级信息与依据',
+    paper_info_filling: '填写论文级字段',
+    paper_field_review: '核对并保存论文级字段',
     keywords_retry: '提炼论文关键词',
     material_family_retry: '判断材料家族',
     material_state_inventory: '建立材料状态与结果清单',

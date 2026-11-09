@@ -154,11 +154,14 @@ def render_region(ir: DocumentIR | None, path: Path | None, expected_hash, *, qu
     if len(matches) != 1:
         return {"status":"unlocated","image":None,"message":"引句无法唯一定位，保留文本证据。"}
     block = matches[0]
+    from .source_highlight import text_locator
     result = {"status":"text_only","image":None,"pdf_page":block.pdf_page,"printed_page":block.printed_page,
               "bbox":block.bbox,"polygon":block.polygon,"table_id":block.table_id,"figure_id":block.figure_id,
               "file_id":ir.source_file_id,"source_version":ir.source_version,
               "source_kind":block.metadata.get("source_kind",ir.parser.get("mode")),
-              "quote":quote,"parser":ir.parser,"block_id":block.block_id}
+              "quote":quote,"parser":ir.parser,"block_id":block.block_id,
+              "context_text": block.text, "text_locator": text_locator(block.text, quote),
+              "source_sha256": ir.source_sha256}
     if block.bbox is None:
         result["message"]="此块没有可靠区域坐标。"
         return result
@@ -176,6 +179,25 @@ def render_region(ir: DocumentIR | None, path: Path | None, expected_hash, *, qu
                 raise ValueError("page geometry mismatch")
             x0,y0,x1,y1=block.bbox
             boxes = [pymupdf.Rect(x0, y0, x1, y1)]
+            context_boxes = []
+            table = next((table for table in ir.tables if table.pdf_page == block.pdf_page and (
+                table.table_id == block.table_id or any(cell.block_id == block.block_id for cell in table.cells))), None)
+            if table:
+                parent = next((candidate for candidate in ir.blocks if candidate.block_id == table.block_id
+                               and candidate.pdf_page == block.pdf_page and candidate.bbox), None)
+                if parent:
+                    context_boxes.append(parent.bbox)
+            reading = block.metadata.get('chart_reading') or {}
+            point = reading.get('point') or {}
+            if reading.get('crop_bbox') and all(isinstance(point.get(k), (int, float)) for k in ('x', 'y', 'pixel_error')):
+                # 只标记模型实际识别并已标定的位置，不从字段数值反推图中位置。
+                cx0, cy0, cx1, cy1 = reading['crop_bbox']
+                context_boxes.append([cx0, cy0, cx1, cy1])
+                radius = max(point['pixel_error'], 3)
+                boxes = [pymupdf.Rect(cx0 + (point['x'] - radius) / 1000 * (cx1 - cx0),
+                    cy0 + (point['y'] - radius) / 1000 * (cy1 - cy0),
+                    cx0 + (point['x'] + radius) / 1000 * (cx1 - cx0),
+                    cy0 + (point['y'] + radius) / 1000 * (cy1 - cy0)) & page.rect]
             visual = block.block_type in {"figure", "table", "table_cell"}
             if visual:
                 captions = []
@@ -192,7 +214,7 @@ def render_region(ir: DocumentIR | None, path: Path | None, expected_hash, *, qu
                 if captions:
                     boxes.append(min(captions, key=lambda item: item[0])[1])
             crops = render_evidence_crops(page, boxes, keep_together=visual,
-                                          context_lines=0 if visual else 3)
+                                          context_lines=0 if visual else 3, context_boxes=context_boxes)
             first = crops[0]
             result.update(status="located", image=first["image"], region=first["highlights"][0],
                           crops=crops, dpi=DPI)

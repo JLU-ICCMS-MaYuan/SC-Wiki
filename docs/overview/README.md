@@ -8,6 +8,8 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 
 当前能力覆盖超导数据去中心化上传（PDF 解析管线）、数据维护与审核验证、本地材料检索、知识图谱、RAG 文献问答、实验性 Tc 估算和研究者社区。部分能力依赖 MySQL、Redis、Neo4j、Qdrant和 LLM/Embedding 配置，具体边界见各功能文档。生产部署使用 Docker Compose，本地开发运行在宿主机进程上（[Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)），两条链路的服务组成与启动方式见[部署与运行时](02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md)。
 
+上传解析已接入论文级先填写核对并保存、材料状态后处理、受限分段并发与来源标记；当前实现及完整黑盒边界见[解析管线](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md#paper-first-processing)。
+
 ## 全局导航
 
 了解 PDF 上传后如何校对、送审和最终成为已批准数据，先看[从 PDF 上传到审核入库的 HTML 交互流程图](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-review-flow.html)。点击“01 解析与草稿”或“批准前检查”，进入对应的独立程序流程图页面，查看内部判断、分支和返回路径；其他节点保留概要说明。图中区分待审入库与最终批准，并保留字段处理、拒绝返修和批准后向量发布。对应[文字说明与实现依据](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md#从-pdf-上传到审核入库的主流程)保留在解析管线文档。

@@ -31,6 +31,9 @@ export default {
     ready: 'Ready for review',
   },
   modelPhase: {
+    paper_info_extraction: 'Reading paper information and evidence',
+    paper_info_filling: 'Filling paper fields',
+    paper_field_review: 'Reviewing and saving paper fields',
     keywords_retry: 'Extracting keywords',
     material_family_retry: 'Identifying material families',
     material_state_inventory: 'Building material state inventory',

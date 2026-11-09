@@ -84,7 +84,7 @@ def _render(page, clip, boxes):
             "source_raster_dpi": raster_dpi if raster_dpi is not None and raster_dpi < DPI else None}
 
 
-def render_evidence_crops(page, boxes, *, keep_together=False, context_lines=CONTEXT_LINES):
+def render_evidence_crops(page, boxes, *, keep_together=False, context_lines=CONTEXT_LINES, context_boxes=None):
     """不连续的正文块分别显示；超大局部图继续按原分辨率分片。"""
     if not boxes:
         return []
@@ -97,6 +97,8 @@ def render_evidence_crops(page, boxes, *, keep_together=False, context_lines=CON
     crops = []
     for _, group in sorted(grouped.items(), key=lambda entry: (min(box.y0 for box in entry[1]), min(box.x0 for box in entry[1]))):
         clip = _clip_for_group(page, group, lines, context_lines)
+        for context_box in context_boxes or []:
+            clip |= pymupdf.Rect(context_box) & page.rect
         for tile in _tiles(clip):
             rendered = _render(page, tile, group)
             if rendered["highlights"]:

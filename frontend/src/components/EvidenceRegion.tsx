@@ -7,23 +7,24 @@ import type { EvidenceSource, EvidenceTarget } from './EvidenceWorkflow'
 import SnapshotFileButton from './SnapshotFileButton'
 
 type Crop = { image: string; highlights: number[][]; width?: number; height?: number; pdf_page?: number; source_raster_dpi?: number }
-type Region = { status: string; image?: string; region?: number[]; regions?: number[][]; crops?: Crop[]; dpi?: number; pdf_page?: number; printed_page?: number; message?: string; parser?: { name: string; mode: string } }
+type Region = { status: string; image?: string; region?: number[]; regions?: number[][]; crops?: Crop[]; dpi?: number; pdf_page?: number; printed_page?: number; message?: string; parser?: { name: string; mode: string }; context_text?: string; text_locator?: { char_interval: [number, number] | null; match_kind: string; text_sha256: string } }
 
-function CropView({ crop, label, onClick, onFailure }: { crop: Crop; label: string; onClick: () => void; onFailure?: () => void }) {
+function CropView({ crop, label, onClick, onFailure, marked = true }: { crop: Crop; label: string; onClick: () => void; onFailure?: () => void; marked?: boolean }) {
   const { t } = useLanguage()
   const [failed, setFailed] = useState(false)
   useEffect(() => { setFailed(false) }, [crop.image])
   if (failed) return onFailure ? null : <Alert severity="warning">{t('evidence.regionUnavailable')}</Alert>
   return <Box component="button" type="button" onClick={onClick} aria-label={label} sx={{ display: 'block', position: 'relative', p: 0, border: 0, bgcolor: 'transparent', cursor: 'zoom-in', width: crop.width || 'max-content' }}>
     <Box component="img" src={crop.image} alt={t('evidence.regionImage')} onError={() => { setFailed(true); onFailure?.() }} sx={{ display: 'block', maxWidth: 'none', width: crop.width ? `${crop.width}px` : 'auto', height: crop.height ? `${crop.height}px` : 'auto' }} />
-    {crop.highlights.map((region, index) => <Box key={index} aria-hidden sx={{ position: 'absolute', pointerEvents: 'none', border: '2px solid #d32f2f', boxSizing: 'border-box',
+    {marked && crop.highlights.map((region, index) => <Box key={index} aria-hidden sx={{ position: 'absolute', pointerEvents: 'none', border: '2px solid #d32f2f', boxSizing: 'border-box',
       left: `${region[0] * 100}%`, top: `${region[1] * 100}%`, width: `${region[2] * 100}%`, height: `${region[3] * 100}%` }} />)}
   </Box>
 }
 
 // 直接按PDF块定位时没有RAG分段编号，不编造chunk_index。
 export function EvidenceRegion({ target, source, hideQuote = false, plain = false }: { target?: EvidenceTarget; source: Omit<EvidenceSource, 'chunk_index'> & { chunk_index?: number }; hideQuote?: boolean; plain?: boolean }) {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
+  const [marked, setMarked] = useState(true)
   const [result, setResult] = useState<Region | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(false)
@@ -31,7 +32,7 @@ export function EvidenceRegion({ target, source, hideQuote = false, plain = fals
   const generation = useRef(0)
   useEffect(() => {
     generation.current++
-    setResult(null); setBusy(false); setError(false); setExpandedCrop(null)
+    setResult(null); setBusy(false); setError(false); setExpandedCrop(null); setMarked(true)
     return () => { generation.current++ }
   }, [target?.target, target?.target_id, source.file_id, source.page_start, source.page_end, source.chunk_index, source.quote, source.block_id, source.evidence_kind])
   const open = async () => {
@@ -82,6 +83,15 @@ export function EvidenceRegion({ target, source, hideQuote = false, plain = fals
     {error && <Alert severity="warning">{t('evidence.regionUnavailable')}</Alert>}
     {source.evidence_kind === 'pdf_image' && (error || result && result.status !== 'located') && <Button disabled={busy} onClick={() => void open()}>{t('evidence.retryRegion')}</Button>}
     {result && result.status !== 'located' && <Typography role="status" color="text.secondary">{unavailable}</Typography>}
+    {result && (result.context_text || crops.length > 0) && <Button aria-pressed={marked} onClick={() => setMarked(value => !value)}>
+      {lang === 'zh' ? (marked ? '隐藏来源标记' : '显示来源标记') : (marked ? 'Hide source highlights' : 'Show source highlights')}
+    </Button>}
+    {result?.context_text && <Typography data-source-context sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{(() => {
+      const text = result.context_text!, span = result.text_locator?.char_interval
+      // Python区间按Unicode字符计数；不能直接套用JavaScript的UTF-16索引。
+      const characters = Array.from(text)
+      return marked && span ? <>{characters.slice(0, span[0]).join('')}<mark>{characters.slice(span[0], span[1]).join('')}</mark>{characters.slice(span[1]).join('')}</> : text
+    })()}</Typography>}
     {crops.length > 0 && <>
       {!plain && <Typography>{result?.parser?.mode === 'legacy_text' ? t('evidence.legacyTextLocator') : result?.parser?.name}{result?.printed_page != null ? ` · ${t('evidence.printedPage', { page: result.printed_page })}` : ''}{result?.dpi ? ` · ${result.dpi} DPI` : ''}</Typography>}
       {!plain && <Typography variant="caption" color="text.secondary">{t('evidence.scrollRegionHint')}</Typography>}
@@ -89,7 +99,7 @@ export function EvidenceRegion({ target, source, hideQuote = false, plain = fals
         {crop.pdf_page && crops.length > 1 && <Typography variant="caption">{t('evidence.page', { page: crop.pdf_page })}</Typography>}
         {crop.source_raster_dpi && <Alert severity="warning">{t('evidence.sourceRasterLowDpi', { dpi: crop.source_raster_dpi })}</Alert>}
         <Box sx={{ maxHeight: 440, overflow: 'auto', border: 1, borderColor: 'divider' }}>
-          <CropView crop={crop} label={t('evidence.expandRegion')} onClick={() => setExpandedCrop(index)} onFailure={() => setError(true)} />
+          <CropView crop={crop} marked={marked} label={t('evidence.expandRegion')} onClick={() => setExpandedCrop(index)} onFailure={() => setError(true)} />
         </Box>
       </Box>)}
     </>}
@@ -98,7 +108,7 @@ export function EvidenceRegion({ target, source, hideQuote = false, plain = fals
         <IconButton aria-label={t('evidence.collapseRegion')} onClick={() => setExpandedCrop(null)}><CloseIcon /></IconButton>
       </DialogTitle>
       <DialogContent sx={{ overflow: 'auto', maxHeight: '80vh' }}>
-        {expandedCrop !== null && crops[expandedCrop] && <CropView crop={crops[expandedCrop]} label={t('evidence.collapseRegion')} onClick={() => setExpandedCrop(null)} />}
+        {expandedCrop !== null && crops[expandedCrop] && <CropView crop={crops[expandedCrop]} marked={marked} label={t('evidence.collapseRegion')} onClick={() => setExpandedCrop(null)} />}
       </DialogContent>
     </Dialog>
   </Box>

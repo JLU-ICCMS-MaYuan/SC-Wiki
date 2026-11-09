@@ -51,7 +51,8 @@ def fake_model(calls):
         data = json.loads(content); calls.append(data)
         assert all(base64.b64decode(x.split(',', 1)[1]).startswith(b'\x89PNG') for x in options['images'])
         if 'regions' in data:
-            return {'targets': [{'region_ids': [r['region_id'] for r in data['regions']], 'reason': 'Tc柱状图'}], 'excluded': []}
+            return {'pages': [{'page': p, 'figures': [{'bbox': [100, 100, 900, 900],
+                'label': 'Fig 1', 'target': True, 'reason': 'Tc柱状图'}]} for p in data['image_pages']]}
         assert len(options['images']) == 2
         return {'panels': [panel()], 'notes': []}
     return model
@@ -148,8 +149,8 @@ def test_source_hash_and_discovery_coverage_are_required(tmp_path):
     path, ir, source = original(tmp_path)
     with pytest.raises(ChartReadingError, match='身份'):
         enrich_document(ir, path, {**source, 'sha256': '0' * 64}, fake_model([]))
-    with pytest.raises(ChartReadingError, match='遗漏'):
-        enrich_document(ir, path, source, lambda *_args, **_kwargs: {'targets': [], 'excluded': []})
+    with pytest.raises(ChartReadingError, match='页面'):
+        enrich_document(ir, path, source, lambda *_args, **_kwargs: {'pages': []})
     assert len(ir.blocks) == 2
 
 

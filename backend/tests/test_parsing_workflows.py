@@ -87,6 +87,11 @@ def test_real_worker_routes_before_any_specialized_entry(tmp_path, monkeypatch, 
         file_kind='md', file_path=str(file), filename='source.md',
         files=[dict(file_id='main', role='main', kind='md', stored_path=str(file), original_filename='source.md')])
     calls = []
+    from backend.ingest import paper_first
+    def paper_stage(*_args, **_kwargs):
+        calls.append(('paper_review_saved', None))
+        return {'paper': {'title': 'A calculation'}, 'material_states': []}
+    monkeypatch.setattr(paper_first, 'prepare_paper', paper_stage)
     monkeypatch.setattr(upload_jobs, 'get_state', lambda _id: deepcopy(state))
     def update(_id, **changes):
         state.update(deepcopy(changes)); calls.append(('state', changes.get('status')))
@@ -115,6 +120,7 @@ def test_real_worker_routes_before_any_specialized_entry(tmp_path, monkeypatch, 
     monkeypatch.setattr(upload_jobs, 'complete_json', model)
     def specialized(_id):
         calls.append(('specialized', None))
+        assert calls.index(('paper_review_saved', None)) < calls.index(('specialized', None))
         assert state['_parsing_workflow'] == workflows.CURRENT.binding()
         assert state['workflow_assessment']['status'] == 'matched'
         return update(_id, status='ready')

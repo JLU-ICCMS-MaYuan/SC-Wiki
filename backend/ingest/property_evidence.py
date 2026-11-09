@@ -307,7 +307,7 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
     return dict(target=target, target_id=str(target_id), records=records, chunks=chunks, version=version, rule_version=RULE_VERSION, _source_digest=source_hash)
 
 
-def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = None, legacy=False) -> dict:
+def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = None, legacy=False, paper_only=False) -> dict:
     from backend.ingest.upload_tasks import get_draft, get_state, markdown_path
     from backend.ingest.upload_source_bundle import task_source_chunks
     from backend.ingest.scientific_drafts import _property_modules_for_state
@@ -316,7 +316,11 @@ def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = 
     if not state or state.get('is_shadow') or int(state.get('user_id') or 0) != user_id:
         raise HTTPException(403, detail='只有上传者可以核对该草稿')
     from .parsing_workflows import require_task_workflow
-    require_task_workflow(state, draft)
+    if paper_only:
+        if parsing_draft is None or draft.get('material_states'):
+            fail('invalid_paper_stage', '论文级核对不能携带材料状态或绕过正式稿件流程')
+    else:
+        require_task_workflow(state, draft)
     if not draft or state.get('paper_id') or (parsing_draft is None and (state.get('stage') != 'ready' or state.get('processing_status') != 'succeeded')):
         fail('draft_not_ready', '草稿尚未准备完成或已经提交')
     chunks = task_source_chunks(task_id, state, markdown_path(task_id).parent)
@@ -1257,7 +1261,7 @@ def _fill_empty_fields(draft, record, proposal):
 
 
 def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip_auto_fill=None,
-                                scientific_sources=None, requested_fields=None, on_preview=None):
+                                scientific_sources=None, requested_fields=None, on_preview=None, field_scope=None):
     """统一模型流程查证并保存最终字段结论，不串联独立科学匹配链。"""
     from backend.database import SessionLocal
     from backend.ingest.upload_tasks import artifact_directory
@@ -1266,8 +1270,12 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
     from .model_review import review_draft
     from .extraction_correction import human_protected_keys
     from .scientific_evidence import save_results
+    if field_scope not in {None, 'paper', 'states'}:
+        raise ValueError('未知的字段核对阶段')
     def rebuild(value):
-        snap = upload_snapshot(task_id, owner, parsing_draft=value)
+        snap = upload_snapshot(task_id, owner, parsing_draft=value, paper_only=field_scope == 'paper')
+        if field_scope is not None:
+            snap['records'] = [r for r in snap['records'] if r['field'].startswith('paper.') == (field_scope == 'paper')]
         if requested_fields is not None:
             snap['records'] = [r for r in snap['records'] if r['field'] in requested_fields]
         return snap
@@ -1296,7 +1304,7 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
     filled, snapshot, results, report = review_draft(draft, rebuild,
         model_name=get_llm_config().model, cancelled=cancelled, skip_auto_fill=skip_auto_fill or (),
         protected_keys=protected, save=save, on_progress=on_progress, on_preview=published,
-        initial_results=previous)
+        initial_results=previous, preserve_paper=field_scope == 'states')
     draft.clear(); draft.update(filled)
     draft['model_review_report'] = report
     save(snapshot, results, report)

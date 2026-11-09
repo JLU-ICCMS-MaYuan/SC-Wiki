@@ -358,19 +358,20 @@ def _extract_markdown(state: dict[str, Any], source: Path) -> str:
                 cancelled=lambda: (get_state(str(state.get("task_id") or "")) or {}).get("status") in {"cancelling", "cancelled"}))
             task_id = str(state.get("task_id") or "")
             if task_id:
-                from .chart_reading import enrich_document
-                item = next((f for f in state.get('files', []) if f.get('file_id') == source_info.file_id), {})
-                chart_source = {'file_id': source_info.file_id, 'sha256': source_info.resolved_sha256(),
-                    'filename': item.get('original_filename') or source.name,
-                    'role': item.get('role') or 'main'}
-                def save_chart_event(event):
-                    directory = artifact_directory(task_id) / 'chart_reading' / source_info.file_id
-                    directory.mkdir(parents=True, exist_ok=True)
-                    token = hashlib.sha256(json.dumps(event, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:20]
-                    _atomic_write_json(directory / f'{event["stage"]}-{token}.json', event)
-                enrich_document(ir, source, chart_source, complete_json,
-                    cancelled=lambda: (get_state(task_id) or {}).get('status') in {'cancelling', 'cancelled', 'paused'},
-                    on_event=save_chart_event)
+                if not state.get("defer_chart_reading"):
+                    from .chart_reading import enrich_document
+                    item = next((f for f in state.get('files', []) if f.get('file_id') == source_info.file_id), {})
+                    chart_source = {'file_id': source_info.file_id, 'sha256': source_info.resolved_sha256(),
+                        'filename': item.get('original_filename') or source.name,
+                        'role': item.get('role') or 'main'}
+                    def save_chart_event(event):
+                        directory = artifact_directory(task_id) / 'chart_reading' / source_info.file_id
+                        directory.mkdir(parents=True, exist_ok=True)
+                        token = hashlib.sha256(json.dumps(event, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:20]
+                        _atomic_write_json(directory / f'{event["stage"]}-{token}.json', event)
+                    enrich_document(ir, source, chart_source, complete_json,
+                        cancelled=lambda: (get_state(task_id) or {}).get('status') in {'cancelling', 'cancelled', 'paused'},
+                        on_event=save_chart_event)
                 _save_document_ir(task_id, source_info.file_id, ir)
                 previous_runs = list((get_state(task_id) or {}).get("parser_runs") or [])
                 previous_runs = [item for item in previous_runs if item.get("file_id") != source_info.file_id]
@@ -1008,6 +1009,8 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
                              'material_states': candidate.get('material_states') or []}
     elif task_status in {"queued", "extracting", "reading"}:
         partial_draft = _build_candidate_draft(chunks)
+        if (state.get("partial_draft") or {}).get("paper"):
+            partial_draft["paper"] = state["partial_draft"]["paper"]
     else:
         partial_draft = None
     coverage_path = available_published_path(task_id, artifact_directory(task_id) / "coverage.json")
@@ -1024,6 +1027,7 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
         "processing_error": state.get("processing_error"),
         "failed_stage": state.get("failed_stage"),
         "model_activity": state.get("model_activity"),
+        "processing_phase": state.get("processing_phase"),
         "execution_resumable": state.get("execution_resumable", False),
         "citation_extraction_status": state.get("citation_extraction_status"),
         "citation_extraction_error": state.get("citation_extraction_error"),
@@ -1982,7 +1986,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             _ensure_not_cancelled(task_id)
             path = _source_path(state, item, source)
             file_state = dict(state, file_id=item['file_id'],
-                file_kind=item.get('kind') or path.suffix.lstrip('.'),
+                file_kind=item.get('kind') or path.suffix.lstrip('.'), defer_chart_reading=True,
                 file_sha256=item.get('sha256') or state.get('file_sha256'))
             from .model_runtime import current_execution
             runtime = current_execution()
@@ -2000,8 +2004,31 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             combined.append(text)
             item.update(extraction_status='completed', error=None)
         markdown_path(task_id).write_text('\n\n'.join(combined), encoding='utf-8')
-        update_state(task_id, files=files if state.get('files') else [],
-                     reading_state='selecting_workflow')
+        state = update_state(task_id, files=files if state.get('files') else [])
+        from .paper_first import prepare_paper
+        prepare_paper(task_id, state, task_source_chunks(task_id, state, root))
+        # 论文级核对保存后再读科学图源，供适用性及材料状态阶段共同使用。
+        from .chart_reading import enrich_document
+        from .document_ir import DocumentIR
+        update_state(task_id, processing_phase='chart_reading')
+        for item in files:
+            if item.get('role') not in {'main', 'supplementary'} or item.get('kind') != 'pdf':
+                continue
+            ir_path = artifact_directory(task_id) / 'document_ir' / f"{item['file_id']}.json"
+            if not ir_path.is_file():
+                continue
+            ir = DocumentIR.model_validate_json(ir_path.read_text())
+            chart_source = {'file_id': item['file_id'], 'sha256': item['sha256'],
+                'filename': item.get('original_filename') or item['file_id'], 'role': item['role']}
+            def save_chart_event(event):
+                key = hashlib.sha256(json.dumps(event, sort_keys=True, ensure_ascii=False).encode()).hexdigest()[:20]
+                _atomic_write_json(artifact_directory(task_id) / 'chart_reading' / item['file_id'] /
+                    f"{event['stage']}-{key}.json", event)
+            enrich_document(ir, _source_path(state, item, source), chart_source, complete_json,
+                cancelled=lambda: bool(_ensure_not_cancelled(task_id)), on_event=save_chart_event)
+            _save_document_ir(task_id, item['file_id'], ir)
+            (directory / f"{item['file_id']}.md").write_text(_ir_to_markdown(ir), encoding='utf-8')
+        update_state(task_id, reading_state='selecting_workflow', processing_phase='workflow_selection')
         with call_phase('workflow_selection'):
             report = assess(task_source_chunks(task_id, state, root, trim_references=True),
                 complete=complete_json, model=get_llm_config().model,
@@ -2025,7 +2052,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         paused = update_state(task_id, status='needs_workflow', stage='extracting',
             processing_status='needs_input', processing_error=None,
             workflow_assessment=report, artifact_manifest=artifact_manifest,
-            partial_draft=None, reading_state='workflow_unavailable')
+            reading_state='workflow_unavailable')
         _schedule_terminal_cleanup(task_id)
         return paused
     except UploadCancelled:
@@ -2050,6 +2077,9 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         raise RuntimeError("上传任务不存在或已过期")
     from .parsing_workflows import require_workflow
     require_workflow(state, required=True)
+    paper_stage_path = artifact_directory(task_id) / 'paper-stage.json'
+    paper_stage_record = json.loads(paper_stage_path.read_text()) if paper_stage_path.is_file() else {}
+    paper_stage = paper_stage_record.get('draft') if paper_stage_record.get('completed') else None
     try:
         _ensure_not_cancelled(task_id)
         source = _original_path(state)
@@ -2273,13 +2303,18 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         _save_chunk_manifest(task_id, manifest)
         update_state(
             task_id, status="reading", stage="reading", stage_index=3,
-            completed_chunks=0, total_chunks=len(all_chunks),
+            completed_chunks=0, total_chunks=len(all_chunks), processing_phase="material_extracting",
         )
-        candidates: list[dict[str, Any]] = []
-        for completed, (file_item, chunk) in enumerate(all_chunks, start=1):
+        from .parallel_extraction import ordered_extract
+        import threading
+        manifest_lock = threading.Lock()
+        completed_count = 0
+        def extract_segment(index, pair):
+            file_item, chunk = pair
             _ensure_not_cancelled(task_id)
-            manifest[completed - 1]["status"] = "processing"
-            _save_chunk_manifest(task_id, manifest)
+            with manifest_lock:
+                manifest[index]["status"] = "processing"
+                _save_chunk_manifest(task_id, manifest)
             try:
                 extraction_source = {**file_item, 'tc_material_scope':
                     (state.get('workflow_assessment') or {}).get('tc_material_scope')}
@@ -2288,19 +2323,24 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                 with call_phase("chunk_extraction", filename=file_item.get('original_filename'),
                                 pages=list(range(chunk_page, chunk_end + 1)) if chunk_page else []):
                     if multi_file:
-                        candidates.append(_read_chunk(task_id, chunk, file_item["file_id"], extraction_source))
-                    elif state.get("parser_profile", "legacy") != "legacy":
-                        candidates.append(_read_chunk(task_id, chunk, source=extraction_source))
-                    else:
-                        candidates.append(_read_chunk(task_id, chunk))
-                manifest[completed - 1]["status"] = "completed"
+                        return _read_chunk(task_id, chunk, file_item["file_id"], extraction_source)
+                    if state.get("parser_profile", "legacy") != "legacy":
+                        return _read_chunk(task_id, chunk, source=extraction_source)
+                    return _read_chunk(task_id, chunk)
             except Exception as chunk_exc:
-                manifest[completed - 1]["status"] = "failed"
-                manifest[completed - 1]["error"] = str(chunk_exc)
-                _save_chunk_manifest(task_id, manifest)
+                with manifest_lock:
+                    manifest[index].update(status="failed", error=str(chunk_exc))
+                    _save_chunk_manifest(task_id, manifest)
                 raise
-            _save_chunk_manifest(task_id, manifest)
-            update_state(task_id, completed_chunks=completed, total_chunks=len(all_chunks))
+        def segment_completed(index, value):
+            nonlocal completed_count
+            with manifest_lock:
+                manifest[index]["status"] = "completed"
+                _save_chunk_manifest(task_id, manifest)
+                completed_count += 1
+            update_state(task_id, completed_chunks=completed_count, total_chunks=len(all_chunks))
+        candidates = ordered_extract(all_chunks, extract_segment, max_workers=2,
+            check=lambda: _ensure_not_cancelled(task_id), completed=segment_completed)
 
         document_set = {}
         legacy_sources = {}
@@ -2411,86 +2451,100 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         def publish_preview(task, **kwargs):
             publish_stage_preview(task, read=get_state, write=update_state, **kwargs)
         initial_preview = _build_candidate_draft([{'result': candidate} for candidate in candidates])
-        publish_preview(task_id, paper=initial_preview.get('paper'),
+        publish_preview(task_id, paper=paper_stage['paper'] if paper_stage else initial_preview.get('paper'),
                         states=initial_preview.get('material_states'), phase='assembling')
         summary_candidates = _summary_classification_candidates(candidates)
-        partial_write = {"last_at": 0.0}
+        if paper_stage:
+            raw_draft = deepcopy(paper_stage)
+            raw_paper = raw_draft['paper']
+            bibliography_patch = deepcopy(paper_stage)
+            summary = raw_paper.get('summary') or ''
+            summary_error = paper_stage.get('summary_error')
+            motivation = raw_paper.get('research_motivation') or ''
+            motivation_error = paper_stage.get('research_motivation_error')
+            motivation_origin = paper_stage.get('research_motivation_origin')
+            current_motivation_chunks = motivation_chunks(task_id, state, data_path('parsed_markdown'))
+            summary_input = ''
+            summary_seconds = motivation_seconds = 0
+            motivation_attempts = []
+        else:
+            partial_write = {"last_at": 0.0}
 
-        def _on_summary_partial(text: str) -> None:
-            _ensure_not_cancelled(task_id)
-            now = time.monotonic()
-            if now - partial_write["last_at"] < 1.0:
-                return
-            partial_draft = _parse_partial_draft(text)
-            if partial_draft is None:
-                return
-            if isinstance(partial_draft.get('paper'), dict):
-                partial_draft['paper']['theoretical_subtype'] = None
-            partial_write["last_at"] = now
-            publish_preview(task_id, paper=partial_draft.get('paper'), phase='assembling')
+            def _on_summary_partial(text: str) -> None:
+                _ensure_not_cancelled(task_id)
+                now = time.monotonic()
+                if now - partial_write["last_at"] < 1.0:
+                    return
+                partial_draft = _parse_partial_draft(text)
+                if partial_draft is None:
+                    return
+                if isinstance(partial_draft.get('paper'), dict):
+                    partial_draft['paper']['theoretical_subtype'] = None
+                partial_write["last_at"] = now
+                publish_preview(task_id, paper=partial_draft.get('paper'), phase='assembling')
 
-        from backend.ingest.domain_extraction import SUMMARY_BOUNDARY
+            from backend.ingest.domain_extraction import SUMMARY_BOUNDARY
 
-        summary_prompt = SUMMARY_SYSTEM_PROMPT + SUMMARY_BOUNDARY
-        if document_set:
-            from backend.ingest.domain_extraction import merge_scientific_candidates
-        current_motivation_chunks = motivation_chunks(task_id, state, data_path("parsed_markdown"))
-        main_context = []
-        remaining = 16000
-        for chunk in current_motivation_chunks:
-            if chunk.get("file_role") != "main" or remaining <= 0:
-                continue
-            content = str(chunk.get("content") or "")[:remaining]
-            main_context.append({"file_id": chunk.get("file_id"), "chunk_index": chunk.get("chunk_index"),
-                                 "page_start": chunk.get("page_start"), "content": content})
-            remaining -= len(content)
-        summary_input = json.dumps({"candidates": summary_candidates, "paper_context": main_context}, ensure_ascii=False)
-        summary_started = time.monotonic()
-        with call_phase("paper_summary"):
-            raw_draft = complete_json(
-                summary_prompt,
-                summary_input,
-                on_partial=_on_summary_partial,
-            )
-        summary_seconds = time.monotonic() - summary_started
-        raw_paper = raw_draft.get("paper") if isinstance(raw_draft.get("paper"), dict) else raw_draft
-        bibliography_patch = {"paper": dict(raw_paper)}
-        if state.get("parser_profile") == "complementary":
-            from .grobid_document import apply_bibliography
-            from .publication_year import verify_document_year
-            apply_bibliography(bibliography_patch, citation_extraction,
-                               main_ir=document_set.get(citation_extraction.get("file_id")),
-                               publication_verification=verify_document_year(
-                                   citation_extraction, raw_paper, source_pdf=citation_source))
-            raw_paper = bibliography_patch["paper"]
-        abstract = raw_paper.get("abstract") or next((
-            item.get("metadata", {}).get("abstract") for item in summary_candidates
-            if isinstance(item, dict) and isinstance(item.get("metadata"), dict)
-            and item["metadata"].get("abstract")
-        ), None)
-        with call_phase("summary_retry"):
-            summary_attempts = []
-            def save_summary_attempt(attempt):
-                summary_attempts.append(attempt)
-                _atomic_write_json(artifact_directory(task_id) / "summary_attempts.json", summary_attempts)
-            summary, summary_error = choose_summary(
-                raw_paper.get("summary") or raw_draft.get("summary"), abstract,
-                summary_candidates,
-                lambda prompt, payload: complete_json(prompt, json.dumps(payload, ensure_ascii=False)),
-                on_attempt=save_summary_attempt,
-            )
-        motivation_attempts: list[dict[str, Any]] = []
-        motivation_started = time.monotonic()
-        with call_phase("motivation_retry"):
-            motivation, motivation_error, motivation_origin = choose_motivation(
-                raw_paper.get("research_motivation"), raw_paper.get("research_motivation_evidences"),
-                current_motivation_chunks, on_attempt=motivation_attempts.append,
-            )
-        motivation_seconds = time.monotonic() - motivation_started
-        raw_draft["paper"] = {**raw_paper, "summary": summary, "research_motivation": motivation}
-        raw_draft["paper"].pop("research_motivation_evidences", None)
-        if summary_error:
-            logging.getLogger(__name__).warning("论文总结需要人工核对 task=%s reason=%s", task_id, summary_error)
+            summary_prompt = SUMMARY_SYSTEM_PROMPT + SUMMARY_BOUNDARY
+            if document_set:
+                from backend.ingest.domain_extraction import merge_scientific_candidates
+            current_motivation_chunks = motivation_chunks(task_id, state, data_path("parsed_markdown"))
+            main_context = []
+            remaining = 16000
+            for chunk in current_motivation_chunks:
+                if chunk.get("file_role") != "main" or remaining <= 0:
+                    continue
+                content = str(chunk.get("content") or "")[:remaining]
+                main_context.append({"file_id": chunk.get("file_id"), "chunk_index": chunk.get("chunk_index"),
+                                     "page_start": chunk.get("page_start"), "content": content})
+                remaining -= len(content)
+            summary_input = json.dumps({"candidates": summary_candidates, "paper_context": main_context}, ensure_ascii=False)
+            summary_started = time.monotonic()
+            with call_phase("paper_summary"):
+                raw_draft = complete_json(
+                    summary_prompt,
+                    summary_input,
+                    on_partial=_on_summary_partial,
+                )
+            summary_seconds = time.monotonic() - summary_started
+            raw_paper = raw_draft.get("paper") if isinstance(raw_draft.get("paper"), dict) else raw_draft
+            bibliography_patch = {"paper": dict(raw_paper)}
+            if state.get("parser_profile") == "complementary":
+                from .grobid_document import apply_bibliography
+                from .publication_year import verify_document_year
+                apply_bibliography(bibliography_patch, citation_extraction,
+                                   main_ir=document_set.get(citation_extraction.get("file_id")),
+                                   publication_verification=verify_document_year(
+                                       citation_extraction, raw_paper, source_pdf=citation_source))
+                raw_paper = bibliography_patch["paper"]
+            abstract = raw_paper.get("abstract") or next((
+                item.get("metadata", {}).get("abstract") for item in summary_candidates
+                if isinstance(item, dict) and isinstance(item.get("metadata"), dict)
+                and item["metadata"].get("abstract")
+            ), None)
+            with call_phase("summary_retry"):
+                summary_attempts = []
+                def save_summary_attempt(attempt):
+                    summary_attempts.append(attempt)
+                    _atomic_write_json(artifact_directory(task_id) / "summary_attempts.json", summary_attempts)
+                summary, summary_error = choose_summary(
+                    raw_paper.get("summary") or raw_draft.get("summary"), abstract,
+                    summary_candidates,
+                    lambda prompt, payload: complete_json(prompt, json.dumps(payload, ensure_ascii=False)),
+                    on_attempt=save_summary_attempt,
+                )
+            motivation_attempts: list[dict[str, Any]] = []
+            motivation_started = time.monotonic()
+            with call_phase("motivation_retry"):
+                motivation, motivation_error, motivation_origin = choose_motivation(
+                    raw_paper.get("research_motivation"), raw_paper.get("research_motivation_evidences"),
+                    current_motivation_chunks, on_attempt=motivation_attempts.append,
+                )
+            motivation_seconds = time.monotonic() - motivation_started
+            raw_draft["paper"] = {**raw_paper, "summary": summary, "research_motivation": motivation}
+            raw_draft["paper"].pop("research_motivation_evidences", None)
+            if summary_error:
+                logging.getLogger(__name__).warning("论文总结需要人工核对 task=%s reason=%s", task_id, summary_error)
         from backend.ingest.state_optimization import resolve_candidates, assemble_candidates, optimization_response_schema
         optimization_attempts = []
         def save_optimization_response(response):
@@ -2515,14 +2569,15 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         })
         if document_set:
             # 全文汇总只负责叙述和书目，科学记录由已校验候选确定性组装。
-            draft = _normalize_draft({**raw_draft, "material_states": [], "key_properties": []}, preserve_citation_extraction=False)
+            draft = deepcopy(paper_stage) if paper_stage else _normalize_draft({**raw_draft, "material_states": [], "key_properties": []}, preserve_citation_extraction=False)
             draft["material_states"] = assemble_candidates(resolved_candidates)
             if state.get("parser_profile") == "complementary":
                 # 在 AI 初始快照之前生成正式表示；GET/PUT 的机械派生不能被误记为人工修改。
                 draft["material_states"] = _normalize_material_states(draft["material_states"])
-                draft["paper"]["research_materials"] = list(dict.fromkeys(
-                    item.get("material_name") or item.get("material") for item in draft["material_states"]
-                    if item.get("material_name") or item.get("material")))
+                if not paper_stage:
+                    draft["paper"]["research_materials"] = list(dict.fromkeys(
+                        item.get("material_name") or item.get("material") for item in draft["material_states"]
+                        if item.get("material_name") or item.get("material")))
         else:
             draft = _normalize_draft({**raw_draft, "material_states": [], "key_properties": []},
                                      preserve_citation_extraction=False)
@@ -2539,6 +2594,7 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         finalize_current_draft(draft, model_output=True, legacy=not bool(document_set))
         from .state_inventory import plan_states
         from .scientific_form_filling import form_sources
+        update_state(task_id, processing_phase="material_identifying")
         with call_phase("material_state_inventory"):
             plan_states(draft, [
                 {**source, "file_role": source.get("file_role", source.get("role", "main"))}
@@ -2554,6 +2610,7 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         def fill_existing_fields(prompt, content):
             return decode_optional_containers(complete_json(prompt, content, response_schema=filling_schema()))
         filling_input_states = deepcopy(draft["material_states"])
+        update_state(task_id, processing_phase="material_filling")
         with call_phase("scientific_form_filling"):
             draft["material_states"], form_filling = fill_scientific_forms(
                 draft["material_states"], form_sources(document_set, scientific_sources), fill_existing_fields,
@@ -2571,37 +2628,40 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         draft["research_motivation_error"] = motivation_error
         draft["research_motivation_origin"] = motivation_origin
         draft["summary_error"] = summary_error
-        if draft["paper"]["paper_type"] == "theoretical":
-            from backend.ingest.theoretical_subtype import assess_candidate, classify, task_sources, SUBTYPES
-            from backend.rag.llm_context import get_llm_config
-
-            subtype_sources = task_sources(task_id, state, data_path("parsed_markdown"))
-            initial_subtype = raw_paper.get("theoretical_subtype")
-            assessment = assess_candidate(subtype_sources, {
-                "value": initial_subtype, "reason": raw_paper.get("theoretical_subtype_reason"),
-                "evidences": raw_paper.get("theoretical_subtype_evidences"),
-            }, model=get_llm_config().model)
-            if assessment["status"] != "completed":
-                with call_phase("theoretical_subtype_retry"):
-                    assessment = classify(subtype_sources, model=get_llm_config().model)
-            if assessment["status"] != "completed" and initial_subtype in SUBTYPES:
-                assessment = {**assessment, "status": "uncertain", "value": initial_subtype,
-                              "reason": "首轮分类尚缺可靠贡献引句；重试未能证实，保留原值供人工核对"}
-            draft["paper"]["theoretical_subtype"] = assessment["value"]
-            draft["theoretical_subtype_assessment"] = assessment
+        if paper_stage:
+            draft['paper'] = deepcopy(paper_stage['paper'])
         else:
-            draft["paper"]["theoretical_subtype"] = None
-        from backend.ingest.keyword_extraction import select_keywords, task_sources
+            if draft["paper"]["paper_type"] == "theoretical":
+                from backend.ingest.theoretical_subtype import assess_candidate, classify, task_sources, SUBTYPES
+                from backend.rag.llm_context import get_llm_config
 
-        with call_phase("keywords_retry"):
-            keyword_assessment = select_keywords(
-                task_sources(task_id, state, data_path("parsed_markdown")),
-                initial_values=raw_paper.get("keywords_tags"),
-                initial_evidences=raw_paper.get("keywords_evidences"),
-                initial_reason=str(raw_paper.get("keywords_reason") or ""),
-            )
-        draft["keyword_assessment"] = keyword_assessment
-        draft["paper"]["keywords_tags"] = keyword_assessment["values"]
+                subtype_sources = task_sources(task_id, state, data_path("parsed_markdown"))
+                initial_subtype = raw_paper.get("theoretical_subtype")
+                assessment = assess_candidate(subtype_sources, {
+                    "value": initial_subtype, "reason": raw_paper.get("theoretical_subtype_reason"),
+                    "evidences": raw_paper.get("theoretical_subtype_evidences"),
+                }, model=get_llm_config().model)
+                if assessment["status"] != "completed":
+                    with call_phase("theoretical_subtype_retry"):
+                        assessment = classify(subtype_sources, model=get_llm_config().model)
+                if assessment["status"] != "completed" and initial_subtype in SUBTYPES:
+                    assessment = {**assessment, "status": "uncertain", "value": initial_subtype,
+                                  "reason": "首轮分类尚缺可靠贡献引句；重试未能证实，保留原值供人工核对"}
+                draft["paper"]["theoretical_subtype"] = assessment["value"]
+                draft["theoretical_subtype_assessment"] = assessment
+            else:
+                draft["paper"]["theoretical_subtype"] = None
+            from backend.ingest.keyword_extraction import select_keywords, task_sources
+
+            with call_phase("keywords_retry"):
+                keyword_assessment = select_keywords(
+                    task_sources(task_id, state, data_path("parsed_markdown")),
+                    initial_values=raw_paper.get("keywords_tags"),
+                    initial_evidences=raw_paper.get("keywords_evidences"),
+                    initial_reason=str(raw_paper.get("keywords_reason") or ""),
+                )
+            draft["keyword_assessment"] = keyword_assessment
+            draft["paper"]["keywords_tags"] = keyword_assessment["values"]
         if document_set:
             carry_state_evidence(draft, claims)
             final_claims = claims_from_candidates(draft, document_set, legacy_sources=legacy_sources)
@@ -2618,9 +2678,10 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                                   profile=state["parser_profile"], parser="coverage_audit")
             apply_claim_evidence(draft, final_claims)
         # 两条解析路径在此收敛到同一论文级材料家族判断。
-        with call_phase("material_family_retry"):
-            _classify_material_family_draft(task_id, state, draft, summary_candidates,
-                                            str(raw_paper.get("material_family_reason") or ""))
+        if not paper_stage:
+            with call_phase("material_family_retry"):
+                _classify_material_family_draft(task_id, state, draft, summary_candidates,
+                                                str(raw_paper.get("material_family_reason") or ""))
         generation_issues = list(draft.get("generation_issues") or [])
         motivation_messages = {
             "source_missing": "当前任务没有可读取的有效主文，请核对文件角色和解析文本",
@@ -2677,7 +2738,10 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         # 候选单独持久保存，不能把推断或通用知识写进提取值。
         from backend.ingest.property_evidence import generate_upload_suggestions
         publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='reviewing')
-        update_state(task_id, suggestions_status='running', suggestions_error=None)
+        if paper_stage:
+            from .paper_first import paper_conflicts
+            draft.setdefault('generation_issues', []).extend(paper_conflicts(paper_stage['paper'], draft['material_states']))
+        update_state(task_id, suggestions_status='running', suggestions_error=None, processing_phase='material_reviewing')
         suggestion_results: dict[str, Any] = {}
         try:
             if not state.get("is_shadow"):
@@ -2686,6 +2750,7 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                         scientific_sources=[{**source,"file_role":next((item.get('role') or 'main' for item in sources if item.get('file_id')==source['file_id']),source['file_role'])}
                                             for source in scientific_sources],
                         on_progress=lambda done, total: update_state(task_id, suggestions_completed=done, suggestions_total=total),
+                        field_scope='states' if paper_stage else None,
                         on_preview=lambda value: publish_preview(task_id, paper=value.get('paper'),
                             states=value.get('material_states'), phase='reviewing'),
                         skip_auto_fill=({"paper.summary"} if summary_error else set()) |

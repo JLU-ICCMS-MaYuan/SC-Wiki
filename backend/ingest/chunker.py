@@ -168,9 +168,15 @@ def _split_by_blank_line(text: str) -> list[str]:
 
 def _split_by_sentence(text: str, max_tokens: int) -> list[str]:
     """按句子切分，每块不超过 max_tokens。"""
-    # 按句号、问号、感叹号、分号切分
-    sentences = re.split(r"(?<=[。！？；.\!?;])\s*", text)
-    sentences = [s.strip() for s in sentences if s.strip()]
+    # 小数和公式中的点不是句末；常见图号/称谓缩写与后文一起保留。
+    boundaries = []
+    for match in re.finditer(r"(?<=[。！？；])\s*|(?<=[.!?;])\s+(?=[A-Z\"“])", text):
+        prefix = text[:match.start()]
+        if re.search(r"\b(?:Fig|Figs|Eq|Eqs|Dr|Mr|Mrs|Prof|vs|et al|e\.g|i\.e)\.$", prefix, re.I):
+            continue
+        boundaries.append(match.end())
+    edges = [0, *boundaries, len(text)]
+    sentences = [text[a:b] for a, b in zip(edges, edges[1:]) if a < b]
 
     chunks = []
     current = []
@@ -179,7 +185,7 @@ def _split_by_sentence(text: str, max_tokens: int) -> list[str]:
     for sent in sentences:
         sent_len = len(sent) // 4
         if current_len + sent_len > max_tokens and current:
-            chunks.append(" ".join(current))
+            chunks.append("".join(current))
             current = [sent]
             current_len = sent_len
         else:
@@ -187,7 +193,7 @@ def _split_by_sentence(text: str, max_tokens: int) -> list[str]:
             current_len += sent_len
 
     if current:
-        chunks.append(" ".join(current))
+        chunks.append("".join(current))
 
     return chunks
 

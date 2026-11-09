@@ -28,6 +28,8 @@
 | [数据表关系与内容说明](table-relationships-AI-writed.md) | 核心地图、39 张数据表、表单定义及本地数据快照 | MySQL、科学数据模型、版本化表单 |
 | [谱线人工编辑与联动调参](spectrum-manual-editor-demo.md) | 正式谱点人工修订、实际区间积分与历史保存；独立Demo另行保留 | React、SVG、谱运行表、版本与权限 |
 
+本轮论文先行、受限并发与来源标记的实现及验证边界见[解析管线](pdf-parsing-pipeline.md#paper-first-processing)，对应#228/#229/#230；CaH6同源网页黑盒单独记录，不能从模块回归推断整篇通过。
+
 ## 功能组成
 
 ```text

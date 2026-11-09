@@ -38,6 +38,8 @@ def test_worker_dispatch_cooperatively_finishes_cancel_after_late_stage(tmp_path
     monkeypatch.setattr(upload_tasks,"available_published_path",lambda _,p:p)
     monkeypatch.setattr(paths,"object_mode",lambda:False)
     monkeypatch.setattr(llm_context,"get_llm_config",lambda:SimpleNamespace(model="fixture"))
+    from backend.ingest import paper_first
+    monkeypatch.setattr(paper_first, 'prepare_paper', lambda *_a, **_kw: {'paper': {}, 'material_states': []})
     def model(*_a,**_kw):
         return dict(paper_type="theoretical",theoretical_subtype="calculation",superconductor_kind="conventional",
             reason="本文计算电声耦合和Tc",source_ids=["review-source-0"],contribution_source_ids=["review-source-0"],tc_materials=[],paper={})

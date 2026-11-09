@@ -183,7 +183,7 @@ def _add_conditions(draft, additions, batch):
 
 def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip_auto_fill=(),
                  protected_keys=(), save=None, on_progress=None, on_preview=None, max_passes=3,
-                 initial_results=None, on_response=None):
+                 initial_results=None, on_response=None, preserve_paper=False):
     """新增或真实依赖变化才进入下一轮，已完成项直接复用。"""
     from .property_evidence import record_batches
     from .field_review import changed_keys, reusable
@@ -199,7 +199,7 @@ def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip
     results, batch_count, errors = deepcopy(initial_results or {}), 0, []
     def current_snapshot():
         from .material_state_contract import research_materials
-        if current.get('material_states'):
+        if current.get('material_states') and not preserve_paper:
             current.setdefault('paper', {})['research_materials'] = research_materials(current['material_states'])
         return rebuild(current)
     snapshot = current_snapshot()

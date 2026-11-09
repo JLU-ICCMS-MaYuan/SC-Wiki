@@ -4,6 +4,7 @@ from __future__ import annotations
 from collections import defaultdict
 from collections import deque
 from contextlib import contextmanager
+from contextlib import nullcontext
 from contextvars import ContextVar, copy_context
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -169,14 +170,22 @@ def input_identity(state):
 
 
 class ModelRuntime:
-    def __init__(self, task_id, generation, root, read_state, write_state, lock, *, identity):
+    def __init__(self, task_id, generation, root, read_state, write_state, lock, *, identity, request_slot=None):
         self.task_id, self.generation, self.root = task_id, generation, Path(root)
         self.read_state, self.write_state, self.lock = read_state, write_state, lock
         self.identity = identity
+        self.request_slot = request_slot
         self.occurrences = defaultdict(int)
+        self.occurrence_lock = threading.Lock()
         self.clients = []
         self.receiving = threading.Event()
         self.last_heartbeat = 0.0
+
+    def fork(self):
+        runtime = ModelRuntime(self.task_id, self.generation, self.root, self.read_state,
+                               self.write_state, self.lock, identity=self.identity, request_slot=self.request_slot)
+        runtime.occurrences, runtime.occurrence_lock = self.occurrences, self.occurrence_lock
+        return runtime
 
     def check(self):
         state = self.read_state()
@@ -282,8 +291,9 @@ class ModelRuntime:
         request = {"system_prompt": system_prompt, "user_prompt": user_prompt,
             **{key: value for key, value in options.items() if key not in {"on_partial", "on_call"}}}
         key = digest({"identity": self.identity, "phase": phase, "request": request})
-        occurrence = self.occurrences[key]
-        self.occurrences[key] += 1
+        with self.occurrence_lock:
+            occurrence = self.occurrences[key]
+            self.occurrences[key] += 1
         directory = self.root / "calls" / f"{key}-{occurrence}"
         try:
             payload = json.loads(user_prompt)
@@ -323,10 +333,11 @@ class ModelRuntime:
                 if options.get("on_partial"):
                     options["on_partial"](text)
             def invoke():
-                return complete(prepared["system_prompt"], prepared["user_prompt"],
-                    **{key: value for key, value in prepared.items() if key not in {"system_prompt", "user_prompt"}},
-                    on_partial=receive, **({"on_call": options["on_call"]} if options.get("on_call") else {}),
-                    _single_attempt=True)
+                with self.request_slot(self) if self.request_slot else nullcontext():
+                    return complete(prepared["system_prompt"], prepared["user_prompt"],
+                        **{key: value for key, value in prepared.items() if key not in {"system_prompt", "user_prompt"}},
+                        on_partial=receive, **({"on_call": options["on_call"]} if options.get("on_call") else {}),
+                        _single_attempt=True)
             try:
                 if not prepared_once and not compacted:
                     prepared = self.interruptible(lambda: prepare_request(request, directory, budget=budget))
@@ -381,6 +392,7 @@ class ModelRuntime:
 
 
 def start_runtime(task_id):
+    from .request_slots import upload_request_slot
     from .upload_tasks import get_state, update_state, upload_task_lock, artifact_directory
     from backend.rag.llm_context import get_llm_config
     with upload_task_lock(task_id):
@@ -397,7 +409,7 @@ def start_runtime(task_id):
                      execution_resumable=True)
     return ModelRuntime(task_id, generation, artifact_directory(task_id) / "model-runtime" / input_hash,
         lambda: get_state(task_id), lambda **changes: update_state(task_id, **changes),
-        lambda: upload_task_lock(task_id), identity=identity)
+        lambda: upload_task_lock(task_id), identity=identity, request_slot=upload_request_slot)
 
 
 def _pause_task_state(task_id):
