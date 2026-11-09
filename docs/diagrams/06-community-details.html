@@ -195,8 +195,9 @@
       "title": "读取前文、检索并生成",
       "summary": "任务开始读前文；问题经独立 Embedding 检索至多8片段",
       "owner": "Python 生成器",
-      "description": "Worker 取得容量租约并认领同题队首后，在任务开始时只读取当时 origin=ai 且 status=visible 的可用公开首答与追加段，保存前文 manifest 快照，而不是使用入队时旧前文；公开真人答案不进入模型前文。retrieve_sources 调用 search_by_semantics(question, top_k=8)，问题先由独立 Embedding 以 purpose=query 向量化，再查当前 Qdrant 主集合；之后过滤当前批准且 revision 匹配的来源，并可合并历史引用。",
+      "description": "Worker 取得容量租约并认领同题队首后，在任务开始时只读取当时 origin=ai 且 status=visible 的可用公开首答与追加段，保存前文 manifest 快照，而不是使用入队时旧前文；公开真人答案不进入模型前文。retrieve_sources 调用 search_by_semantics(question, top_k=8)，问题先由独立 Embedding 以 purpose=query 向量化，再查当前 Qdrant 主集合；之后按当前批准状态与可用的 revision 元数据过滤来源，并可合并历史引用。",
       "notes": [
+        "带 source_kind 的新片段在向量层要求原始 paper_revision 等于当前批准版；社区层只拒绝带非空但不匹配 revision 的 row。缺失 revision 的旧片段可继续，并在来源快照回填当前 content_revision，不代表已证明其原始版本匹配。",
         "context_rows 明确限定 Entry.origin='ai' 与 Entry.status='visible'；即使真人答案公开可读，也不会成为 [A...] 前文。",
         "前文是待回应观点，不是论文证据；读取时排除来源或祖先依赖已失效的内容。",
         "top_k=8 限制每次新检索片段数，合并历史来源后的提示来源总数不应误称为始终只有 8。",
@@ -205,7 +206,10 @@
         "空公开库与 retrieval_failed 走不同分支。"
       ],
       "code": "backend/community/answers.py::run / context_rows / manifest；backend/community/generation.py::retrieve_sources / approved_sources / create_answer；backend/ingest/embedder.py；backend/rag/search/vector_search.py",
-      "links": [{"href": "06-community.html#ai-generate", "label": "返回本功能主干"}]
+      "links": [
+        {"href": "06-community.html#ai-generate", "label": "返回本功能主干"},
+        {"href": "#context-too-long", "label": "查看上下文过长失败分支"}
+      ]
     },
     {
       "id": "ai-publish",
@@ -601,14 +605,36 @@
       "title": "失败继续，重试排队尾",
       "summary": "不阻塞同题后续 FIFO 项",
       "owner": "Python 队列",
-      "description": "生成、复核或 Worker 异常会把当前请求标为 failed 并保留安全错误码，finally 再 dispatch 同题下一队首，后续任务继续。超管显式重试失败答案时创建新的请求和 sequence 排到该问题队尾，retry_of 指向原项，而不是原地覆盖或插队。",
+      "description": "生成、复核或 Worker 异常会把当前请求标为 failed 并保留安全错误码，finally 再 dispatch 同题下一队首，后续任务继续。上游上下文长度异常明确映射为 context_too_long。超管显式重试失败答案时创建新的请求和 sequence 排到该问题队尾，retry_of 指向原项，而不是原地覆盖或插队。",
       "notes": [
         "失败项保留供受保护队列查看。",
         "同题 FIFO 与失败继续并不矛盾：当前队首结束后才推进下一项。",
+        "context_too_long 不会因失败继续而变成成功，也不会主动截断完整前文后冒充原请求完成。",
         "监督 reconcile 可补齐投递遗漏或标记过期任务。"
       ],
-      "code": "backend/community/answers.py::finish_failure / retry_answer / dispatch / reconcile_answers",
-      "links": [{"href": "06-community.html#queue-failure", "label": "返回主干对应支线"}]
+      "code": "backend/community/answers.py::run / finish_failure / retry_answer / dispatch / reconcile_answers",
+      "links": [
+        {"href": "06-community.html#queue-failure", "label": "返回主干对应支线"},
+        {"href": "#context-too-long", "label": "展开 context_too_long 错误映射"}
+      ]
+    },
+    {
+      "id": "context-too-long",
+      "attachTo": "ai-generate",
+      "side": "left",
+      "kind": "stop",
+      "label": "上游上下文过长",
+      "title": "context_too_long 明确失败",
+      "summary": "保留错误码；不主动截断前文后继续",
+      "owner": "Python 生成器 / LLM 供应商 / 队列",
+      "description": "上游异常 code 为 context_length_exceeded 或 context_window_exceeded，或 HTTP 400 文本包含 context length、context window、maximum context 时，当前任务错误映射为 context_too_long。finish_failure 将请求标为 failed 并保留错误；finally 仍推进同题下一队首，不把当前项伪装为完成。",
+      "notes": [
+        "该分支与一般 generation_failed 分开，便于识别完整前文和来源超出模型上下文。",
+        "当前实现不在这条异常路径主动截断前文、减少来源后自动重试；显式重试仍按新请求排到队尾。",
+        "失败继续只保证后续任务可执行，不改变当前请求的失败结果。"
+      ],
+      "code": "backend/community/answers.py::run / finish_failure / dispatch；docs/specs/143-question-answer-threads/spec.md",
+      "links": [{"href": "#queue-failure", "label": "返回失败继续与队尾重试"}]
     },
     {
       "id": "publish-conflict",

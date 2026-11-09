@@ -513,7 +513,7 @@
       "owner": "上传者或审核员 / 字段工作流 / 模型核对",
       "description": "ready 后修改或认可当前字段。普通修改保存人工理由及链接、图片、PDF、长文字资料，可主动模型核对或送审时统一核对；明确免证按钮写入 approve + mode=without_evidence，清空 AI 科学结论并标黄，不调用该字段模型。有效决定可随送审、审核、批准和检索保留。",
       "notes": [
-        "普通查看、输入和保存不自动启动模型；补入人工资料，或当前值、原始来源、适用范围变化，会使旧免证决定失效并转待核对。",
+        "普通查看、输入和保存不自动启动模型；当前值、原始论文来源或真实适用范围变化，或当前值形成完整人工补证（非空 reason 且至少一项真实 items），会使旧免证决定失效并转待核对；只补理由或缺证说明不构成完整补证。",
         "格式、必填、结构及未验证派生等程序门不被黄色绕过；有效黄色字段可以送审和批准，但整篇批准仍是独立后续。"
       ],
       "code": "backend/api/evidence.py::save_field_decision / enqueue_review；backend/ingest/field_decisions.py::decide；backend/ingest/field_waiver.py；backend/ingest/manual_evidence.py；backend/ingest/manual_links.py",
@@ -985,7 +985,7 @@
       "owner": "上传者或审核员 / field-review-v2",
       "description": "显式按钮在 review_token 和程序资格有效时保存 action=approve、mode=without_evidence，当前投影清空 AI 理由、证据关联和模型审核字段，并显示黄色。该字段有效时普通提交不再调用模型，可继续送审、审核员批准、入库与检索。",
       "notes": [
-        "不删除审计历史；当前值、来源、范围或人工资料状态变化会使决定失效。程序格式、结构和派生资格仍不可绕过。"
+        "不删除审计历史；当前值、原始来源、真实适用范围变化，完整补证（非空 reason 且至少一项真实 items），或字段不再满足免证资格，会使决定失效。只补理由或缺证说明不构成完整补证；程序格式、结构和派生资格仍不可绕过。"
       ],
       "code": "backend/api/evidence.py::save_field_decision；backend/ingest/field_decisions.py::decide；backend/ingest/field_waiver.py；frontend/src/components/FieldReviewFeedback.tsx",
       "links": [
@@ -1008,13 +1008,13 @@
       "attachTo": "field-waiver",
       "side": "left",
       "kind": "wait",
-      "label": "值 / 来源 / 范围 / 资料变化",
+      "label": "值 / 来源 / 范围变化 / 完整补证",
       "returnTo": "field-review-workflow",
       "returnLabel": "按当前版本重新处理",
       "title": "旧免证决定失效并转待核对",
       "summary": "stale / unchecked / pending_review",
       "owner": "字段版本与来源校验程序",
-      "description": "内容摘要、waiver_source_hash 或状态范围不再匹配，或补入人工理由与资料后，旧 without_evidence 不再有效；当前字段转 unchecked / pending_review。补证后走普通模型核对，不能把黄色旧决定冒充新版本通过。",
+      "description": "内容摘要、waiver_source_hash 或状态范围不再匹配，或当前人工记录同时具备非空 reason 和至少一项真实 items 后，旧 without_evidence 不再有效；只补理由或缺证说明不触发完整补证分支。当前字段转 unchecked / pending_review；完整补证后走普通模型核对，不能把黄色旧决定冒充新版本通过。",
       "notes": [],
       "code": "backend/ingest/field_waiver.py::active / project；backend/ingest/field_review.py::valid_field_decision / needs_review / blocking；backend/ingest/field_input.py::bind",
       "links": [

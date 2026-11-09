@@ -566,7 +566,7 @@
         "普通人工资料包含链接、图片、PDF 各最多 10 项及一个最长 100000 字符的长文字框；单文件最大 10 MiB，PDF 读取最多 20 页、正文最多 100000 字符。保存链接不触发网络或模型，只有核对时才按公开地址与格式边界读取。",
         "普通路径要求实际修改字段有人工理由和至少一项资料；模型可立即核对或提交时核对。读取失败、格式错误或技术失败保留真实回执，不伪装为已读或科学通过。",
         "without_evidence 是 field-review-v2 的 approve 人工决定，不是模型支持；有效时该字段普通提交不再发起模型，并清空 AI 理由、证据关联和模型审核字段。前端以 waived 黄色状态显示。",
-        "补入人工资料、修改当前值、原始论文来源变化或状态适用范围变化会使旧免证决定失效；结构类、未验证派生、非法空值或不满足字段 Schema 的当前值不能免证放行。",
+        "当前值形成完整人工补证（非空 reason 且至少一项真实 items）、修改当前值、原始论文来源变化或真实状态适用范围变化，会使旧免证决定失效；只补理由或缺证说明不构成完整补证。结构类、未验证派生、非法空值或不满足字段 Schema 的当前值不能免证放行。",
         "有效黄色可以进入送审、审核员批准、入库与检索；仍须通过任务 ready、权限、来源、流程绑定、整篇提交及最终审核员批准等其他门禁。当前工作区 #226 新版正式批准与搜索验收仍受本机 #225 迁移缺失阻塞，不把实现画成该黑盒已完成。"
       ],
       "code": "backend/api/evidence.py::save_field_decision / enqueue_review；backend/ingest/field_input.py::bind；backend/ingest/field_decisions.py::detail / decide；backend/ingest/field_review.py::valid_field_decision / blocking；backend/ingest/field_waiver.py；backend/ingest/manual_evidence.py；backend/ingest/manual_links.py",
@@ -1256,11 +1256,11 @@
       "kind": "wait",
       "label": "普通修改与人工资料",
       "returnTo": "field-review-workflow",
-      "returnLabel": "保存并复用同版本结果",
+      "returnLabel": "主动单字段重查；提交门复用有效结果",
       "title": "人工理由与多源资料进入普通模型核对",
       "summary": "可立即核对，也可提交/批准检查时统一核对",
       "owner": "上传者或审核员 / 人工资料存储 / 字段核对 Worker",
-      "description": "实际修改字段后，普通路径保存人工判断理由，并提供链接、图片、PDF、单个长文字中的一项或多项。field_input.bind 把当前字段值、原论文来源和人工资料摘要绑定为 field_input_token；显式单字段核对或提交/批准检查只处理当前需核对字段。同版本 supported 与有效人工决定复用，普通查看、输入和保存不追加模型调用。",
+      "description": "实际修改字段后，普通路径保存人工判断理由，并提供链接、图片、PDF、单个长文字中的一项或多项。field_input.bind 把当前字段值、原论文来源和人工资料摘要绑定为 field_input_token；显式单字段核对必须携带一个 retry_keys 项和匹配的 expected_field_token，并强制核对该指定字段。提交/批准检查不指定重试字段，复用仍有效的同版本 supported 与有效人工决定，只把 needs_review 的字段交给核对 Worker。普通查看、输入和保存不追加模型调用。",
       "notes": [
         "链接、图片、PDF 各最多 10 项，文字只用一个最长 100000 字符输入框；图片/PDF/旧文本单文件最大 10 MiB，PDF 最多 20 页和 100000 正文字符。超限、不可读或格式错误明确失败，不自动裁剪后冒充完整读取。",
         "保存 HTTP/HTTPS 链接不触发网络；核对时只允许公网地址、限制重定向和 10 MiB 读取，支持可读取文本或 PDF。网络 403、无正文、加密/超页 PDF 等保留 not_read 或失败回执，不伪称模型已读。",
@@ -1335,7 +1335,7 @@
       "description": "valid_field_decision 与 field_waiver.active / project 共同检查 field-review-v2、approve、内容摘要、来源摘要和 scope_matches。当前值改变、paper_source_hash 与 waiver_source_hash 不一致、状态适用范围变化、字段不再满足免证资格，或当前人工理由与资料已补齐，都会使旧 without_evidence 失效；详情和摘要转为 unchecked / stale / pending_review，AI 理由保持为空。",
       "notes": [
         "换值或换原始来源时，旧人工资料不能自动成为新值依据；服务端清空当前草稿说明和 items 以待重新填写，历史行仍保留。",
-        "补入人工理由与资料后不再满足‘无人工资料’语义，黄色转待核对并进入普通模型路径；只有重新形成当前版本有效决定才可复用。",
+        "当前人工记录同时具备非空 reason 和至少一项真实 items 后，不再满足‘无人工资料’语义，黄色转待核对并进入普通模型路径；只补理由或缺证说明仍可保留有效黄色，只有重新形成当前版本有效决定才可复用。",
         "失效不是模型判定不通过，也不是技术失败；它只是旧人工决定不能绑定新内容。提交门的 blocking 会阻止继续沿用旧结果。"
       ],
       "code": "backend/ingest/field_waiver.py::active / project；backend/ingest/field_review.py::valid_field_decision / needs_review / blocking；backend/ingest/field_input.py::bind；backend/ingest/manual_evidence.py::_ensure；frontend/src/components/EvidenceWorkflow.tsx",

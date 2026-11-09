@@ -289,10 +289,15 @@
       "notes": [
         "信息不足时只问一个关键澄清问题，不执行后续设计、discuss 或 reviewer。",
         "只有 READY 才进入 design_router→design_search→design_curator→design_evidence→discuss 的完整路径。设计检索同样调用 search_by_semantics，默认或逻辑 paper_chunks 使用当前配置主集合；显式传入的其他集合仍按原名查询，不能宣称这些集合均已由 #222 重建。",
-        "想法与 discuss 由检索证据加模型生成，reviewer 仅按条件额外执行；这些输出不构成科研结论，完整路径执行期间不逐步推送 review verdict。"
+        "design_curator 会把筛选结果写入 curated_chunks，但 design_evidence 当前仍格式化原始 retrieval_result；筛选输出不进入想法生成 prompt。单集合检索失败可保留其他集合，全部失败可按空证据继续。",
+        "想法与 discuss 使用原始检索证据加模型生成，reviewer 仅按条件额外执行；这些输出不构成科研结论，完整路径执行期间不逐步推送 review verdict。"
       ],
-      "code": "backend/rag/agent/graph.py::clarify_node / clarify_router / build_graph / run；backend/rag/service.py::chat_stream",
-      "links": [{"href": "05-rag-qa.html#explore-review", "label": "返回主干对应支线"}]
+      "code": "backend/rag/agent/graph.py::clarify_node / design_curator_node / design_evidence_node / clarify_router / build_graph / run；backend/rag/inspiration/retrieval.py；backend/rag/service.py::chat_stream",
+      "links": [
+        {"href": "05-rag-qa.html#explore-review", "label": "返回主干对应支线"},
+        {"href": "#explore-retrieval-degraded", "label": "查看检索与筛选降级边界"},
+        {"href": "#explore-revise", "label": "查看 REVISE 同次调用重设计循环"}
+      ]
     },
     {
       "id": "explore-clarify",
@@ -311,6 +316,44 @@
       ],
       "code": "backend/rag/agent/graph.py::clarify_router / build_graph / run；backend/rag/service.py::chat_stream",
       "links": [{"href": "05-rag-qa.html#explore-clarify", "label": "返回主干澄清支线"}]
+    },
+    {
+      "id": "explore-retrieval-degraded",
+      "attachTo": "explore-review",
+      "side": "right",
+      "kind": "wait",
+      "label": "单集合失败或空证据",
+      "title": "Inspiration 检索降级与筛选边界",
+      "summary": "保留可用集合；全部检索失败仍可按空证据继续",
+      "owner": "Inspiration retrieval / curator / design_evidence",
+      "description": "execute_retrieval 逐集合调用独立 Embedding 与 search_by_semantics；单集合异常只记录 err 并继续，保留其他集合结果。全部集合失败时 chunks=[]，不会直接转成 Inspiration 请求失败。curator 在无 chunks 时直接返回；其模型调用、JSON 解析等 try 内异常保留全部 chunks，但论文标题加载位于该 try 之外，不能概括为所有筛选异常都降级。",
+      "notes": [
+        "design_curator_node 只把筛选结果写入 curated_chunks；design_evidence_node 仍调用 format_rag_context(retrieval_result)，所以原始检索结果才是想法生成的实际证据输入。",
+        "空证据继续不等于已检索到支持材料；后续模型调用自身失败仍走请求异常路径。",
+        "当前 kg_results 固定为空，不应把 Inspiration 描述成同时完成知识图谱检索。"
+      ],
+      "code": "backend/rag/inspiration/retrieval.py::execute_retrieval / format_rag_context；backend/rag/inspiration/curator.py::curate_papers；backend/rag/agent/graph.py::design_curator_node / design_evidence_node",
+      "links": [{"href": "#explore-review", "label": "返回 Inspiration 主分支"}]
+    },
+    {
+      "id": "explore-revise",
+      "attachTo": "explore-review",
+      "side": "right",
+      "kind": "wait",
+      "label": "discuss 回复含 REVISE:",
+      "title": "REVISE 在同次图调用内重新设计",
+      "summary": "discuss → design_router，不等待下一轮",
+      "owner": "Inspiration LangGraph / discuss_router",
+      "description": "discuss_node 的回答包含 REVISE: 时把 stage 设为 design，并递增 iteration；discuss_router 随即返回 design，图中边回到 design_router，在同一次 _graph.invoke 内重新执行检索、筛选、想法生成和 discuss。只有 discuss_end 才结束当前完整路径。",
+      "notes": [
+        "这是当前 LangGraph 调用内的循环，不是先把 REVISE 回复回放给用户、再等待下一轮请求。",
+        "run 使用 recursion_limit=30；不能把 REVISE 描述成无限循环。",
+        "若最终 discuss 不含 REVISE:，才进入 discuss_end 并由 service 回放 answer、返回 ideas。"
+      ],
+      "code": "backend/rag/agent/graph.py::discuss_node / discuss_router / build_graph / run",
+      "returnTo": "explore-review",
+      "returnLabel": "回到 design_router 重新设计",
+      "links": [{"href": "#explore-replay", "label": "查看 discuss_end 后的完成回放"}]
     },
     {
       "id": "explore-replay",
