@@ -1,0 +1,194 @@
+{
+  "at": "2026-11-09T02:34:52.917533+00:00",
+  "migration": {
+    "citation_match_cache": true,
+    "matching_snapshot": true,
+    "match_evidence": true,
+    "heads": [
+      "20261102_0160",
+      "20261106_0225"
+    ]
+  },
+  "task": {
+    "task_id": "005639e78e004c56ab817f4cca589d7b",
+    "user_id": 2,
+    "files": [
+      {
+        "file_id": "b4a06b47c95546f0be09829c10d3e382",
+        "client_id": "09f0d9dcb9fc439ba6146f6d38f4ce09",
+        "role": "main",
+        "declared_role": "main",
+        "original_filename": "2017 YHn LaHn-彭枫.pdf",
+        "media_type": "application/pdf",
+        "kind": "pdf",
+        "size": 3476148,
+        "sort_order": 0,
+        "upload_status": "completed",
+        "extraction_status": "waiting",
+        "error": null,
+        "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "stored_path": "upload_PDFs/005639e78e004c56ab817f4cca589d7b/b4a06b47c95546f0be09829c10d3e382/998f6319a7cd4c959ab04eeca214c179.pdf",
+        "source_file_path": "upload_PDFs/005639e78e004c56ab817f4cca589d7b/b4a06b47c95546f0be09829c10d3e382/998f6319a7cd4c959ab04eeca214c179.pdf"
+      },
+      {
+        "file_id": "3270143b09ee4d8aa2fd184f4ddcdf53",
+        "client_id": "ebd8fff4827d46dd834b8b0da427ca1a",
+        "role": "supplementary",
+        "declared_role": "supplementary",
+        "original_filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "media_type": "application/pdf",
+        "kind": "pdf",
+        "size": 14260391,
+        "sort_order": 1,
+        "upload_status": "completed",
+        "extraction_status": "waiting",
+        "error": null,
+        "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+        "stored_path": "upload_PDFs/005639e78e004c56ab817f4cca589d7b/3270143b09ee4d8aa2fd184f4ddcdf53/2888afc4eb4e4a308b5d45a069665f1a.pdf",
+        "source_file_path": "upload_PDFs/005639e78e004c56ab817f4cca589d7b/3270143b09ee4d8aa2fd184f4ddcdf53/2888afc4eb4e4a308b5d45a069665f1a.pdf"
+      }
+    ],
+    "status": "extracting",
+    "stage": "extracting",
+    "job_id": "417fe505-b64f-4e6c-ad97-e43a686f193e",
+    "parser_profile": "complementary",
+    "llm_provider": "server:LLM2",
+    "execution_model": {
+      "provider": "server:LLM2",
+      "model": "gpt-6.1-sol",
+      "catalog_id": "LLM2",
+      "input_hash": "20ffa30767a04dd5bca3f821caecb1ab1c6b48757d31328c34b763fd0c5b63ca",
+      "endpoint_hash": "8f11cc1d483994c69a25d434dbc98dc8be8e43bd63ef3a59af2f68795f62e5af"
+    },
+    "model_activity": {
+      "status": "processing",
+      "updated_at": 1794191591.4720461,
+      "phase": "extracting_sources",
+      "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+      "attempt": 0,
+      "pages": [],
+      "action": null,
+      "note": null,
+      "error": null,
+      "retry_at": null,
+      "history": [
+        {
+          "status": "processing",
+          "updated_at": 1794191529.60247,
+          "phase": "extracting_sources",
+          "filename": "2017 YHn LaHn-彭枫.pdf",
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null
+        },
+        {
+          "status": "processing",
+          "updated_at": 1794191591.4720461,
+          "phase": "extracting_sources",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null
+        }
+      ]
+    }
+  },
+  "workers": [
+    {
+      "name": "eb43814540ae45e2bd51511299043601",
+      "state": "idle",
+      "pid": 83983,
+      "queues": [
+        "scwiki-upload"
+      ],
+      "job": null
+    },
+    {
+      "name": "d02e91eb5a504922ab049309d5af6f21",
+      "state": "idle",
+      "pid": 83982,
+      "queues": [
+        "scwiki-upload"
+      ],
+      "job": null
+    },
+    {
+      "name": "3dca6e2c812f439a84beb4b03c91d90c",
+      "state": "idle",
+      "pid": 83979,
+      "queues": [
+        "scwiki-upload"
+      ],
+      "job": null
+    },
+    {
+      "name": "9aec1c0d76c0406a98caef96636d394c",
+      "state": "idle",
+      "pid": 83974,
+      "queues": [
+        "scwiki-upload"
+      ],
+      "job": null
+    },
+    {
+      "name": "6015d111f9c246938342e3a0672424fa",
+      "state": "idle",
+      "pid": 83981,
+      "queues": [
+        "scwiki-upload"
+      ],
+      "job": null
+    },
+    {
+      "name": "16744124fb784994b1adddaf092a0977",
+      "state": "busy",
+      "pid": 83975,
+      "queues": [
+        "scwiki-upload"
+      ],
+      "job": "417fe505-b64f-4e6c-ad97-e43a686f193e"
+    },
+    {
+      "name": "997d5702b2964649b2dcaf9f97cb710c",
+      "state": "idle",
+      "pid": 83977,
+      "queues": [
+        "scwiki-upload"
+      ],
+      "job": null
+    },
+    {
+      "name": "04d9c6b12c16461ebb8c43203d860159",
+      "state": "idle",
+      "pid": 83980,
+      "queues": [
+        "scwiki-upload"
+      ],
+      "job": null
+    },
+    {
+      "name": "044bd695db324bd5b12abeb740027180",
+      "state": "idle",
+      "pid": 83976,
+      "queues": [
+        "scwiki-upload"
+      ],
+      "job": null
+    },
+    {
+      "name": "10cc86d637a349048c6e4a7100bf81be",
+      "state": "idle",
+      "pid": 83978,
+      "queues": [
+        "scwiki-upload"
+      ],
+      "job": null
+    }
+  ]
+}

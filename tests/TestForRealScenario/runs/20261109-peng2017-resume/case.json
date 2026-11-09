@@ -1,0 +1,57 @@
+{
+  "files": [
+    {
+      "path": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261106-peng2017/sources/2017 YHn LaHn-彭枫.pdf",
+      "role": "main",
+      "size": 3476148,
+      "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846"
+    },
+    {
+      "path": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261106-peng2017/sources/2017 YHn LaHn-彭枫 Supplementary.pdf",
+      "role": "supplementary",
+      "size": 14260391,
+      "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93"
+    }
+  ],
+  "accounts": {
+    "user": {
+      "email": "myth620137018@163.com",
+      "browser": "safari",
+      "origin": "http://127.0.0.1:5173"
+    },
+    "superadmin": {
+      "email": "mayuan_mark@163.com",
+      "browser": "chrome",
+      "origin": "http://localhost:5173"
+    }
+  },
+  "source_sha": "dd256c176345a05d817e1e2027354245ee36e030",
+  "worktree_status": " M backend/api/evidence.py\n M backend/api/upload_tasks.py\n M backend/ingest/field_decisions.py\n M backend/ingest/field_drafts.py\n M backend/ingest/field_input.py\n M backend/ingest/field_review.py\n M backend/ingest/manual_evidence.py\n M backend/ingest/property_evidence.py\n M backend/ingest/scientific_evidence.py\n M backend/services/manuscript_handoffs.py\n M backend/services/workdrafts.py\n M docs/overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md\n M docs/overview/README.md\n M docs/specs/100-quick-review-status/spec.md\n M docs/specs/174-form-processing-contract/form-inventory.md\n M docs/specs/220-field-red-marking/spec.md\n M docs/specs/221-scientific-field-sidebar/spec.md\n M frontend/src/components/EvidenceFieldMarkers.tsx\n M frontend/src/components/EvidenceWorkflow.tsx\n M frontend/src/components/FieldReviewFeedback.tsx\n M frontend/src/components/ManualEvidenceSection.tsx\n M frontend/src/components/MaterialStatesEditor.tsx\n M frontend/src/components/ReviewFieldSettings.tsx\n M frontend/src/components/UploadTaskEditor.tsx\n M frontend/src/i18n/en/evidence.ts\n M frontend/src/i18n/zh/evidence.ts\n M frontend/src/lib/evidenceFields.ts\n M frontend/src/lib/evidenceProposals.ts\n M frontend/src/lib/evidenceStatus.ts\n M frontend/src/lib/manualEvidenceDrafts.ts\n M frontend/src/pages/AdminPaperEditPage.tsx\n M goserver/handlers/empty_field_decision_test.go\n M goserver/handlers/paper_evidence.go\n M scripts/check-form-contract.mjs\n M tests/01_decentralized_uploading/empty-confirmation-hosts.test.tsx\n M tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx\n M tests/01_decentralized_uploading/manual-evidence-editor.test.tsx\n M tests/01_decentralized_uploading/manual-evidence-section.test.tsx\n M tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx\n M tests/01_decentralized_uploading/test_empty_confirmation_mysql.py\n M tests/01_decentralized_uploading/test_empty_field_confirmation.py\n M tests/01_decentralized_uploading/test_sidebar_pdf_evidence.py\n M tests/01_decentralized_uploading/test_two_stage_commit_mysql.py\n M tests/01_decentralized_uploading/test_workdraft_concurrency_mysql.py\n?? backend/ingest/field_waiver.py\n?? backend/ingest/manual_links.py\n?? docs/specs/226-field-workflow-convergence/\n?? frontend/src/components/UnifiedFieldSettings.tsx\n?? tests/01_decentralized_uploading/field-workflow-226.test.tsx\n?? tests/01_decentralized_uploading/test_226_concurrency_mysql.py\n?? tests/01_decentralized_uploading/test_226_sources.py\n?? tests/01_decentralized_uploading/test_226_waiver.py\n?? tests/TestForRealScenario/cah6-226-blackbox.mjs\n",
+  "started": "2026-11-09T02:25:13.607793+00:00",
+  "doi": "10.1103/PhysRevLett.119.107001",
+  "search": "YH10",
+  "phases": [
+    {
+      "id": "1"
+    },
+    {
+      "id": "2"
+    },
+    {
+      "id": "3"
+    },
+    {
+      "id": "4"
+    },
+    {
+      "id": "5"
+    }
+  ],
+  "previous_task": "d2ca41e5f16b4d65bf744f5d5325e855",
+  "previous_task_state": "expired; Redis与ScientificUploadDraft均无记录；正式库DOI无论文",
+  "migration_owner_thread": "01a1ae88-2946-7533-a421-20609de8970d",
+  "migration_authorization": "由 #225 任务完成迁移，然后继续完成这篇文章的黑盒测试。",
+  "task_id": "005639e78e004c56ab817f4cca589d7b",
+  "source_sha_at_upload": "dd256c176345a05d817e1e2027354245ee36e030",
+  "upload_time": "2026-11-09T02:32:42.522312+00:00"
+}
