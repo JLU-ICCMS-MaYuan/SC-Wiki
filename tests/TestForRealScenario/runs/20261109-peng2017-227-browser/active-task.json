@@ -1,6 +1,6 @@
 {
   "task_id": "02b23f7c5e524f8ba718f48d92a07f75",
-  "job_id": "e35a26fb-15df-4679-bde3-9cff0fa65ded",
+  "job_id": "8558b665-ad17-40d9-b883-b3b7f565a0f6",
   "files": [
     {
       "file_id": "a6013d5bea8d473b936d8cb8abe143c0",
@@ -27,5 +27,18 @@
   },
   "browser_url": "http://127.0.0.1:5173/upload/tasks/02b23f7c5e524f8ba718f48d92a07f75",
   "window": 7839,
-  "source_sha": "a09c149d57fb92d63f44da48405d23def9f3072e"
+  "source_sha": "a09c149d57fb92d63f44da48405d23def9f3072e",
+  "resumptions": [
+    {
+      "at": "2026-11-09T11:09:33.812129+00:00",
+      "task_id": "02b23f7c5e524f8ba718f48d92a07f75",
+      "old_job_id": "e35a26fb-15df-4679-bde3-9cff0fa65ded",
+      "resumed_job_id": "8558b665-ad17-40d9-b883-b3b7f565a0f6",
+      "from_completed": 11,
+      "now_completed": 14,
+      "status": "reading",
+      "prior_chunks_byte_equal": true,
+      "method": "原Safari网页继续解析；仅重启本机原生上传Worker，配置并发10不变"
+    }
+  ]
 }

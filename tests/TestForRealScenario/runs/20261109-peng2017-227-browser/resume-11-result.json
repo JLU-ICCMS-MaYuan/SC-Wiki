@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-09T11:09:33.812129+00:00",
+  "task_id": "02b23f7c5e524f8ba718f48d92a07f75",
+  "old_job_id": "e35a26fb-15df-4679-bde3-9cff0fa65ded",
+  "resumed_job_id": "8558b665-ad17-40d9-b883-b3b7f565a0f6",
+  "from_completed": 11,
+  "now_completed": 14,
+  "status": "reading",
+  "prior_chunks_byte_equal": true,
+  "method": "原Safari网页继续解析；仅重启本机原生上传Worker，配置并发10不变"
+}
