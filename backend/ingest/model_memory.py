@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import re
 from collections import Counter
 from functools import lru_cache
 from pathlib import Path
@@ -203,21 +204,27 @@ def _compact_source_catalog(request):
 
 
 def validate_context_output(response, request):
-    if not any(marker in request.get('user_prompt','') for marker in ('"_context_texts"','"_context_source_catalog"','"_context_unread_index"','"_context_identifiers"')):
+    if not any(marker in request.get('user_prompt','') for marker in ('"_context_texts"','"_context_source_catalog"','"_context_unread_index"','"_context_identifiers"','"_context_encoding"')):
         return
     payload = json.loads(request['user_prompt'])
+    tree_encoded = isinstance(payload, dict) and payload.get('_context_encoding') == 'lossless-tree-v1'
     texts = payload.get('_context_texts') if isinstance(payload, dict) else None
     texts = texts or {}
     from backend.rag.structured_output import StructuredOutputError
     def visit(value):
         if isinstance(value, dict):
-            if set(value) & {'_context_text_ref', '_context_texts', '_context_source_catalog', '_context_unread_index', '_context_identifier_ref', '_context_identifiers'}:
+            forbidden = {'_context_text_ref', '_context_texts', '_context_source_catalog', '_context_unread_index', '_context_identifier_ref', '_context_identifiers'}
+            if tree_encoded:
+                forbidden |= {'_ref', '_rows', '_object', '_context_encoding'}
+            if set(value) & forbidden:
                 raise StructuredOutputError('模型返回内部传输引用，未提供实际字段内容')
             for item in value.values(): visit(item)
         elif isinstance(value, list):
             for item in value: visit(item)
-        elif isinstance(value, str) and any(key in value for key in texts):
-            raise StructuredOutputError('模型把内部传输标识写入字段，未作为有效结果保存')
+        elif isinstance(value, str):
+            if any(key in value for key in texts) or (tree_encoded and re.search(
+                    r'''["']_(?:ref|rows|object|context_encoding)["']\s*:''', value)):
+                raise StructuredOutputError('模型把内部传输标识写入字段，未作为有效结果保存')
     visit(response)
 
 
@@ -254,6 +261,25 @@ def prepare_fixed_request(request, *, budget=96000):
         if _fixed_token_estimate(prepared) < budget:
             return prepared
         prepared = compact(prepared)
+    if _fixed_token_estimate(prepared) >= budget:
+        # 重新从原始JSON编码，不把旧传输格式层层叠加；科学内容不做摘要或合并。
+        from .context_encoding import encode_context
+        try:
+            original = json.loads(request['user_prompt'])
+        except (KeyError, TypeError, ValueError):
+            original = None
+        if original is not None:
+            instruction = ('\nInput uses lossless-tree-v1 JSON transport encoding. Interpret data as the original input: '
+                '{"_ref":N} means references[N], recursively expanded; '
+                '{"_rows":{"columns":[...],"values":[[...],...]}} is an ordered array of objects '
+                'formed by pairing each row with columns; {"_object":M} is a literal object M with its values expanded. '
+                'sha256 verifies the fully expanded original JSON. All records, scientific values and source identities '
+                'remain distinct and unchanged. Read all expanded content. Output actual values and original source identities '
+                'under the original output contract; never output transport containers, references or indices.\n')
+            encoded = {**request, 'system_prompt': request.get('system_prompt', '') + instruction,
+                       'user_prompt': json.dumps(encode_context(original), ensure_ascii=False, separators=(',', ':'))}
+            if _fixed_token_estimate(encoded) < _fixed_token_estimate(prepared):
+                prepared = encoded
     if _fixed_token_estimate(prepared) >= budget:
         raise ContextBudgetError('当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据')
     return prepared

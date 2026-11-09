@@ -1,0 +1,16 @@
+{
+  "source_request": ".data/review_artifacts/90427eb91a05495fb671a705b5ece82f/model-runtime/7a0bb4123aecd2df5b11332bfc610537f066839f3836ce55ee90a60804eedf93/calls/6bc077e54690bad99f97f2f6e53195576efb72c5255cc941205ce761a4af6d70-0/request.json",
+  "source_sha": "de1e36b65976d79157b1a43f323b60e768d06d9e",
+  "original_tokens": 146690,
+  "prepared_tokens": 82489,
+  "budget": 96000,
+  "exact_roundtrip": true,
+  "candidates": 29,
+  "references": 200,
+  "encoding": "lossless-tree-v1",
+  "before": {
+    "error": "ContextBudgetError",
+    "message": "当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据",
+    "original_tokens": 146690
+  }
+}

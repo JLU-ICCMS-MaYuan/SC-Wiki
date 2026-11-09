@@ -1,0 +1,123 @@
+F...............FFFFF                                                    [100%]
+=================================== FAILURES ===================================
+__________ test_repeated_scientific_tree_fits_without_merging_records __________
+
+    def test_repeated_scientific_tree_fits_without_merging_records():
+        payload = repeated_scientific_payload()
+        request = {'system_prompt': 'Use current scientific content and actual source identities.',
+                   'user_prompt': json.dumps(payload), 'images': []}
+        original = copy.deepcopy(request)
+>       prepared = prepare_fixed_request(request, budget=4500)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_context_encoding.py:32:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+request = {'system_prompt': 'Use current scientific content and actual source identities.', 'user_prompt': '{"candidates": [{"ca..._id": "original-figure-4", "quote": "ScH6 at 300 GPa: estimated Tc 99 K; mu*=0.1; precision 2 K."}}]}]}', 'images': []}
+budget = 4500
+
+    def prepare_fixed_request(request, *, budget=96000):
+        """纯传输准备；供旧字符预算门之前复用，不调用模型、不写当前科学数据。"""
+        prepared = dict(request)
+        for compact in (_compact_source_texts, _compact_source_catalog, _compact_unread_index, _compact_source_identifiers):
+            if _fixed_token_estimate(prepared) < budget:
+                return prepared
+            prepared = compact(prepared)
+        if _fixed_token_estimate(prepared) >= budget:
+>           raise ContextBudgetError('当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据')
+E           backend.ingest.model_memory.ContextBudgetError: 当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据
+
+backend/ingest/model_memory.py:258: ContextBudgetError
+_____ test_transport_output_is_rejected_only_for_encoded_requests[value0] ______
+
+value = {'tc': {'_ref': 0}}
+
+    @pytest.mark.parametrize('value', [
+        {'tc': {'_ref': 0}}, {'paper': {'summary': {'_rows': {}}}},
+        {'paper': {'summary': {'_object': {}}}},
+        {'paper': {'summary': '{"_ref": 0}'}},
+        {'paper': {'summary': {'_context_encoding': 'lossless-tree-v1'}}},
+    ])
+    def test_transport_output_is_rejected_only_for_encoded_requests(value):
+        request = {'user_prompt': json.dumps(encode_context({'scientific': 'original'}))}
+>       with pytest.raises(StructuredOutputError): validate_context_output(value, request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE StructuredOutputError
+
+backend/tests/test_context_encoding.py:71: Failed
+_____ test_transport_output_is_rejected_only_for_encoded_requests[value1] ______
+
+value = {'paper': {'summary': {'_rows': {}}}}
+
+    @pytest.mark.parametrize('value', [
+        {'tc': {'_ref': 0}}, {'paper': {'summary': {'_rows': {}}}},
+        {'paper': {'summary': {'_object': {}}}},
+        {'paper': {'summary': '{"_ref": 0}'}},
+        {'paper': {'summary': {'_context_encoding': 'lossless-tree-v1'}}},
+    ])
+    def test_transport_output_is_rejected_only_for_encoded_requests(value):
+        request = {'user_prompt': json.dumps(encode_context({'scientific': 'original'}))}
+>       with pytest.raises(StructuredOutputError): validate_context_output(value, request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE StructuredOutputError
+
+backend/tests/test_context_encoding.py:71: Failed
+_____ test_transport_output_is_rejected_only_for_encoded_requests[value2] ______
+
+value = {'paper': {'summary': {'_object': {}}}}
+
+    @pytest.mark.parametrize('value', [
+        {'tc': {'_ref': 0}}, {'paper': {'summary': {'_rows': {}}}},
+        {'paper': {'summary': {'_object': {}}}},
+        {'paper': {'summary': '{"_ref": 0}'}},
+        {'paper': {'summary': {'_context_encoding': 'lossless-tree-v1'}}},
+    ])
+    def test_transport_output_is_rejected_only_for_encoded_requests(value):
+        request = {'user_prompt': json.dumps(encode_context({'scientific': 'original'}))}
+>       with pytest.raises(StructuredOutputError): validate_context_output(value, request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE StructuredOutputError
+
+backend/tests/test_context_encoding.py:71: Failed
+_____ test_transport_output_is_rejected_only_for_encoded_requests[value3] ______
+
+value = {'paper': {'summary': '{"_ref": 0}'}}
+
+    @pytest.mark.parametrize('value', [
+        {'tc': {'_ref': 0}}, {'paper': {'summary': {'_rows': {}}}},
+        {'paper': {'summary': {'_object': {}}}},
+        {'paper': {'summary': '{"_ref": 0}'}},
+        {'paper': {'summary': {'_context_encoding': 'lossless-tree-v1'}}},
+    ])
+    def test_transport_output_is_rejected_only_for_encoded_requests(value):
+        request = {'user_prompt': json.dumps(encode_context({'scientific': 'original'}))}
+>       with pytest.raises(StructuredOutputError): validate_context_output(value, request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE StructuredOutputError
+
+backend/tests/test_context_encoding.py:71: Failed
+_____ test_transport_output_is_rejected_only_for_encoded_requests[value4] ______
+
+value = {'paper': {'summary': {'_context_encoding': 'lossless-tree-v1'}}}
+
+    @pytest.mark.parametrize('value', [
+        {'tc': {'_ref': 0}}, {'paper': {'summary': {'_rows': {}}}},
+        {'paper': {'summary': {'_object': {}}}},
+        {'paper': {'summary': '{"_ref": 0}'}},
+        {'paper': {'summary': {'_context_encoding': 'lossless-tree-v1'}}},
+    ])
+    def test_transport_output_is_rejected_only_for_encoded_requests(value):
+        request = {'user_prompt': json.dumps(encode_context({'scientific': 'original'}))}
+>       with pytest.raises(StructuredOutputError): validate_context_output(value, request)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE StructuredOutputError
+
+backend/tests/test_context_encoding.py:71: Failed
+=========================== short test summary info ============================
+FAILED backend/tests/test_context_encoding.py::test_repeated_scientific_tree_fits_without_merging_records
+FAILED backend/tests/test_context_encoding.py::test_transport_output_is_rejected_only_for_encoded_requests[value0]
+FAILED backend/tests/test_context_encoding.py::test_transport_output_is_rejected_only_for_encoded_requests[value1]
+FAILED backend/tests/test_context_encoding.py::test_transport_output_is_rejected_only_for_encoded_requests[value2]
+FAILED backend/tests/test_context_encoding.py::test_transport_output_is_rejected_only_for_encoded_requests[value3]
+FAILED backend/tests/test_context_encoding.py::test_transport_output_is_rejected_only_for_encoded_requests[value4]
+6 failed, 15 passed in 0.39s
