@@ -1,0 +1,42 @@
+{
+  "task_id": "005639e78e004c56ab817f4cca589d7b",
+  "status": "ready",
+  "source_sha": "e3639c38b905ee6e715824e17cf020f9970951d8",
+  "states": 37,
+  "review_status_counts": {
+    "supported": 460,
+    "uncertain": 10
+  },
+  "model_review": {
+    "errors": [],
+    "passes": [
+      {
+        "pass": 1,
+        "fields": 470,
+        "batches": 40
+      },
+      {
+        "pass": 2,
+        "fields": 59,
+        "batches": 5
+      }
+    ],
+    "batches": 45,
+    "contract": "unified-model-review-v1",
+    "completed_fields": 460,
+    "unfinished_fields": 0
+  },
+  "structural_issue_count": 34,
+  "structure_count": 0,
+  "paper_id": null,
+  "phases": [
+    "已解析，科学校对与结构修复待完成，未送审",
+    "未执行",
+    "未执行",
+    "未执行",
+    "未执行"
+  ],
+  "technical_failure": "结构归属必要上下文本地超预算被旧兜底吞掉，未请求上游；#224既有要求尚未修复",
+  "new_feature": "#227已建档，详细设计草稿，未实现",
+  "formal_doi_rows": []
+}

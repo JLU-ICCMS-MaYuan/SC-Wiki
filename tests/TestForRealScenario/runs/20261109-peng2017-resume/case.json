@@ -53,5 +53,10 @@
   "migration_authorization": "由 #225 任务完成迁移，然后继续完成这篇文章的黑盒测试。",
   "task_id": "005639e78e004c56ab817f4cca589d7b",
   "source_sha_at_upload": "dd256c176345a05d817e1e2027354245ee36e030",
-  "upload_time": "2026-11-09T02:32:42.522312+00:00"
+  "upload_time": "2026-11-09T02:32:42.522312+00:00",
+  "current_safari_window": 7839,
+  "prior_safari_window_closed": 7566,
+  "current_stage": "阶段1；ready，但结构归属技术故障，未送审",
+  "chart_feature_issue": 227,
+  "chart_decision": "用户要求图中取数填写，保留约数与精度；不采用删除ScH6 Tc建议；图表功能尚未实现"
 }
