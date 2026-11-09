@@ -81,6 +81,13 @@ Do not return approximation: this resolver MUST NOT decide any electronic/phonon
 Preserve all numeric values, result identities and original sources.
 """
 
+PROMPT += """
+The host retains all property records, Tc/EPC values and their evidence unchanged. They are not
+inputs or outputs of this geometry-objective resolver. Targets contain state identity, existing
+geometry classification and its applicability evidence; use the supplied original sources to
+judge structural optimization only, never reconstruct or modify omitted property records.
+"""
+
 
 def row_approximation(state):
     labels = set()
@@ -142,7 +149,10 @@ def resolve_candidates(candidates, sources, model, *, on_response=None, source_b
                                          "source_index": index, "quote": _source_paragraph(paragraph)})
     payload["workflow_sources"] = workflow_sources
     wire_sources, layouts = _model_source_view(sources, source_blocks)
-    wire_payload = {**payload, 'sources': wire_sources}
+    wire_payload = {**payload, 'sources': wire_sources,
+        'targets': [{'target': key, 'state': {name: deepcopy(value) for name, value in state.items()
+                    if name not in {'property_modules', 'tc_results', 'properties'}}}
+                    for key, state in targets.items()]}
     if on_request:
         on_request({'original': deepcopy(payload), 'model_input': deepcopy(wire_payload),
                     'locator_layout': layouts})

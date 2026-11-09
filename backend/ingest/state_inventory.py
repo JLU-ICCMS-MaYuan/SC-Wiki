@@ -202,6 +202,35 @@ def apply_inventory(draft, sources, response, *, material_scope=None):
 FIGURE_REFERENCE = re.compile(r'\bfig(?:ure)?s?\.?\s*([sS]?\s*\d+)', re.I)
 
 
+def inventory_candidates(states, sources=()):
+    """给归属判断提供状态身份、结果标识及标量，不重复参数/软件设置和状态来源副本。"""
+    from .tc_contexts import map_draft
+    expanded = map_draft({'material_states': states})['material_states']
+    record_fields = {'record_key', 'record_type', 'property_code', 'custom_property_key', 'name_raw',
+        'value_kind', 'value_number', 'value_min', 'value_max', 'value_raw', 'value_text', 'value_boolean',
+        'uncertainty', 'unit_raw', 'canonical_unit', 'method_code', 'method_raw', 'criterion_code',
+        'criterion_raw', 'basis_kind', 'evidences', 'evidence'}
+    from .source_highlight import source_reference
+    def evidence_view(evidence):
+        return source_reference(evidence, sources) or deepcopy(evidence)
+    result = []
+    for state in expanded:
+        view = {k: deepcopy(v) for k, v in state.items() if k in {*FIELDS, 'state_key', 'basis_kind'}}
+        view['property_modules'] = [{k: deepcopy(v) for k, v in module.items()
+            if k in {'module_key', 'module_code', 'definition_key', 'definition_version'}} |
+            {'records': [{k: deepcopy(v) for k, v in record.items() if k in record_fields}
+                         for record in module.get('records') or []]}
+            for module in state.get('property_modules') or []]
+        for module in view['property_modules']:
+            for record in module['records']:
+                if isinstance(record.get('evidences'), list):
+                    record['evidences'] = [evidence_view(e) for e in record['evidences']]
+                if isinstance(record.get('evidence'), dict):
+                    record['evidence'] = evidence_view(record['evidence'])
+        result.append(view)
+    return result
+
+
 def referenced_pages(draft, sources):
     """只定位引用图页，不凭图号/相邻压力判断物理量；同页只传一次。"""
     labels, requested = set(), set()
@@ -225,8 +254,76 @@ def referenced_pages(draft, sources):
     return requested
 
 
+def inventory_requests(draft, request, images, prompt):
+    """按实际输入预算分组候选；每组保留全部文字，只携带本组引用的必要原图。"""
+    from .model_memory import prepare_fixed_request, ContextBudgetError
+    def check(body, pixels, instruction):
+        prepare_fixed_request({'system_prompt': instruction, 'user_prompt': json.dumps(body, ensure_ascii=False),
+                               'images': pixels, 'response_schema': SCHEMA})
+    try:
+        check(request, images, prompt)
+        return [(request, images, prompt)]
+    except ContextBudgetError:
+        if not request['candidates']:
+            raise
+    instruction = prompt + ('\nCandidates are one partition of the full inventory. Assign EVERY supplied candidate exactly once, '
+        'and no candidate outside this partition. known_state_roster is read-only context: use consistent material names '
+        'and physical identities for the same state. Do not create extra unknown-pressure states or change result values.\n')
+    roster = [{k: s.get(k) for k in (*FIELDS, 'state_key')} for s in draft['material_states']]
+    def group(indices):
+        needed = referenced_pages({'material_states': [draft['material_states'][i] for i in indices]}, request['sources'])
+        selected = [i for i, page in enumerate(request['original_pages']) if (page['file_id'], page['pdf_page']) in needed]
+        body = {**request, 'candidates': [request['candidates'][i] for i in indices],
+                'known_state_roster': roster, 'original_pages': [request['original_pages'][i] for i in selected],
+                'reused_original_pages': [p for p in request['reused_original_pages'] if (p['file_id'], p['pdf_page']) in needed]}
+        pixels = [images[i] for i in selected]
+        check(body, pixels, instruction)
+        return body, pixels, instruction
+    batches, current = [], []
+    for index in range(len(request['candidates'])):
+        try:
+            group([*current, index])
+            current.append(index)
+        except ContextBudgetError:
+            if not current:
+                raise  # 单个候选的必要内容仍放不下时如实失败，不裁掉科学依据。
+            batches.append(group(current))
+            current = [index]
+            group(current)
+    if current:
+        batches.append(group(current))
+    return batches
+
+
+def collect_inventory_responses(batches):
+    """规划阶段只合并完全相同的状态，按原身份归位；不是核对后的全表合稿。"""
+    output = {'states': [], 'assignments': [], 'record_assignments': []}
+    for candidates, response in batches:
+        expected = {s['state_key'] for s in candidates}
+        assigned = [row.get('candidate_state_key') for row in response.get('assignments') or []]
+        if len(assigned) != len(set(assigned)) or set(assigned) != expected:
+            raise ValueError('分组材料规划没有完整覆盖本组候选')
+        remap = {}
+        for index, entry in enumerate(response.get('states') or []):
+            target = next((i for i, previous in enumerate(output['states']) if previous.get('values') == entry.get('values')), None)
+            if target is None:
+                target = len(output['states']); output['states'].append(deepcopy(entry))
+            else:
+                previous = output['states'][target]
+                previous['source_ids'] = list(dict.fromkeys([*previous['source_ids'], *entry['source_ids']]))
+                if entry['reason'] not in previous['reason']:
+                    previous['reason'] += '\n' + entry['reason']
+            remap[index] = target
+        for kind in ('assignments', 'record_assignments'):
+            for row in response.get(kind) or []:
+                if row.get('candidate_state_key') not in expected or type(row.get('target_index')) is not int or row['target_index'] not in remap:
+                    raise ValueError('分组材料规划的记录身份或目标索引无效')
+                output[kind].append({**deepcopy(row), 'target_index': remap[row['target_index']]})
+    return output
+
+
 def plan_states(draft, chunks, model, *, on_response=None, on_request=None, files=(), target_id=None,
-                material_scope=None):
+                material_scope=None, documents=None):
     from .scientific_context import build_context
     from .material_state_contract import ensure_state_keys
     ensure_state_keys(draft.get('material_states') or [])
@@ -234,7 +331,7 @@ def plan_states(draft, chunks, model, *, on_response=None, on_request=None, file
     sources = [{**source, 'source_id': f'inventory-source-{i}'} for i, source in enumerate(sources)]
     if not sources:
         raise ValueError('无法读取原文建立材料状态')
-    images, pages = [], []
+    images, pages, reused = [], [], []
     manifest = {str(f['file_id']): f for f in files}
     requested = referenced_pages(draft, sources)
     if requested and manifest:
@@ -247,6 +344,18 @@ def plan_states(draft, chunks, model, *, on_response=None, on_request=None, file
                 raise ValueError('存疑记录的原PDF未在文件清单中')
             if source.get('kind') not in (None, 'pdf'):
                 continue  # TXT/MD没有原PDF图页；文字来源仍完整提供。
+            ir = (documents or {}).get(file_id)
+            previous = ir.coverage.get('chart_reading', {}) if ir else {}
+            from .chart_reading import VERSION as CHART_VERSION
+            reading_ids = [s['source_id'] for s in sources if s.get('file_id') == file_id
+                and s.get('page_start') == page and str(s.get('content', '')).startswith('CALIBRATED ORIGINAL FIGURE READING')]
+            if (ir and previous.get('version') == CHART_VERSION and previous.get('status') == 'completed'
+                    and ir.source_sha256 == source['sha256'] == previous.get('source_sha256')
+                    and page in previous.get('scanned_pages', []) and reading_ids
+                    and not any(issue.get('page') in (None, page) for issue in previous.get('unresolved', []))):
+                reused.append({'file_id': file_id, 'pdf_page': page, 'source_sha256': source['sha256'],
+                               'source_ids': reading_ids, 'prior_reader': CHART_VERSION})
+                continue
             path = resolve_file(source['stored_path'], size=source['size'], sha256=source['sha256'],
                                 media_type='application/pdf', namespace=target_id)
             if hashlib.sha256(path.read_bytes()).hexdigest() != source['sha256']:
@@ -258,11 +367,27 @@ def plan_states(draft, chunks, model, *, on_response=None, on_request=None, file
     options = {'response_schema': SCHEMA}
     if images:
         options['images'] = images
-    request = {'sources': sources, 'candidates': draft['material_states'], 'original_pages': pages}
+    request = {'sources': sources, 'candidates': inventory_candidates(draft['material_states'], sources),
+               'original_pages': pages, 'reused_original_pages': reused}
     if on_request:
         on_request({**deepcopy(request), 'image_count': len(images)})
     from .tc_material_scope import scope_prompt
-    response = model(PROMPT + scope_prompt(material_scope), json.dumps(request, ensure_ascii=False), **options)
+    purpose = ('\nThe host keeps all full property records, parameters, software settings and state evidence unchanged. '
+               'This request contains state identities and scalar-result references only. Read the complete supplied '
+               'original sources/images for applicability; output assignments, never replacement scientific values. '
+               'Evidence source_id and quote_span reference the supplied original content (Unicode characters, left closed/right open). '
+               'reused_original_pages identifies same-hash pages actually read by the preceding chart reader: use its calibrated '
+               'source facts without claiming a new image read. Unresolved/unprocessed pages remain attached; uncertainty stays explicit.\n')
+    batches = inventory_requests(draft, request, images, PROMPT + purpose + scope_prompt(material_scope))
+    if on_request and len(batches) > 1:
+        on_request({**deepcopy(request), 'image_count': len(images), 'batches': [
+            {'candidate_keys': [s['state_key'] for s in body['candidates']], 'original_pages': body['original_pages']}
+            for body, _, _ in batches]})
+    responses = []
+    for body, pixels, prompt in batches:
+        response = model(prompt, json.dumps(body, ensure_ascii=False), response_schema=SCHEMA, **({'images': pixels} if pixels else {}))
+        responses.append((body['candidates'], response))
+    response = collect_inventory_responses(responses) if len(batches) > 1 else responses[0][1]
     if on_response:
         on_response(response)
     return apply_inventory(draft, sources, response, material_scope=material_scope)

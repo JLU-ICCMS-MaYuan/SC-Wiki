@@ -665,7 +665,6 @@ const AdminPaperEditPage: React.FC = () => {
             onChange={states => {
               if (JSON.stringify(researchMaterials(editMaterialStates)) !== JSON.stringify(researchMaterials(states))) evidenceWorkflow.invalidate('paper.research_materials')
               setEditMaterialStates(states)
-              setEditForm(current => ({ ...current, research_materials: researchMaterials(states) }))
             }}
             catalogs={classificationCatalogs}
             catalogLoading={!classificationCatalogs && !classificationCatalogError}

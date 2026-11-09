@@ -18,6 +18,7 @@ import UploadTaskCenter from '../components/UploadTaskCenter'
 import MultiFileUploadPanel from '../components/MultiFileUploadPanel'
 import UploadRoleReview from '../components/UploadRoleReview'
 import UploadParsingDetail from '../components/UploadParsingDetail'
+import { parsingPhaseLabel } from '../lib/parsingPhases'
 import UploadModelActivity from '../components/UploadModelActivity'
 import { api } from '../lib/api'
 import { buildLlmHeaders } from '../lib/llmProvider'
@@ -42,7 +43,7 @@ const MAX_PAPER_UPLOAD_BYTES = 50 * 1024 * 1024
 /* ═══════════════════════════════════════════════ */
 const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const { user } = useAuth()
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
   const fileInput = useRef<HTMLInputElement>(null)
@@ -59,6 +60,14 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const [uploadProgress, setUploadProgress] = useState(0)
   const activeTaskId = taskId || null
   const [taskState, setTaskState] = useState<UploadTaskState | null>(null)
+  const [processingPhase, setProcessingPhase] = useState<string>()
+  useEffect(() => { setProcessingPhase(undefined) }, [activeTaskId])
+  const activity = taskState?.model_activity
+  const activeCall = activity?.phase && ['processing', 'requesting', 'receiving', 'retry_wait', 'compacting'].includes(activity.status)
+  const activityLabel = activeCall ? t('upload.modelPhase.' + activity.phase) : undefined
+  const knownActivityLabel = activityLabel !== 'upload.modelPhase.' + activity?.phase ? activityLabel : undefined
+  const phaseLabel = taskState?.processing_status !== 'succeeded'
+    ? knownActivityLabel || parsingPhaseLabel(processingPhase, lang) : undefined
   const [taskLoading, setTaskLoading] = useState(false)
   const [taskPollTick, setTaskPollTick] = useState(0)
   const [taskCenterTick, setTaskCenterTick] = useState(0)
@@ -400,14 +409,14 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                   }}>
                     <Box sx={{ minWidth: 0, flex: 1, flexBasis: { xs: '100%', sm: 0 } }}>
                       <Typography variant="h6" fontWeight={700} noWrap sx={{ fontSize: { xs: 16, sm: 18 }, lineHeight: '24px' }}>{taskState?.filename || t('upload.readingTask')}</Typography>
-                      <Typography variant="body2" color="text.secondary" noWrap sx={{ lineHeight: '18px' }}>
-                        {taskState
+                      <Typography data-processing-phase-heading variant="body2" color="text.secondary" noWrap sx={{ lineHeight: '18px' }}>
+                        {phaseLabel || (taskState
                           ? t('upload.stageProgress', {
                               index: taskState.stage_index,
                               total: taskState.stage_total,
                               label: stageLabel(taskState.stage),
                             })
-                          : t('upload.restoringProgress')}
+                          : t('upload.restoringProgress'))}
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1,
@@ -436,7 +445,7 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                     setTaskCenterTick(value => value + 1)
                   }} />}
 
-                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(5, minmax(0, 1fr))' }, gap: 1 }}>
+                  {!phaseLabel && <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(5, minmax(0, 1fr))' }, gap: 1 }}>
                     {PROCESSING_STAGES.map((item, index) => {
                       const current = Math.max(0, (taskState?.stage_index || 1) - 1)
                       const complete = index < current || taskState?.processing_status === 'succeeded'
@@ -454,7 +463,7 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                         </Box>
                       )
                     })}
-                  </Box>
+                  </Box>}
 
                   {taskState?.stage === 'reading' && taskState.total_chunks > 0 && (
                     <Box sx={{ mt: 2 }}>
@@ -481,7 +490,7 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                     </Alert>
                   )}
                   {activeTaskId && taskState?.status !== 'needs_role_review' &&
-                    <UploadParsingDetail key={`${activeTaskId}:${taskPollTick}`} taskId={activeTaskId} onSubmitted={handleTaskSubmitted} />}
+                    <UploadParsingDetail key={`${activeTaskId}:${taskPollTick}`} taskId={activeTaskId} onSubmitted={handleTaskSubmitted} onPhaseChange={setProcessingPhase} />}
                 </MaterialOutlineLayout>
                 </CardContent>
                 </MaterialStateControlsContext.Provider>

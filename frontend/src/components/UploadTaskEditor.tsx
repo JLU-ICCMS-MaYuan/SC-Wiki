@@ -357,7 +357,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 
   const setDraftField = (field: keyof UploadDraft, value: unknown) => {
     if (field === 'material_states' && JSON.stringify(researchMaterials(draft?.material_states || [])) !== JSON.stringify(researchMaterials(value as UploadDraft['material_states']))) evidenceWorkflow.invalidate('paper.research_materials')
-    changeDraft(current => ({ ...current, [field]: value, ...(field === 'material_states' ? { paper: { ...current.paper, research_materials: researchMaterials(value as UploadDraft['material_states']) } } : {}) }))
+    changeDraft(current => ({ ...current, [field]: value }))
   }
 
   const saveDraft = useCallback(async (showResult = false, _syncEvidence = true, reportFailure = false): Promise<boolean> => {

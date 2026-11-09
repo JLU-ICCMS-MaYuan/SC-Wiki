@@ -9,6 +9,7 @@ import { api } from '../lib/api'
 import { CitationExtractionStatus, PROCESSING_STAGES, UploadDraft, unwrapData, type WorkflowAssessment, type ParsingWorkflowBinding } from '../lib/paperProcessing'
 import { useLanguage } from '../context/LanguageContext'
 import UploadTaskEditor from './UploadTaskEditor'
+import { parsingPhaseLabel } from '../lib/parsingPhases'
 
 interface ChunkDetail {
   chunk_id: string
@@ -53,9 +54,10 @@ interface ParsingDetail {
 interface Props {
   taskId: string
   onSubmitted?: (paperId: number) => void
+  onPhaseChange?: (phase: string | undefined) => void
 }
 
-const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => undefined }) => {
+const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => undefined, onPhaseChange }) => {
   const { t, lang } = useLanguage()
   const [detail, setDetail] = useState<ParsingDetail | null>(null)
   const [error, setError] = useState('')
@@ -85,6 +87,7 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
         if (stopped) return
         const value = unwrapData(response)
         setDetail(value)
+        onPhaseChange?.(value.processing_phase)
         setError('')
         if (value.next_poll_ms) timer = window.setTimeout(poll, value.next_poll_ms)
       } catch (reason: any) {
@@ -96,7 +99,7 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
     }
     void poll()
     return () => { stopped = true; if (timer) window.clearTimeout(timer) }
-  }, [taskId, reload])
+  }, [taskId, reload, onPhaseChange])
 
   const runAction = async (path: 'retry' | 'manual') => {
     setActionPending(true)
@@ -117,23 +120,11 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
   }
 
   const statusNote = (value: ParsingDetail): string => {
-    const phases: Record<string, [string, string]> = {
-      paper_extracting: ['读取论文级信息', 'Reading paper information'],
-      paper_filling: ['填写论文级字段', 'Filling paper fields'],
-      paper_reviewing: ['核对并保存论文级字段', 'Reviewing and saving paper fields'],
-      paper_reviewed: ['论文级核对已保存', 'Paper review saved'],
-      chart_reading: ['逐页找图并读取科学数据', 'Finding figures and reading scientific data'],
-      workflow_selection: ['判断材料状态适用流程', 'Selecting material workflow'],
-      material_extracting: ['并发提取材料状态与科学结果', 'Extracting material states and results'],
-      material_identifying: ['规划材料状态及其归属', 'Organizing material states'],
-      material_filling: ['填写材料状态字段', 'Filling material fields'],
-      material_reviewing: ['核对并保存材料状态字段', 'Reviewing and saving material fields'],
-    }
-    const phase = value.processing_phase && phases[value.processing_phase]
+    const phase = parsingPhaseLabel(value.processing_phase, lang)
     if (phase && ['extracting', 'reading', 'summarizing', 'failed', 'paused'].includes(value.status)) {
       const prefix = value.status === 'failed' ? (lang === 'zh' ? '未完成：' : 'Incomplete: ')
         : value.status === 'paused' ? (lang === 'zh' ? '已暂停：' : 'Paused: ') : ''
-      return prefix + phase[lang === 'zh' ? 0 : 1]
+      return prefix + phase
     }
     switch (value.status) {
       case 'summarizing':

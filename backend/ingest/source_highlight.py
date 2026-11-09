@@ -27,3 +27,19 @@ def text_locator(content, quote):
     start = positions[starts[0]][0]; end = positions[starts[0] + len(needle) - 1][1]
     result.update(char_interval=[start, end], match_kind='exact' if content[start:end] == quote else 'whitespace_equivalent')
     return result
+
+
+def source_reference(evidence, sources):
+    """只把当前目录中可唯一定位的原句替换为引用，不靠数值猜来源。"""
+    quote = evidence.get('quote')
+    if not isinstance(quote, str) or not quote.strip():
+        return None
+    candidates = [s for s in sources if str(s.get('file_id')) == str(evidence.get('file_id'))
+        and (not evidence.get('block_id') or evidence['block_id'] == s.get('block_id'))
+        and (not evidence.get('source_sha256') or evidence['source_sha256'] == s.get('source_sha256'))]
+    matches = [(s, text_locator(s['content'], quote)) for s in candidates]
+    matches = [(s, span) for s, span in matches if span['char_interval'] is not None]
+    if len(matches) != 1:
+        return None
+    source, span = matches[0]
+    return {'source_id': source['source_id'], 'quote_span': span['char_interval']}

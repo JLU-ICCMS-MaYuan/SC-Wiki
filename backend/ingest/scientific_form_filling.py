@@ -25,6 +25,9 @@ anisotropic_eliashberg, scdft, other, unknown. other MUST have the actual report
 Do not guess a specific Eliashberg variant. unknown means not established, NOT a combined method.
 Keep distinct methods and their own Tc/mu_star points. Share a group only if lambda_ep, omega_log,
 calculation conditions and approximation agree. Use one method label per method row within that group.
+Within a shared group, repeat the SAME complete parameters (except mu_star) and calculation_conditions
+representation on every point and method: do not mix a string such as "90 Ry" with a quantity object
+for that same shared energy_cutoff. Keep scientifically different conditions in separate groups.
 method_raw preserves EACH result's actual reported spelling, not a shared normalized name. Keep its
 own source_ids. Explain method identity, wording differences and their source support in the EXISTING
 reason field. Reuse group/method ONLY when the read sources establish that relationship. Do not add
@@ -80,8 +83,16 @@ both original expressions. The existing scientific field review will check these
 """ + METHOD_SEMANTICS_PROMPT
 
 
-def candidates(states):
-    return {f"s{si}:m{mi}:r{ri}": (si, mi, record)
+PROMPT += """
+candidate_evidences may reference a source_id and quote_span in the original source catalog instead
+of repeating its text. Read that source; if it is only in source_index request read_source_ids first.
+quote_span uses original Unicode characters, left closed/right open. Do not treat evidence_id as a
+source_id. The host keeps full provenance, including dos_fermi_sources, outside this value/grouping patch.
+"""
+
+
+def candidates(states, *, state_offset=0):
+    return {f"s{si + state_offset}:m{mi}:r{ri}": (si, mi, record)
             for si, state in enumerate(states)
             for mi, module in enumerate(state.get("property_modules") or [])
             for ri, record in enumerate(module.get("records") or [])
@@ -144,9 +155,9 @@ def filling_review_context(report, record_key):
             if record_key and record_key in (entry.get("records") or []) and entry.get("original_record")]
 
 
-def validate_filling_coverage(before, after, report):
+def validate_filling_coverage(before, after, report, *, state_offset=0):
     """核对既有去向与实际草稿；科学等价由后续统一模型核对判断。"""
-    original = candidates(before)
+    original = candidates(before, state_offset=state_offset)
     dispositions = report.get("candidate_dispositions") or {}
     if set(dispositions) != set(original):
         raise ValueError("整理遗漏原候选，禁止以部分结果替换")
@@ -160,7 +171,7 @@ def validate_filling_coverage(before, after, report):
                 targets[key] = (si, mi, record)
     for key, (si, mi, record) in original.items():
         entry = dispositions[key]
-        if entry.get("original_record") != record or (entry.get("state_index"), entry.get("module_index")) != (si, mi):
+        if entry.get("original_record") != record or (entry.get("state_index"), entry.get("module_index")) != (si + state_offset, mi):
             raise ValueError("候选去向与本次输入不一致")
         if entry.get("action") == "excluded":
             if _numeric(record) or not entry.get("reason") or not entry.get("source_ids"):
@@ -181,7 +192,7 @@ def validate_filling_coverage(before, after, report):
                 raise ValueError("候选去向丢失原文来源")
 
 
-def apply_plan(states, sources, response):
+def apply_plan(states, sources, response, *, state_offset=0):
     """纯函数：一旦有候选丢失或来源错误，整次计划拒绝，调用者保留原数据。"""
     from .tc_groups import tc_collection_issues
     from .scientific_contracts import normalize_parameters
@@ -189,7 +200,7 @@ def apply_plan(states, sources, response):
     from .property_modules import normalize_current_tc_value
     if response.get("done") is not True:
         raise ValueError("整理未完成")
-    original = candidates(states)
+    original = candidates(states, state_offset=state_offset)
     by_source = {s["source_id"]: s for s in sources}
     dispositions, outputs, issues = {}, [], []
     keys = set()
@@ -228,6 +239,9 @@ def apply_plan(states, sources, response):
                         record["evidences"].append(original_evidence)
         # 新版本不能继承旧来源关联或人工决定；原候选保存在报告中。
         payload = record.setdefault("payload", {})
+        # 档案来自宿主，不属于本次模型的可写字段；严格校验前暂存，随后原样恢复。
+        has_dos_archive = "dos_fermi_sources" in payload
+        dos_archive = payload.pop("dos_fermi_sources", None)
         legacy_labels = deepcopy(payload.pop("legacy_method_labels", []))
         legacy_approximation = payload.pop("approximation", None)
         if legacy_approximation is not None:
@@ -252,9 +266,9 @@ def apply_plan(states, sources, response):
             group, method = entry.get("group"), entry.get("method")
             if not isinstance(group, str) or not group.strip() or not isinstance(method, str) or not method.strip():
                 raise ValueError("预测 Tc 缺少共同组或方法行")
-            identity = fingerprint([VERSION, si, mi, sorted(ids), values])[:24]
-            group_metadata = {"version": 1, "group_key": "fill-" + fingerprint([si, mi, group])[:24],
-                              "method_key": "fill-" + fingerprint([si, mi, group, method])[:24]}
+            identity = fingerprint([VERSION, si + state_offset, mi, sorted(ids), values])[:24]
+            group_metadata = {"version": 1, "group_key": "fill-" + fingerprint([si + state_offset, mi, group])[:24],
+                              "method_key": "fill-" + fingerprint([si + state_offset, mi, group, method])[:24]}
             if record["value_kind"] == "number":
                 group_metadata["point_key"] = identity
         elif record.get("record_type") == "measured_tc" and record.get("method_code") not in EXPERIMENTAL_METHODS:
@@ -276,6 +290,8 @@ def apply_plan(states, sources, response):
             payload["tc_group"] = group_metadata
         if legacy_labels:
             payload["legacy_method_labels"] = legacy_labels
+        if has_dos_archive:
+            payload["dos_fermi_sources"] = dos_archive
         from .calculation_methods import record_method_issue
         method_error = record_method_issue(record)
         if method_error:
@@ -284,7 +300,7 @@ def apply_plan(states, sources, response):
         record["definition_key"] = (f"record.{record['module_code']}.{record['record_type']}.{record.get('method_code')}"
                                     if record["record_type"] in {"predicted_tc", "measured_tc"}
                                     else f"record.{record['module_code']}.{record['property_code']}")
-        record["record_key"] = "fill-" + fingerprint([si, mi, sorted(ids), values])[:28]
+        record["record_key"] = "fill-" + fingerprint([si + state_offset, mi, sorted(ids), values])[:28]
         if record["record_key"] in keys:
             raise ValueError("重复结果未被合并")
         keys.add(record["record_key"])
@@ -308,14 +324,14 @@ def apply_plan(states, sources, response):
                 if entry.get("category") not in {"not_reported", "ambiguous", "conflict", "unreadable"}:
                     raise ValueError("未解决原因无效")
                 outputs.append((si, mi, deepcopy(record)))
-                issues.append({"field": f"material_states[{si}].property_modules[{mi}]", "code": entry["category"],
+                issues.append({"field": f"material_states[{si + state_offset}].property_modules[{mi}]", "code": entry["category"],
                                "message": entry["reason"], "record_key": record["record_key"]})
             dispositions[key] = {"action": action, **entry}
     if set(dispositions) != set(original):
         raise ValueError("整理遗漏原候选，禁止以部分结果替换")
     for key, (si, mi, record) in original.items():
         entry = dispositions[key]
-        entry.update(original_record=deepcopy(record), state_index=si, module_index=mi)
+        entry.update(original_record=deepcopy(record), state_index=si + state_offset, module_index=mi)
         if entry["action"] == "unresolved":
             entry.update(records=[record["record_key"]], reasons=[entry["reason"]])
     result = deepcopy(states)
@@ -325,8 +341,11 @@ def apply_plan(states, sources, response):
             module["records"] = kept + [r for s, m, r in outputs if s == si and m == mi]
             # 未解决历史记录沿用历史读取；新分组执行完整共享参数约束。
             grouped = [r for r in module["records"] if r.get("payload", {}).get("tc_group")]
-            if tc_collection_issues(grouped):
-                raise ValueError("同组参数或方法行不一致")
+            group_issues = tc_collection_issues(grouped)
+            if group_issues:
+                raise ValueError("同组参数或方法行不一致：" + "; ".join(
+                    f"state[{si + state_offset}].module[{mi}].{field}: {message}"
+                    for field, _, message in group_issues))
             approximations, methods = {}, {}
             for r in grouped:
                 meta = r["payload"]["tc_group"]
@@ -340,18 +359,17 @@ def apply_plan(states, sources, response):
                     raise ValueError("同一方法行不能混用不同自定义方法")
                 approximations[group], methods[group, method] = approximation, identity
     audit = {"candidate_dispositions": dispositions, "issues": issues}
-    validate_filling_coverage(states, result, audit)
+    validate_filling_coverage(states, result, audit, state_offset=state_offset)
     return result, audit
 
 
 
-def _model_candidates(indexed):
+def _model_candidates(indexed, sources=()):
     """仅投影模型输入：完全相同的证据集中一次，原记录及不同来源身份不变。"""
     rows, evidence_pool, identities = [], {}, {}
-    for key, (si, _, original) in indexed.items():
-        record = deepcopy(original)
+    def references_for(evidences):
         references = []
-        for evidence in record.get("evidences") or []:
+        for evidence in evidences or []:
             identity = fingerprint(evidence)
             if identity not in identities:
                 evidence_id = f"evidence-{len(identities)}"
@@ -360,16 +378,32 @@ def _model_candidates(indexed):
             reference = {"evidence_id": identities[identity]}
             if reference not in references:
                 references.append(reference)
-        record["evidences"] = references
+        return references
+    for key, (si, _, original) in indexed.items():
+        record = deepcopy(original)
+        record['evidences'] = references_for(record.get('evidences'))
+        archive = (record.get('payload') or {}).get('dos_fermi_sources')
+        if isinstance(archive, dict) and isinstance(archive.get('records'), list):
+            from .fermi_dos import SCIENCE_FIELDS
+            projected = []
+            for source in archive['records']:
+                value = {name: deepcopy(source[name]) for name in (*SCIENCE_FIELDS, 'basis_kind') if name in source}
+                value['payload'] = {name: deepcopy(item) for name, item in (source.get('payload') or {}).items()
+                                    if name not in {'dos_fermi_sources', 'source_associations', 'table_row_ref'}}
+                value['evidences'] = references_for([*(source.get('evidences') or []),
+                    *([source['evidence']] if isinstance(source.get('evidence'), dict) else [])])
+                projected.append(value)
+            record['payload']['dos_fermi_sources'] = {'version': archive.get('version'), 'records': projected}
         rows.append({"candidate_id": key, "state_index": si, "record": record})
-    return rows, evidence_pool
+    from .source_highlight import source_reference
+    return rows, {key: source_reference(evidence, sources) or evidence for key, evidence in evidence_pool.items()}
 
 
-def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=None, max_rounds=4):
+def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=None, max_rounds=4, _state_offset=0):
     """复用原块读源，模型可定向查缺；无新增信息停止，不写业务数据。"""
     context = build_context(chunks, max_chars=60000)
     sources = context["sources"]
-    indexed = candidates(states)
+    indexed = candidates(states, state_offset=_state_offset)
     report = {"version": VERSION, "status": "pending", "input_hash": fingerprint(states),
               "source_hash": context["source_fingerprint"], "attempts": [], "issues": []}
     if not indexed:
@@ -378,14 +412,27 @@ def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=N
     by_source = {s["source_id"]: s for s in sources}
     read, size = {}, 0
     # 首批优先阅读候选引用；其他段落保留目录，交模型定向请求。
-    evidence_ids = {e.get("block_id") for _, _, r in indexed.values() for e in r.get("evidences", []) if e.get("block_id")}
-    ordered = sorted(sources, key=lambda s: s.get("block_id") not in evidence_ids)
+    evidence_ids = set()
+    def referenced_blocks(value):
+        if isinstance(value, dict):
+            if isinstance(value.get('block_id'), str):
+                evidence_ids.add(value['block_id'])
+            for child in value.values():
+                referenced_blocks(child)
+        elif isinstance(value, list):
+            for child in value:
+                referenced_blocks(child)
+    for _, _, record in indexed.values():
+        referenced_blocks(record)
+    preferred = [source for source in sources if source.get('block_id') in evidence_ids]
+    # 已知引用优先且不以无关原文填满额度；其他原块仍在目录中供实际缺口定向读取。
+    ordered = preferred or sources
     for s in ordered:
         length = len(json.dumps(s, ensure_ascii=False))
         if size + length <= 65000:
             read[s["source_id"]] = s
             size += length
-    model_candidates, candidate_evidences = _model_candidates(indexed)
+    model_candidates, candidate_evidences = _model_candidates(indexed, sources)
     payload = {
         "states": [{k: v for k, v in state.items() if k not in {"property_modules", "structures", "evidences", "field_evidence"}} for state in states],
         "candidates": model_candidates,
@@ -406,17 +453,16 @@ def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=N
         content = json.dumps(request, ensure_ascii=False, separators=(",", ":"))
         wire_prompt = PROMPT
         report['original_input_chars'] = len(content)
-        if len(content) > 250000:
-            from .model_memory import prepare_fixed_request, ContextBudgetError
-            from .scientific_output_schema import filling_schema
-            try:
-                wire = prepare_fixed_request({'system_prompt':PROMPT,'user_prompt':content,
-                                              'response_schema':filling_schema()}, max_chars=250000)
-                wire_prompt, content = wire['system_prompt'], wire['user_prompt']
-            except ContextBudgetError as exc:
-                error = str(exc)
-                report['stop_reason'] = 'context_budget'
-                break
+        from .model_memory import prepare_fixed_request, ContextBudgetError
+        from .scientific_output_schema import filling_schema
+        try:
+            wire = prepare_fixed_request({'system_prompt':PROMPT,'user_prompt':content,
+                                          'response_schema':filling_schema()}, max_chars=250000)
+            wire_prompt, content = wire['system_prompt'], wire['user_prompt']
+        except ContextBudgetError as exc:
+            error = str(exc)
+            report['stop_reason'] = 'context_budget'
+            break
         report["input_chars"] = len(content)
         if len(content) > 250000:
             error = "整理输入超过预算，保留候选；未假装完成全文阅读"
@@ -431,7 +477,7 @@ def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=N
                 cancelled()
             attempt["response"] = deepcopy(response)
             if response.get("done") is True:
-                result, audit = apply_plan(states, list(read.values()), response)
+                result, audit = apply_plan(states, list(read.values()), response, state_offset=_state_offset)
                 report.update(audit, status="completed")
                 report["attempts"].append(attempt)
                 if on_attempt:
@@ -477,6 +523,31 @@ def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=N
         report["attempts"].append(attempt)
         if on_attempt:
             on_attempt(report)
+    remaining = max_rounds - len(report['attempts'])
+    if report.get('stop_reason') == 'context_budget' and len(states) > 1 and remaining > 0:
+        # 各状态不能互相合并，本来就是独立整理单元；只在实际预算不足时分组。
+        # 共同父请求已占的轮数从每组扣除，不增加任何候选的四轮上限。
+        cut = len(states) // 2
+        children, reports = [], []
+        for offset, group in ((0, states[:cut]), (cut, states[cut:])):
+            values, child = fill_scientific_forms(group, chunks, model, cancelled=cancelled,
+                max_rounds=remaining, _state_offset=_state_offset + offset)
+            children.extend(values); reports.append(child)
+        report['batches'] = reports
+        if all(child['status'] in {'completed', 'not_needed'} for child in reports):
+            dispositions = {key: value for child in reports
+                            for key, value in (child.get('candidate_dispositions') or {}).items()}
+            report.update(status='completed', candidate_dispositions=dispositions,
+                          issues=[issue for child in reports for issue in child.get('issues') or []],
+                          stop_reason='partitioned_by_state')
+            validate_filling_coverage(states, children, report, state_offset=_state_offset)
+            if on_attempt:
+                on_attempt(report)
+            return children, report
+        failed = [child for child in reports if child['status'] not in {'completed', 'not_needed'}]
+        report['stop_reason'] = failed[0].get('stop_reason', 'partition_incomplete')
+        error = '; '.join(issue['message'] for child in failed for issue in child.get('issues') or []
+                          if issue.get('message')) or error
     report.update(status="incomplete", issues=[{"field": "material_states", "code": "form_filling_incomplete",
                                               "message": error or "模型整理未完成，原始候选已保留"}])
     if on_attempt:

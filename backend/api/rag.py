@@ -9,6 +9,7 @@ import re
 import shutil
 import time
 import uuid
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Literal
 
@@ -1611,8 +1612,11 @@ async def put_upload_draft(
                          == (previous.get('paper') or {}).get(str(issue['field']).split('.', 1)[1]))
                     or (issue.get('field') == 'material_states'
                         and normalized.get('material_states') == previous.get('material_states')))]
-            if "material_states" in draft:
-                normalized["paper"]["research_materials"] = _derived_research_materials(normalized["material_states"])
+            if "material_states" in draft and 'research_materials' not in (draft.get('paper') or {}):
+                if 'research_materials' in (previous.get('paper') or {}):
+                    normalized['paper']['research_materials'] = deepcopy(previous['paper']['research_materials'])
+                elif not previous.get('_parsing_workflow'):
+                    normalized['paper']['research_materials'] = _derived_research_materials(normalized['material_states'])
             # citation_extraction 是服务端 GROBID 产物，不能接受浏览器回传值覆盖。
             normalized["citation_extraction"] = previous.get("citation_extraction")
             from backend.services.citation_matching import preserve_matching_snapshot
@@ -1892,6 +1896,7 @@ async def _create_pending_paper(
     from backend.ingest.upload_tasks import markdown_path
     from backend.rag.database import async_session_factory
 
+    paper_materials_provided = 'research_materials' in (draft.get('paper') or {}) or bool(draft.get('_parsing_workflow'))
     try:
         draft = _normalize_draft(convert_legacy_scientific_draft(draft))
     except UploadContractError as exc:
@@ -1928,9 +1933,9 @@ async def _create_pending_paper(
                             existing_paper_id=existing.id,
                         )
 
-                derived_materials = _derived_research_materials(material_states)
-                if derived_materials:
-                    paper_data["research_materials"] = derived_materials
+                from backend.ingest.material_state_contract import research_materials_for_save
+                paper_data['research_materials'] = research_materials_for_save(
+                    paper_data, material_states, provided=paper_materials_provided)
 
                 paper = Paper(
                     upload_task_id=task_id,
@@ -2789,8 +2794,7 @@ async def _rewrite_paper_scientific_draft_in_tx(
     manual_before = await session.run_sync(lambda sync: paper_snapshot(
         sync, paper.id, current_user.id, current_user.role, check_access=False))
     paper.superconductor_kind = full_draft["paper"]["superconductor_kind"]
-    # 仅在用户保存科学数据时同步汇总，不在读取历史论文时回填。
-    paper.research_materials = _derived_research_materials(full_draft["material_states"])
+    # C1只保存科学数据，论文级清单继续由当前论文值掌管。
 
     bumped = paper.review_status == "approved"
     citation_extraction = await _reextract_main_pdf_references(session, paper) if bumped else None

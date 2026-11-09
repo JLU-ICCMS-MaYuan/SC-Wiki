@@ -2605,6 +2605,7 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                 {**source, "file_role": source.get("file_role", source.get("role", "main"))}
                 for source in form_sources(document_set, scientific_sources)], complete_json, files=state.get('files') or [], target_id=task_id,
                 material_scope=(state.get('workflow_assessment') or {}).get('tc_material_scope'),
+                documents=document_set,
                 on_request=lambda request: _atomic_write_json(
                     artifact_directory(task_id) / "material_state_inventory_request.json", request),
                 on_response=lambda response: _atomic_write_json(

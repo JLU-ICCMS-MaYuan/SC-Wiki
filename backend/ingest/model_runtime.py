@@ -237,7 +237,7 @@ class ModelRuntime:
                     pass
         threading.Thread(target=close, daemon=True).start()
 
-    def interruptible(self, operation):
+    def interruptible(self, operation, *, activity=None):
         result = queue.Queue(maxsize=1)
         context = copy_context()
         stopped = threading.Event()
@@ -267,7 +267,7 @@ class ModelRuntime:
                 except queue.Empty:
                     if self.receiving.is_set() and not receiving_announced:
                         self.receiving.clear()
-                        self.event("receiving")
+                        self.event("receiving", **(activity or {}))
                         receiving_announced = True
                     continue
                 self.check()
@@ -349,7 +349,8 @@ class ModelRuntime:
                     prepared_once = True
                     self.event('requesting', phase=phase, attempt=attempt, filename=filename, pages=pages,
                                started_at=time.time(), error=None, retry_at=None)
-                response = self.interruptible(invoke)
+                response = self.interruptible(invoke, activity={
+                    'phase': phase, 'attempt': attempt, 'filename': filename, 'pages': pages})
                 validate_context_output(response, prepared)
             except ExecutionStopped:
                 raise

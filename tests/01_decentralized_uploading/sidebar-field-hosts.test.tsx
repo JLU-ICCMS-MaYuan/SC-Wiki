@@ -83,6 +83,47 @@ beforeEach(()=>{
 })
 afterEach(()=>{cleanup();clearFormDefinitionCache();vi.clearAllMocks()})
 
+it.each(['upload','revision','admin','superadmin'])('230 %s 修改科学字段并保存不重写论文级研究材料',async kind=>{
+ draft.paper.research_materials=['Reviewed calcium hydrides']
+ await open(kind,false)
+ fireEvent.click(screen.getByRole('button',{name:'关闭来源详情',exact:true}))
+ fireEvent.change(await screen.findByLabelText('μ*'),{target:{value:'0.12'}})
+ fireEvent.click(screen.getByRole('button',{name:['admin','superadmin'].includes(kind)?'保存修改':'立即保存',exact:true}))
+ await waitFor(()=>expect(vi.mocked(api.patch)).toHaveBeenCalled())
+ const changes=vi.mocked(api.patch).mock.calls.flatMap(([,body]:any)=>body.changes||[])
+ expect(changes.filter((change:any)=>change.path[0]==='paper'&&change.path[1]==='research_materials')).toHaveLength(0)
+ expect(draft.paper.research_materials).toEqual(['Reviewed calcium hydrides'])
+ expect(vi.mocked(api.post).mock.calls.filter(([path])=>path.endsWith('/jobs'))).toHaveLength(0)
+})
+
+it.each(['upload','revision','admin','superadmin'])('228 %s 原文标记可关闭，条件上下文保留且不重新请求或写值',async kind=>{
+ const context='At 150 GPa the authors used mu*=0.13 for this result only.'
+ const start=context.indexOf('0.13')
+ sourceOverrides={status:'supported',stale:false,pending_review:false,
+  evidences:[{file_id:'main',source_name:'正文',block_id:'source-block',page_start:1,chunk_index:0,quote:'0.13'}]}
+ const original=vi.mocked(api.post).getMockImplementation()!
+ vi.mocked(api.post).mockImplementation(async(path,body:any)=>{
+  if(path.endsWith('/region'))return {status:'text_only',context_text:context,
+   text_locator:{char_interval:[start,start+4],match_kind:'exact',text_sha256:'current-source'}} as never
+  return original(path,body)
+ })
+ await open(kind,false)
+ const drawer=document.querySelector('.evidence-review-drawer') as HTMLElement
+ fireEvent.click(within(drawer).getByRole('button',{name:'查看原 PDF 区域'}))
+ const toggle=await within(drawer).findByRole('button',{name:'隐藏来源标记'})
+ expect(drawer.querySelector('mark')).toHaveTextContent('0.13')
+ expect(drawer.querySelector('[data-source-context]')).toHaveTextContent('150 GPa')
+ fireEvent.click(toggle)
+ expect(drawer.querySelector('mark')).toBeNull()
+ expect(drawer.querySelector('[data-source-context]')).toHaveTextContent('for this result only.')
+ fireEvent.click(within(drawer).getByRole('button',{name:'显示来源标记'}))
+ expect(drawer.querySelector('mark')).toHaveTextContent('0.13')
+ expect(vi.mocked(api.post).mock.calls.filter(([path])=>path.endsWith('/region'))).toHaveLength(1)
+ expect(vi.mocked(api.patch)).not.toHaveBeenCalled()
+ expect(vi.mocked(api.put)).not.toHaveBeenCalled()
+ expect(vi.mocked(api.post).mock.calls.filter(([path])=>path.endsWith('/jobs'))).toHaveLength(0)
+})
+
 it.each(['admin','superadmin'])('%s 恢复不含程序身份的审核工作稿仍显示整稿，当前空值不回退正式缓存',async role=>{
  auth.role=role
  delete draft.paper.id

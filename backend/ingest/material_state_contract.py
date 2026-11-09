@@ -41,6 +41,12 @@ def research_materials(states):
     return result
 
 
+def research_materials_for_save(paper, states, *, provided=True):
+    """论文级字段由当前值掌管；仅旧请求缺少该字段时沿用一次派生。"""
+    from copy import deepcopy
+    return deepcopy(paper.get('research_materials') or []) if provided else research_materials(states)
+
+
 def state_metadata(state: dict) -> dict:
     kind = state.get("state_kind") or "unknown"
     optimization = state.get("structure_optimization") or "unknown"

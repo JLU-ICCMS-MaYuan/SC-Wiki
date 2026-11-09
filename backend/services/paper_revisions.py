@@ -270,7 +270,13 @@ async def save_draft(session, paper_id, user, payload):
     preserve_binding(draft, saved.draft)
     draft.pop('theoretical_subtype_assessment', None)
     draft['paper'] = {k: v for k, v in draft['paper'].items() if k in {*PAPER_FIELDS, 'material_families', 'corresponding_authors', 'co_first_authors'}}
-    draft['paper']['research_materials'] = _derived_research_materials(draft['material_states'])
+    from backend.ingest.material_state_contract import research_materials_for_save
+    if 'research_materials' not in (payload.draft.get('paper') or {}) and 'research_materials' in (saved.draft.get('paper') or {}):
+        draft['paper']['research_materials'] = copy.deepcopy(saved.draft['paper']['research_materials'])
+    draft['paper']['research_materials'] = research_materials_for_save(
+        draft['paper'], draft['material_states'],
+        provided='research_materials' in (payload.draft.get('paper') or {})
+            or 'research_materials' in (saved.draft.get('paper') or {}) or bool(saved.draft.get('_parsing_workflow')))
     # 来源解析信息由服务端持有，客户端不能替换正文或引用解析。
     draft.pop('citation_extraction', None)
     await _resolve_draft_classifications(session, draft)

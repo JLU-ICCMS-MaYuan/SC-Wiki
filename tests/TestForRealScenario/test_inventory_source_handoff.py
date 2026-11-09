@@ -37,6 +37,17 @@ def test_worker_inventory_retains_ir_identity(tmp_path, monkeypatch, db_session)
     def selected_conventional(task_id):
         from backend.ingest.parsing_workflows import CURRENT, BINDING
         upload_jobs.update_state(task_id, **{BINDING: CURRENT.binding()})
+        original_model = upload_jobs.complete_json
+        def image_aware_model(prompt, content, **options):
+            try:
+                payload = json.loads(content)
+            except ValueError:
+                payload = None  # 正式分段请求有章节/页码前缀，沿原固定模型处理。
+            if isinstance(payload, dict) and 'image_pages' in payload:
+                # 此固定PDF只有文字/表格；新增逐页图盘点仍返回完整页面回执。
+                return {'pages': [{'page': page, 'figures': []} for page in payload['image_pages']]}
+            return original_model(prompt, content, **options)
+        monkeypatch.setattr(upload_jobs, 'complete_json', image_aware_model)
         return upload_jobs._process_conventional_upload_task(task_id)
     monkeypatch.setattr(upload_jobs, '_process_upload_task', selected_conventional)
     path = Path(__file__).parents[1]/'01_decentralized_uploading'/'test_issue139_workflow.py'
