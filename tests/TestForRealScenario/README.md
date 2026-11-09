@@ -89,3 +89,5 @@ python3 -m unittest discover -s "tests/TestForRealScenario" -p "test_*.py"
 `fixtures/h3s-filling-failed.json` 保留真实失败响应；`test_candidate_coverage.py`验证通用候选去向、正式最终关口、既有模型上下文和保存重读；真实模型重跑另存各轮证据，不以构造响应代替科学验收。`verify_review_failure.py` 验证技术错误不被依赖变化提示覆盖；成功字段和真实未核对状态分别保留。
 
 `verify_worker_capacity.py` 执行真实本地启动函数验证并发配置透传，并用独立TCP Redis及正式RQ启动入口验证“10项同时执行、第11项排队”。`worker_capacity_probe.py` 只占用隔离任务槽，不解析PDF、不调用模型；它验证容量，不能作为十篇论文科学解析通过的证据。本机当前 `.env` 的 `UPLOAD_LLM_CONCURRENCY=10` 已通过实际进程注册核对，恢复容量后再继续正文／补充材料的单任务黑盒流程。
+
+CaH6的第三轮真实后处理失败中，fixtures/cah6-dos-archive-failed.json保留CaH4 50GPa DOS的完整独立状态、必要原文及实际模型响应；仅按状态隔离，没有改写科学值或来源。test_cah6_dos_archive_replay.py固定重放宿主来源档案误入模型字段检查的故障，验证当前值、单位、档案及候选去向。它不调用模型或业务库，不替代CaH6新上传黑盒；完整失败/成功后处理制品仍在对应runs目录。

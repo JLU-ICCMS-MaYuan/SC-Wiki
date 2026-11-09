@@ -1,0 +1,856 @@
+{
+  "origin_task": "0ee89b0a8d2844e291afcfd09be1a62c",
+  "scope": "真实失败响应中CaH4 50GPa DOS单元，原科学值/原文/档案/响应未改写，仅按状态隔离",
+  "original_error": "payload：模型输出了未登记科学字段：dos_fermi_sources",
+  "state_offset": 6,
+  "states": [
+    {
+      "material": "CaH4",
+      "material_name": "tI10-CaH4",
+      "pressure_value_gpa": 50,
+      "reported_space_group_symbol": "I4/mmm",
+      "state_kind": "theoretical",
+      "structure_optimization": "classical_static",
+      "state_key": "state-8",
+      "property_modules": [
+        {
+          "module_code": "electronic_properties",
+          "records": [
+            {
+              "record_key": "assembled-7-electronic_properties-0",
+              "module_code": "electronic_properties",
+              "record_type": "property",
+              "property_code": "dos_fermi",
+              "custom_property_key": null,
+              "definition_key": "record.electronic_properties.dos_fermi",
+              "definition_version": 2,
+              "name_raw": "Electronic density of states at the Fermi level",
+              "value_kind": "number",
+              "value_raw": "",
+              "value_number": null,
+              "value_min": null,
+              "value_max": null,
+              "value_text": null,
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "states/eV/f.u.",
+              "canonical_unit": "states/eV/f.u.",
+              "method_code": null,
+              "method_raw": null,
+              "criterion_code": null,
+              "criterion_raw": null,
+              "structure_key": null,
+              "payload": {
+                "method_variant_status": null,
+                "dos_fermi_sources": {
+                  "version": 1,
+                  "records": [
+                    {
+                      "record_key": "ir-f5e89e53207f6a56bc9240773f69a1ed",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "Electronic density of states at the Fermi level",
+                      "value_kind": "number",
+                      "value_raw": "~0.03 states/eV/f.u.",
+                      "value_number": 0.03,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": null,
+                      "value_boolean": null,
+                      "uncertainty": null,
+                      "unit_raw": "states/eV/f.u.",
+                      "canonical_unit": "states/eV/f.u.",
+                      "method_code": null,
+                      "method_raw": null,
+                      "criterion_code": null,
+                      "criterion_raw": null,
+                      "structure_key": null,
+                      "payload": {
+                        "method_variant_status": null
+                      },
+                      "evidence": null,
+                      "evidences": [
+                        {
+                          "file_id": "bc6db65eac734d439f30bee318761644",
+                          "pdf_page": 10,
+                          "block_id": "chart-reading-7d3c67ff20e7351ac52f95900d8129d246ddcbc7",
+                          "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper main panel\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.03, \"value_raw\": \"~0.03 states/eV/f.u.\", \"reading_precision\": 0.09, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"DOS curve at E−EF=0; the panel identifies I4/mmm at 50 GPa, and the caption maps this phase to tI10-CaH4.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.00020441360646472617, \"reading_precision\": 0.14879295204916831, \"calibration\": {\"slope\": 0.023150560697885326, \"intercept\": -18.983255358659502, \"residual\": 0.009889587861856342, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [129, 993], \"scale\": \"linear\", \"ticks\": [{\"position\": 129, \"value\": -16}, {\"position\": 215, \"value\": -14}, {\"position\": 302, \"value\": -12}, {\"position\": 388, \"value\": -10}, {\"position\": 474, \"value\": -8}, {\"position\": 561, \"value\": -6}, {\"position\": 647, \"value\": -4}, {\"position\": 734, \"value\": -2}, {\"position\": 820, \"value\": 0}, {\"position\": 906, \"value\": 2}, {\"position\": 993, \"value\": 4}]}}"
+                        }
+                      ],
+                      "is_representative": false,
+                      "basis_kind": "paper_quote"
+                    },
+                    {
+                      "record_key": "ir-d1cb29c95f481157dc90198630ce6c38",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "Electronic density of states at the Fermi level",
+                      "value_kind": "number",
+                      "value_raw": "~0.01 states/eV/f.u.",
+                      "value_number": 0.01,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": null,
+                      "value_boolean": null,
+                      "uncertainty": null,
+                      "unit_raw": "states/eV/f.u.",
+                      "canonical_unit": "states/eV/f.u.",
+                      "method_code": null,
+                      "method_raw": null,
+                      "criterion_code": null,
+                      "criterion_raw": null,
+                      "structure_key": null,
+                      "payload": {
+                        "method_variant_status": null
+                      },
+                      "evidence": null,
+                      "evidences": [
+                        {
+                          "file_id": "bc6db65eac734d439f30bee318761644",
+                          "pdf_page": 10,
+                          "block_id": "chart-reading-e08d54b1079979fb4b0d09f7c8f89a090a2c57db",
+                          "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"Minimum of the inset DOS curve at the dashed Fermi-level line; this inset belongs to the I4/mmm, 50 GPa upper panel.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.19081742659648945, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}"
+                        },
+                        {
+                          "file_id": "bc6db65eac734d439f30bee318761644",
+                          "pdf_page": 10,
+                          "block_id": "chart-reading-000717e1f06d76cb3fbf9ead6282517baf4b4a04",
+                          "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"CaH4, I4/mmm, 50 GPa\", \"series\": \"Total electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": \"VASP\", \"conditions\": [{\"label\": \"E − EF\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"The inset enlarges the upper 50 GPa I4/mmm curve. Its dashed Fermi-level line intersects the DOS near the shallow minimum.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": -0.00962613128554679, \"reading_precision\": 0.29841006985178564, \"calibration\": {\"slope\": 0.02291936020366975, \"intercept\": -18.803501498294743, \"residual\": 0.00962613128554679, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733.3, 908.1], \"scale\": \"linear\", \"ticks\": [{\"position\": 733.3, \"value\": -2}, {\"position\": 777, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863.7, \"value\": 1}, {\"position\": 908.1, \"value\": 2}]}}"
+                        }
+                      ],
+                      "is_representative": false,
+                      "basis_kind": "paper_quote"
+                    },
+                    {
+                      "record_key": "ir-f60a5c5d32d75b0b46eb4354c2585908",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "Electronic density of states at the Fermi level",
+                      "value_kind": "number",
+                      "value_raw": "~0 states/eV/f.u.",
+                      "value_number": 0.0,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": null,
+                      "value_boolean": null,
+                      "uncertainty": null,
+                      "unit_raw": "states/eV/f.u.",
+                      "canonical_unit": "states/eV/f.u.",
+                      "method_code": null,
+                      "method_raw": "VASP",
+                      "criterion_code": null,
+                      "criterion_raw": null,
+                      "structure_key": null,
+                      "payload": {
+                        "method_variant_status": null
+                      },
+                      "evidence": null,
+                      "evidences": [
+                        {
+                          "file_id": "bc6db65eac734d439f30bee318761644",
+                          "pdf_page": 10,
+                          "block_id": "chart-reading-861ded9df8c13607fe1fe67192fb85cffb907b21",
+                          "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"S7\", \"panel\": \"Upper main panel\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.0, \"value_raw\": \"~0 states/eV/f.u.\", \"reading_precision\": 0.2, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"CaH4, I4/mmm, 50 GPa\", \"series\": \"Total electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": \"VASP\", \"conditions\": [{\"label\": \"E − EF\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"The upper-panel label assigns this total electronic DOS curve to I4/mmm CaH4 at 50 GPa; the reading is at zero energy, also shown enlarged in the inset.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": -0.0013702034999028, \"reading_precision\": 0.20217917839512453, \"calibration\": {\"slope\": 0.023142050209203156, \"intercept\": -18.97785137504649, \"residual\": 0.007785956637818003, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [128.9, 993], \"scale\": \"linear\", \"ticks\": [{\"position\": 128.9, \"value\": -16}, {\"position\": 215, \"value\": -14}, {\"position\": 301.5, \"value\": -12}, {\"position\": 388.1, \"value\": -10}, {\"position\": 474.1, \"value\": -8}, {\"position\": 560.7, \"value\": -6}, {\"position\": 647.4, \"value\": -4}, {\"position\": 733.3, \"value\": -2}, {\"position\": 820, \"value\": 0}, {\"position\": 906.7, \"value\": 2}, {\"position\": 993, \"value\": 4}]}}"
+                        }
+                      ],
+                      "is_representative": false,
+                      "basis_kind": "paper_quote"
+                    },
+                    {
+                      "record_key": "ir-f2d7ac038458307f74650af3e5e73dec",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "Electronic density of states at the Fermi level",
+                      "value_kind": "number",
+                      "value_raw": "~0.005 states/eV/f.u.",
+                      "value_number": 0.005,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": null,
+                      "value_boolean": null,
+                      "uncertainty": null,
+                      "unit_raw": "states/eV/f.u.",
+                      "canonical_unit": "states/eV/f.u.",
+                      "method_code": null,
+                      "method_raw": null,
+                      "criterion_code": null,
+                      "criterion_raw": null,
+                      "structure_key": null,
+                      "payload": {
+                        "method_variant_status": null
+                      },
+                      "evidence": null,
+                      "evidences": [
+                        {
+                          "file_id": "bc6db65eac734d439f30bee318761644",
+                          "pdf_page": 10,
+                          "block_id": "chart-reading-3d094a525099a0a4b7f7d74623ad54bf19f21e72",
+                          "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"S7\", \"panel\": \"Top panel, near-Fermi-level inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.005, \"value_raw\": \"~0.005 states/eV/f.u.\", \"reading_precision\": 0.009, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Phase\", \"unit\": null, \"value\": \"tI10\"}, {\"label\": \"E − EF\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"The inset belongs to the upper I4/mmm, 50 GPa panel. The DOS curve is read at the dashed Fermi-level line using the inset calibration, rather than assigning the caption's numerical DOS to this coordinate.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.14484114401674433, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}"
+                        }
+                      ],
+                      "is_representative": false,
+                      "basis_kind": "paper_quote"
+                    }
+                  ]
+                }
+              },
+              "evidence": null,
+              "evidences": [
+                {
+                  "file_id": "bc6db65eac734d439f30bee318761644",
+                  "pdf_page": 10,
+                  "block_id": "chart-reading-7d3c67ff20e7351ac52f95900d8129d246ddcbc7",
+                  "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper main panel\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.03, \"value_raw\": \"~0.03 states/eV/f.u.\", \"reading_precision\": 0.09, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"DOS curve at E−EF=0; the panel identifies I4/mmm at 50 GPa, and the caption maps this phase to tI10-CaH4.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.00020441360646472617, \"reading_precision\": 0.14879295204916831, \"calibration\": {\"slope\": 0.023150560697885326, \"intercept\": -18.983255358659502, \"residual\": 0.009889587861856342, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [129, 993], \"scale\": \"linear\", \"ticks\": [{\"position\": 129, \"value\": -16}, {\"position\": 215, \"value\": -14}, {\"position\": 302, \"value\": -12}, {\"position\": 388, \"value\": -10}, {\"position\": 474, \"value\": -8}, {\"position\": 561, \"value\": -6}, {\"position\": 647, \"value\": -4}, {\"position\": 734, \"value\": -2}, {\"position\": 820, \"value\": 0}, {\"position\": 906, \"value\": 2}, {\"position\": 993, \"value\": 4}]}}"
+                },
+                {
+                  "file_id": "bc6db65eac734d439f30bee318761644",
+                  "pdf_page": 10,
+                  "block_id": "chart-reading-e08d54b1079979fb4b0d09f7c8f89a090a2c57db",
+                  "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"Minimum of the inset DOS curve at the dashed Fermi-level line; this inset belongs to the I4/mmm, 50 GPa upper panel.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.19081742659648945, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}"
+                },
+                {
+                  "file_id": "bc6db65eac734d439f30bee318761644",
+                  "pdf_page": 10,
+                  "block_id": "chart-reading-000717e1f06d76cb3fbf9ead6282517baf4b4a04",
+                  "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"CaH4, I4/mmm, 50 GPa\", \"series\": \"Total electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": \"VASP\", \"conditions\": [{\"label\": \"E − EF\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"The inset enlarges the upper 50 GPa I4/mmm curve. Its dashed Fermi-level line intersects the DOS near the shallow minimum.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": -0.00962613128554679, \"reading_precision\": 0.29841006985178564, \"calibration\": {\"slope\": 0.02291936020366975, \"intercept\": -18.803501498294743, \"residual\": 0.00962613128554679, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733.3, 908.1], \"scale\": \"linear\", \"ticks\": [{\"position\": 733.3, \"value\": -2}, {\"position\": 777, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863.7, \"value\": 1}, {\"position\": 908.1, \"value\": 2}]}}"
+                },
+                {
+                  "file_id": "bc6db65eac734d439f30bee318761644",
+                  "pdf_page": 10,
+                  "block_id": "chart-reading-861ded9df8c13607fe1fe67192fb85cffb907b21",
+                  "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"S7\", \"panel\": \"Upper main panel\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.0, \"value_raw\": \"~0 states/eV/f.u.\", \"reading_precision\": 0.2, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"CaH4, I4/mmm, 50 GPa\", \"series\": \"Total electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": \"VASP\", \"conditions\": [{\"label\": \"E − EF\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"The upper-panel label assigns this total electronic DOS curve to I4/mmm CaH4 at 50 GPa; the reading is at zero energy, also shown enlarged in the inset.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": -0.0013702034999028, \"reading_precision\": 0.20217917839512453, \"calibration\": {\"slope\": 0.023142050209203156, \"intercept\": -18.97785137504649, \"residual\": 0.007785956637818003, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [128.9, 993], \"scale\": \"linear\", \"ticks\": [{\"position\": 128.9, \"value\": -16}, {\"position\": 215, \"value\": -14}, {\"position\": 301.5, \"value\": -12}, {\"position\": 388.1, \"value\": -10}, {\"position\": 474.1, \"value\": -8}, {\"position\": 560.7, \"value\": -6}, {\"position\": 647.4, \"value\": -4}, {\"position\": 733.3, \"value\": -2}, {\"position\": 820, \"value\": 0}, {\"position\": 906.7, \"value\": 2}, {\"position\": 993, \"value\": 4}]}}"
+                },
+                {
+                  "file_id": "bc6db65eac734d439f30bee318761644",
+                  "pdf_page": 10,
+                  "block_id": "chart-reading-3d094a525099a0a4b7f7d74623ad54bf19f21e72",
+                  "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"S7\", \"panel\": \"Top panel, near-Fermi-level inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.005, \"value_raw\": \"~0.005 states/eV/f.u.\", \"reading_precision\": 0.009, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Phase\", \"unit\": null, \"value\": \"tI10\"}, {\"label\": \"E − EF\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"The inset belongs to the upper I4/mmm, 50 GPa panel. The DOS curve is read at the dashed Fermi-level line using the inset calibration, rather than assigning the caption's numerical DOS to this coordinate.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.14484114401674433, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}"
+                }
+              ],
+              "is_representative": false,
+              "basis_kind": "paper_quote"
+            }
+          ],
+          "module_key": "module-electronic_properties",
+          "definition_key": "module.electronic_properties",
+          "definition_version": 1
+        }
+      ],
+      "schema_version": 2,
+      "evidences": [
+        {
+          "file_id": "bc6db65eac734d439f30bee318761644",
+          "block_id": "da15f57654bda1e0c72adff2419af51c0daf00e1feecbfb053be73e4d1fd710d",
+          "source_version": 1,
+          "pdf_page": 8,
+          "quote": "Table S1 Calculated structural parameters of tI10-CaH₄ at 50 GPa."
+        },
+        {
+          "file_id": "bc6db65eac734d439f30bee318761644",
+          "block_id": "60f3ad15514bdf58f6255832ccaccfc482d8bdfd640cc1c1874c361d29e2a143",
+          "source_version": 1,
+          "pdf_page": 8,
+          "quote": "tI10 (space group I4/mmm )"
+        },
+        {
+          "file_id": "bc6db65eac734d439f30bee318761644",
+          "block_id": "150323f5867d8623b4bea321d5c259fad094f55f5b2a8bb511b067c3632c80a9",
+          "source_version": 1,
+          "pdf_page": 8,
+          "quote": "H1 (4 d)"
+        },
+        {
+          "file_id": "bc6db65eac734d439f30bee318761644",
+          "block_id": "56c7b79f346983622035b198d024ace255e4da214e11d297c5ab84bcceae2118",
+          "source_version": 1,
+          "pdf_page": 8,
+          "quote": "H2 (4 e)"
+        },
+        {
+          "file_id": "bc6db65eac734d439f30bee318761644",
+          "block_id": "780e25b7c904bc6a819103115cf78d0c9450b2bb4cec011ff2ad4e3c65df2703",
+          "source_version": 1,
+          "pdf_page": 8,
+          "quote": "Ca (2 a)"
+        },
+        {
+          "file_id": "bc6db65eac734d439f30bee318761644",
+          "block_id": "d52bafee2027a8b504a5bb1d4dd8fc5661ea6bb90f5825ffa67da73db9b28475",
+          "source_version": 1,
+          "pdf_page": 10,
+          "quote": "Figure S6 Calculated phonon DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} and oC20-CaH4 at 50/150 and 200 GPa, respectively."
+        },
+        {
+          "file_id": "bc6db65eac734d439f30bee318761644",
+          "block_id": "chart-reading-e08d54b1079979fb4b0d09f7c8f89a090a2c57db",
+          "source_version": 1,
+          "pdf_page": 10,
+          "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"Minimum of the inset DOS curve at the dashed Fermi-level line; this inset belongs to the I4/mmm, 50 GPa upper panel.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.19081742659648945, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}"
+        },
+        {
+          "file_id": "1e8a9544a1984f91a7721416c77c1fa7",
+          "block_id": "e34313449d6dd5f526ecde2b2ea3b1e94d27297d6acafece90957ab847d7553e",
+          "source_version": 1,
+          "pdf_page": 4,
+          "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+        },
+        {
+          "file_id": "bc6db65eac734d439f30bee318761644",
+          "block_id": "4a04ff15db506fed6c6c36f9f8e7e1034bd92627f7c7537bcb6f9126eb0be1c9",
+          "source_version": 1,
+          "pdf_page": 2,
+          "quote": "To analyze the results of structure simulations, we selected a number of distinct lowest-enthalpy structures and optimized their structures as a function of pressures using VASP code. To reduce the errors, the cut-off energy for the expansion of wavefunctions into plane waves was set to 400 eV in all calculations, and the Monkhorst- \\mathbf { \\cdot } \\mathbf { P a c k } ^ { 1 } grid with a maximum spacing of 0 . 0 3 ~ \\AA ^ { - 1 } was individually adjusted in reciprocal space to the size of each computational cell. This usually gave well-converged total energies (within ～ 1 meV per atom)"
+        }
+      ],
+      "field_evidence": {
+        "material": [
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "da15f57654bda1e0c72adff2419af51c0daf00e1feecbfb053be73e4d1fd710d",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "Table S1 Calculated structural parameters of tI10-CaH₄ at 50 GPa."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "60f3ad15514bdf58f6255832ccaccfc482d8bdfd640cc1c1874c361d29e2a143",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "tI10 (space group I4/mmm )"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "150323f5867d8623b4bea321d5c259fad094f55f5b2a8bb511b067c3632c80a9",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "H1 (4 d)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "56c7b79f346983622035b198d024ace255e4da214e11d297c5ab84bcceae2118",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "H2 (4 e)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "780e25b7c904bc6a819103115cf78d0c9450b2bb4cec011ff2ad4e3c65df2703",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "Ca (2 a)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "d52bafee2027a8b504a5bb1d4dd8fc5661ea6bb90f5825ffa67da73db9b28475",
+            "source_version": 1,
+            "pdf_page": 10,
+            "quote": "Figure S6 Calculated phonon DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} and oC20-CaH4 at 50/150 and 200 GPa, respectively."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "chart-reading-e08d54b1079979fb4b0d09f7c8f89a090a2c57db",
+            "source_version": 1,
+            "pdf_page": 10,
+            "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"Minimum of the inset DOS curve at the dashed Fermi-level line; this inset belongs to the I4/mmm, 50 GPa upper panel.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.19081742659648945, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}"
+          },
+          {
+            "file_id": "1e8a9544a1984f91a7721416c77c1fa7",
+            "block_id": "e34313449d6dd5f526ecde2b2ea3b1e94d27297d6acafece90957ab847d7553e",
+            "source_version": 1,
+            "pdf_page": 4,
+            "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "4a04ff15db506fed6c6c36f9f8e7e1034bd92627f7c7537bcb6f9126eb0be1c9",
+            "source_version": 1,
+            "pdf_page": 2,
+            "quote": "To analyze the results of structure simulations, we selected a number of distinct lowest-enthalpy structures and optimized their structures as a function of pressures using VASP code. To reduce the errors, the cut-off energy for the expansion of wavefunctions into plane waves was set to 400 eV in all calculations, and the Monkhorst- \\mathbf { \\cdot } \\mathbf { P a c k } ^ { 1 } grid with a maximum spacing of 0 . 0 3 ~ \\AA ^ { - 1 } was individually adjusted in reciprocal space to the size of each computational cell. This usually gave well-converged total energies (within ～ 1 meV per atom)"
+          }
+        ],
+        "material_name": [
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "da15f57654bda1e0c72adff2419af51c0daf00e1feecbfb053be73e4d1fd710d",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "Table S1 Calculated structural parameters of tI10-CaH₄ at 50 GPa."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "60f3ad15514bdf58f6255832ccaccfc482d8bdfd640cc1c1874c361d29e2a143",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "tI10 (space group I4/mmm )"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "150323f5867d8623b4bea321d5c259fad094f55f5b2a8bb511b067c3632c80a9",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "H1 (4 d)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "56c7b79f346983622035b198d024ace255e4da214e11d297c5ab84bcceae2118",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "H2 (4 e)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "780e25b7c904bc6a819103115cf78d0c9450b2bb4cec011ff2ad4e3c65df2703",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "Ca (2 a)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "d52bafee2027a8b504a5bb1d4dd8fc5661ea6bb90f5825ffa67da73db9b28475",
+            "source_version": 1,
+            "pdf_page": 10,
+            "quote": "Figure S6 Calculated phonon DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} and oC20-CaH4 at 50/150 and 200 GPa, respectively."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "chart-reading-e08d54b1079979fb4b0d09f7c8f89a090a2c57db",
+            "source_version": 1,
+            "pdf_page": 10,
+            "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"Minimum of the inset DOS curve at the dashed Fermi-level line; this inset belongs to the I4/mmm, 50 GPa upper panel.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.19081742659648945, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}"
+          },
+          {
+            "file_id": "1e8a9544a1984f91a7721416c77c1fa7",
+            "block_id": "e34313449d6dd5f526ecde2b2ea3b1e94d27297d6acafece90957ab847d7553e",
+            "source_version": 1,
+            "pdf_page": 4,
+            "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "4a04ff15db506fed6c6c36f9f8e7e1034bd92627f7c7537bcb6f9126eb0be1c9",
+            "source_version": 1,
+            "pdf_page": 2,
+            "quote": "To analyze the results of structure simulations, we selected a number of distinct lowest-enthalpy structures and optimized their structures as a function of pressures using VASP code. To reduce the errors, the cut-off energy for the expansion of wavefunctions into plane waves was set to 400 eV in all calculations, and the Monkhorst- \\mathbf { \\cdot } \\mathbf { P a c k } ^ { 1 } grid with a maximum spacing of 0 . 0 3 ~ \\AA ^ { - 1 } was individually adjusted in reciprocal space to the size of each computational cell. This usually gave well-converged total energies (within ～ 1 meV per atom)"
+          }
+        ],
+        "pressure_value_gpa": [
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "da15f57654bda1e0c72adff2419af51c0daf00e1feecbfb053be73e4d1fd710d",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "Table S1 Calculated structural parameters of tI10-CaH₄ at 50 GPa."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "60f3ad15514bdf58f6255832ccaccfc482d8bdfd640cc1c1874c361d29e2a143",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "tI10 (space group I4/mmm )"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "150323f5867d8623b4bea321d5c259fad094f55f5b2a8bb511b067c3632c80a9",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "H1 (4 d)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "56c7b79f346983622035b198d024ace255e4da214e11d297c5ab84bcceae2118",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "H2 (4 e)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "780e25b7c904bc6a819103115cf78d0c9450b2bb4cec011ff2ad4e3c65df2703",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "Ca (2 a)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "d52bafee2027a8b504a5bb1d4dd8fc5661ea6bb90f5825ffa67da73db9b28475",
+            "source_version": 1,
+            "pdf_page": 10,
+            "quote": "Figure S6 Calculated phonon DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} and oC20-CaH4 at 50/150 and 200 GPa, respectively."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "chart-reading-e08d54b1079979fb4b0d09f7c8f89a090a2c57db",
+            "source_version": 1,
+            "pdf_page": 10,
+            "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"Minimum of the inset DOS curve at the dashed Fermi-level line; this inset belongs to the I4/mmm, 50 GPa upper panel.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.19081742659648945, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}"
+          },
+          {
+            "file_id": "1e8a9544a1984f91a7721416c77c1fa7",
+            "block_id": "e34313449d6dd5f526ecde2b2ea3b1e94d27297d6acafece90957ab847d7553e",
+            "source_version": 1,
+            "pdf_page": 4,
+            "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "4a04ff15db506fed6c6c36f9f8e7e1034bd92627f7c7537bcb6f9126eb0be1c9",
+            "source_version": 1,
+            "pdf_page": 2,
+            "quote": "To analyze the results of structure simulations, we selected a number of distinct lowest-enthalpy structures and optimized their structures as a function of pressures using VASP code. To reduce the errors, the cut-off energy for the expansion of wavefunctions into plane waves was set to 400 eV in all calculations, and the Monkhorst- \\mathbf { \\cdot } \\mathbf { P a c k } ^ { 1 } grid with a maximum spacing of 0 . 0 3 ~ \\AA ^ { - 1 } was individually adjusted in reciprocal space to the size of each computational cell. This usually gave well-converged total energies (within ～ 1 meV per atom)"
+          }
+        ],
+        "reported_space_group_symbol": [
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "da15f57654bda1e0c72adff2419af51c0daf00e1feecbfb053be73e4d1fd710d",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "Table S1 Calculated structural parameters of tI10-CaH₄ at 50 GPa."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "60f3ad15514bdf58f6255832ccaccfc482d8bdfd640cc1c1874c361d29e2a143",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "tI10 (space group I4/mmm )"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "150323f5867d8623b4bea321d5c259fad094f55f5b2a8bb511b067c3632c80a9",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "H1 (4 d)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "56c7b79f346983622035b198d024ace255e4da214e11d297c5ab84bcceae2118",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "H2 (4 e)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "780e25b7c904bc6a819103115cf78d0c9450b2bb4cec011ff2ad4e3c65df2703",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "Ca (2 a)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "d52bafee2027a8b504a5bb1d4dd8fc5661ea6bb90f5825ffa67da73db9b28475",
+            "source_version": 1,
+            "pdf_page": 10,
+            "quote": "Figure S6 Calculated phonon DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} and oC20-CaH4 at 50/150 and 200 GPa, respectively."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "chart-reading-e08d54b1079979fb4b0d09f7c8f89a090a2c57db",
+            "source_version": 1,
+            "pdf_page": 10,
+            "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"Minimum of the inset DOS curve at the dashed Fermi-level line; this inset belongs to the I4/mmm, 50 GPa upper panel.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.19081742659648945, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}"
+          },
+          {
+            "file_id": "1e8a9544a1984f91a7721416c77c1fa7",
+            "block_id": "e34313449d6dd5f526ecde2b2ea3b1e94d27297d6acafece90957ab847d7553e",
+            "source_version": 1,
+            "pdf_page": 4,
+            "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "4a04ff15db506fed6c6c36f9f8e7e1034bd92627f7c7537bcb6f9126eb0be1c9",
+            "source_version": 1,
+            "pdf_page": 2,
+            "quote": "To analyze the results of structure simulations, we selected a number of distinct lowest-enthalpy structures and optimized their structures as a function of pressures using VASP code. To reduce the errors, the cut-off energy for the expansion of wavefunctions into plane waves was set to 400 eV in all calculations, and the Monkhorst- \\mathbf { \\cdot } \\mathbf { P a c k } ^ { 1 } grid with a maximum spacing of 0 . 0 3 ~ \\AA ^ { - 1 } was individually adjusted in reciprocal space to the size of each computational cell. This usually gave well-converged total energies (within ～ 1 meV per atom)"
+          }
+        ],
+        "state_kind": [
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "da15f57654bda1e0c72adff2419af51c0daf00e1feecbfb053be73e4d1fd710d",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "Table S1 Calculated structural parameters of tI10-CaH₄ at 50 GPa."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "60f3ad15514bdf58f6255832ccaccfc482d8bdfd640cc1c1874c361d29e2a143",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "tI10 (space group I4/mmm )"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "150323f5867d8623b4bea321d5c259fad094f55f5b2a8bb511b067c3632c80a9",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "H1 (4 d)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "56c7b79f346983622035b198d024ace255e4da214e11d297c5ab84bcceae2118",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "H2 (4 e)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "780e25b7c904bc6a819103115cf78d0c9450b2bb4cec011ff2ad4e3c65df2703",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "Ca (2 a)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "d52bafee2027a8b504a5bb1d4dd8fc5661ea6bb90f5825ffa67da73db9b28475",
+            "source_version": 1,
+            "pdf_page": 10,
+            "quote": "Figure S6 Calculated phonon DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} and oC20-CaH4 at 50/150 and 200 GPa, respectively."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "chart-reading-e08d54b1079979fb4b0d09f7c8f89a090a2c57db",
+            "source_version": 1,
+            "pdf_page": 10,
+            "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"Minimum of the inset DOS curve at the dashed Fermi-level line; this inset belongs to the I4/mmm, 50 GPa upper panel.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.19081742659648945, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}"
+          },
+          {
+            "file_id": "1e8a9544a1984f91a7721416c77c1fa7",
+            "block_id": "e34313449d6dd5f526ecde2b2ea3b1e94d27297d6acafece90957ab847d7553e",
+            "source_version": 1,
+            "pdf_page": 4,
+            "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "4a04ff15db506fed6c6c36f9f8e7e1034bd92627f7c7537bcb6f9126eb0be1c9",
+            "source_version": 1,
+            "pdf_page": 2,
+            "quote": "To analyze the results of structure simulations, we selected a number of distinct lowest-enthalpy structures and optimized their structures as a function of pressures using VASP code. To reduce the errors, the cut-off energy for the expansion of wavefunctions into plane waves was set to 400 eV in all calculations, and the Monkhorst- \\mathbf { \\cdot } \\mathbf { P a c k } ^ { 1 } grid with a maximum spacing of 0 . 0 3 ~ \\AA ^ { - 1 } was individually adjusted in reciprocal space to the size of each computational cell. This usually gave well-converged total energies (within ～ 1 meV per atom)"
+          }
+        ],
+        "structure_optimization": [
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "da15f57654bda1e0c72adff2419af51c0daf00e1feecbfb053be73e4d1fd710d",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "Table S1 Calculated structural parameters of tI10-CaH₄ at 50 GPa."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "60f3ad15514bdf58f6255832ccaccfc482d8bdfd640cc1c1874c361d29e2a143",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "tI10 (space group I4/mmm )"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "150323f5867d8623b4bea321d5c259fad094f55f5b2a8bb511b067c3632c80a9",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "H1 (4 d)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "56c7b79f346983622035b198d024ace255e4da214e11d297c5ab84bcceae2118",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "H2 (4 e)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "780e25b7c904bc6a819103115cf78d0c9450b2bb4cec011ff2ad4e3c65df2703",
+            "source_version": 1,
+            "pdf_page": 8,
+            "quote": "Ca (2 a)"
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "d52bafee2027a8b504a5bb1d4dd8fc5661ea6bb90f5825ffa67da73db9b28475",
+            "source_version": 1,
+            "pdf_page": 10,
+            "quote": "Figure S6 Calculated phonon DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} and oC20-CaH4 at 50/150 and 200 GPa, respectively."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "chart-reading-e08d54b1079979fb4b0d09f7c8f89a090a2c57db",
+            "source_version": 1,
+            "pdf_page": 10,
+            "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"Minimum of the inset DOS curve at the dashed Fermi-level line; this inset belongs to the I4/mmm, 50 GPa upper panel.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.19081742659648945, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}"
+          },
+          {
+            "file_id": "1e8a9544a1984f91a7721416c77c1fa7",
+            "block_id": "e34313449d6dd5f526ecde2b2ea3b1e94d27297d6acafece90957ab847d7553e",
+            "source_version": 1,
+            "pdf_page": 4,
+            "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+          },
+          {
+            "file_id": "bc6db65eac734d439f30bee318761644",
+            "block_id": "4a04ff15db506fed6c6c36f9f8e7e1034bd92627f7c7537bcb6f9126eb0be1c9",
+            "source_version": 1,
+            "pdf_page": 2,
+            "quote": "To analyze the results of structure simulations, we selected a number of distinct lowest-enthalpy structures and optimized their structures as a function of pressures using VASP code. To reduce the errors, the cut-off energy for the expansion of wavefunctions into plane waves was set to 400 eV in all calculations, and the Monkhorst- \\mathbf { \\cdot } \\mathbf { P a c k } ^ { 1 } grid with a maximum spacing of 0 . 0 3 ~ \\AA ^ { - 1 } was individually adjusted in reciprocal space to the size of each computational cell. This usually gave well-converged total energies (within ～ 1 meV per atom)"
+          }
+        ]
+      },
+      "material_dimensionality": "unknown",
+      "structure_families": []
+    }
+  ],
+  "sources": [
+    {
+      "file_id": "bc6db65eac734d439f30bee318761644",
+      "file_role": "supplementary",
+      "source_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "source_version": 1,
+      "block_id": "f3a0f99a5b2a2001fb61adc973769c3f526636565311755c3be0c342abf6ed1f",
+      "page_start": 3,
+      "page_end": 3,
+      "content": "Band structure and density of state of \\mathrm{CaH_{2},~CaH_{4},~CaH_{6}} and \\mathrm { C a H } _ { 1 2 } were examined by using VASP code. The k-point mesh was carefully chosen to ensure the convergence of the results. The Fermi surfaces of cI 14 - CaH _6 were calculated by using VASP within 4 0   \\times   4 0   \\times   4 0 k-points mesh. Phonon dispersions of \\mathrm{CaH_{2},CaH_{4}} and \\mathrm { C a H _ { 6 } } were also performed by using supercell method⁴ with 108, 81, 135, 80 and 112 atoms in the cell for \\mathrm{hP6-CaH_{2}} \\mathrm{hP3-CaH_{2}} tI 10 - CaH _4 \\mathrm{OC20-CaH_{4}} and \\mathrm{cI14{-}CaH_{6}} as implemented in \\mathrm { F r o p h o } ^ { 5 } and \\mathtt { P h o n o n p y } ^ { 5 } .The difference of zero-point energy (ZPE) for cl 14 - CaH _6 between the calculated results through VASP and Q-E, i.e. \\Delta \\mathrm { Z P E } = ZPE \\mathrm{vASP^{-}ZPE_{Q-E_{2}}} is found to be negligible, being less than 1 % of \\mathrm { { [ Z P E _ { Q - E } } }",
+      "source_id": "source-118"
+    },
+    {
+      "file_id": "bc6db65eac734d439f30bee318761644",
+      "file_role": "supplementary",
+      "source_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "source_version": 1,
+      "block_id": "chart-reading-7d3c67ff20e7351ac52f95900d8129d246ddcbc7",
+      "page_start": 10,
+      "page_end": 10,
+      "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper main panel\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.03, \"value_raw\": \"~0.03 states/eV/f.u.\", \"reading_precision\": 0.09, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"DOS curve at E−EF=0; the panel identifies I4/mmm at 50 GPa, and the caption maps this phase to tI10-CaH4.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.00020441360646472617, \"reading_precision\": 0.14879295204916831, \"calibration\": {\"slope\": 0.023150560697885326, \"intercept\": -18.983255358659502, \"residual\": 0.009889587861856342, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [129, 993], \"scale\": \"linear\", \"ticks\": [{\"position\": 129, \"value\": -16}, {\"position\": 215, \"value\": -14}, {\"position\": 302, \"value\": -12}, {\"position\": 388, \"value\": -10}, {\"position\": 474, \"value\": -8}, {\"position\": 561, \"value\": -6}, {\"position\": 647, \"value\": -4}, {\"position\": 734, \"value\": -2}, {\"position\": 820, \"value\": 0}, {\"position\": 906, \"value\": 2}, {\"position\": 993, \"value\": 4}]}}",
+      "source_id": "source-199"
+    },
+    {
+      "file_id": "bc6db65eac734d439f30bee318761644",
+      "file_role": "supplementary",
+      "source_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "source_version": 1,
+      "block_id": "chart-reading-e08d54b1079979fb4b0d09f7c8f89a090a2c57db",
+      "page_start": 10,
+      "page_end": 10,
+      "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Energy relative to the Fermi level\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"Minimum of the inset DOS curve at the dashed Fermi-level line; this inset belongs to the I4/mmm, 50 GPa upper panel.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.19081742659648945, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}",
+      "source_id": "source-200"
+    },
+    {
+      "file_id": "bc6db65eac734d439f30bee318761644",
+      "file_role": "supplementary",
+      "source_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "source_version": 1,
+      "block_id": "chart-reading-861ded9df8c13607fe1fe67192fb85cffb907b21",
+      "page_start": 10,
+      "page_end": 10,
+      "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"S7\", \"panel\": \"Upper main panel\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.0, \"value_raw\": \"~0 states/eV/f.u.\", \"reading_precision\": 0.2, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"CaH4, I4/mmm, 50 GPa\", \"series\": \"Total electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": \"VASP\", \"conditions\": [{\"label\": \"E − EF\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"The upper-panel label assigns this total electronic DOS curve to I4/mmm CaH4 at 50 GPa; the reading is at zero energy, also shown enlarged in the inset.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": -0.0013702034999028, \"reading_precision\": 0.20217917839512453, \"calibration\": {\"slope\": 0.023142050209203156, \"intercept\": -18.97785137504649, \"residual\": 0.007785956637818003, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [128.9, 993], \"scale\": \"linear\", \"ticks\": [{\"position\": 128.9, \"value\": -16}, {\"position\": 215, \"value\": -14}, {\"position\": 301.5, \"value\": -12}, {\"position\": 388.1, \"value\": -10}, {\"position\": 474.1, \"value\": -8}, {\"position\": 560.7, \"value\": -6}, {\"position\": 647.4, \"value\": -4}, {\"position\": 733.3, \"value\": -2}, {\"position\": 820, \"value\": 0}, {\"position\": 906.7, \"value\": 2}, {\"position\": 993, \"value\": 4}]}}",
+      "source_id": "source-203"
+    },
+    {
+      "file_id": "bc6db65eac734d439f30bee318761644",
+      "file_role": "supplementary",
+      "source_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "source_version": 1,
+      "block_id": "chart-reading-000717e1f06d76cb3fbf9ead6282517baf4b4a04",
+      "page_start": 10,
+      "page_end": 10,
+      "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"S7\", \"panel\": \"Upper-panel inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.01, \"value_raw\": \"~0.01 states/eV/f.u.\", \"reading_precision\": 0.02, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"CaH4, I4/mmm, 50 GPa\", \"series\": \"Total electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": \"VASP\", \"conditions\": [{\"label\": \"E − EF\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"The inset enlarges the upper 50 GPa I4/mmm curve. Its dashed Fermi-level line intersects the DOS near the shallow minimum.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": -0.00962613128554679, \"reading_precision\": 0.29841006985178564, \"calibration\": {\"slope\": 0.02291936020366975, \"intercept\": -18.803501498294743, \"residual\": 0.00962613128554679, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733.3, 908.1], \"scale\": \"linear\", \"ticks\": [{\"position\": 733.3, \"value\": -2}, {\"position\": 777, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863.7, \"value\": 1}, {\"position\": 908.1, \"value\": 2}]}}",
+      "source_id": "source-204"
+    },
+    {
+      "file_id": "bc6db65eac734d439f30bee318761644",
+      "file_role": "supplementary",
+      "source_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "source_version": 1,
+      "block_id": "chart-reading-3d094a525099a0a4b7f7d74623ad54bf19f21e72",
+      "page_start": 10,
+      "page_end": 10,
+      "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"S7\", \"panel\": \"Top panel, near-Fermi-level inset\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level\", \"unit\": \"states/eV/f.u.\", \"value_number\": 0.005, \"value_raw\": \"~0.005 states/eV/f.u.\", \"reading_precision\": 0.009, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CaH4\", \"category\": \"tI10-CaH4 at 50 GPa\", \"series\": \"Electronic DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": \"I4/mmm\", \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Phase\", \"unit\": null, \"value\": \"tI10\"}, {\"label\": \"E − EF\", \"unit\": \"eV\", \"value\": \"0\"}], \"reason\": \"The inset belongs to the upper I4/mmm, 50 GPa panel. The DOS curve is read at the dashed Fermi-level line using the inset calibration, rather than assigning the caption's numerical DOS to this coordinate.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.\nCalibrated horizontal condition: {\"quantity\": \"energy\", \"unit\": \"eV\", \"value\": 0.004597628257972275, \"reading_precision\": 0.14484114401674433, \"calibration\": {\"slope\": 0.022988141289872557, \"intercept\": -18.845678229437524, \"residual\": 0.006912296277509, \"scale\": \"linear\"}, \"axis\": {\"bounds\": [733, 907], \"scale\": \"linear\", \"ticks\": [{\"position\": 733, \"value\": -2}, {\"position\": 776, \"value\": -1}, {\"position\": 820, \"value\": 0}, {\"position\": 863, \"value\": 1}, {\"position\": 907, \"value\": 2}]}}",
+      "source_id": "source-207"
+    },
+    {
+      "file_id": "bc6db65eac734d439f30bee318761644",
+      "file_role": "supplementary",
+      "source_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "source_version": 1,
+      "block_id": "6144cfe91f0271392c0243d8b2a404ad0be1259f6a3a8060d5e4d4357496edc1",
+      "page_start": 7,
+      "page_end": 7,
+      "content": "The calculated electronic DOS and band structures of the tI10 and oC20 phases of \\mathrm { C a H _ { 4 } } are shown in Figures S7-S9, respectively. Our band structure results suggest that metallization of \\mathrm { C a H _ { 4 } } can be achieved in tI10 phase at pressures above 50 GPa. However, since the density-functional calculations typically underestimate energy gap within 30% - 50%, the metallization pressure of \\mathrm{tI10-CaH_{4}} might be much higher than above 50 GPa (e.g., at 150 GPa, Figure S9).",
+      "source_id": "source-145"
+    },
+    {
+      "file_id": "bc6db65eac734d439f30bee318761644",
+      "file_role": "supplementary",
+      "source_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "source_version": 1,
+      "block_id": "84ef5306b05155efafaf30b0434fe0e88c004248c4e7f5ab2f8868559e7ca5c1",
+      "page_start": 10,
+      "page_end": 10,
+      "content": "Figure S7 Electronic DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} and \\mathrm{oC20-CaH_{4}} at 5 0 / 1 5 0 and 200 GPa, respectively. The dashed lines denote the Fermi level. The inset figure is plotted to zoom in the DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} near the Fermi level. The calculated DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} is 0.02234 states/eV/f.u. at the Fermi level.",
+      "source_id": "source-197"
+    }
+  ],
+  "response": {
+    "done": true,
+    "records": [
+      {
+        "candidate_ids": [
+          "s6:m0:r0"
+        ],
+        "group": "CaH4-I4mmm-50GPa-DOS",
+        "method": "VASP-DOS",
+        "reason": "The S7 caption ties its numerical DOS to the near-Fermi inset, which the calibrated original readings explicitly locate in the upper 50 GPa panel. Prefer the explicitly reported 0.02234 over the approximate main-panel (~0–0.03) and inset (~0.005–0.01) localizations of this same result; their differences are within their supplied reading resolutions. Do not transfer this exact value to the 150 GPa panel. SI identifies VASP for CaH4 electronic DOS.",
+        "source_ids": [
+          "source-197",
+          "source-199",
+          "source-200",
+          "source-203",
+          "source-204",
+          "source-207",
+          "source-118",
+          "source-145"
+        ],
+        "values": {
+          "calculation_conditions": {
+            "calculation_code": "VASP",
+            "electronic_method": null,
+            "epw": null,
+            "exchange_correlation_functional": null,
+            "phonon_method": null,
+            "qe": null,
+            "sscha": null,
+            "vibrational_treatment": null
+          },
+          "canonical_unit": "states/eV/f.u.",
+          "method_code": null,
+          "method_raw": "VASP",
+          "uncertainty": null,
+          "unit_raw": "states/eV/f.u.",
+          "value_boolean": null,
+          "value_kind": "number",
+          "value_max": null,
+          "value_min": null,
+          "value_number": 0.02234,
+          "value_raw": "0.02234 states/eV/f.u.",
+          "value_text": null
+        }
+      }
+    ],
+    "excluded": [],
+    "unresolved": []
+  }
+}

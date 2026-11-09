@@ -39,3 +39,5 @@
 第三轮0ee89b0a8d2844e291afcfd09be1a62c的19段主提取、112项Claims验证完成，后处理输入超限导致任务失败。原始任务状态和全部制品已归档到tests/TestForRealScenario/runs/20261109T144412Z-c985a526/round3-artifacts及failed-task-before-cleanup.json，随后通过网页仅清理该失败任务。第四轮在20261109T181409Z-4e0a9338目录重新上传相同正文/SI，待记录实际结果；未宣称送审、返修、批准或搜索通过。
 
 第四轮真实任务为7615ba8ac23e4ddeaaa99b3837a9b058，实际模型server:LLM2 / gpt-6.1-sol。仅本任务增量投影到7c9e6bed的独立树，后端33项、来源标记/论文所有权四宿主8项及TypeScript/Vite构建通过；未带入原有#226未提交变更。
+
+第四轮论文阶段完成后，只读MySQL重读证实23个论文数据项与当前检查点完全相同，22项当前字段核对均以supported保存，未发生技术失败；随后进入图像处理。原始回执为runs/20261109T181409Z-4e0a9338/paper-stage-persisted-read.json。该存储检查不代替后续网页送审、返修、批准和搜索。
