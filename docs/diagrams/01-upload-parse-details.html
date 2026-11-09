@@ -7,16 +7,17 @@
 <link rel="stylesheet" href="flow.css">
 <script defer src="flow.js"></script>
 </head>
-<body data-flow-role="details">
+<body data-flow-role="branch">
 <main class="page">
   <nav class="page-links" aria-label="功能模块切换" data-module-nav></nav>
-  <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / 上传与解析：展开细节与分支</nav>
-  <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>上传与解析：展开细节与分支</h1><p class="intro">本页完整展开本功能的处理、判断、失败与返回路径。点击节点查看当前实现依据；主干页面保留入口与概要。</p></header>
-  <nav class="page-links" aria-label="流程页面导航"><a href="index.html">← 全站主流程</a><a href="01-upload-parse.html">← 上传与解析主干</a><a href="../overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md">文字说明与实现依据</a></nav>
+  <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / 上传与解析</nav>
+  <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>上传与解析：步骤分支层</h1><p class="intro">本页每次只展开一个步骤：显示它的判定依据、各条支线去向、出口与失败处理，不重复主干和其他步骤。带展开标记的支线可以继续下沉。</p></header>
+  <nav class="page-links" aria-label="流程页面导航"><a href="index.html">← 全站主流程</a><a href="01-upload-parse.html">← 上传与解析步骤</a><a href="../overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md">文字说明与实现依据</a></nav>
   <div class="layout">
     <section class="diagram" aria-labelledby="chart-title">
       <div class="toolbar"><div><h2 id="chart-title">程序控制流</h2><p>箭头表示标注的处理或数据关系；各功能按入口选择，不必逐个执行。</p></div><span class="mode-label">本机实际源码</span></div>
       <div class="legend" aria-label="图例"><span><i></i>处理</span><span><i class="check"></i>判断</span><span><i class="stop"></i>拒绝或失败</span><span><i class="result"></i>结果或独立出口</span></div>
+      <p class="level-caption" id="level-caption" hidden></p>
       <noscript>请启用 JavaScript 查看本地流程图；本页仅使用同目录静态资源。</noscript>
       <div class="viewport" tabindex="0" role="region" aria-label="上传与解析：展开细节与分支流程图，窄屏可横向滚动"><div class="canvas-wrap"><div class="canvas"></div></div></div>
     </section>
@@ -844,7 +845,7 @@
       "code": "backend/api/upload_tasks.py::cancel_upload_task；backend/ingest/upload_jobs.py::_ensure_not_cancelled / process_upload_task；backend/spectra/jobs.py::fail_upload_runs",
       "links": [
         {
-          "href": "01-upload-parse.html#task-lifecycle",
+          "href": "01-upload-parse.html#files",
           "label": "返回本功能主干"
         }
       ]
@@ -866,7 +867,7 @@
       "code": "backend/api/upload_tasks.py::retry_upload_task；backend/ingest/upload_jobs.py::process_upload_task；backend/ingest/upload_resume.py::resume_spectra",
       "links": [
         {
-          "href": "01-upload-parse.html#task-lifecycle",
+          "href": "01-upload-parse.html#files",
           "label": "返回本功能主干"
         },
         {
@@ -892,7 +893,7 @@
       "code": "backend/api/upload_tasks.py::delete_upload_task / batch_delete_upload_tasks；backend/ingest/upload_tasks.py::delete_task_record",
       "links": [
         {
-          "href": "01-upload-parse.html#task-lifecycle",
+          "href": "01-upload-parse.html#files",
           "label": "返回本功能主干"
         }
       ]

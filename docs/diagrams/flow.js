@@ -1,5 +1,5 @@
-// 程序流程图渲染器：主干纵向、支线左右横置，节点为 HTML，连线为单层 SVG。
-// 页面只声明 JSON 数据，不连接任何业务接口，也不写入真实数据。
+// 程序流程图渲染器：根图 / 功能步骤 / 支线 三种层级视图。
+// 每次只画当前节点的直接子结构，其余层级通过点击进入；节点是 HTML，连线是单层 SVG。
 (() => {
   'use strict';
 
@@ -18,430 +18,458 @@
     { no: '07', name: 'Tc 估算', href: '07-tc-predict.html' }
   ];
 
+  const pageName = decodeURIComponent(location.pathname.split('/').pop() || 'index.html');
+  const role = document.body.dataset.flowRole || 'root';
+  const feature = MODULES.find(item => item.href === pageName
+    || item.href.replace(/\.html$/, '-details.html') === pageName) || null;
+  const detailsHref = pageName.replace(/\.html$/, '-details.html');
+
+  const mains = data.main || [];
+  const branches = data.branches || [];
+  const byId = new Map([...mains, ...branches].map(node => [node.id, node]));
+  const childrenOf = id => branches.filter(branch => branch.attachTo === id);
+  const hasChildren = id => childrenOf(id).length > 0;
+
   function moduleOf(node) {
     if (node.module) return MODULES.find(item => item.no === String(node.module)) || null;
     for (const link of node.links || []) {
       const target = String(link.href || '').split('#')[0];
-      const found = MODULES.find(item => item.href === target);
-      if (found) return found;
+      const matched = MODULES.find(item => item.href === target);
+      if (matched) return matched;
     }
     return null;
   }
 
-  const NODE_H = 94;
-  const GEO = {
-    width: 1140,
-    top: 56,
-    rowGap: 128,
-    mainGap: 54,
-    branchGap: 36,
-    nodeHeight: NODE_H,
-    outerPad: 32,
-    innerGap: 128,
-    laneStep: 12,
-    main: { x: 380, w: 380 },
-    left: { x: 32, w: 248 },
-    right: { x: 820, w: 248 }
-  };
-  if (!(data.branches || []).length) {
-    GEO.width = 640;
-    GEO.main = { x: 110, w: 420 };
-  } else {
-    GEO.left.x = GEO.outerPad;
-    GEO.main.x = GEO.left.x + GEO.left.w + GEO.innerGap;
-    GEO.right.x = GEO.main.x + GEO.main.w + GEO.innerGap;
-    GEO.width = GEO.right.x + GEO.right.w + GEO.outerPad;
+  function stepLabel(node, fallbackIndex) {
+    if (node.step) return node.step;
+    const mod = moduleOf(node);
+    if (mod) return `功能 ${mod.no}`;
+    // 没有编号也没有步骤号的节点（例如只指向外部资料的旁支）不能显示成“步骤 00”。
+    return fallbackIndex >= 0
+      ? `步骤 ${String(fallbackIndex + 1).padStart(2, '0')}`
+      : '外部资料';
   }
+
+  const NODE_H = 94;
   const NS = 'http://www.w3.org/2000/svg';
   const canvas = document.querySelector('.canvas');
   const wrap = document.querySelector('.canvas-wrap');
   const viewport = document.querySelector('.viewport');
 
-  const nodes = new Map();
-  data.main.forEach((node, index) => {
-    const mod = moduleOf(node);
-    nodes.set(node.id, {
-      ...node,
-      col: 'main',
-      index,
-      module: mod,
-      step: node.step || (mod ? `功能 ${mod.no}` : `主干 ${String(index + 1).padStart(2, '0')}`),
-      x: GEO.main.x,
-      y: GEO.top,
-      w: GEO.main.w
-    });
-  });
-
-  const rawBranches = data.branches || [];
-  const branchMap = new Map(rawBranches.map(branch => [branch.id, branch]));
-  const children = new Map();
-  for (const branch of rawBranches) {
-    if (!nodes.has(branch.attachTo) && !branchMap.has(branch.attachTo)) continue;
-    const list = children.get(branch.attachTo) || [];
-    list.push(branch);
-    children.set(branch.attachTo, list);
-  }
-
-  function descendantsOf(mainId) {
-    const ordered = [];
-    const queue = [...(children.get(mainId) || [])];
-    const seen = new Set();
-    while (queue.length) {
-      const branch = queue.shift();
-      if (seen.has(branch.id)) continue;
-      seen.add(branch.id);
-      ordered.push(branch);
-      queue.push(...(children.get(branch.id) || []));
-    }
-    return ordered;
-  }
-
-  let cursorY = GEO.top;
-  for (const main of data.main) {
-    const node = nodes.get(main.id);
-    node.y = cursorY;
-    const group = descendantsOf(main.id);
-    const sideCursor = { left: cursorY, right: cursorY };
-
-    // 每个主干节点自己形成一个局部支线簇；下一主干让出整个簇的高度。
-    for (const branch of group) {
-      const anchor = nodes.get(branch.attachTo);
-      if (!anchor) continue;
-      const side = branch.side === 'left' ? 'left' : 'right';
-      const desired = anchor.col === 'main'
-        ? cursorY
-        : anchor.y + NODE_H + GEO.branchGap;
-      const y = Math.max(desired, sideCursor[side]);
-      nodes.set(branch.id, {
-        ...branch,
-        col: side,
-        kind: branch.kind || 'wait',
-        module: moduleOf(branch),
-        step: branch.step || (moduleOf(branch) ? `功能 ${moduleOf(branch).no}` : `支线 · ${anchor.title}`),
-        x: GEO[side].x,
-        y,
-        w: GEO[side].w,
-        anchor: branch.attachTo,
-        root: main.id
-      });
-      sideCursor[side] = y + NODE_H + GEO.branchGap;
-    }
-
-    let bottom = cursorY + NODE_H;
-    for (const branch of group) {
-      const placed = nodes.get(branch.id);
-      if (placed) bottom = Math.max(bottom, placed.y + NODE_H);
-    }
-    node.clusterBottom = bottom;
-    cursorY = Math.max(cursorY + NODE_H + GEO.rowGap, bottom + GEO.mainGap);
-  }
-
-  const height = Math.max(...Array.from(nodes.values(), node => node.y + NODE_H)) + 80;
-  canvas.style.width = GEO.width + 'px';
-  canvas.style.height = height + 'px';
-
-  const lane = document.createElement('div');
-  lane.className = 'lane';
-  lane.setAttribute('aria-hidden', 'true');
-  Object.assign(lane.style, {
-    left: (GEO.main.x - 22) + 'px',
-    top: '20px',
-    width: (GEO.main.w + 44) + 'px',
-    height: (height - 40) + 'px'
-  });
-
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('class', 'connections');
-  svg.setAttribute('viewBox', `0 0 ${GEO.width} ${height}`);
   svg.setAttribute('aria-hidden', 'true');
   svg.innerHTML = `<defs>
-    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8" fill="#8b9eac"/></marker>
-    <marker id="arrow-active" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8" fill="#275d9f"/></marker>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#8b9eac"></path>
+    </marker>
+    <marker id="arrow-active" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#275d9f"></path>
+    </marker>
   </defs><g id="edges"></g>`;
-
   const edgeLayer = svg.querySelector('#edges');
-  const edges = [];
-  const specs = [];
 
-  const mainIndex = new Map(data.main.map((node, index) => [node.id, index]));
-  const flowEdges = data.edges || data.main.slice(1).map((node, index) => ({
-    from: data.main[index].id, to: node.id, label: node.label
-  }));
-  for (const edge of flowEdges) {
-    if (nodes.has(edge.from) && nodes.has(edge.to)) {
-      specs.push({ from: edge.from, to: edge.to, label: edge.label, branch: false });
-    }
+  const controls = new Map();
+  const stepOf = new Map();
+  const edges = [];
+  let scene = null;
+  let currentPath = [];
+
+  // ---------- 三种层级的坐标计算 ----------
+
+  function baseScene(width) {
+    return { width, height: 0, nodes: [], edges: [], pills: [], caption: '' };
   }
-  for (const branch of rawBranches) {
-    if (nodes.has(branch.attachTo) && nodes.has(branch.id)) {
-      specs.push({
+
+  function layoutRoot() {
+    const pad = 32;
+    const leftW = 248;
+    const mainW = 380;
+    const rightW = 248;
+    const columnGap = 128;
+    const rowGap = 150;
+    const mainX = pad + leftW + columnGap;
+    const width = mainX + mainW + columnGap + rightW + pad;
+    const current = baseScene(width);
+    const positions = new Map();
+
+    let cursor = 56;
+    for (const node of mains) {
+      positions.set(node.id, { x: mainX, y: cursor, col: 'main' });
+      cursor += rowGap;
+    }
+    const sides = { left: 56, right: 56 };
+    for (const branch of branches) {
+      const anchor = positions.get(branch.attachTo);
+      if (!anchor) continue;
+      const side = branch.side === 'left' ? 'left' : 'right';
+      const y = Math.max(anchor.y, sides[side]);
+      positions.set(branch.id, {
+        x: side === 'left' ? pad : mainX + mainW + columnGap,
+        y,
+        col: side
+      });
+      sides[side] = y + NODE_H + 44;
+    }
+
+    for (const [id, position] of positions) {
+      const node = byId.get(id);
+      current.nodes.push({
+        node,
+        x: position.x,
+        y: position.y,
+        w: position.col === 'main' ? mainW : leftW,
+        step: stepLabel(node, mains.findIndex(item => item.id === id)),
+        target: node.links && node.links.length ? node.links[0].href : null
+      });
+    }
+
+    // 支线走线槽：同一父节点的首条支线占最外侧槽位，后续支线依次贴近主干，
+    // 这样横向引入线只与外侧竖线平行，不会彼此穿插。
+    const groups = new Map();
+    const sideUsed = { left: 0, right: 0 };
+    const deliveryRows = { left: [], right: [] };
+    for (const branch of branches) {
+      const from = positions.get(branch.attachTo);
+      const to = positions.get(branch.id);
+      if (!from || !to) continue;
+      const key = `${branch.attachTo}|${to.col}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(branch);
+    }
+    const slotOf = new Map();
+    for (const list of groups.values()) {
+      const side = positions.get(list[0].id).col === 'right' ? 'right' : 'left';
+      const base = sideUsed[side];
+      list.forEach((branch, order) => {
+        slotOf.set(branch.id, base + (list.length - 1 - order));
+        deliveryRows[side].push(positions.get(branch.id).y + NODE_H / 2);
+      });
+      sideUsed[side] = base + list.length;
+    }
+
+    const chain = data.edges && data.edges.length
+      ? data.edges
+      : mains.slice(1).map((node, index) => ({ from: mains[index].id, to: node.id, label: node.label }));
+    const cx = mainX + mainW / 2;
+    const hugUsed = { left: 0, right: 0 };
+    const mainIndex = new Map(mains.map((node, index) => [node.id, index]));
+    for (const edge of chain) {
+      const from = positions.get(edge.from);
+      const to = positions.get(edge.to);
+      if (!from || !to || from.col !== 'main' || to.col !== 'main') continue;
+      if (mainIndex.get(edge.to) === mainIndex.get(edge.from) + 1) {
+        current.edges.push({
+          from: edge.from,
+          to: edge.to,
+          label: edge.label,
+          points: [[cx, from.y + NODE_H], [cx, to.y]]
+        });
+        continue;
+      }
+      // 跨行连线（跳步或回退）绝不压中轴：贴主干外侧走一条独立专线。
+      const down = to.y > from.y;
+      const side = down ? 'left' : 'right';
+      const slot = hugUsed[side];
+      hugUsed[side] += 1;
+      const hugX = down ? mainX - 12 - slot * 8 : mainX + mainW + 12 + slot * 8;
+      const startY = down ? from.y + NODE_H - 22 : from.y + 22;
+      const endY = to.y + NODE_H / 2;
+      const startX = down ? from.x : from.x + mainW;
+      const endX = down ? to.x : to.x + mainW;
+      current.edges.push({
+        from: edge.from,
+        to: edge.to,
+        label: edge.label,
+        points: [[startX, startY], [hugX, startY], [hugX, endY], [endX, endY]]
+      });
+    }
+    // 每条支线一个独立出口位 + 独立侧向车道，出口位移开所有支线落点行，杜绝共线。
+    const branchSeen = new Map();
+    for (const branch of branches) {
+      const from = positions.get(branch.attachTo);
+      const to = positions.get(branch.id);
+      if (!from || !to) continue;
+      const side = to.col === 'right' ? 'right' : 'left';
+      const order = branchSeen.get(branch.attachTo) || 0;
+      branchSeen.set(branch.attachTo, order + 1);
+      const startX = side === 'right' ? from.x + mainW : from.x;
+      const endX = side === 'right' ? to.x : to.x + leftW;
+      const endY = to.y + NODE_H / 2;
+      const rows = deliveryRows[side];
+      let tapY = from.y + 22 + order * 18;
+      for (let step = 0; step < 5 && rows.some(row => Math.abs(row - tapY) < 6); step += 1) tapY += 6;
+      const slot = slotOf.get(branch.id) || 0;
+      const lane = side === 'right' ? mainX + mainW + 26 + slot * 14 : mainX - 26 - slot * 14;
+      current.edges.push({
         from: branch.attachTo,
         to: branch.id,
         label: branch.label,
-        branch: true
+        points: Math.abs(tapY - endY) < 1
+          ? [[startX, tapY], [endX, tapY]]
+          : [[startX, tapY], [lane, tapY], [lane, endY], [endX, endY]]
       });
     }
-    if (branch.returnTo && nodes.has(branch.returnTo) && nodes.has(branch.id)) {
-      specs.push({
-        from: branch.id,
-        to: branch.returnTo,
-        label: branch.returnLabel,
-        branch: true,
-        ret: true
+
+    current.height = Math.max(cursor, sides.left, sides.right) + 48;
+    return current;
+  }
+
+  function layoutSteps() {
+    const width = 780;
+    const x = 180;
+    const nodeW = 420;
+    const gap = 76;
+    const current = baseScene(width);
+    let y = 56;
+
+    mains.forEach((node, index) => {
+      const kids = childrenOf(node.id);
+      current.nodes.push({
+        node,
+        x,
+        y,
+        w: nodeW,
+        step: node.step || `步骤 ${String(index + 1).padStart(2, '0')}`,
+        target: kids.length ? `${detailsHref}#${node.id}` : null,
+        badge: kids.length ? `展开 ${kids.length} 条支线 ▸` : null
+      });
+      y += NODE_H + gap;
+    });
+
+    const chain = data.edges && data.edges.length
+      ? data.edges
+      : mains.slice(1).map((node, index) => ({ from: mains[index].id, to: node.id, label: node.label }));
+    const cx = x + nodeW / 2;
+    const jumps = [];
+    for (const edge of chain) {
+      const fromIndex = mains.findIndex(item => item.id === edge.from);
+      const toIndex = mains.findIndex(item => item.id === edge.to);
+      if (fromIndex < 0 || toIndex < 0) continue;
+      if (toIndex === fromIndex + 1) {
+        current.edges.push({
+          from: edge.from,
+          to: edge.to,
+          label: edge.label,
+          points: [
+            [cx, 56 + fromIndex * (NODE_H + gap) + NODE_H],
+            [cx, 56 + toIndex * (NODE_H + gap)]
+          ]
+        });
+      } else {
+        jumps.push({ edge, fromIndex, toIndex });
+      }
+    }
+
+    // 跨步（跳步或回退）连线走右侧车道：中轴线只留给相邻两步。
+    // 车道按跨度由短到长依次外移，长跨度必然包住短跨度，嵌套后互不穿插。
+    const lanes = [];
+    jumps.sort((a, b) => (Math.abs(a.toIndex - a.fromIndex) - Math.abs(b.toIndex - b.fromIndex))
+      || (Math.min(a.fromIndex, a.toIndex) - Math.min(b.fromIndex, b.toIndex)));
+    // 出口位自上而下按车道由外到内分配：外侧线先出，后出的线才不会横切已落下的竖线。
+    const groupIndex = new Map();
+    const groupSize = new Map();
+    for (const jump of jumps) groupSize.set(jump.edge.from, (groupSize.get(jump.edge.from) || 0) + 1);
+    const headUsed = new Map();
+    for (const jump of jumps) {
+      const min = Math.min(jump.fromIndex, jump.toIndex);
+      const max = Math.max(jump.fromIndex, jump.toIndex);
+      let lane = lanes.find(item => item.ranges.every(range => max + 6 < range.min || min - 6 > range.max));
+      if (!lane) {
+        lane = { index: lanes.length, ranges: [] };
+        lanes.push(lane);
+      }
+      lane.ranges.push({ min, max });
+      const laneX = x + nodeW + 26 + lane.index * 18;
+      const slot = groupIndex.get(jump.edge.from) || 0;
+      groupIndex.set(jump.edge.from, slot + 1);
+      const tapSlot = Math.min(3, (groupSize.get(jump.edge.from) || 1) - 1 - slot);
+      const headCount = headUsed.get(jump.edge.to) || 0;
+      headUsed.set(jump.edge.to, headCount + 1);
+      const headSlot = Math.min(3, headCount);
+      // 出口位落在卡片右缘上半段、入口位落在下半段，同一节点既是出口又是入口时也不会共线。
+      const fromY = 56 + jump.fromIndex * (NODE_H + gap) + 22 + tapSlot * 10;
+      const toY = 56 + jump.toIndex * (NODE_H + gap) + 62 + headSlot * 10;
+      current.edges.push({
+        from: jump.edge.from,
+        to: jump.edge.to,
+        label: jump.edge.label,
+        points: [
+          [x + nodeW, fromY],
+          [laneX, fromY],
+          [laneX, toY],
+          [x + nodeW, toY]
+        ]
       });
     }
+
+    current.width = Math.max(width, x + nodeW + 26 + Math.max(0, lanes.length - 1) * 18 + 40);
+    current.height = y + 24;
+    return current;
   }
 
-  function inwardSide(node) {
-    return node.col === 'left' ? 'right' : 'left';
-  }
+  function layoutBranch(path) {
+    const parentId = path[path.length - 1];
+    const parent = byId.get(parentId);
+    const kids = childrenOf(parentId);
+    const width = 1180;
+    const entryW = Math.max(120, 44 + Math.max(0, kids.length - 1) * 20);
+    const entryX = 120;
+    const entryY = 48;
+    const childX = 440;
+    const childW = 430;
+    const rowGap = 54;
+    const top = 152;
+    const current = baseScene(width);
+    current.caption = parent && parent.kind === 'check'
+      ? `判定依据：${parent.summary || parent.title}`
+      : '';
 
-  function sidesFor(spec, from, to) {
-    const cross = (from.col === 'left' && to.col === 'right')
-      || (from.col === 'right' && to.col === 'left');
-    if (cross) return { fromSide: from.col, toSide: to.col, band: null, cross: true };
-    if (from.col === 'main' && to.col !== 'main') {
-      return { fromSide: to.col, toSide: inwardSide(to), band: to.col };
-    }
-    if (from.col !== 'main' && to.col === 'main') {
-      return { fromSide: inwardSide(from), toSide: from.col, band: from.col };
-    }
-    if (from.col === 'main' && to.col === 'main') {
-      return { fromSide: 'left', toSide: 'left', band: 'left' };
-    }
-    if (from.col === to.col) {
-      return { fromSide: inwardSide(from), toSide: inwardSide(to), band: from.col };
-    }
-    return { fromSide: 'left', toSide: 'left', band: 'left' };
-  }
+    current.pills.push({ kind: 'entry', text: '入口', x: entryX, y: entryY, w: entryW, h: 36 });
 
-  const portRequests = new Map();
-  for (const spec of specs) {
-    const from = nodes.get(spec.from);
-    const to = nodes.get(spec.to);
-    spec.straight = from.col === 'main' && to.col === 'main'
-      && mainIndex.get(to.id) === mainIndex.get(from.id) + 1;
-    if (spec.straight) continue;
-    Object.assign(spec, sidesFor(spec, from, to));
-    const addPort = (node, side, other, role) => {
-      const key = `${node.id}:${side}`;
-      const list = portRequests.get(key) || [];
-      list.push({ spec, role, side, node, otherY: other.y + NODE_H / 2 });
-      portRequests.set(key, list);
-    };
-    addPort(from, spec.fromSide, to, 'from');
-    addPort(to, spec.toSide, from, 'to');
-  }
-
-  // 同一侧的端口都落在同一条水平走廊上；两个端口只差 1~2px 时，连线在视觉上会并成一条。
-  // 因此先记录全部端口，再按 y 排序做一次最小间距松弛，最后才写回连线端点。
-  const portRecords = [];
-  for (const list of portRequests.values()) {
-    list.sort((a, b) => a.otherY - b.otherY
-      || (a.role === b.role ? 0 : a.role === 'from' ? -1 : 1));
-    const count = list.length;
-    list.forEach((request, index) => {
-      const node = request.node;
-      const base = count === 1
-        ? NODE_H / 2
-        : 20 + (NODE_H - 40) * (index / (count - 1));
-      // 出口与入口使用不同奇偶的轨道，主干与支线再错开 2px。
-      const even = Math.round(base / 2) * 2;
-      const offset = request.role === 'from'
-        ? (node.col === 'main' ? 1 : 3)
-        : (node.col === 'main' ? 0 : 2);
-      portRecords.push({
-        request,
-        side: request.side,
-        x: request.side === 'left' ? node.x : node.x + node.w,
-        y: node.y + even + offset,
-        min: node.y + 8,
-        max: node.y + NODE_H - 8
+    kids.forEach((kid, index) => {
+      const grand = childrenOf(kid.id);
+      const y = top + index * (NODE_H + rowGap);
+      current.nodes.push({
+        node: kid,
+        x: childX,
+        y,
+        w: childW,
+        step: kid.step || '支线',
+        target: grand.length ? `#${[...path, kid.id].join('/')}` : null,
+        badge: grand.length ? `展开 ${grand.length} 条子支线 ▸` : null
       });
+      if (kid.returnTo) {
+        const target = byId.get(kid.returnTo);
+        current.pills.push({
+          kind: 'exit',
+          text: `出口 · 回到 ${target ? target.title : kid.returnTo}`,
+          x: childX + childW + 48,
+          y: y + NODE_H / 2 - 16,
+          w: 250,
+          h: 32
+        });
+      }
     });
-  }
 
-  // 端口分组的键不是“方向”，而是它所在的那条水平走廊：
-  // 主干左边缘（x=主干左）与左列右边缘共享同一条走廊，必须一起松弛，否则仍会并线。
-  const corridorOf = x => (x <= GEO.main.x ? 'L'
-    : x >= GEO.main.x + GEO.main.w ? 'R' : 'C');
-  const portGroups = new Map();
-  for (const record of portRecords) {
-    const key = corridorOf(record.x);
-    const list = portGroups.get(key) || [];
-    list.push(record);
-    portGroups.set(key, list);
-  }
-  for (const list of portGroups.values()) {
-    list.sort((a, b) => a.y - b.y);
-    for (let index = 1; index < list.length; index += 1) {
-      const previous = list[index - 1];
-      const current = list[index];
-      // 只处理“看起来并成一条”的近重合（<=3px），避免大范围位移改变车道、反而制造交叉。
-      if (current.y - previous.y > 3) continue;
-      current.y = Math.min(Math.max(previous.y + 5, current.min), current.max);
-    }
-  }
-
-  for (const record of portRecords) {
-    const point = [record.x, record.y];
-    if (record.request.role === 'from') record.request.spec.start = point;
-    else record.request.spec.end = point;
-  }
-
-  function rangesOverlap(a, b) {
-    return a.min < b.max + 5 && b.min < a.max + 5;
-  }
-
-  const laneBands = { left: [], right: [] };
-  const innerSpecs = specs.filter(spec => !spec.straight && !spec.cross
-    && spec.start && spec.end && Math.abs(spec.start[1] - spec.end[1]) > 1);
-  innerSpecs.sort((a, b) => (Math.abs(a.start[1] - a.end[1]) - Math.abs(b.start[1] - b.end[1]))
-    || (Math.min(a.start[1], a.end[1]) - Math.min(b.start[1], b.end[1])));
-  for (const spec of innerSpecs) {
-    const range = {
-      min: Math.min(spec.start[1], spec.end[1]),
-      max: Math.max(spec.start[1], spec.end[1])
-    };
-    const band = laneBands[spec.band];
-    let lane = band.find(item => item.ranges.every(other => !rangesOverlap(range, other)));
-    if (!lane) {
-      lane = { index: band.length, ranges: [] };
-      band.push(lane);
-    }
-    lane.ranges.push(range);
-    spec.laneIndex = lane.index;
-  }
-
-  // 车道必须留在两列之间的走廊里：步距按车道条数自适应，条数多时自动收紧，
-  // 否则最外侧车道会挤进支线列、把连线画到卡片上。
-  const laneLimits = {
-    left: { inner: GEO.main.x - 16, outer: GEO.left.x + GEO.left.w + 12 },
-    right: { inner: GEO.main.x + GEO.main.w + 16, outer: GEO.right.x - 12 }
-  };
-  const laneStepOf = {};
-  for (const side of ['left', 'right']) {
-    const count = laneBands[side].length;
-    const span = Math.abs(laneLimits[side].inner - laneLimits[side].outer);
-    laneStepOf[side] = count > 1 ? Math.min(GEO.laneStep, span / (count - 1)) : 0;
-  }
-
-  function laneX(spec) {
-    const { inner } = laneLimits[spec.band];
-    const offset = spec.laneIndex * laneStepOf[spec.band];
-    return spec.band === 'left' ? inner - offset : inner + offset;
-  }
-
-  let crossIndex = 0;
-  for (const spec of specs) {
-    if (spec.straight) {
-      const from = nodes.get(spec.from);
-      const to = nodes.get(spec.to);
-      spec.points = [
-        [from.x + from.w / 2, from.y + NODE_H],
-        [to.x + to.w / 2, to.y]
-      ];
-      spec.labelHint = {
-        x: from.x + from.w / 2 + 12,
-        y: (from.y + NODE_H + to.y) / 2,
-        anchor: 'start'
-      };
-      continue;
-    }
-    if (spec.cross) {
-      const from = nodes.get(spec.from);
-      const to = nodes.get(spec.to);
-      const fromRoot = nodes.get(from.root || from.id);
-      const toRoot = nodes.get(to.root || to.id);
-      const bottom = Math.max(
-        fromRoot.clusterBottom || from.y + NODE_H,
-        toRoot.clusterBottom || to.y + NODE_H
-      );
-      const trackY = bottom + 16 + crossIndex * GEO.laneStep;
-      const leftOuter = 8 + (crossIndex % 3) * 6;
-      const rightOuter = GEO.width - 8 - (crossIndex % 3) * 6;
-      const fromOuter = from.col === 'left' ? leftOuter : rightOuter;
-      const toOuter = to.col === 'left' ? leftOuter : rightOuter;
-      spec.points = [
-        spec.start,
-        [fromOuter, spec.start[1]],
-        [fromOuter, trackY],
-        [toOuter, trackY],
-        [toOuter, spec.end[1]],
-        spec.end
-      ];
-      spec.labelHint = {
-        x: (leftOuter + rightOuter) / 2,
-        y: trackY - 8,
-        anchor: 'middle'
-      };
-      crossIndex += 1;
-      continue;
-    }
-    if (Math.abs(spec.start[1] - spec.end[1]) <= 1) {
-      spec.points = [spec.start, spec.end];
-    } else {
-      const x = laneX(spec);
-      spec.points = [
-        spec.start,
-        [x, spec.start[1]],
-        [x, spec.end[1]],
-        spec.end
-      ];
-    }
-    const target = nodes.get(spec.to);
-    spec.labelHint = {
-      x: target.x + target.w / 2,
-      y: target.y - 8,
-      anchor: 'middle'
-    };
-  }
-
-  const simplified = points => points.filter((point, index) => {
-    if (!index) return true;
-    const previous = points[index - 1];
-    return point[0] !== previous[0] || point[1] !== previous[1];
-  });
-
-  for (const spec of specs) {
-    const points = simplified(spec.points);
-    const path = document.createElementNS(NS, 'path');
-    path.setAttribute('d', points.map(([x, y], index) => `${index ? 'L' : 'M'}${x} ${y}`).join(' '));
-    path.setAttribute('data-from', spec.from);
-    path.setAttribute('data-to', spec.to);
-    path.setAttribute('class', 'edge' + (spec.branch ? ' branch' : '') + (spec.ret ? ' return' : ''));
-    edgeLayer.append(path);
-    edges.push({
-      from: spec.from,
-      to: spec.to,
-      path,
-      points,
-      label: spec.label,
-      labelHint: spec.labelHint,
-      branch: !!spec.branch,
-      ret: !!spec.ret
+    // 每个子节点一条独立车道：越靠上的子节点车道越贴近子节点列，横向引入线彼此不穿越。
+    kids.forEach((kid, index) => {
+      const laneX = entryX + 22 + (kids.length - 1 - index) * 20;
+      const childY = top + index * (NODE_H + rowGap) + NODE_H / 2;
+      current.edges.push({
+        from: 'entry',
+        to: kid.id,
+        label: kid.label,
+        points: [[laneX, entryY + 36], [laneX, childY], [childX, childY]]
+      });
+      if (kid.returnTo) {
+        current.edges.push({
+          from: kid.id,
+          to: `exit:${kid.id}`,
+          dashed: true,
+          points: [
+            [childX + childW, childY],
+            [childX + childW + 48, childY]
+          ]
+        });
+      }
     });
+
+    current.height = Math.max(top + kids.length * (NODE_H + rowGap) + 24, 320);
+    return current;
   }
 
-  function nodeBoxes() {
-    return Array.from(nodes.values(), node => {
-      const control = controls.get(node.id);
-      return {
-        x: node.x - 4,
-        y: node.y - 4,
-        w: node.w + 8,
-        h: (control ? control.offsetHeight : NODE_H) + 8
-      };
+  function layoutSingle(nodeId) {
+    const node = byId.get(nodeId);
+    const current = baseScene(760);
+    current.caption = '该节点没有可展开的下一层，说明见右侧。';
+    current.nodes.push({
+      node,
+      x: 170,
+      y: 90,
+      w: 420,
+      step: node.step || '节点',
+      target: null
     });
+    current.height = 300;
+    return current;
   }
 
-  function intersects(a, b) {
-    return a.x < b.x + b.w && b.x < a.x + a.w
-      && a.y < b.y + b.h && b.y < a.y + a.h;
+  // ---------- 交叉断口：竖线跨横线处抬一个小桥，区分“相交”与“相连” ----------
+
+  function segmentList(points) {
+    const list = [];
+    for (let index = 1; index < points.length; index += 1) {
+      const [x1, y1] = points[index - 1];
+      const [x2, y2] = points[index];
+      list.push({ at: index - 1, x1, y1, x2, y2, horizontal: Math.abs(y1 - y2) < 1 });
+    }
+    return list;
   }
 
-  // 每条线的标签先挂在“线段附近”的若干首选点，再由这些小偏移扩展成包围盒候选。
-  // 偏移量按到原点的距离排序：能不动就不动，实在挤不开才让位，避免标签飘离所属线条。
+  function collectHops(sceneEdges) {
+    const segments = sceneEdges.map(edge => segmentList(edge.points));
+    const hops = segments.map(() => new Map());
+    for (let i = 0; i < segments.length; i += 1) {
+      for (let j = i + 1; j < segments.length; j += 1) {
+        for (const first of segments[i]) {
+          for (const second of segments[j]) {
+            if (first.horizontal === second.horizontal) continue;
+            const horizontal = first.horizontal ? first : second;
+            const vertical = first.horizontal ? second : first;
+            // 断口只能画在竖线所属的那条边上，横线保持连续，才不会被误读成“相连”。
+            const ownerIndex = first.horizontal ? j : i;
+            // 横线上留 4px 余量（避免在拐点处起桥），竖线上留 12px 余量（避免在端点附近起桥）。
+            const lowX = Math.min(horizontal.x1, horizontal.x2) + 4;
+            const highX = Math.max(horizontal.x1, horizontal.x2) - 4;
+            const lowY = Math.min(vertical.y1, vertical.y2) + 12;
+            const highY = Math.max(vertical.y1, vertical.y2) - 12;
+            if (vertical.x1 <= lowX || vertical.x1 >= highX) continue;
+            if (horizontal.y1 <= lowY || horizontal.y1 >= highY) continue;
+            const bucket = hops[ownerIndex].get(vertical.at) || [];
+            if (!bucket.includes(horizontal.y1)) bucket.push(horizontal.y1);
+            hops[ownerIndex].set(vertical.at, bucket);
+          }
+        }
+      }
+    }
+    return hops;
+  }
+
+  function pathData(points, hopMap) {
+    let d = `M${points[0][0]} ${points[0][1]}`;
+    const gap = 5;
+    let drawn = 0;
+    for (let index = 1; index < points.length; index += 1) {
+      const [x1, y1] = points[index - 1];
+      const [x2, y2] = points[index];
+      const stops = ((hopMap && hopMap.get(index - 1)) || []).slice().sort((a, b) => a - b);
+      const horizontal = Math.abs(y1 - y2) < 1;
+      const low = horizontal ? Math.min(x1, x2) : Math.min(y1, y2);
+      const high = horizontal ? Math.max(x1, x2) : Math.max(y1, y2);
+      // 断口必须整段落在线上，贴端点的交叉不再断，避免把线剪出毛刺。
+      const usable = stops.filter(stop => stop - gap - 1 > low && stop + gap + 1 < high);
+      if (horizontal) {
+        const dir = x2 > x1 ? 1 : -1;
+        for (const stop of usable) {
+          // 先画到断口一侧，再用 M 起笔续画另一侧：中间这段不落笔，才不会被看成相连。
+          d += ` L${stop - gap * dir} ${y1} M${stop + gap * dir} ${y1}`;
+          drawn += 1;
+        }
+      } else {
+        const dir = y2 > y1 ? 1 : -1;
+        for (const stop of usable) {
+          d += ` L${x1} ${stop - gap * dir} M${x1} ${stop + gap * dir}`;
+          drawn += 1;
+        }
+      }
+      d += ` L${x2} ${y2}`;
+    }
+    return { d, hops: drawn };
+  }
+
+  // ---------- 标签：候选点 + 偏移搜索，避开卡片、出口提示与其他标签 ----------
+
   const LABEL_NUDGES = (() => {
     const steps = [0, 12, 26, 44, 68, 96];
     const list = [];
@@ -456,69 +484,67 @@
   })();
 
   function labelCandidates(edge) {
-    const candidates = [];
+    const list = [];
     const seen = new Set();
     const push = candidate => {
-      const key = [
-        Math.round(candidate.x), Math.round(candidate.y), candidate.anchor, candidate.rotate || 0
-      ].join('|');
+      const key = [Math.round(candidate.x), Math.round(candidate.y), candidate.anchor].join('|');
       if (seen.has(key)) return;
       seen.add(key);
-      candidates.push(candidate);
+      list.push(candidate);
     };
-    if (edge.labelHint) push(edge.labelHint);
     const segments = [];
     for (let index = 1; index < edge.points.length; index += 1) {
       const [x1, y1] = edge.points[index - 1];
       const [x2, y2] = edge.points[index];
       const length = Math.abs(x2 - x1) + Math.abs(y2 - y1);
-      if (length >= 30) segments.push({ x1, y1, x2, y2, length });
-    }
-    segments.sort((a, b) => b.length - a.length);
-    for (const segment of segments) {
-      if (Math.abs(segment.y1 - segment.y2) < 1) {
-        const x = (segment.x1 + segment.x2) / 2;
-        push({ x, y: segment.y1 - 8, anchor: 'middle' });
-        push({ x, y: segment.y1 + 15, anchor: 'middle' });
-        push({ x: segment.x1 + 12, y: segment.y1 - 8, anchor: 'start' });
-        push({ x: segment.x2 - 12, y: segment.y1 - 8, anchor: 'end' });
-      } else {
-        const mid = (segment.y1 + segment.y2) / 2;
-        const top = Math.min(segment.y1, segment.y2) + 18;
-        const bottom = Math.max(segment.y1, segment.y2) - 18;
-        push({ x: segment.x1 + 8, y: mid, anchor: 'start' });
-        push({ x: segment.x1 - 8, y: mid, anchor: 'end' });
-        push({ x: segment.x1, y: mid, anchor: 'middle', rotate: -90 });
-        if (bottom > top) {
-          push({ x: segment.x1 + 8, y: top, anchor: 'start' });
-          push({ x: segment.x1 - 8, y: bottom, anchor: 'end' });
-        }
+      if (length >= 30) {
+        segments.push({ x1, y1, x2, y2, length, last: index === edge.points.length - 1 });
       }
     }
-    return candidates;
+    // 贴近目标的那一段优先，标签才不会飘到长车道中部、失去归属。
+    segments.sort((a, b) => (Number(b.last) - Number(a.last)) || (b.length - a.length));
+    for (const segment of segments) {
+      if (Math.abs(segment.y1 - segment.y2) < 1) {
+        const mid = (segment.x1 + segment.x2) / 2;
+        push({ x: mid, y: segment.y1 - 8, anchor: 'middle' });
+        push({ x: mid, y: segment.y1 + 15, anchor: 'middle' });
+        push({ x: segment.x1 + 10, y: segment.y1 - 8, anchor: 'start' });
+      } else {
+        const mid = (segment.y1 + segment.y2) / 2;
+        push({ x: segment.x1 + 8, y: mid, anchor: 'start' });
+        push({ x: segment.x1 - 8, y: mid, anchor: 'end' });
+      }
+    }
+    return list;
   }
 
-  // 旋转文本的包围盒要按 transform 实际落点换算，否则“算的地方”和“画的地方”会差半个字高。
-  function rotatedBox(candidate, box) {
-    const cx = box.x + box.w / 2;
-    const cy = box.y + box.h / 2;
-    const centerX = candidate.x + (cy - candidate.y);
-    const centerY = candidate.y - (cx - candidate.x);
-    return {
-      x: centerX - box.h / 2,
-      y: centerY - box.w / 2,
-      w: box.h,
-      h: box.w
-    };
+  function intersects(a, b) {
+    return a.x < b.x + b.w && b.x < a.x + a.w
+      && a.y < b.y + b.h && b.y < a.y + a.h;
   }
 
-  function layoutEdgeLabels() {
-    const boxes = nodeBoxes();
+  function layoutEdgeLabels(boxes) {
     const placed = [];
+    // 标签也不能压在别的连线上：把所有线段收成细长框，供打分时避让。
+    const lineBoxes = [];
+    for (const edge of edges) {
+      for (let index = 1; index < edge.points.length; index += 1) {
+        const [x1, y1] = edge.points[index - 1];
+        const [x2, y2] = edge.points[index];
+        lineBoxes.push({
+          edge,
+          x: Math.min(x1, x2) - 2,
+          y: Math.min(y1, y2) - 2,
+          w: Math.abs(x2 - x1) + 4,
+          h: Math.abs(y2 - y1) + 4
+        });
+      }
+    }
     for (const edge of edges) {
       if (!edge.label) continue;
       const text = document.createElementNS(NS, 'text');
       text.setAttribute('class', 'edge-label');
+      text.setAttribute('data-edge', String(edges.indexOf(edge)));
       text.textContent = edge.label;
       edgeLayer.append(text);
       let best = null;
@@ -526,85 +552,60 @@
       const candidates = labelCandidates(edge);
       for (let rank = 0; rank < candidates.length; rank += 1) {
         const candidate = candidates[rank];
-        text.removeAttribute('transform');
         text.setAttribute('x', candidate.x);
         text.setAttribute('y', candidate.y);
         text.style.textAnchor = candidate.anchor;
         const raw = text.getBBox();
-        // DOMRect 的 x/y/width/height 在原型上，不能直接展开；必须逐项取值，
-        // 否则包围盒是 NaN，碰撞检测会静默失效、标签全部叠在同一处。
-        const plain = { x: raw.x, y: raw.y, w: raw.width, h: raw.height };
-        const base = candidate.rotate ? rotatedBox(candidate, plain) : plain;
-        const w = base.w + 6;
-        const h = base.h + 4;
+        const base = { x: raw.x, y: raw.y, w: raw.width, h: raw.height };
         for (const [dx, dy] of LABEL_NUDGES) {
-          const padded = { x: base.x + dx - 3, y: base.y + dy - 2, w, h };
+          const padded = { x: base.x + dx - 3, y: base.y + dy - 2, w: base.w + 6, h: base.h + 4 };
           const outside = padded.x < 1 || padded.y < 1
-            || padded.x + padded.w > GEO.width - 1 || padded.y + padded.h > height - 1;
+            || padded.x + padded.w > scene.width - 1 || padded.y + padded.h > scene.height - 1;
           const hitNode = boxes.some(item => intersects(padded, item));
           const hitLabel = placed.some(item => intersects(padded, item));
-          const cost = (outside ? 1e9 : 0) + (hitNode ? 1e6 : 0) + (hitLabel ? 2e5 : 0)
+          const hitLine = lineBoxes.some(item => item.edge !== edge && intersects(padded, item));
+          const cost = (outside ? 1e9 : 0) + (hitNode ? 1e6 : 0) + (hitLine ? 8e4 : 0)
+            + (hitLabel ? 2e5 : 0)
             + rank * 3 + Math.abs(dx) + Math.abs(dy);
           if (cost < bestCost) {
             bestCost = cost;
-            best = {
-              x: candidate.x + dx,
-              y: candidate.y + dy,
-              anchor: candidate.anchor,
-              rotate: candidate.rotate,
-              box: padded
-            };
+            best = { x: candidate.x + dx, y: candidate.y + dy, anchor: candidate.anchor, box: padded };
           }
         }
-        // 已经零惩罚且几乎没挪动，无需再试更远的候选。
         if (bestCost < 4) break;
       }
       if (!best) continue;
       text.setAttribute('x', best.x);
       text.setAttribute('y', best.y);
       text.style.textAnchor = best.anchor;
-      if (best.rotate) text.setAttribute('transform', `rotate(${best.rotate} ${best.x} ${best.y})`);
       placed.push(best.box);
       edge.labelEl = text;
     }
   }
 
-  const controls = new Map();
-  const host = document.createElement('div');
-  host.setAttribute('role', 'group');
-  host.setAttribute('aria-label', '流程节点');
-  const pageName = decodeURIComponent(location.pathname.split('/').pop() || 'index.html');
-  // 详情页已是展开终点：卡片本身不再承担导航，只保留“说明”按钮。
-  // 角色以页面显式标记为准，文件名仅作兜底，避免改名后点击语义悄悄反转。
-  const role = document.body.dataset.flowRole || '';
-  const detailsPage = role === 'details' || (!role && /-details\.html$/.test(pageName));
+  // ---------- 渲染 ----------
 
-  // 其余节点仅保留独立的“说明”按钮，避免把静态方块伪装成页面链接。
-  function targetOf(node) {
-    if (detailsPage) return null;
-    return (node.links || []).find(item => item.href && !item.href.startsWith('#')) || null;
-  }
-
-  for (const node of nodes.values()) {
-    const target = targetOf(node);
-    const control = document.createElement(target ? 'a' : 'article');
+  function buildNode(item) {
+    const node = item.node;
+    const control = document.createElement(item.target ? 'a' : 'article');
     control.id = node.id;
-    control.className = 'node' + (node.col === 'main' ? '' : ' branch')
-      + (node.kind ? ' ' + node.kind : '') + (target ? ' linked' : ' static');
-    control.style.left = node.x + 'px';
-    control.style.top = node.y + 'px';
-    control.style.width = node.w + 'px';
+    control.className = 'node'
+      + (node.kind ? ' ' + node.kind : '')
+      + (item.target ? ' linked' : ' static');
+    control.style.left = item.x + 'px';
+    control.style.top = item.y + 'px';
+    control.style.width = item.w + 'px';
     control.style.minHeight = NODE_H + 'px';
     control.setAttribute('data-active', 'false');
-    control.setAttribute('aria-label', `${node.step} ${node.title}`);
-    if (target) {
-      control.setAttribute('href', target.href);
+    control.setAttribute('aria-label', `${item.step} ${node.title}`);
+    if (item.target) {
+      control.setAttribute('href', item.target);
       control.addEventListener('mouseenter', () => select(node.id, false));
       control.addEventListener('focus', () => select(node.id, false));
     }
     const step = document.createElement('span');
     step.className = 'step';
-    step.textContent = node.step;
+    step.textContent = item.step;
     const title = document.createElement('strong');
     title.textContent = node.title;
     const summary = document.createElement('span');
@@ -617,58 +618,114 @@
       flag.textContent = '判断';
       control.append(flag);
     }
-    if (target) {
-      const go = document.createElement('span');
-      go.className = 'go';
-      go.textContent = '打开 ↗';
-      control.append(go);
+    if (item.target) {
+      if (item.badge) {
+        // 下沉入口写在步骤行，避免与标题抢位置，也让“可展开”一眼可见。
+        const badge = document.createElement('span');
+        badge.className = 'step-badge';
+        badge.textContent = item.badge;
+        step.append(' · ', badge);
+      } else {
+        const go = document.createElement('span');
+        go.className = 'go';
+        go.textContent = '打开 ↗';
+        control.append(go);
+      }
     } else {
       const more = document.createElement('button');
       more.type = 'button';
       more.className = 'node-more';
-      more.textContent = '说明';
+      more.textContent = node.kind === 'check' ? '判定要素' : '说明';
       more.setAttribute('aria-label', `查看 ${node.title} 的实现说明`);
       more.setAttribute('aria-controls', 'detail-title detail-description');
       more.addEventListener('click', () => select(node.id));
       control.append(more);
     }
-    controls.set(node.id, control);
-    host.append(control);
+    return control;
   }
 
-  canvas.append(lane, svg, host);
-  layoutEdgeLabels();
+  function renderScene(next) {
+    scene = next;
+    controls.clear();
+    edges.length = 0;
+    edgeLayer.replaceChildren();
+    canvas.replaceChildren();
+    stepOf.clear();
+    canvas.style.width = scene.width + 'px';
+    canvas.style.height = scene.height + 'px';
 
-  function branchButtons(node) {
-    const box = document.querySelector('#detail-branches');
-    box.replaceChildren();
-    const related = [];
-    if (node.col === 'main') {
-      for (const item of nodes.values()) {
-        if (item.anchor === node.id) related.push(item);
-      }
-    } else if (node.anchor && nodes.has(node.anchor)) {
-      related.push(nodes.get(node.anchor));
+    const host = document.createElement('div');
+    host.setAttribute('role', 'group');
+    host.setAttribute('aria-label', '流程节点');
+
+    for (const item of scene.nodes) {
+      const control = buildNode(item);
+      controls.set(item.node.id, control);
+      stepOf.set(item.node.id, item.step);
+      host.append(control);
     }
-    for (const item of related) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.textContent = item.col === 'main' ? `↑ 回主干：${item.title}` : `↳ ${item.title}`;
-      button.addEventListener('click', () => select(item.id));
-      box.append(button);
+    for (const pill of scene.pills) {
+      const element = document.createElement('span');
+      element.className = pill.kind === 'entry' ? 'entry-pill' : 'exit-pill';
+      element.style.left = pill.x + 'px';
+      element.style.top = pill.y + 'px';
+      element.style.width = pill.w + 'px';
+      element.style.height = pill.h + 'px';
+      element.textContent = pill.text;
+      host.append(element);
     }
-    for (const item of node.links || []) {
-      const link = document.createElement('a');
-      link.href = item.href;
-      link.textContent = item.label;
-      box.append(link);
+
+    const hopMap = collectHops(scene.edges);
+    scene.edges.forEach((edge, index) => {
+      const path = document.createElementNS(NS, 'path');
+      const drawn = pathData(edge.points, hopMap[index]);
+      path.setAttribute('d', drawn.d);
+      path.setAttribute('data-hops', String(drawn.hops));
+      path.setAttribute('data-from', edge.from);
+      path.setAttribute('data-to', edge.to);
+      path.setAttribute('class', 'edge' + (edge.dashed ? ' return' : ''));
+      edgeLayer.append(path);
+      edges.push({
+        from: edge.from,
+        to: edge.to,
+        path,
+        points: edge.points,
+        label: edge.label,
+        dashed: !!edge.dashed
+      });
+    });
+
+    canvas.append(svg, host);
+
+    const boxes = [];
+    for (const item of scene.nodes) {
+      const control = controls.get(item.node.id);
+      boxes.push({
+        x: item.x - 4,
+        y: item.y - 4,
+        w: item.w + 8,
+        h: (control ? control.offsetHeight : NODE_H) + 8
+      });
     }
-    box.hidden = box.childElementCount === 0;
-    box.parentElement.hidden = box.hidden;
+    for (const pill of scene.pills) {
+      boxes.push({ x: pill.x - 3, y: pill.y - 3, w: pill.w + 6, h: pill.h + 6 });
+    }
+    layoutEdgeLabels(boxes);
+    fitCanvas();
   }
 
-  function select(id, writeHash = true) {
-    const node = nodes.get(id);
+  function fitCanvas() {
+    if (!scene) return;
+    const scale = Math.max(.6, Math.min(1, viewport.clientWidth / scene.width));
+    canvas.style.transform = `scale(${scale})`;
+    wrap.style.width = scene.width * scale + 'px';
+    wrap.style.height = scene.height * scale + 'px';
+  }
+
+  // ---------- 说明面板 ----------
+
+  function select(id) {
+    const node = byId.get(id);
     if (!node) return;
     for (const [key, control] of controls) {
       control.setAttribute('data-active', String(key === id));
@@ -676,12 +733,11 @@
     for (const edge of edges) {
       const active = edge.from === id || edge.to === id;
       edge.path.setAttribute('class', 'edge'
-        + (edge.branch ? ' branch' : '')
-        + (edge.ret ? ' return' : '')
+        + (edge.dashed ? ' return' : '')
         + (active ? ' active' : ''));
       if (edge.labelEl) edge.labelEl.classList.toggle('active', active);
     }
-    document.querySelector('#detail-step').textContent = node.step;
+    document.querySelector('#detail-step').textContent = stepOf.get(id) || stepLabel(node, 0);
     document.querySelector('#detail-title').textContent = node.title;
     document.querySelector('#detail-owner').textContent = node.owner || '未标注';
     document.querySelector('#detail-description').textContent = node.description || '';
@@ -693,43 +749,189 @@
     }));
     notes.closest('section').hidden = !(node.notes || []).length;
     document.querySelector('#detail-code').textContent = node.code || '同一流程内的状态或控制分支';
-    branchButtons(node);
+    renderPanelLinks(node);
     document.querySelector('.details').scrollTop = 0;
-    if (writeHash) {
-      try { history.replaceState(null, '', '#' + id); }
-      catch { location.hash = id; }
-    }
   }
 
-  // 顶部功能陈列由 MODULES 生成，编号与节点徽标同源，新增模块只改一处。
+  function renderPanelLinks(node) {
+    const box = document.querySelector('#detail-branches');
+    box.replaceChildren();
+    const kids = childrenOf(node.id);
+    if (kids.length) {
+      const drill = document.createElement('a');
+      if (role === 'branch') {
+        drill.href = `#${[...currentPath, node.id].join('/')}`;
+        drill.textContent = `展开下一层：${node.title} 的 ${kids.length} 条子支线 →`;
+      } else {
+        drill.href = `${detailsHref}#${node.id}`;
+        drill.textContent = `展开下一层：${node.title} 的 ${kids.length} 条支线 →`;
+      }
+      box.append(drill);
+    }
+    for (const link of node.links || []) {
+      if (!link.href || link.href.startsWith('#')) continue;
+      const anchor = document.createElement('a');
+      anchor.href = link.href;
+      anchor.textContent = link.label;
+      box.append(anchor);
+    }
+    if (role === 'branch' && currentPath.length > 1) {
+      const up = document.createElement('a');
+      up.href = `#${currentPath.slice(0, -1).join('/')}`;
+      up.textContent = '↑ 返回上一层';
+      box.append(up);
+    }
+    box.hidden = box.childElementCount === 0;
+    box.parentElement.hidden = box.hidden;
+  }
+
+  // ---------- 面包屑：只保留一行位置 ----------
+
+  function renderBreadcrumb(path) {
+    const nav = document.querySelector('.breadcrumb');
+    if (!nav) return;
+    const parts = [{ label: '全站主流程', href: role === 'root' ? null : 'index.html' }];
+    if (role !== 'root' && feature) {
+      parts.push({
+        label: feature.name,
+        href: role === 'steps' ? null : feature.href
+      });
+    }
+    path.forEach((id, index) => {
+      const node = byId.get(id);
+      if (!node) return;
+      const isLast = index === path.length - 1;
+      parts.push({
+        label: node.title,
+        href: isLast ? null : `#${path.slice(0, index + 1).join('/')}`
+      });
+    });
+    nav.replaceChildren(...parts.flatMap((part, index) => {
+      const nodes = [];
+      if (index) nodes.push(document.createTextNode(' / '));
+      if (part.href) {
+        const link = document.createElement('a');
+        link.href = part.href;
+        link.textContent = part.label;
+        nodes.push(link);
+      } else {
+        const current = document.createElement('span');
+        current.setAttribute('aria-current', 'page');
+        current.textContent = part.label;
+        nodes.push(current);
+      }
+      return nodes;
+    }));
+  }
+
   function renderModuleNav() {
     const nav = document.querySelector('nav[data-module-nav]');
     if (!nav) return;
-    const here = (location.pathname.split('/').pop() || 'index.html');
     nav.replaceChildren(...MODULES.map(item => {
       const link = document.createElement('a');
       link.href = item.href;
       link.textContent = `${item.no} ${item.name}`;
-      const detailsHref = item.href.replace(/\.html$/, '-details.html');
-      if (item.href === here || detailsHref === here) link.setAttribute('aria-current', 'page');
+      if (item.href === pageName) link.setAttribute('aria-current', 'page');
       return link;
     }));
   }
 
-  function fitCanvas() {
-    const scale = Math.max(.62, Math.min(1, viewport.clientWidth / GEO.width));
-    canvas.style.transform = `scale(${scale})`;
-    wrap.style.width = GEO.width * scale + 'px';
-    wrap.style.height = height * scale + 'px';
+  // ---------- 层级解析与入口 ----------
+
+  // 目标可能是叶子：沿 attachTo 上溯到最近一个有子结构的祖先，叶子本身留给面板选中。
+  function ancestorsOf(id) {
+    const chain = [];
+    const seen = new Set();
+    let node = byId.get(id);
+    while (node && !seen.has(node.id)) {
+      seen.add(node.id);
+      chain.unshift(node.id);
+      node = node.attachTo ? byId.get(node.attachTo) : null;
+    }
+    return chain;
   }
 
-  const initial = location.hash.slice(1);
-  select(nodes.has(initial) ? initial : data.main[0].id, false);
-  renderModuleNav();
-  window.addEventListener('hashchange', () => {
-    const id = location.hash.slice(1);
-    if (nodes.has(id)) select(id, false);
-  });
-  new ResizeObserver(fitCanvas).observe(viewport);
-  fitCanvas();
+  function levelFor(id) {
+    const chain = ancestorsOf(id);
+    let deepest = -1;
+    chain.forEach((cid, index) => {
+      if (hasChildren(cid)) deepest = index;
+    });
+    return { path: deepest >= 0 ? chain.slice(0, deepest + 1) : [], selected: id };
+  }
+
+  function render() {
+    renderModuleNav();
+    const caption = document.querySelector('#level-caption');
+
+    if (role === 'root' || role === 'steps') {
+      currentPath = [];
+      renderBreadcrumb([]);
+      if (caption) caption.hidden = true;
+      renderScene(role === 'root' ? layoutRoot() : layoutSteps());
+      // 从其他页面带 #节点 进来：根图全部节点都在场，步骤页只画主干，
+      // 因此支线锚点要上溯到它所属的主干步骤再选中，不能选一个没有卡片的节点。
+      const wanted = location.hash.replace(/^#/, '');
+      const mainIds = new Set(mains.map(node => node.id));
+      let pick = null;
+      if (role === 'root') pick = byId.has(wanted) ? wanted : null;
+      else if (mainIds.has(wanted)) pick = wanted;
+      else if (wanted) {
+        let cursor = byId.get(wanted);
+        for (let guard = 0; cursor && guard < 12; guard += 1) {
+          if (mainIds.has(cursor.id)) { pick = cursor.id; break; }
+          cursor = byId.get(cursor.attachTo);
+        }
+      }
+      select(pick || (mains[0] ? mains[0].id : null));
+      return;
+    }
+
+    const raw = location.hash.replace(/^#/, '');
+    const wanted = raw.split('/').filter(Boolean).pop() || '';
+    let usePath = [];
+    let selected = null;
+    if (wanted && byId.has(wanted)) {
+      const info = levelFor(wanted);
+      usePath = info.path;
+      selected = wanted;
+    }
+    if (!usePath.length) {
+      if (selected) {
+        currentPath = [];
+        renderBreadcrumb([selected]);
+        if (caption) {
+          caption.hidden = false;
+          caption.textContent = '这一层只显示被请求的节点本身：它没有可展开的支线。';
+        }
+        renderScene(layoutSingle(selected));
+        select(selected);
+        return;
+      }
+      const firstParent = mains.find(node => hasChildren(node.id));
+      usePath = firstParent ? [firstParent.id] : [];
+    }
+    const parentId = usePath[usePath.length - 1];
+    if (!parentId) {
+      renderScene(baseScene(760));
+      return;
+    }
+    if (!selected) {
+      const kids = childrenOf(parentId);
+      selected = kids[0] ? kids[0].id : parentId;
+    }
+    currentPath = usePath;
+    renderBreadcrumb(usePath);
+    if (caption) {
+      const parent = byId.get(parentId);
+      caption.hidden = false;
+      caption.textContent = `当前层：${parent.title}，${childrenOf(parentId).length} 条支线；只展示这一层，继续下沉请点带箭头的支线。`;
+    }
+    renderScene(layoutBranch(usePath));
+    select(byId.has(selected) ? selected : parentId);
+  }
+
+  render();
+  window.addEventListener('hashchange', render);
+  new ResizeObserver(() => fitCanvas()).observe(viewport);
 })();

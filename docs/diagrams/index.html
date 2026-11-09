@@ -7,15 +7,16 @@
 <link rel="stylesheet" href="flow.css">
 <script defer src="flow.js"></script>
 </head>
-<body>
+<body data-flow-role="root">
 <main class="page">
   <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / SC-Wiki 全站主流程</nav>
-  <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>SC-Wiki 全站主流程</h1><p class="intro">先看全站主干与七大功能的关系，再通过右侧链接打开各功能主干、分支和展开细节。所有页面独立存放，可直接用浏览器打开，不进入 SC-Wiki 应用。</p></header>
+  <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>SC-Wiki 全站主流程</h1><p class="intro">本页只画全站主干与七大功能的位置关系。点功能节点进入它的步骤层，再点带箭头的节点逐层下沉到下一层；每层只显示该节点自己的直接子结构，不复述上层和兄弟节点。所有页面独立存放，可直接用浏览器打开，不进入 SC-Wiki 应用。</p></header>
   <nav class="page-links" aria-label="功能模块切换" data-module-nav></nav>
   <div class="layout">
     <section class="diagram" aria-labelledby="chart-title">
       <div class="toolbar"><div><h2 id="chart-title">七大功能与数据流向</h2><p>箭头表示标注的处理或数据关系；各功能按入口选择，不必逐个执行。</p></div><span class="mode-label">本机实际源码</span></div>
       <div class="legend" aria-label="图例"><span><i></i>处理</span><span><i class="check"></i>判断</span><span><i class="stop"></i>拒绝或失败</span><span><i class="result"></i>结果或独立出口</span></div>
+      <p class="level-caption" id="level-caption" hidden></p>
       <noscript>请启用 JavaScript 查看本地流程图；本页仅使用同目录静态资源。</noscript>
       <div class="viewport" tabindex="0" role="region" aria-label="SC-Wiki 全站主流程流程图，窄屏可横向滚动"><div class="canvas-wrap"><div class="canvas"></div></div></div>
     </section>

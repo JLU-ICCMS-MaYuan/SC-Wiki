@@ -7,16 +7,17 @@
 <link rel="stylesheet" href="flow.css">
 <script defer src="flow.js"></script>
 </head>
-<body>
+<body data-flow-role="steps">
 <main class="page">
-  <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / 检索与发现：功能主干</nav>
-  <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>检索与发现：功能主干</h1><p class="intro">本页只画本功能的主要步骤。需要展开的步骤及分支细节均在其他 HTML 页面；选择节点后通过右侧链接进入对应位置。</p></header>
+  <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / 检索与发现</nav>
+  <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>检索与发现：功能步骤</h1><p class="intro">本页只画本功能的直接步骤。带「展开 N 条支线」的步骤可以点开，进入它自己的分支层；没有展开标记的步骤只提供说明。</p></header>
   <nav class="page-links" aria-label="功能模块切换" data-module-nav></nav>
-  <nav class="page-links" aria-label="流程页面导航"><a href="index.html">← 全站主流程</a><a href="03-search-details.html">完整细节与分支 →</a><a href="../overview/03_Superconductivity_Data_Search_and_Database_Discovery/local-material-search.md">文字说明与实现依据</a></nav>
+  <nav class="page-links" aria-label="流程页面导航"><a href="index.html">← 全站主流程</a><a href="03-search-details.html">步骤分支层 →</a><a href="../overview/03_Superconductivity_Data_Search_and_Database_Discovery/local-material-search.md">文字说明与实现依据</a></nav>
   <div class="layout">
     <section class="diagram" aria-labelledby="chart-title">
       <div class="toolbar"><div><h2 id="chart-title">程序控制流</h2><p>箭头表示标注的处理或数据关系；各功能按入口选择，不必逐个执行。</p></div><span class="mode-label">本机实际源码</span></div>
       <div class="legend" aria-label="图例"><span><i></i>处理</span><span><i class="check"></i>判断</span><span><i class="stop"></i>拒绝或失败</span><span><i class="result"></i>结果或独立出口</span></div>
+      <p class="level-caption" id="level-caption" hidden></p>
       <noscript>请启用 JavaScript 查看本地流程图；本页仅使用同目录静态资源。</noscript>
       <div class="viewport" tabindex="0" role="region" aria-label="检索与发现：功能主干流程图，窄屏可横向滚动"><div class="canvas-wrap"><div class="canvas"></div></div></div>
     </section>
@@ -31,23 +32,28 @@
       </div>
     </aside>
   </div>
-  <p class="boundary">流程图独立于应用；所有细节仍完整保留在本功能的详情页，源码中存在实现不等于真实服务或科学结果已验收。</p>
+  <p class="boundary">流程图独立于应用；分支细节在步骤的分支层按需展开，源码中存在实现不等于真实服务或科学结果已验收。</p>
   <footer><span>依据本机实际源码（含工作区改动）静态核对；不代表模型科学结果或运行服务已验收。</span><a href="index.html">返回全站主流程 ↑</a></footer>
 </main>
-<script type="application/json" id="flow-data">{
+<script type="application/json" id="flow-data">
+{
   "main": [
     {
       "id": "search-entry",
       "title": "周期表与化学式输入",
       "summary": "选元素或输化学式发起检索",
       "owner": "React / SearchPage",
-      "description": "选元素或输化学式发起检索。详细行为、边界和来源见独立详情页。",
-      "notes": [],
+      "description": "用户在 /search 通过周期表选择元素或输入化学式，点「进入页面」或「搜索」后以新标签打开结果页，原标签保留输入与选择。",
+      "notes": [
+        "elements_combination_search：体系元素集合是所选元素集合的子集。",
+        "elements_exact_search 与 formula_search：体系元素集合与所选／化学式提取集合相等。",
+        "elements_contained_search：所选元素集合是体系元素集合的子集；化学式模式不保证化学计量比严格相等。"
+      ],
       "code": "frontend/src/pages/SearchPage.tsx",
       "links": [
         {
-          "href": "03-search-details.html#search-entry",
-          "label": "展开此步骤的完整细节"
+          "href": "03-search.html#search-entry",
+          "label": "返回本功能主干"
         }
       ]
     },
@@ -56,13 +62,16 @@
       "title": "地址状态恢复",
       "summary": "从 URL 还原查询、视图与页码",
       "owner": "React Router / searchNavigation",
-      "description": "从 URL 还原查询、视图与页码。详细行为、边界和来源见独立详情页。",
-      "notes": [],
+      "description": "结果地址保存元素／化学式、检索模式、筛选、view 以及两种视图和独立结构各自的页码；刷新、前后退和详情返回都由地址恢复并重读最新数据。",
+      "notes": [
+        "无查询地址进入元素选择页，不预选元素且 Formula 为空。",
+        "带 elements／formula 的地址恢复结果，默认按论文视图。"
+      ],
       "code": "frontend/src/lib/searchNavigation.ts",
       "links": [
         {
-          "href": "03-search-details.html#url-restore",
-          "label": "展开此步骤的完整细节"
+          "href": "03-search.html#url-restore",
+          "label": "返回本功能主干"
         }
       ]
     },
@@ -70,14 +79,18 @@
       "id": "structure-python-query",
       "title": "独立结构 Python 并行查询",
       "summary": "与 Go 双视图结果并行发起独立结构检索",
-      "owner": "React / FastAPI",
-      "description": "StructuralResults 与 Go 论文／状态结果并行调用 POST /api/rag/structural-records/search，沿用元素、化学式及通用筛选，但不发送 Tc 与 chart_only 条件。",
-      "notes": [],
-      "code": "frontend/src/components/PaperStructuralCollection.tsx；backend/api/structural_records.py",
+      "owner": "React StructuralResults / FastAPI",
+      "description": "SearchPage 在同一结果页同时渲染 SearchResults 与 StructuralResults。后者直接调用 POST /api/rag/structural-records/search，并强制 independent_only=true；它不走 Go 的 /api/papers/search/results，也不经过 RAG 搜索层。",
+      "notes": [
+        "沿用元素／化学式、关键词、压力、年份和身份对应的审核口径；material_family_id 使用正式材料家族目录，并兼容旧 superconductor_type 别名。发送前剔除 tc_min、tc_max、chart_only。",
+        "元素或化学式无效返回 422；结构资料表迁移未就绪返回 503 structural_migration_required。",
+        "独立结构请求失败只在本区域显示警告与重试，不清空 Go 论文／状态结果。"
+      ],
+      "code": "frontend/src/pages/SearchPage.tsx；frontend/src/components/PaperStructuralCollection.tsx；backend/api/structural_records.py",
       "links": [
         {
-          "href": "03-search-details.html#structure-python-query",
-          "label": "展开此步骤的完整细节"
+          "href": "03-search.html#structure-python-query",
+          "label": "返回本功能主干"
         }
       ]
     },
@@ -85,14 +98,18 @@
       "id": "structure-public-page",
       "title": "retained 模型与独立分页",
       "summary": "state_key 为空，按独立总数单独翻页",
-      "owner": "FastAPI / MySQL",
-      "description": "查询当前版本的 retained 完整 model，independent_only 限定 state_key 为 NULL 或空串；普通身份仅限当前批准版，已批准管理员和超级管理员可查询 approved、pending、rejected 并按状态筛选。每页 20 条，以 structure_page 和独立 total 分页。",
-      "notes": [],
-      "code": "backend/api/structural_records.py；frontend/src/components/PaperStructuralCollection.tsx",
+      "owner": "FastAPI / SQLAlchemy / MySQL",
+      "description": "查询 paper_structural_records 并 JOIN papers，固定 kind='model'、retention='retained'、paper_revision=content_revision；普通身份另要求 review_status='approved' 且 approved_revision=content_revision，已批准 admin／superadmin 默认覆盖当前版本的 approved、pending、rejected，并可按 review_status 筛选。independent_only 再限定 state_key IS NULL OR state_key=''。",
+      "notes": [
+        "Python 分支同样实现组合、精确、化学式、包含四种元素集合匹配；独立结构与 Go 论文／材料状态查询采用一致的角色范围。",
+        "先对完整候选查询 COUNT 得 total，再按 year DESC、paper_id、record_key 排序并应用独立 offset／limit。",
+        "前端固定每页 20 条，以 URL structure_page 保存页码；它与 paper_page／state_page 互不共用 total 或翻页状态。"
+      ],
+      "code": "backend/api/structural_records.py::search_records；frontend/src/components/PaperStructuralCollection.tsx",
       "links": [
         {
-          "href": "03-search-details.html#structure-public-page",
-          "label": "展开此步骤的完整细节"
+          "href": "03-search.html#structure-public-page",
+          "label": "返回本功能主干"
         }
       ]
     },
@@ -100,18 +117,22 @@
       "id": "structure-detail-download",
       "title": "当前结构详情与匿名下载",
       "summary": "公开 retained 模型可匿名查看并下载",
-      "owner": "React / FastAPI",
-      "description": "结构卡片打开 /structures/:recordId，读取当前版本结构详情；当前已批准论文的 retained 模型无需登录即可下载 JSON、CIF 或 POSCAR，不经过旧 /api/structures/* 权限链。",
-      "notes": [],
-      "code": "frontend/src/pages/StructuralRecordPage.tsx；backend/api/structural_records.py",
+      "owner": "React StructuralRecordPage / FastAPI",
+      "description": "卡片通过 /structures/:recordId 打开 GET /api/rag/structural-records/{identity}；下载走同资源 /download?format=...&cell=...。接口使用可选认证，当前已批准论文的 retained 模型允许匿名读取和下载，上传者及已批准管理员按其权限读取当前记录。",
+      "notes": [
+        "详情要求记录属于论文当前 content_revision；匿名访问非 retained、非公开论文或旧版本记录统一返回 404。",
+        "可下载带来源 JSON、CIF、POSCAR；CIF／POSCAR 可选择原胞或惯用胞，所求表示没有文本时返回 400。",
+        "这是 /api/rag/structural-records/* 主链，不调用旧 /api/structures/*，也不存在 representative／raw 必须登录或 403 的这套权限判断。"
+      ],
+      "code": "frontend/src/pages/StructuralRecordPage.tsx；backend/api/structural_records.py::visible_record",
       "links": [
         {
-          "href": "03-search-details.html#structure-detail-download",
-          "label": "展开此步骤的完整细节"
+          "href": "03-search.html#structure-detail-download",
+          "label": "返回本功能主干"
         },
         {
-          "href": "03-search-details.html#perm-denied",
-          "label": "分支：不可见或表示不可用"
+          "href": "03-search.html#perm-denied",
+          "label": "查看不可见与下载失败边界"
         }
       ]
     },
@@ -120,17 +141,16 @@
       "title": "检索接口路由",
       "summary": "结果查询落到 Go 直连主库",
       "owner": "Go / gin 路由",
-      "description": "结果查询落到 Go 直连主库。详细行为、边界和来源见独立详情页。",
-      "notes": [],
+      "description": "前端以 300ms 定时后调用 POST /api/papers/search/results，由 Go 直接查询主库，不经过 RAG 搜索层。",
+      "notes": [
+        "默认每页 20 条，请求带 limit 与 offset。",
+        "旧接口 POST /api/papers/search/records 仍为其他调用方保留。"
+      ],
       "code": "goserver/main.go",
       "links": [
         {
-          "href": "03-search-details.html#api-route",
-          "label": "展开此步骤的完整细节"
-        },
-        {
-          "href": "03-search-details.html#stale-drop",
-          "label": "分支：过期响应丢弃"
+          "href": "03-search.html#api-route",
+          "label": "返回本功能主干"
         }
       ]
     },
@@ -140,13 +160,17 @@
       "title": "参数与筛选校验",
       "summary": "收敛元素集合、筛选与审核口径",
       "owner": "Go API",
-      "description": "收敛元素集合、筛选与审核口径。详细行为、边界和来源见独立详情页。",
-      "notes": [],
-      "code": "goserver/handlers/search_results.go",
+      "description": "服务端接收 elements／formula／mode／view 与压力、年份、Tc、关键词等筛选，物性条件只通过状态相关存在查询收紧结果，不成为结果主体。",
+      "notes": [
+        "普通身份不应用审核状态放宽参数，始终限制在当前批准版本；已批准 admin／superadmin 可使用 approved、pending、rejected 审核筛选。普通前端不发送审核状态参数，服务端仍独立执行权限限制。默认数值范围不额外过滤缺失值。",
+        "非法 JSON、模式、元素、上下限、limit／offset 或超过 118 个元素返回 400。",
+        "system_key 读取、计数或结果查询失败返回 503，不把数据库错误伪装成空结果；前端可重试。"
+      ],
+      "code": "goserver/handlers/search_results.go；frontend/src/pages/SearchPage.tsx；frontend/src/lib/searchNavigation.ts",
       "links": [
         {
-          "href": "03-search-details.html#param-validate",
-          "label": "展开此步骤的完整细节"
+          "href": "03-search.html#param-validate",
+          "label": "返回本功能主干"
         }
       ]
     },
@@ -155,13 +179,16 @@
       "title": "身份对应的检索范围",
       "summary": "普通身份限当前批准版；已批准管理员可按审核状态检索",
       "owner": "Go API / MySQL",
-      "description": "普通身份仅检索当前批准版本；已批准管理员和超级管理员可检索当前版本的 approved、pending、rejected 内容。范围由服务端认证身份决定，详细边界见独立详情页。",
-      "notes": [],
+      "description": "普通身份（包括普通登录用户）的候选查询固定附加 review_status='approved' 与 approved_revision=content_revision；已批准 admin／superadmin 可检索当前版本的 approved、pending、rejected，并按审核状态筛选。可见范围由服务端认证身份决定，不能由请求参数越权扩大。",
+      "notes": [
+        "检索可见范围扩大不等于详情、工作稿或下载权限同步放宽，仍由各自身份检查控制。",
+        "superconductor_records 不属于当前运行模型，任何读取路径不得查询该表。"
+      ],
       "code": "goserver/handlers/search_results.go",
       "links": [
         {
-          "href": "03-search-details.html#perm-scope",
-          "label": "展开此步骤的完整细节"
+          "href": "03-search.html#perm-scope",
+          "label": "返回本功能主干"
         }
       ]
     },
@@ -170,13 +197,16 @@
       "title": "MySQL 候选查询",
       "summary": "状态表连接论文与超导记录",
       "owner": "MySQL / GORM",
-      "description": "状态表连接论文与超导记录。详细行为、边界和来源见独立详情页。",
-      "notes": [],
+      "description": "Go 以 material_states 为主表 JOIN papers（revision 对齐）并 LEFT JOIN superconductors、chemical_systems；论文视图还合并 retained 结构来源论文，状态视图按 state_key 关联结构卡片。页面下方的独立结构列表则由并行 Python 链单独查询和分页。",
+      "notes": [
+        "Tc／图表条件用 EXISTS 约束，避免多条 Tc 复制状态。",
+        "不能跨状态拼接组成与压力。"
+      ],
       "code": "goserver/handlers/search_results.go",
       "links": [
         {
-          "href": "03-search-details.html#mysql-query",
-          "label": "展开此步骤的完整细节"
+          "href": "03-search.html#mysql-query",
+          "label": "返回本功能主干"
         }
       ]
     },
@@ -185,17 +215,16 @@
       "title": "去重计数与分页",
       "summary": "分页前按论文或状态去重计数",
       "owner": "Go API",
-      "description": "分页前按论文或状态去重计数。详细行为、边界和来源见独立详情页。",
-      "notes": [],
+      "description": "匹配与去重在分页前完成，返回 papers_total、states_total 与当前视图 total、limit、offset，并按视图装配论文行或状态行。",
+      "notes": [
+        "论文视图同一论文不重复，来源含匹配状态及完整结构来源论文。",
+        "没有 Tc 也能检索，多物性不增加状态数量。"
+      ],
       "code": "goserver/handlers/search_results.go",
       "links": [
         {
-          "href": "03-search-details.html#dedup-assemble",
-          "label": "展开此步骤的完整细节"
-        },
-        {
-          "href": "03-search-details.html#empty-result",
-          "label": "分支：无匹配结果"
+          "href": "03-search.html#dedup-assemble",
+          "label": "返回本功能主干"
         }
       ]
     },
@@ -205,13 +234,15 @@
       "title": "论文与状态双视图",
       "summary": "默认论文视图，可切材料状态",
       "owner": "React / SearchResults",
-      "description": "默认论文视图，可切材料状态。详细行为、边界和来源见独立详情页。",
-      "notes": [],
+      "description": "默认按论文展示，可切换按材料状态；view、分页或筛选变化会形成新的请求键，300ms 后重新查询对应结果，地址保存两种视图各自的页码。旧请求迟到时不覆盖新目标。",
+      "notes": [
+        "两种视图由服务端分别查询和分页，并非切换时总能复用同一响应。"
+      ],
       "code": "frontend/src/components/SearchResults.tsx",
       "links": [
         {
-          "href": "03-search-details.html#dual-view",
-          "label": "展开此步骤的完整细节"
+          "href": "03-search.html#dual-view",
+          "label": "返回本功能主干"
         }
       ]
     },
@@ -220,22 +251,18 @@
       "kind": "check",
       "title": "详情与结构预览",
       "summary": "按论文 ID 读取当前 content_revision",
-      "owner": "Go API / React",
-      "description": "按论文 ID 读取当前 content_revision 的物性与结构，并按审核状态和身份判断可读性。详细行为、边界和来源见独立详情页。",
-      "notes": [],
+      "owner": "Go API / React PaperEditView",
+      "description": "按 paper_id 请求 GET /api/papers/:id，Go 直接加载 papers 当前 content_revision 及关联当前版本数据；结构预览读材料状态下 structures，物性统一读 property_modules，Tc 排在关键物性最前。独立论文结构另读 Python structural-records 集合。",
+      "notes": [
+        "手稿交接分支在送审时移交工作稿，不提前重写公开正式实体；旧直接升版分支则递增 content_revision 并退回 pending，二者不能统一宣称公开读取旧批准版。",
+        "详情可见性由 review_status 与当前用户决定，不要求 approved_revision=content_revision 才可调用 GetPaper。",
+        "空值不生成表格行；没有完整模型时不复制其他压强或优化方式的坐标。"
+      ],
       "code": "goserver/handlers/papers.go；backend/services/paper_revisions.py",
       "links": [
         {
-          "href": "03-search-details.html#detail-preview",
-          "label": "展开此步骤的完整细节"
-        },
-        {
-          "href": "03-search-details.html#source-invalid",
-          "label": "分支：非法来源兜底"
-        },
-        {
-          "href": "03-search-details.html#detail-permissions",
-          "label": "分支：论文详情读取权限"
+          "href": "03-search.html#detail-preview",
+          "label": "返回本功能主干"
         }
       ]
     },
@@ -245,21 +272,17 @@
       "title": "Tc 图表统计读取",
       "summary": "读取代表 Tc，单值优先、区间取中点",
       "owner": "Go API / Recharts",
-      "description": "从 property_records 连接 property_modules，筛选代表 Tc 记录并取单值或区间中点。详细行为、边界和来源见独立详情页。",
-      "notes": [],
+      "description": "/share/charts 按 tc_field 请求 tc-pressure 与 tc-year。SQL 从 property_records t JOIN property_modules pm，再连接 material_states 与 papers，限定 property_code='tc'、module_code='superconductive_properties'、is_representative=TRUE，以 COALESCE(value_number, (value_min+value_max)/2) 取代表单值或区间中点。",
+      "notes": [
+        "tc_field 白名单五个，非法字段返回 HTTP 400；实验 Tc 与四种计算方法分别按 record_type／方法代码过滤。",
+        "chartApprovedJoin 显式要求论文 approved 及 t／ms.paper_revision=content_revision，但当前 SQL 未显式写 approved_revision=content_revision，这是与搜索公开约束不同的实现边界。",
+        "缓存按图表类型与 Tc 字段隔离，为永久缓存；Tc-P 要求压力非空，Tc-Year 要求年份非空。"
+      ],
       "code": "goserver/handlers/stats.go",
       "links": [
         {
-          "href": "03-search-details.html#chart-stats",
-          "label": "展开此步骤的完整细节"
-        },
-        {
-          "href": "03-search-details.html#chart-unclassified",
-          "label": "分支：未分类归入其他"
-        },
-        {
-          "href": "03-search-details.html#chart-empty",
-          "label": "分支：图表无数据点"
+          "href": "03-search.html#chart-stats",
+          "label": "返回本功能主干"
         }
       ]
     },
@@ -269,21 +292,16 @@
       "title": "导出与分享出口",
       "summary": "PaperEditView 状态卡片导出 JSON",
       "owner": "Go API / React PaperEditView",
-      "description": "论文详情的材料状态卡片提供 JSON 离线包导出；RIS 与图表组合导出当前没有活动入口。详细行为、边界和来源见独立详情页。",
-      "notes": [],
+      "description": "PaperEditView 在每个具有 state_key 的材料状态卡片上显示「导出材料状态」，调用 GET /api/papers/{paper_id}/material-states/{state_key}/export，按 paper_id+revision+state_key 精确定位并下载同 revision 的离线 JSON 包。",
+      "notes": [
+        "导出包含材料、状态、结构、模块记录、Evidence、谱数据与定义快照，不暴露管理员审计字段。",
+        "当前没有 RIS 按钮／处理函数，也没有图表组合导出入口；这些未实现项不构成活动路径。"
+      ],
       "code": "goserver/handlers/material_state_export.go",
       "links": [
         {
-          "href": "03-search-details.html#export-path",
-          "label": "展开此步骤的完整细节"
-        },
-        {
-          "href": "03-search-details.html#export-format",
-          "label": "边界：当前无 RIS／组合导出入口"
-        },
-        {
-          "href": "03-search-details.html#export-incomplete",
-          "label": "分支：导出不完整拦截"
+          "href": "03-search.html#export-path",
+          "label": "返回本功能主干"
         }
       ]
     }
@@ -306,7 +324,7 @@
       "code": "frontend/src/components/SearchResults.tsx",
       "links": [
         {
-          "href": "03-search-details.html#api-route",
+          "href": "03-search.html#api-route",
           "label": "返回本功能主干"
         }
       ]
@@ -328,7 +346,7 @@
       "code": "goserver/handlers/search_results.go",
       "links": [
         {
-          "href": "03-search-details.html#dedup-assemble",
+          "href": "03-search.html#dedup-assemble",
           "label": "返回本功能主干"
         }
       ]
@@ -350,7 +368,7 @@
       "code": "frontend/src/lib/searchNavigation.ts",
       "links": [
         {
-          "href": "03-search-details.html#detail-preview",
+          "href": "03-search.html#detail-preview",
           "label": "返回本功能主干"
         }
       ]
@@ -364,14 +382,15 @@
       "title": "论文详情读取权限",
       "summary": "approved 匿名；pending 已认证；rejected 上传者或管理员",
       "owner": "Go API / canViewPaper",
-      "description": "approved 论文允许匿名读取；pending 允许任意已认证用户；rejected 仅上传者或管理员；管理员可读取各状态。无权限返回 403，不以此规则替代独立结构接口的 404 可见性规则。",
+      "description": "canViewPaper 先放行已批准管理员与所有 approved 论文，因此 approved 可匿名读取；pending 对任意已认证用户开放；rejected 仅上传者或管理员可读；管理员可读取各状态。其他情况由 GetPaper 返回 403。",
       "notes": [
-        "详情直接读取当前 content_revision，不能统一宣称公开旧批准版。"
+        "这里的「已认证」不以论文上传者为前提，普通登录用户也可读 pending。",
+        "review_comment 只附加给上传者或管理员，管理员内部字段只附加给管理员，读取权限不等于所有审计字段公开。"
       ],
-      "code": "goserver/handlers/papers.go::canViewPaper",
+      "code": "goserver/handlers/papers.go::canViewPaper；paperForViewer",
       "links": [
         {
-          "href": "03-search-details.html#detail-preview",
+          "href": "03-search.html#detail-preview",
           "label": "返回本功能主干"
         }
       ]
@@ -385,15 +404,16 @@
       "title": "结构读取与下载边界",
       "summary": "非公开或旧版本返回 404，缺失表示返回 400",
       "owner": "FastAPI / structural_records.py",
-      "description": "匿名仅可读当前已批准论文的 retained 模型；上传者与已批准管理员可读其权限范围内的当前记录。不可见、非当前版本或匿名访问非 retained 记录返回 404，所需晶胞表示缺失返回 400。",
+      "description": "visible_record 先要求 model，再调用 visible_paper：公开匿名路径仅接受 approved 且 approved_revision=content_revision 的论文；随后要求 record.paper_revision=content_revision，且匿名公开记录的 retention 必须为 retained。不满足时返回 404。",
       "notes": [
-        "读取与下载使用可选认证，不要求登录，也不套用旧 /api/structures/* 的 403 规则。",
-        "存储迁移未就绪返回 503 structural_migration_required。"
+        "上传者或已批准 admin／superadmin 属于 privileged，可按其论文权限读取当前记录；匿名与无权限访问不会因此得到旧版本内容。",
+        "CIF／POSCAR 的指定晶胞表示缺少文本返回 400；存储迁移未就绪返回 503。",
+        "可选认证意味着公开 retained 模型可匿名下载，不能套用旧 /api/structures/* 的登录／403 描述。"
       ],
-      "code": "backend/api/structural_records.py",
+      "code": "backend/api/structural_records.py::visible_paper；visible_record；download",
       "links": [
         {
-          "href": "03-search-details.html#structure-detail-download",
+          "href": "03-search.html#structure-detail-download",
           "label": "返回独立结构主链"
         }
       ]
@@ -415,7 +435,7 @@
       "code": "goserver/handlers/stats.go",
       "links": [
         {
-          "href": "03-search-details.html#chart-stats",
+          "href": "03-search.html#chart-stats",
           "label": "返回本功能主干"
         }
       ]
@@ -437,7 +457,7 @@
       "code": "frontend/src/components/ChartScatter.tsx",
       "links": [
         {
-          "href": "03-search-details.html#chart-stats",
+          "href": "03-search.html#chart-stats",
           "label": "返回本功能主干"
         }
       ]
@@ -451,15 +471,15 @@
       "title": "RIS 与图表组合导出未实现",
       "summary": "没有按钮或处理函数，不形成活动路径",
       "owner": "React 当前源码",
-      "description": "当前 React 源码没有 RIS 按钮或处理函数，图表也没有组合导出入口；仅 PaperEditView 的材料状态卡片提供 JSON 导出。此处只记录未实现边界，不是可执行分支。",
+      "description": "当前 React 源码仅保留 RIS 国际化文案，没有对应按钮或处理函数；/share/charts 也没有组合导出入口。唯一材料状态 JSON 活动入口位于 PaperEditView 的状态卡片，本节点仅说明未实现边界。",
       "notes": [
-        "残留 RIS 文案不等于存在交互或后端接口。",
+        "不得把残留文案、历史说明或离线脚本画成当前网页交互。",
         "离线全量导出由 backend/scripts/export_data.py 生成，不属于前端交互。"
       ],
-      "code": "frontend/src/components/PaperEditView.tsx；frontend/src/pages/share.tsx",
+      "code": "frontend/src/components/PaperEditView.tsx；frontend/src/pages/share.tsx；frontend/src/i18n/zh/search.ts",
       "links": [
         {
-          "href": "03-search-details.html#export-path",
+          "href": "03-search.html#export-path",
           "label": "返回材料状态 JSON 出口"
         }
       ]
@@ -475,13 +495,14 @@
       "owner": "Go API",
       "description": "已批准材料状态导出要求每条物性记录至少一条当前 revision 的 Evidence；仅当记录提供 structure_key 时，才校验其匹配本状态的 structure-{id}。证据或已提供的结构关联不完整返回 409 export_incomplete；revision 不一致返回 409 export_revision_conflict。",
       "notes": [
+        "未提供 structure_key 的物性记录不要求具备结构关联。",
         "跨 revision 关联无效。",
         "查询按 paper_id + revision + state_key 精确定位。"
       ],
       "code": "goserver/handlers/material_state_export.go",
       "links": [
         {
-          "href": "03-search-details.html#export-path",
+          "href": "03-search.html#export-path",
           "label": "返回本功能主干"
         }
       ]
@@ -546,6 +567,7 @@
       "label": "状态卡片导出 JSON"
     }
   ]
-}</script>
+}
+</script>
 </body>
 </html>
