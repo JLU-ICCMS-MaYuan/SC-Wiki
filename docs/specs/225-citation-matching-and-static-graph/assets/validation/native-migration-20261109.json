@@ -1,0 +1,586 @@
+{
+  "client_date": "2026-11-09",
+  "database": {
+    "db": "scwiki",
+    "hostname": "MaYuan-Macbook-Pro.local",
+    "port": 3307,
+    "version": "8.4.2",
+    "server_uuid": "332dca5c-bbb0-11f1-aeec-5203197502aa"
+  },
+  "versions_before": [
+    "20261102_0160",
+    "20261102_0204"
+  ],
+  "versions_after": [
+    "20261102_0160",
+    "20261106_0225"
+  ],
+  "data_differences": {},
+  "all_preexisting_business_tables": 74,
+  "all_preexisting_business_data_unchanged": true,
+  "papers": 4,
+  "historical_references": 211,
+  "new_cache_rows": 0,
+  "new_nonnull_evidence": 0,
+  "new_nonnull_snapshots": 0,
+  "new_tables": [
+    "citation_match_cache"
+  ],
+  "changed_schema_tables": [
+    "paper_reference_extractions",
+    "paper_references"
+  ],
+  "schema": {
+    "citation_match_cache": {
+      "columns": {
+        "cache_key": {
+          "type": "varchar(64)",
+          "nullable": false
+        },
+        "payload": {
+          "type": "json",
+          "nullable": false
+        },
+        "created_at": {
+          "type": "datetime",
+          "nullable": false
+        }
+      },
+      "foreign_keys": [],
+      "unique": [],
+      "checks": [],
+      "primary_key": [
+        "cache_key"
+      ]
+    },
+    "paper_reference_extractions": {
+      "columns": {
+        "paper_id": {
+          "type": "integer",
+          "nullable": false
+        },
+        "paper_revision": {
+          "type": "integer",
+          "nullable": false
+        },
+        "status": {
+          "type": "varchar(20)",
+          "nullable": false
+        },
+        "parser_name": {
+          "type": "varchar(32)",
+          "nullable": false
+        },
+        "parser_version": {
+          "type": "varchar(64)",
+          "nullable": true
+        },
+        "error_message": {
+          "type": "text",
+          "nullable": true
+        },
+        "processed_at": {
+          "type": "datetime",
+          "nullable": false
+        },
+        "matching_snapshot": {
+          "type": "json",
+          "nullable": true
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "papers",
+          "references": [
+            "id",
+            "content_revision"
+          ]
+        }
+      ],
+      "unique": [],
+      "checks": [
+        "(statusin('succeeded','partial','failed','unavailable'))"
+      ],
+      "primary_key": [
+        "paper_id",
+        "paper_revision"
+      ]
+    },
+    "paper_references": {
+      "columns": {
+        "id": {
+          "type": "bigint",
+          "nullable": false
+        },
+        "paper_id": {
+          "type": "integer",
+          "nullable": false
+        },
+        "paper_revision": {
+          "type": "integer",
+          "nullable": false
+        },
+        "reference_index": {
+          "type": "integer",
+          "nullable": false
+        },
+        "raw_citation": {
+          "type": "longtext",
+          "nullable": false
+        },
+        "doi": {
+          "type": "varchar(255)",
+          "nullable": true
+        },
+        "title": {
+          "type": "text",
+          "nullable": true
+        },
+        "normalized_title": {
+          "type": "varchar(512)",
+          "nullable": true
+        },
+        "authors": {
+          "type": "json",
+          "nullable": true
+        },
+        "year": {
+          "type": "integer",
+          "nullable": true
+        },
+        "cited_paper_id": {
+          "type": "integer",
+          "nullable": true
+        },
+        "match_status": {
+          "type": "varchar(20)",
+          "nullable": false
+        },
+        "match_method": {
+          "type": "varchar(20)",
+          "nullable": true
+        },
+        "match_checked_at": {
+          "type": "datetime",
+          "nullable": true
+        },
+        "created_at": {
+          "type": "datetime",
+          "nullable": false
+        },
+        "updated_at": {
+          "type": "datetime",
+          "nullable": false
+        },
+        "match_evidence": {
+          "type": "json",
+          "nullable": true
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "cited_paper_id"
+          ],
+          "table": "papers",
+          "references": [
+            "id"
+          ]
+        },
+        {
+          "columns": [
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "papers",
+          "references": [
+            "id",
+            "content_revision"
+          ]
+        }
+      ],
+      "unique": [
+        [
+          "paper_id",
+          "paper_revision",
+          "reference_index"
+        ]
+      ],
+      "checks": [
+        "(((match_status='matched')and(cited_paper_idisnotnull)and(match_methodisnotnull))or((match_statusin('unmatched','ambiguous'))and(cited_paper_idisnull)and(match_methodisnull)))",
+        "((match_methodisnull)or(match_methodin('doi','title_year','manual','llm2')))",
+        "(match_statusin('matched','unmatched','ambiguous'))",
+        "(reference_index>=0)"
+      ],
+      "primary_key": [
+        "id"
+      ]
+    }
+  },
+  "yh_task_id": "d2ca41e5f16b4d65bf744f5d5325e855",
+  "yh_task_unchanged": true,
+  "yh_status": null,
+  "migration_sha256": "aa5ce76cd80fa6352cdefae7c83b40d6a680d83d9543b112727ebe92ffa947c4",
+  "backup": {
+    "path": "/Users/mayuan/Codes/SC-Wiki/.local/backups/issue225-native-20261109-102551/business-before.sql",
+    "bytes": 1307468929,
+    "sha256": "ae73966efe1d90f5dc417cc31372147d96cbe7653538fa85131689c57f3d9f80",
+    "mode": "0o600"
+  },
+  "storage": {
+    "backend": "s3",
+    "endpoint": "http://127.0.0.1:39110",
+    "bucket": "scwiki-business"
+  },
+  "storage_operations": "none",
+  "historical_backfill": false,
+  "services_restarted": [
+    "goserver"
+  ],
+  "readiness": {
+    "python": {
+      "http_status": 200,
+      "body": {
+        "ready": true,
+        "dependencies": {
+          "mysql": true,
+          "redis": true,
+          "storage": true,
+          "qdrant": true,
+          "neo4j": true
+        }
+      }
+    },
+    "goserver": {
+      "http_status": 200,
+      "body": {
+        "dependencies": {
+          "mysql": true,
+          "redis": true,
+          "schema": true,
+          "storage": true
+        },
+        "ready": true
+      }
+    }
+  },
+  "orm_read_validation": {
+    "cache_lookup": "success_without_write",
+    "extractions_read": 4,
+    "references_read": 211,
+    "model_calls": 0
+  },
+  "preexisting_table_checksums": {
+    "admin_applications": {
+      "rows": 2,
+      "sha256": "cf340d25ad7c9da85d02df00ea092f0ff8ae92dcd1bf68edbf6015ff6b843b41"
+    },
+    "chart_group_items": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "chart_groups": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "chemical_systems": {
+      "rows": 8,
+      "sha256": "c6362aad1d2604d7980f6a27aeed9d58e5265ea654102e2f22b18ee128bc56dc"
+    },
+    "community_ai_batches": {
+      "rows": 1,
+      "sha256": "4eb29c0ae0e44b1fccf7eed44f0800b8b95d732c1efb7b4b85ebfccec786c550"
+    },
+    "community_ai_tasks": {
+      "rows": 2,
+      "sha256": "7365dc180ae6737ac4dc9b4be974d96bbbd3eea622aba42baa828e684241d1c1"
+    },
+    "community_answer_groups": {
+      "rows": 2,
+      "sha256": "826b5b198d80f036c9878dfcf0733f208e4ad26d50ef4f06a076348389a45f14"
+    },
+    "community_answer_requests": {
+      "rows": 3,
+      "sha256": "3461c8dee9b689a54fba07499464636c399156360a0dcbcc5df94d369f237030"
+    },
+    "community_answer_turn_revisions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "community_answer_turns": {
+      "rows": 1,
+      "sha256": "61bcf8ca9d0d23e7afb34d9303b9c27592dbf46d269043629dbbd09aafdce989"
+    },
+    "community_entries": {
+      "rows": 6,
+      "sha256": "f1391225fdf19f49f62bdcc27f7046b9e4edf51111e4749798e5361ec8f2fada"
+    },
+    "community_entry_revisions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "community_model_answers": {
+      "rows": 4,
+      "sha256": "a3cfa1449ff3e0b8655e5309aeb76eb7a321eab0a5489b3d5032debb49f68974"
+    },
+    "community_moderation_events": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "community_notifications": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "community_reports": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "community_systems": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "community_votes": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "form_definitions": {
+      "rows": 34,
+      "sha256": "81cc30853ddb034d28fa1cd6a6c75edff7ccb4366245f3a16f06c3f5b16ab12e"
+    },
+    "material_families": {
+      "rows": 8,
+      "sha256": "bd3b087f7abc223f1dc401878720292ec71263abe376c39e4cd1d93d3d63bcc6"
+    },
+    "material_family_aliases": {
+      "rows": 26,
+      "sha256": "529ed15eacdec81dca30929081ee5d0dea1094aa0d0f39ee648341f6020833e9"
+    },
+    "material_state_structure_families": {
+      "rows": 9,
+      "sha256": "631fa9b0981395d23b1d2e3aa5b73513e475498f8fac1a607be51fdd60df87f3"
+    },
+    "material_states": {
+      "rows": 47,
+      "sha256": "0235393fb718024b0824912bfaa13d2475ab10700f7e2fbab0aac5246cc83996"
+    },
+    "news_feed_candidates": {
+      "rows": 8786,
+      "sha256": "eab6cd7e7dea388a0bb684a4a603b760afa91b98825623a22adb5e8e66e7e967"
+    },
+    "news_feed_classifications": {
+      "rows": 1960,
+      "sha256": "0bc47d62d14d59136455e96474435e273db91d2611216e55f620845c226f7941"
+    },
+    "news_feed_identities": {
+      "rows": 4794,
+      "sha256": "e0d6bd7f3bdd6f8f2af467808b6dd498efc8f1cfc4f84f2ab078cf445735bb44"
+    },
+    "news_feed_items": {
+      "rows": 1960,
+      "sha256": "f7e0d7bea5196718ee4f8d6586f3c51b7991aa5fb1104835a01543b3b9f54c61"
+    },
+    "news_feed_material_families": {
+      "rows": 614,
+      "sha256": "6b00e6ae598778d283580fd2e567c89d4a1c7b0a9314e18bc484663afe0a56d1"
+    },
+    "news_feed_sources": {
+      "rows": 13,
+      "sha256": "46fa8014fe99334ef1a05ffec2912fcd39ddb5f2678d465a72d4fad102d3abc9"
+    },
+    "news_items": {
+      "rows": 1,
+      "sha256": "84571282dc64077699336cf1a5b6ea76ba03a5b6928bbaf0e29cb7080e05ec55"
+    },
+    "paper_chunks": {
+      "rows": 353,
+      "sha256": "bbe4d7055ce80eae85dce63e2f932805ff431759eb7a1a6c0a98dc5c805b68c0"
+    },
+    "paper_document_blocks": {
+      "rows": 2745,
+      "sha256": "440470785817755a5dcc59429879361e7c943d245e9997ed86a802048f9c7b1e"
+    },
+    "paper_document_parser_runs": {
+      "rows": 6,
+      "sha256": "641db213cfbb8f03a7c3a673b7a96010bb19aaac69520a203975d861b8eb6da5"
+    },
+    "paper_evidence_locators": {
+      "rows": 843,
+      "sha256": "1328e1c45d9b4e2e73b92e29caf7b6fc4f673817e070b867eee76fda436cd1c3"
+    },
+    "paper_evidences": {
+      "rows": 4450,
+      "sha256": "26930fe3af0a67ef1c12757846b68c4133f572613b62cfc14defd88f81c54427"
+    },
+    "paper_files": {
+      "rows": 8,
+      "sha256": "0c66b8b8966f7e183999a363d60b8b4e4369d2355d64c3c5fbb68868865487d0"
+    },
+    "paper_graph_marks": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "paper_history_events": {
+      "rows": 18,
+      "sha256": "16045954a180ea3b4e5ae376e24780272e9a9350713c7efe1ae8a2d2bf1699b0"
+    },
+    "paper_material_families": {
+      "rows": 5,
+      "sha256": "6cf8f47fd4454cf85b63a07074b0f4247e2daf92a61fc06fefe955b26f61f981"
+    },
+    "paper_reference_extractions": {
+      "rows": 4,
+      "sha256": "5c97f1224e542ab640a75cc31f20e49ca3634c96f066946b0fddc1849b5884ce"
+    },
+    "paper_references": {
+      "rows": 211,
+      "sha256": "329afb7b6cf9a301be6e8f9b1581a66854dcbc5f6187d889a279470a0b75fbf3"
+    },
+    "paper_revision_drafts": {
+      "rows": 3,
+      "sha256": "db4fd6fce203f70625f2265d0df16c648330045c2c774850070d0ef40021b5a2"
+    },
+    "paper_structural_records": {
+      "rows": 2,
+      "sha256": "2e8a8eefb4b83cf0442ceb7ead0fe18a88e1561538f9124802c68762f03d2b13"
+    },
+    "papers": {
+      "rows": 4,
+      "sha256": "aa5203d268077a4b3c4fe3bc8be7f7d5677b8482bd26fdab04d48515a8717045"
+    },
+    "periodic_table_elements": {
+      "rows": 118,
+      "sha256": "1da7c6ae78150696d8625b74e14dd64531fff6d2ee6c3bd1f3a7d7e1e3f9387f"
+    },
+    "profile_change_audit_events": {
+      "rows": 4,
+      "sha256": "462d6cdce221019d50ec6549cf069a525894de0aea82134f66db21b536f5d6a1"
+    },
+    "property_definition_promotion_events": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "property_definitions": {
+      "rows": 9,
+      "sha256": "cbe93073a408fc0ace4443590cd776498fe67e5ba40d9701c716fd4580d1f535"
+    },
+    "property_evidence_checks": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "property_modules": {
+      "rows": 36,
+      "sha256": "57bcbadb62531231b4383bce02c549d79948f4810811c6b2772c60456d5ede90"
+    },
+    "property_record_definition_events": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "property_record_evidences": {
+      "rows": 4380,
+      "sha256": "29a31f612b31f0fe42b5c34fc5643b248d5f9e6cd818b0ecdac1c427b3536f0c"
+    },
+    "property_records": {
+      "rows": 61,
+      "sha256": "8c5d5d96b3128e82e7744fc4206ff669a68022850a0a79120bb819916112237f"
+    },
+    "rag_chat_conversations": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "rag_chat_turns": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scientific_evidence_checks": {
+      "rows": 11992,
+      "sha256": "e1d4e15937170cf543d41aa48278f79363ab811fc8f46edb00891423cc6d7904"
+    },
+    "scientific_evidence_sources": {
+      "rows": 4176,
+      "sha256": "71e5229033a852df8e3ecea4a73d713019df1d83976b2071aca7c1d96512bbc9"
+    },
+    "scientific_field_source_uses": {
+      "rows": 9389,
+      "sha256": "ec82d26f2b81abecbb82c33946b648b87b65647a999ef70ea17293991847a298"
+    },
+    "scientific_manual_evidence": {
+      "rows": 21,
+      "sha256": "d3e36ce0041c18d4bd08fd334b729981be644fc84a0f23e1801dbcec07006792"
+    },
+    "scientific_review_drafts": {
+      "rows": 1,
+      "sha256": "44c5f4cbdc3bc200066be66d5142a92100fe959f4f7ea417252a689e0b98c736"
+    },
+    "scientific_source_items": {
+      "rows": 2428,
+      "sha256": "6ec89ec3f48ae354d9e76fe2b27ee9c11427897bb9da9d887201c7d8948082d5"
+    },
+    "scientific_structure_origins": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scientific_upload_drafts": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "scientific_work_drafts": {
+      "rows": 9,
+      "sha256": "f12be5b0eb61ae75c51c4aae3791415d3361e307f1cc738363d14bb4605e0888"
+    },
+    "spectrum_collections": {
+      "rows": 241,
+      "sha256": "9a1664c61306b6c6e8af440d55e43ede4dc25360c281dbe69834661ff01184d1"
+    },
+    "spectrum_runs": {
+      "rows": 561,
+      "sha256": "46afd385a78ba543ba33fe2f10e7df36a1bb6dbe3aa09581fc13147844fc1ca5"
+    },
+    "structure_families": {
+      "rows": 8,
+      "sha256": "63f76794bb69ed61cbd910fed2774289ad1e799e99c3157f2eec27e7b502839e"
+    },
+    "structure_family_aliases": {
+      "rows": 3,
+      "sha256": "8e917b933bab70ac5cb38f064acafd659b228bc87c768df1b863111767b44737"
+    },
+    "structure_model_evidences": {
+      "rows": 35,
+      "sha256": "83a935d324a48b5e416376af0728e6e2cbad4047f4929290acacedd9a202c530"
+    },
+    "structure_models": {
+      "rows": 19,
+      "sha256": "c27a90bde1a5393d619e407649a383b69fdecda06b3289cad5be1054d8f52df8"
+    },
+    "superconductors": {
+      "rows": 23,
+      "sha256": "b2fa1e4c0972d0544086a2898a02613de324781058af1049e543608f1806f8f2"
+    },
+    "user_governance_audit_events": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "username_change_audit_events": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "users": {
+      "rows": 3,
+      "sha256": "aca5a889fc3a476115c9c52fbd2454930021638036995df34b2c2e6a99fa81cf"
+    }
+  },
+  "yh_redis_keys_present_before_and_after": {
+    "state": false,
+    "draft": false
+  },
+  "schema_manifest_validation": "verify_schema: passed for all tables",
+  "schema_tests": {
+    "passed": 48,
+    "skipped": 11,
+    "note": "本机部署与显式运行时结构回归；条件不适用项未计通过"
+  },
+  "post_goserver_reload_data_rechecked": true
+}

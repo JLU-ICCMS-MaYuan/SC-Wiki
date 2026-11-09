@@ -33,7 +33,7 @@ revision 的提取结果，不创建新 revision 或重复引用。缺少主 PDF
   `/api/isalive` 成功后再报告服务可用；本地 Python/Worker 使用 `GROBID_URL=http://127.0.0.1:8070`。
   WSL cgroup 环境启动容器时附带 `JAVA_TOOL_OPTIONS=-XX:-UseContainerSupport`，避免 Java 容器资源探测
   导致启动失败。
-- 匹配快照、依据及缓存迁移：`alembic/versions/20261106_0225_citation_matching.py`；业务库尚未执行本轮升级，须在确定目标后显式升级至 `20261106_0225`。隔离验证见[#225](../../specs/225-citation-matching-and-static-graph/validation.md)。
+- 匹配快照、依据及缓存迁移：`alembic/versions/20261106_0225_citation_matching.py`；本机原生开发库已于2026-11-09升级至 `20261106_0225`，旧科学数据及211条引用内容保持、未历史回填；其他环境须分别确认目标。隔离及本机验证见[#225](../../specs/225-citation-matching-and-static-graph/native-migration-20261109.md)。
 - 原图谱迁移：`alembic/versions/20260902_0004_paper_citation_graph.py`。迁移前会检查 `papers.year`，发现空值时明确失败，必须先补全。
 
 ## 代码与测试

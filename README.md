@@ -232,7 +232,7 @@ Phys.org 只能补回当前 RSS 窗口；Crossref 摘要仅用于内部筛选，
 
 修改表单及共享组件后，运行 `npm run test:form-contract --prefix frontend` 与 `npm run test:form-contract:mutation --prefix frontend`，检查完整页面的局部更新、输入／保存及已知回退检出能力。规则和实际覆盖范围见[表单更新与回归检查](docs/overview/form-processing.md)。
 
-解析期引用匹配先由程序确定明确书目关系，疑难候选固定交给LLM2批量核对并保存；解析页提供新标签结果页。图谱使用固定坐标和直线，拖动后停住、刷新复位，默认只显示有图谱标题的论文。使用前须在已明确的目标环境升级数据库至 `20261106_0225`；本轮仅完成隔离验证，未迁移业务库或部署。见[#225使用与验收](docs/specs/225-citation-matching-and-static-graph/quickstart.md)。
+解析期引用匹配先由程序确定明确书目关系，疑难候选固定交给LLM2批量核对并保存；解析页提供新标签结果页。图谱使用固定坐标和直线，拖动后停住、刷新复位，默认只显示有图谱标题的论文。使用前须在已明确的目标环境升级数据库至 `20261106_0225`；2026-11-09已完成本机原生开发库升级与数据保持核验，尚未历史回填或部署阿里云。见[#225使用与验收](docs/specs/225-citation-matching-and-static-graph/quickstart.md)。
 
 校对表单在论文原标题下方显示“图谱科学标题”，用于知识图谱节点展示。可直接查看、编辑并保存；点击字段标签进入来源核对或字段设置。没有标题时输入框保持为空，不自动复制原标题。见 [#173 操作与验收](docs/specs/173-graph-title-form/quickstart.md)。
 

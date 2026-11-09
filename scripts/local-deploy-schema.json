@@ -2,7 +2,7 @@
   "deferred_source_heads": [],
   "schema_heads": [
     "20261102_0160",
-    "20261102_0204"
+    "20261106_0225"
   ],
   "tables": {
     "admin_applications": {
@@ -273,6 +273,28 @@
           "system_key"
         ]
       ]
+    },
+    "citation_match_cache": {
+      "checks": [],
+      "columns": {
+        "cache_key": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "payload": {
+          "nullable": false,
+          "type": "json"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "cache_key"
+      ],
+      "unique": []
     },
     "community_ai_batches": {
       "checks": [],
@@ -2924,6 +2946,10 @@
           "nullable": true,
           "type": "text"
         },
+        "matching_snapshot": {
+          "nullable": true,
+          "type": "json"
+        },
         "paper_id": {
           "nullable": false,
           "type": "integer"
@@ -2971,7 +2997,7 @@
     "paper_references": {
       "checks": [
         "(((match_status='matched')and(cited_paper_idisnotnull)and(match_methodisnotnull))or((match_statusin('unmatched','ambiguous'))and(cited_paper_idisnull)and(match_methodisnull)))",
-        "((match_methodisnull)or(match_methodin('doi','title_year','manual')))",
+        "((match_methodisnull)or(match_methodin('doi','title_year','manual','llm2')))",
         "(match_statusin('matched','unmatched','ambiguous'))",
         "(reference_index>=0)"
       ],
@@ -2999,6 +3025,10 @@
         "match_checked_at": {
           "nullable": true,
           "type": "datetime"
+        },
+        "match_evidence": {
+          "nullable": true,
+          "type": "json"
         },
         "match_method": {
           "nullable": true,
