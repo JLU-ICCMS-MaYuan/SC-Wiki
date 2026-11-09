@@ -1,0 +1,31 @@
+{
+  "task_id": "02b23f7c5e524f8ba718f48d92a07f75",
+  "job_id": "e35a26fb-15df-4679-bde3-9cff0fa65ded",
+  "files": [
+    {
+      "file_id": "a6013d5bea8d473b936d8cb8abe143c0",
+      "role": "main",
+      "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "size": 3476148,
+      "original_filename": "2017 YHn LaHn-彭枫.pdf"
+    },
+    {
+      "file_id": "ac262d3aa07f48b0a43280ddc72254c3",
+      "role": "supplementary",
+      "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "size": 14260391,
+      "original_filename": "2017 YHn LaHn-彭枫 Supplementary.pdf"
+    }
+  ],
+  "status": "extracting",
+  "model": {
+    "provider": "server:LLM2",
+    "model": "gpt-6.1-sol",
+    "catalog_id": "LLM2",
+    "input_hash": "b35f6d5413336c69944afa9bf3b73b2873dcb8f24dda68f4e071737b3049a9a8",
+    "endpoint_hash": "8f11cc1d483994c69a25d434dbc98dc8be8e43bd63ef3a59af2f68795f62e5af"
+  },
+  "browser_url": "http://127.0.0.1:5173/upload/tasks/02b23f7c5e524f8ba718f48d92a07f75",
+  "window": 7839,
+  "source_sha": "a09c149d57fb92d63f44da48405d23def9f3072e"
+}

@@ -12,7 +12,8 @@ from backend.ingest.upload_tasks import get_state, upload_queue
 from rq import Worker
 
 ROOT = Path(__file__).resolve().parent
-TASK_ID = '90427eb91a05495fb671a705b5ece82f'
+ACTIVE = ROOT / 'active-task.json'
+TASK_ID = json.loads(ACTIVE.read_text())['task_id'] if ACTIVE.exists() else '90427eb91a05495fb671a705b5ece82f'
 
 
 def observe(browser=False):
