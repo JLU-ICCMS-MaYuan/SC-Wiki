@@ -1,0 +1,269 @@
+{
+  "task_id": "02b23f7c5e524f8ba718f48d92a07f75",
+  "job_id": "c85abbe6-28df-4c2a-b90e-3b3a42be72bd",
+  "source_commit": "333031bcd3875cd996719e14e3e5ac56f034e633",
+  "scope": "真实网页继续后当前正文IR，尚未送审",
+  "sha256": "e41d8b71f334bc9c22ed65994ec082baf965fccb7932807f114ffbd837da9a69",
+  "report": {
+    "version": "scientific-chart-reading-v3",
+    "status": "completed",
+    "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+    "regions": [
+      {
+        "region_id": "chart-region-0",
+        "block_id": "3f8e062ebb2f2b247dbf3d7f1b66a0dc70b771b133d8cce703c885d8bfae8633",
+        "page": 2,
+        "bbox": [
+          313.956,
+          47.519999999999996,
+          437.58,
+          140.184
+        ]
+      },
+      {
+        "region_id": "chart-region-1",
+        "block_id": "372206e29a8d8b73ab12458b343971f4af5efdeacf9e5c8106ffdad5e0f4e9ea",
+        "page": 2,
+        "bbox": [
+          439.416,
+          50.688,
+          561.816,
+          140.976
+        ]
+      },
+      {
+        "region_id": "chart-region-2",
+        "block_id": "fbefdeaabcfeffc562f2a5ad8bd16a2c120964f6e0001c0ceabde99a8df95af7",
+        "page": 2,
+        "bbox": [
+          317.016,
+          144.936,
+          438.192,
+          230.47199999999998
+        ]
+      },
+      {
+        "region_id": "chart-region-3",
+        "block_id": "46c24c28060f1d07081648a04fab4f30d8c81d211385572d9c394f3054ccff5e",
+        "page": 2,
+        "bbox": [
+          437.58,
+          144.144,
+          559.368,
+          230.47199999999998
+        ]
+      },
+      {
+        "region_id": "chart-region-4",
+        "block_id": "b4de617406d8cb031c7948bdef48dccb7e2d222852a6e9af57573f66e19789e2",
+        "page": 3,
+        "bbox": [
+          57.528,
+          44.352000000000004,
+          290.08799999999997,
+          219.38400000000001
+        ]
+      },
+      {
+        "region_id": "chart-region-5",
+        "block_id": "f7a2de09135a245cfd6d09e35e7a60284f98e5c95b2fe14e7865c958bd95dfec",
+        "page": 3,
+        "bbox": [
+          313.344,
+          45.144,
+          433.296,
+          188.49599999999998
+        ]
+      },
+      {
+        "region_id": "chart-region-6",
+        "block_id": "54addd0ff3a87b688589c5698ad275c84d20aefccff0a00c05dba047106178cc",
+        "page": 3,
+        "bbox": [
+          435.74399999999997,
+          45.144,
+          559.98,
+          188.49599999999998
+        ]
+      },
+      {
+        "region_id": "chart-region-7",
+        "block_id": "7993790b9c2e23f404d7c6f97e718dd45380ce46b9df167bd2bb46c6aa4e4c23",
+        "page": 4,
+        "bbox": [
+          67.932,
+          45.144,
+          279.072,
+          199.584
+        ]
+      }
+    ],
+    "scanned_pages": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "targets": [
+      {
+        "region_id": "chart-page-4-figure-0",
+        "page": 4,
+        "block_id": null,
+        "label": "Figure 4, top panel",
+        "reason": "Bar chart of hydrogen-derived electronic density of states at the Fermi level for multiple hydrides; supported dos_fermi quantity.",
+        "bbox": [
+          67.32,
+          46.728,
+          278.46,
+          97.416
+        ]
+      },
+      {
+        "region_id": "chart-page-4-figure-1",
+        "page": 4,
+        "block_id": null,
+        "label": "Figure 4, middle panel",
+        "reason": "Bar chart of electron–phonon coupling parameter lambda for multiple hydrides; supported lambda_ep quantity.",
+        "bbox": [
+          67.32,
+          97.416,
+          278.46,
+          142.56
+        ]
+      },
+      {
+        "region_id": "chart-page-4-figure-2",
+        "page": 4,
+        "block_id": null,
+        "label": "Figure 4, bottom panel",
+        "reason": "Grouped bars of superconducting transition temperature for multiple hydrides and Coulomb pseudopotentials; supported tc quantity. Shared material labels and caption remain in the original page context.",
+        "bbox": [
+          67.32,
+          142.56,
+          278.46,
+          201.168
+        ]
+      }
+    ],
+    "excluded": [
+      {
+        "region_id": "chart-page-2-figure-0",
+        "page": 2,
+        "block_id": null,
+        "label": "Figure 1(a–d)",
+        "reason": "Formation enthalpies, pressure–composition stability ranges, and a temperature–pressure structural phase diagram; no supported superconducting scalar quantity is plotted.",
+        "bbox": [
+          313.956,
+          46.728,
+          561.204,
+          230.472
+        ]
+      },
+      {
+        "region_id": "chart-page-3-figure-0",
+        "page": 3,
+        "block_id": null,
+        "label": "Figure 2(a–c)",
+        "reason": "Atomic structures, hydrogen cages, and polygonal building units; structural drawings are not scalar-field targets.",
+        "bbox": [
+          52.02,
+          46.728,
+          293.148,
+          220.176
+        ]
+      },
+      {
+        "region_id": "chart-page-3-figure-1",
+        "page": 3,
+        "block_id": null,
+        "label": "Figure 3(a–d)",
+        "reason": "Plots of atomic charges, ionic radii, H–H separation, and formation/internal/PV energies; these quantities are outside the supported scalar fields.",
+        "bbox": [
+          313.344,
+          46.728,
+          560.592,
+          188.496
+        ]
+      }
+    ],
+    "readings": 38,
+    "unresolved": [
+      {
+        "page": 4,
+        "region_id": "chart-page-4-figure-0",
+        "crop_bbox": [
+          55.31999999999999,
+          34.728,
+          290.46,
+          109.416
+        ],
+        "reason": "Only the DOS panel is fully present in image 2. A narrow, clipped portion of the EPC panel below it is insufficient for axis calibration and complete point coverage; the Tc panel is outside the crop."
+      },
+      {
+        "page": 4,
+        "region_id": "chart-page-4-figure-1",
+        "crop_bbox": [
+          55.31999999999999,
+          85.416,
+          290.46,
+          154.56
+        ],
+        "reason": "The DOS panel above and Tc panel below are clipped in image 2. Their complete value-axis calibrations and bar endpoints are not visible, so no scalar readings are extracted from those partial panels."
+      },
+      {
+        "page": 4,
+        "region_id": "chart-page-4-figure-2",
+        "figure": "4",
+        "panel": "bottom",
+        "crop_bbox": [
+          55.31999999999999,
+          130.56,
+          290.46,
+          213.168
+        ],
+        "category": "PrH9",
+        "reason": "No separable green bar top is visible above the baseline; caption maps this material to 100 GPa.",
+        "series": "μ* = 0.1"
+      },
+      {
+        "page": 4,
+        "region_id": "chart-page-4-figure-2",
+        "figure": "4",
+        "panel": "bottom",
+        "crop_bbox": [
+          55.31999999999999,
+          130.56,
+          290.46,
+          213.168
+        ],
+        "category": "PrH9",
+        "reason": "No separable blue bar top is visible above the baseline; caption maps this material to 100 GPa.",
+        "series": "μ* = 0.13"
+      },
+      {
+        "page": 4,
+        "region_id": "chart-page-4-figure-2",
+        "crop_bbox": [
+          55.31999999999999,
+          130.56,
+          290.46,
+          213.168
+        ],
+        "reason": "The crop includes only the bottom fragment of the EPC λ panel; its upper frame, nonzero tick labels, and most bar tops are outside IMAGE 2, preventing calibrated extraction."
+      },
+      {
+        "page": 4,
+        "region_id": "chart-page-4-figure-2",
+        "crop_bbox": [
+          55.31999999999999,
+          130.56,
+          290.46,
+          213.168
+        ],
+        "reason": "Neither PrH9 bar can be distinguished from the Tc baseline at this resolution; both series are unresolved rather than assigned zero."
+      }
+    ]
+  }
+}

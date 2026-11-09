@@ -1,0 +1,23 @@
+{
+  "task": "02b23f7c5e524f8ba718f48d92a07f75",
+  "job": "c85abbe6-28df-4c2a-b90e-3b3a42be72bd",
+  "request_directory": "/Users/mayuan/Codes/SC-Wiki/.data/review_artifacts/02b23f7c5e524f8ba718f48d92a07f75/model-runtime/b35f6d5413336c69944afa9bf3b73b2873dcb8f24dda68f4e071737b3049a9a8/calls/1c5d5938495877b2147819274b286eb4b7408bf27821961bbb08cdab62905913-0",
+  "failures": 155,
+  "text_tokens": 19116,
+  "tool_tokens": 13743,
+  "budget": 96000,
+  "images": 0,
+  "source": "upstream",
+  "actual_reason": "上游未提供",
+  "same_tool_schema_prior_success": true,
+  "scope": "保留当前真实任务持续重试，不做模型替换、科学兜底或缓存替换",
+  "latest_activity": "requesting",
+  "latest_error": {
+    "error_type": "InternalServerError",
+    "status_code": 503,
+    "code": "service_unavailable",
+    "message": "模型服务暂时不可用，请稍后重试；如持续出现，请联系管理员并提供错误编号。（错误编号 #bf8a902f）",
+    "request_id": "ee27e21d-9c7a-4abf-ac73-e5a0bf8a902f",
+    "output_started": false
+  }
+}
