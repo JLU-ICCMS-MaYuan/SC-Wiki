@@ -1,0 +1,171 @@
+{
+  "at": "2026-11-09T07:39:22.565917+00:00",
+  "task": {
+    "task_id": "90427eb91a05495fb671a705b5ece82f",
+    "status": "extracting",
+    "stage": "extracting",
+    "reading_state": "extracting_sources",
+    "completed_chunks": 0,
+    "total_chunks": 0,
+    "processing_error": null,
+    "error_code": null,
+    "job_id": "d72b898a-173c-4172-bd58-c2e36f39e05d",
+    "execution_model": {
+      "provider": "server:LLM2",
+      "model": "gpt-6.1-sol",
+      "catalog_id": "LLM2",
+      "input_hash": "7a0bb4123aecd2df5b11332bfc610537f066839f3836ce55ee90a60804eedf93",
+      "endpoint_hash": "8f11cc1d483994c69a25d434dbc98dc8be8e43bd63ef3a59af2f68795f62e5af"
+    },
+    "model_activity": {
+      "status": "receiving",
+      "updated_at": 1794209959.747689,
+      "phase": "chart_discovery",
+      "filename": "2017 YHn LaHn-彭枫.pdf",
+      "attempt": 1,
+      "pages": [
+        2,
+        3,
+        4
+      ],
+      "action": null,
+      "note": null,
+      "error": null,
+      "retry_at": null,
+      "started_at": 1794209954.423189,
+      "history": [
+        {
+          "status": "processing",
+          "updated_at": 1794209896.309268,
+          "phase": "extracting_sources",
+          "filename": "2017 YHn LaHn-彭枫.pdf",
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794209954.316092,
+          "phase": "chart_discovery",
+          "filename": "2017 YHn LaHn-彭枫.pdf",
+          "attempt": 1,
+          "pages": [
+            2,
+            3,
+            4
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794209954.313613
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794209954.42566,
+          "phase": "chart_discovery",
+          "filename": "2017 YHn LaHn-彭枫.pdf",
+          "attempt": 1,
+          "pages": [
+            2,
+            3,
+            4
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794209954.423189
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794209959.747689,
+          "phase": "chart_discovery",
+          "filename": "2017 YHn LaHn-彭枫.pdf",
+          "attempt": 1,
+          "pages": [
+            2,
+            3,
+            4
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794209954.423189
+        }
+      ]
+    },
+    "revision": 3
+  },
+  "queue_count": 0,
+  "workers": [
+    {
+      "name": "895de6be87224f1cada66a96e98a2f52",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-09 07:33:20.356143+00:00"
+    },
+    {
+      "name": "f8727d88e13644098b9b0f1020881912",
+      "state": "busy",
+      "job_id": "d72b898a-173c-4172-bd58-c2e36f39e05d",
+      "last_heartbeat": "2026-11-09 07:39:14.831357+00:00"
+    },
+    {
+      "name": "8405741211054a258d712f3738d59db8",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-09 07:33:20.356045+00:00"
+    },
+    {
+      "name": "eaed7fe0ca25462a9d8dae5e171920ae",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-09 07:33:20.352179+00:00"
+    },
+    {
+      "name": "c0be441929fa4daa845a3ba21024f07b",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-09 07:33:20.356993+00:00"
+    },
+    {
+      "name": "2a86379aa8c045ed800b974885b9b254",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-09 07:33:20.352210+00:00"
+    },
+    {
+      "name": "cf08a50defd6419fbdbe3b2bfcdba501",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-09 07:33:20.355666+00:00"
+    },
+    {
+      "name": "45960449f7e347bca340ee1445b59cb7",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-09 07:33:20.352316+00:00"
+    },
+    {
+      "name": "ff9eb3eb6d724c5fb051bfcad351b773",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-09 07:33:20.352214+00:00"
+    },
+    {
+      "name": "e3cc33c73c274850a16f30df0fb5a804",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-09 07:33:20.357655+00:00"
+    }
+  ],
+  "page": {
+    "url": "http://127.0.0.1:5173/upload/tasks/90427eb91a05495fb671a705b5ece82f",
+    "text": "\nSC\nSC-Wiki\n\n\n探索\n\n热点\n\n脉络\n\n社区\n\n上传\n\n对话\n\n预测\n\n切换模型\nopenAI · gpt-6.1-sol\n中文\nEnglish\n消息通知\n用户\nmayuan\n\nM\nUPLOAD\n解析与校对\n2017 YHn LaHn-彭枫.pdf\n第 2/5 步：提取论文正文\n全部折叠\n全部展开\n返回上传记录\n✓\n保存原始文件\n2\n提取论文正文\n3\n分段解析\n4\n汇总解析草稿\n5\n等待用户校对\n解析动态 · 正在接收模型输出\n停止并保留进度\n识别原图中的科学图表 · 2017 YHn LaHn-彭枫.pdf · PDF 第 2, 3, 4 页\n第 1 次请求 · 本次已用 8 秒\n\n查看请求与错误记录\n解析草稿\n分段解析与证据\n\n解析草稿（实时生成中）\n交接记录与快照\n正在提取论文正文，完成后逐段解析。\n只读预览\n标题\n\n图谱科学标题\n\n用于知识图谱节点展示的简短标题。字段：paper.knowledge_graph_title。\n作者\n\n期刊名\n\n年份\n\n期号\n\n卷号\n\n起始页码\n\nDOI\n\n论文整体类型\n暂不确定\n论文整体类型\n理论二级类型\n​\n\n超导类型\n未知\n超导类型\n材料家族\n\n关键词（每行一个）\n\n论文内容不足或提炼失败，未生成关键词；请核对后填写。\n研究方法（每行一项）\n\n论文摘要\n\n总结\n\nAI 未能形成可靠总结时请核对正文并手动填写；每条结论应有本文依据。\n核心发现\n\n研究驱动力\n\n材料状态与计算条件\n研究材料\n未提供"
+  }
+}
