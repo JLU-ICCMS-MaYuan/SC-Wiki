@@ -9,3 +9,9 @@
 所有上传模型请求通过Redis租约共享当前`upload_llm_concurrency`额度；保持现有十Worker配置。租约续期、停止释放及丢失后的响应拒收不生成科学通过结果。没有新业务表、标准科学字段或提高模型输入预算。
 
 并发接收事件显式携带本次phase、attempt、filename和pages，不能继承其他分段刚写入的动态。主清单按稳定分段编号保存，前台动态表示实际最新事件，不作为科学结果归属依据。
+
+## 材料组检查点
+
+material-stage.json是服务端执行制品，不属于科学字段。source_identity绑定原状态候选、论文结果、原文、执行模型与版本；completed_groups仅保存正式草稿保存成功的前缀。每项保留原offset/state_keys、填写审计、核对结果、该组核对前状态和来源Claim；draft保留已完成组与尚未处理候选。遇到失败只更新预览和已成功保存结论，不将该组记为完成；恢复时验证前缀及身份。
+
+state_keys限制核对选择范围，field路径仍是全稿全局索引；其他状态不归本组所有。material_batch是任务元数据，只表达真实运行情况。form_filling_report只存去向与科学审计摘要，所有层级attempts/输入全文留组制品，不进入草稿。

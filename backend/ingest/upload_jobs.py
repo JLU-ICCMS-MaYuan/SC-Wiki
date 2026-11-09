@@ -1030,6 +1030,7 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
         "failed_stage": state.get("failed_stage"),
         "model_activity": state.get("model_activity"),
         "processing_phase": state.get("processing_phase"),
+        "material_batch": state.get("material_batch"),
         "execution_resumable": state.get("execution_resumable", False),
         "citation_extraction_status": state.get("citation_extraction_status"),
         "citation_extraction_error": state.get("citation_extraction_error"),
@@ -2611,22 +2612,6 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                 on_response=lambda response: _atomic_write_json(
                     artifact_directory(task_id) / "material_state_inventory.json", response))
         publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='organizing')
-        from backend.ingest.scientific_form_filling import fill_scientific_forms, form_sources
-        from backend.ingest.scientific_output_schema import filling_schema, decode_optional_containers
-        def fill_existing_fields(prompt, content):
-            return decode_optional_containers(complete_json(prompt, content, response_schema=filling_schema()))
-        filling_input_states = deepcopy(draft["material_states"])
-        update_state(task_id, processing_phase="material_filling")
-        with call_phase("scientific_form_filling"):
-            draft["material_states"], form_filling = fill_scientific_forms(
-                draft["material_states"], form_sources(document_set, scientific_sources), fill_existing_fields,
-                cancelled=lambda: _ensure_not_cancelled(task_id),
-                on_attempt=lambda report: _atomic_write_json(
-                    artifact_directory(task_id) / "scientific_form_filling.json", report))
-        _atomic_write_json(artifact_directory(task_id) / "scientific_form_filling.json", form_filling)
-        publish_preview(task_id, states=draft['material_states'], phase='reviewing')
-        draft["form_filling_report"] = {k: v for k, v in form_filling.items() if k != "attempts"}
-        draft.setdefault("generation_issues", []).extend(form_filling.get("issues") or [])
         if document_set and optimization_issues:
             draft.setdefault("generation_issues", []).extend(optimization_issues)
         if motivation_error:
@@ -2668,21 +2653,6 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                 )
             draft["keyword_assessment"] = keyword_assessment
             draft["paper"]["keywords_tags"] = keyword_assessment["values"]
-        if document_set:
-            carry_state_evidence(draft, claims)
-            final_claims = claims_from_candidates(draft, document_set, legacy_sources=legacy_sources)
-            _atomic_write_json(artifact_directory(task_id) / "final_claims.json", [c.model_dump(mode="json") for c in final_claims])
-            if any(c.status != ClaimStatus.VALIDATED for c in final_claims):
-                raise ParserError("document_review_required", "汇总草稿含无法在原文定位的科学字段，请重新核对",
-                                  profile=state["parser_profile"], parser="claim_validator")
-        if document_set:
-            from .document_claims import missing_tc_after_filling
-            if missing_tc_after_filling(claims, final_claims, input_states=filling_input_states,
-                                       output_states=draft["material_states"], filling_report=form_filling,
-                                       documents=document_set, legacy_sources=legacy_sources):
-                raise ParserError("summary_records_missing", "汇总遗漏了已识别的 Tc、压力或方法记录，请重新核对",
-                                  profile=state["parser_profile"], parser="coverage_audit")
-            apply_claim_evidence(draft, final_claims)
         # 两条解析路径在此收敛到同一论文级材料家族判断。
         if not paper_stage:
             with call_phase("material_family_retry"):
@@ -2747,31 +2717,70 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         if paper_stage:
             from .paper_first import paper_conflicts
             draft.setdefault('generation_issues', []).extend(paper_conflicts(paper_stage['paper'], draft['material_states']))
-        update_state(task_id, suggestions_status='running', suggestions_error=None, processing_phase='material_reviewing')
-        suggestion_results: dict[str, Any] = {}
-        try:
-            if not state.get("is_shadow"):
-                with call_phase("field_evidence_and_suggestions"):
-                    suggestion_results = generate_upload_suggestions(task_id, draft, int(current_state.get('user_id') or 0),
-                        scientific_sources=[{**source,"file_role":next((item.get('role') or 'main' for item in sources if item.get('file_id')==source['file_id']),source['file_role'])}
-                                            for source in scientific_sources],
-                        on_progress=lambda done, total: update_state(task_id, suggestions_completed=done, suggestions_total=total),
-                        field_scope='states' if paper_stage else None,
-                        on_preview=lambda value: publish_preview(task_id, paper=value.get('paper'),
-                            states=value.get('material_states'), phase='reviewing'),
-                        skip_auto_fill=({"paper.summary"} if summary_error else set()) |
-                                       ({"paper.research_motivation"} if motivation_error else set())) or {}
-            unfinished = sum(bool(result.get('review_error')) for result in suggestion_results.values()) + len(
-                (draft.get('model_review_report') or {}).get('errors') or [])
-            draft['field_suggestions_error'] = f'{unfinished}项模型核对未完成，已保留其他结果；可在对应字段重试。' if unfinished else None
-            update_state(task_id, suggestions_status='failed' if unfinished else 'completed',
-                         suggestions_error=draft['field_suggestions_error'])
-        except UploadCancelled:
-            raise
-        except Exception as suggestion_error:
-            logging.getLogger(__name__).exception('字段建议生成失败 task=%s type=%s', task_id, type(suggestion_error).__name__)
-            draft['field_suggestions_error'] = '建议生成失败，已提取内容已保留；可点击 AI 审核重试。'
-            update_state(task_id, suggestions_status='failed', suggestions_error=draft['field_suggestions_error'])
+        from .material_batches import process_material_groups
+        from .scientific_form_filling import form_sources
+        from .scientific_output_schema import filling_schema, decode_optional_containers
+        from .paper_first import persist_paper
+        material_sources = form_sources(document_set, scientific_sources)
+        update_state(task_id, suggestions_status='running', suggestions_error=None)
+        def fill_existing_fields(prompt, content):
+            with call_phase("scientific_form_filling"):
+                return decode_optional_containers(complete_json(prompt, content, response_schema=filling_schema()))
+        def prepare_material_group(current, offset, count):
+            # 空占位只用于程序生成全局Claim路径，从不进入模型请求。
+            view = {'material_states': [{} for _ in range(offset)] + current['material_states'][offset:offset+count]}
+            if not document_set:
+                return []
+            carry_state_evidence(view, claims)
+            located = claims_from_candidates(view, document_set, legacy_sources=legacy_sources)
+            if any(c.status != ClaimStatus.VALIDATED for c in located):
+                raise ParserError("document_review_required", "当前材料组含无法在原文定位的科学字段，请重新核对",
+                                  profile=state["parser_profile"], parser="claim_validator")
+            apply_claim_evidence(current, located)
+            validate_draft_generated_english({'paper': current['paper'],
+                'material_states': current['material_states'][offset:offset+count]})
+            return located
+        def review_material_group(current, keys):
+            current.pop('model_review_report', None)
+            if state.get('is_shadow'):
+                return {}
+            with call_phase("field_evidence_and_suggestions"):
+                return generate_upload_suggestions(task_id, current, int(current_state.get('user_id') or 0),
+                    scientific_sources=scientific_sources, field_scope='states', state_keys=keys,
+                    on_progress=lambda done, total: update_state(task_id, suggestions_completed=done, suggestions_total=total),
+                    on_preview=lambda value: publish_preview(task_id, paper=value.get('paper'),
+                        states=value.get('material_states'), phase='reviewing')) or {}
+        def material_progress(value):
+            phase = {'filling': 'material_filling', 'reviewing': 'material_reviewing',
+                     'saving': 'material_saving', 'completed': 'material_saving'}[value['action']]
+            update_state(task_id, processing_phase=phase, material_batch=value)
+            publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='reviewing')
+        grouped = process_material_groups(draft, material_sources, fill_existing_fields,
+            review=review_material_group, prepare=prepare_material_group,
+            save=lambda value: None if state.get('is_shadow') else persist_paper(task_id, current_state, value),
+            checkpoint=artifact_directory(task_id)/'material-stage.json',
+            identity={'execution_model': current_state.get('execution_model'),
+                      'workflow': draft.get('_parsing_workflow')},
+            cancelled=lambda: _ensure_not_cancelled(task_id), on_progress=material_progress)
+        form_filling = grouped['filling_report']
+        suggestion_results = grouped['review_results']
+        draft['model_review_report'] = {
+            'contract': 'unified-model-review-v1', 'errors': [], 'material_groups': grouped['review_reports'],
+            'completed_fields': sum(r.get('status') == 'supported' for r in suggestion_results.values()),
+            'unfinished_fields': 0}
+        draft.setdefault('generation_issues', []).extend(form_filling.get('issues') or [])
+        draft['field_suggestions_error'] = None
+        update_state(task_id, suggestions_status='completed', suggestions_error=None)
+        _atomic_write_json(artifact_directory(task_id)/'scientific_form_filling.json', form_filling)
+        if document_set:
+            final_claims = grouped['claims']
+            _atomic_write_json(artifact_directory(task_id)/'final_claims.json', [c.model_dump(mode="json") for c in final_claims])
+            from .document_claims import missing_tc_after_filling
+            if missing_tc_after_filling(claims, final_claims, input_states=grouped['input_states'],
+                    output_states=grouped['filled_states'], filling_report=form_filling,
+                    documents=document_set, legacy_sources=legacy_sources):
+                raise ParserError("summary_records_missing", "汇总遗漏了已识别的 Tc、压力或方法记录，请重新核对",
+                                  profile=state["parser_profile"], parser="coverage_audit")
         _atomic_write_json(artifact_directory(task_id) / "generation_report.json", {
             "role_assessment": current_state.get("role_assessment"),
             "issues": draft.get("generation_issues") or [],

@@ -183,23 +183,31 @@ def _add_conditions(draft, additions, batch):
 
 def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip_auto_fill=(),
                  protected_keys=(), save=None, on_progress=None, on_preview=None, max_passes=3,
-                 initial_results=None, on_response=None, preserve_paper=False):
+                 initial_results=None, on_response=None, preserve_paper=False, state_keys=None):
     """新增或真实依赖变化才进入下一轮，已完成项直接复用。"""
     from .property_evidence import record_batches
     from .field_review import changed_keys, reusable
     from .field_candidates import patched_draft
     from .tc_contexts import map_draft
     current = map_draft(draft)
+    if state_keys is not None:
+        selected = set(state_keys)
+        if not selected or not selected <= {s.get('state_key') for s in draft.get('material_states') or []}:
+            raise ValueError('材料组核对范围无效')
+        current['material_states'] = [s if s.get('state_key') in selected else deepcopy(draft['material_states'][i])
+                                      for i, s in enumerate(current['material_states'])]
     allow_additions = draft.get('_form_contract_version') != 1
     from .scientific_drafts import _property_modules_for_state
     from .material_state_contract import ensure_state_keys
     ensure_state_keys(current.get('material_states') or [])
     for index, state in enumerate(current.get('material_states') or []):
+        if state_keys is not None and state.get('state_key') not in selected:
+            continue
         state['property_modules'] = _property_modules_for_state(state)
     results, batch_count, errors = deepcopy(initial_results or {}), 0, []
     def current_snapshot():
         from .material_state_contract import research_materials
-        if current.get('material_states') and not preserve_paper:
+        if current.get('material_states') and not preserve_paper and state_keys is None:
             current.setdefault('paper', {})['research_materials'] = research_materials(current['material_states'])
         return rebuild(current)
     snapshot = current_snapshot()
@@ -222,7 +230,7 @@ def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip
                     row['organization_context'] = context
             reviewed = review_fields(batch, snapshot['chunks'], model_name=model_name, cancelled=cancelled,
                 manifest=snapshot.get('pdf_manifest') or [], allow_condition_additions=allow_additions, additions=additions,
-                on_response=on_response)
+                on_response=on_response, source_policy='referenced' if state_keys is not None else 'initial')
             batch_count += 1
             for row in batch:
                 result = reviewed[row['key']]
@@ -327,7 +335,7 @@ def _read_original_page(arguments, manifest, tools, *, retry=False):
 def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_partial=None,
                   model_name='', manifest=(), allow_condition_additions=False, additions=None,
                   max_rounds=13, on_completed=None, human_context=None, on_response=None,
-                  review_started_at=None, on_activity=None):
+                  review_started_at=None, on_activity=None, source_policy='initial'):
     """单一有界工具循环；部分结果立即保留，错误引用交回模型定位。"""
     from .field_document_followup import tools_for_chunks
     from .document_agent import AgentStopped
@@ -372,7 +380,34 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
         for block, source in zip(document.blocks, own):
             block.metadata['source_id'] = source['source_id']
     read, size = {}, 0
-    for key, source in catalog.items():
+    initial_sources = catalog
+    if source_policy == 'referenced':
+        identities, referenced_ids, seen = set(), set(), set()
+        from .source_highlight import source_reference
+        def collect(value):
+            if isinstance(value, dict):
+                if value.get('file_id') and value.get('block_id'):
+                    identities.add((str(value['file_id']), value['block_id']))
+                if value.get('file_id') and value.get('quote'):
+                    identity = (str(value['file_id']), value.get('block_id'), str(value['quote']))
+                    if identity not in seen:
+                        seen.add(identity)
+                        # 正式核对目录仍可能是Markdown窗口；仅用同文件唯一引句选择预读，
+                        # 不把排版对齐当作科学支持，也不冒造IR块编号。
+                        windows = [s for s in catalog.values() if not s.get('block_id')
+                                   and str(s.get('file_id')) == identity[0]]
+                        ref = source_reference({'file_id': value['file_id'], 'quote': value['quote']}, windows)
+                        if ref:
+                            referenced_ids.add(ref['source_id'])
+                for child in value.values(): collect(child)
+            elif isinstance(value, list):
+                for child in value: collect(child)
+        collect(records)
+        initial_sources = {key: s for key, s in catalog.items()
+                           if key in referenced_ids or (str(s.get('file_id')), s.get('block_id')) in identities}
+    elif source_policy != 'initial':
+        raise ValueError('未知的核对原文读取策略')
+    for key, source in initial_sources.items():
         length = len(json.dumps(source, ensure_ascii=False))
         if size + length <= 120000:
             read[key] = source

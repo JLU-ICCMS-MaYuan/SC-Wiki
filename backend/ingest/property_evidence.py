@@ -1261,7 +1261,8 @@ def _fill_empty_fields(draft, record, proposal):
 
 
 def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip_auto_fill=None,
-                                scientific_sources=None, requested_fields=None, on_preview=None, field_scope=None):
+                                scientific_sources=None, requested_fields=None, on_preview=None, field_scope=None,
+                                state_keys=None):
     """统一模型流程查证并保存最终字段结论，不串联独立科学匹配链。"""
     from backend.database import SessionLocal
     from backend.ingest.upload_tasks import artifact_directory
@@ -1272,10 +1273,16 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
     from .scientific_evidence import save_results
     if field_scope not in {None, 'paper', 'states'}:
         raise ValueError('未知的字段核对阶段')
+    if state_keys is not None:
+        state_keys = frozenset(state_keys)
+        if field_scope != 'states' or not state_keys or not state_keys <= {s.get('state_key') for s in draft['material_states']}:
+            raise ValueError('材料组核对范围无效')
     def rebuild(value):
         snap = upload_snapshot(task_id, owner, parsing_draft=value, paper_only=field_scope == 'paper')
         if field_scope is not None:
             snap['records'] = [r for r in snap['records'] if r['field'].startswith('paper.') == (field_scope == 'paper')]
+        if state_keys is not None:
+            snap['records'] = [r for r in snap['records'] if r.get('state_key') in state_keys]
         if requested_fields is not None:
             snap['records'] = [r for r in snap['records'] if r['field'] in requested_fields]
         return snap
@@ -1304,7 +1311,7 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
     filled, snapshot, results, report = review_draft(draft, rebuild,
         model_name=get_llm_config().model, cancelled=cancelled, skip_auto_fill=skip_auto_fill or (),
         protected_keys=protected, save=save, on_progress=on_progress, on_preview=published,
-        initial_results=previous, preserve_paper=field_scope == 'states')
+        initial_results=previous, preserve_paper=field_scope == 'states', state_keys=state_keys)
     draft.clear(); draft.update(filled)
     draft['model_review_report'] = report
     save(snapshot, results, report)

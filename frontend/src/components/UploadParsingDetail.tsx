@@ -25,6 +25,8 @@ interface ChunkDetail {
 
 interface ParsingDetail {
   processing_phase?: string
+  material_batch?: { index: number; total: number; state_count: number; completed_states: number;
+    action: 'filling' | 'reviewing' | 'saving' | 'completed' }
   workflow_policy?: string
   _parsing_workflow?: ParsingWorkflowBinding
   workflow_assessment?: WorkflowAssessment
@@ -157,6 +159,12 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
       {!detail && !error && <LinearProgress aria-label={t('upload.loadingDetailAria')} />}
       {detail && (
         <>
+          {detail.material_batch && detail.status !== 'ready' &&
+            ['material_filling','material_reviewing','material_saving'].includes(detail.processing_phase || '') && <Typography data-material-batch variant="body2" sx={{ mb: 1.5 }}>
+            {lang === 'zh'
+              ? `材料表单：第 ${detail.material_batch.index}/${detail.material_batch.total} 组 · ${({filling:'填写',reviewing:'核对',saving:'保存',completed:'本组已保存'})[detail.material_batch.action]} · 已保存 ${detail.material_batch.completed_states} 个材料状态`
+              : `Material forms: group ${detail.material_batch.index}/${detail.material_batch.total} · ${detail.material_batch.action} · ${detail.material_batch.completed_states} material states saved`}
+          </Typography>}
           {detail.status !== 'ready' && detail.citation_extraction_status && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2" fontWeight={700}>

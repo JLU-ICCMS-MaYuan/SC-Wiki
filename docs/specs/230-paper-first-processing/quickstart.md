@@ -1,3 +1,5 @@
 # 验证入口
 
 项目Python执行定向回归；前端执行test:field-contract、test:form-contract和test:form-contract:mutation。真实黑盒遵守tests/TestForRealScenario/README.md，使用本轮CaH6来源清单。失败与未完成写入validation.md。
+
+新增定向入口：tests/01_decentralized_uploading/test_material_group_processing.py、test_material_group_review.py与tests/TestForRealScenario/test_material_group_worker.py。分别验证组串行/恢复、实际模型请求边界和正式Worker接线；模型固定夹具不替代真实来源重跑。material-stage.json及material-groups/保留每组检查点和完整请求报告，草稿不保存模型请求全文。

@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
 import { afterEach, expect, it, vi } from 'vitest'
-import { cleanup, render, waitFor } from '@testing-library/react'
+import { cleanup, render, waitFor, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import UploadPage from '../../frontend/src/pages/UploadPage'
 import { api } from '../../frontend/src/lib/api'
@@ -9,6 +9,22 @@ import { api } from '../../frontend/src/lib/api'
 vi.mock('../../frontend/src/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 7, role: 'user' } }) }))
 vi.mock('../../frontend/src/lib/api', () => ({ api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), put: vi.fn(), del: vi.fn() } }))
 afterEach(() => { cleanup(); vi.clearAllMocks() })
+
+it('材料组填写后核对并保存的进度沿现有轮询显示', async () => {
+  const id = 'c'.repeat(32)
+  vi.mocked(api.post).mockResolvedValue({records:[],version:'fixture'})
+  vi.mocked(api.get).mockImplementation(async path => {
+    if (path === `/api/upload-tasks/${id}`) return {data: {task_id:id,status:'summarizing',stage:'summarizing',files:[]}} as never
+    if (path.endsWith('/parsing')) return {data: {status:'summarizing',stage:'summarizing',processing_phase:'material_reviewing',
+      material_batch:{index:2,total:3,state_count:2,completed_states:2,action:'reviewing'},
+      files:[],chunks:[],partial_draft:{paper:{title:'CaH6',authors:[],paper_type:'unknown'},material_states:[]},
+      summary:{completed:5,total:5},next_poll_ms:null}} as never
+    return {data:{},items:[],records:[],jobs:[],space_groups:[],material_families:[],structure_families:[],material_dimensionalities:[]} as never
+  })
+  render(<MemoryRouter><UploadPage taskId={id} /></MemoryRouter>)
+  expect(await screen.findByText('材料表单：第 2/3 组 · 核对 · 已保存 2 个材料状态')).toBeVisible()
+  expect(vi.mocked(api.post).mock.calls.filter(([path]) => /\/jobs$|\/submit$|\/check$/.test(path))).toHaveLength(0)
+})
 
 it.each([
   ['paper_reviewing', '核对并保存论文级字段', ''],

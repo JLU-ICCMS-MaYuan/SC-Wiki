@@ -10,6 +10,7 @@ const labels: Record<string, [string, string]> = {
   material_identifying: ['规划材料状态及其归属', 'Organizing material states'],
   material_filling: ['填写材料状态字段', 'Filling material fields'],
   material_reviewing: ['核对并保存材料状态字段', 'Reviewing and saving material fields'],
+  material_saving: ['保存本组材料状态', 'Saving this material group'],
 }
 
 export function parsingPhaseLabel(phase: string | undefined, lang: string): string | undefined {
