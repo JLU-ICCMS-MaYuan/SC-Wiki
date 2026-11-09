@@ -5,11 +5,24 @@ import json
 import re
 
 from .scientific_output_schema import obj, array, nullable, TEXT, NUMBER
+from .fixed_form_contract import CONTRACT
 
 FIELDS = ('material', 'material_name', 'pressure_value_gpa', 'reported_space_group_symbol',
           'reported_space_group_number', 'state_kind', 'structure_optimization')
-FACTS = obj({key: nullable(NUMBER if key in {'pressure_value_gpa', 'reported_space_group_number'} else TEXT)
-             for key in FIELDS})
+def _fact_type(key):
+    kind = (CONTRACT['state_fields'] | CONTRACT['state_scientific_fields'])[key]
+    if kind == 'enum':
+        return {'type': 'string', 'enum': CONTRACT['enums'][key]}
+    if kind == 'integer':
+        return {'type': 'integer'}
+    if kind.startswith('number:'):
+        return NUMBER
+    if kind == 'text':
+        return TEXT
+    raise ValueError('材料规划字段没有已登记的标量类型')
+
+
+FACTS = obj({key: nullable(_fact_type(key)) for key in FIELDS})
 ASSIGNMENT = {'candidate_state_key': TEXT, 'target_index': {'type': 'integer'},
               'status': {'type': 'string', 'enum': ['supported', 'uncertain']},
               'reason': TEXT, 'source_ids': array(TEXT)}
@@ -41,6 +54,11 @@ Attached original pages belong to ambiguous scalar candidates. Read actual panel
 ownership before assigning them; a zoomed inset belongs to its enclosing panel, not a nearby
 metallization discussion. Do not discard image evidence merely because the caption is ambiguous.
 Write reasons in simplified Chinese; preserve original source text in evidence.'''
+PROMPT += '''
+Use the declared canonical codes for state_kind and structure_optimization. The latter describes
+the geometry optimization kind, not calculation software, pseudopotential or XC functional text.
+Preserve those source method details in the cited evidence/reason, never replace an enum with them.
+'''
 PROMPT += '''
 An extracted non-null pressure can still be an INITIAL INTERPRETATION, not a source-established fact.
 For each result, match the physical quantity, material, phase, calculation and units before borrowing

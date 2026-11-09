@@ -1,0 +1,104 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_inventory_generation_uses_registered_scalar_types[structure_optimization-VASP\uff0cPAW\uff0cPBE\u51e0\u4f55\u4f18\u5316] _
+
+field = 'structure_optimization', value = 'VASP，PAW，PBE几何优化'
+
+    @pytest.mark.parametrize('field,value', [
+        ('structure_optimization', 'VASP，PAW，PBE几何优化'),
+        ('structure_optimization', 'anharmonic_quantum'),
+        ('state_kind', 'VASP'), ('reported_space_group_number', 19.5),
+    ])
+    def test_inventory_generation_uses_registered_scalar_types(field, value):
+        from backend.ingest.state_inventory import SCHEMA
+        from backend.rag.structured_output import validate_output, StructuredOutputError
+        values = dict(material='YH10', material_name=None, pressure_value_gpa=400,
+            reported_space_group_symbol='Fm-3m', reported_space_group_number=225,
+            state_kind='theoretical', structure_optimization='classical_static')
+        output = dict(states=[dict(values=values, source_ids=['source-1'], reason='原文静态几何优化')],
+                      assignments=[], record_assignments=[])
+        validate_output(output, SCHEMA)
+        output['states'][0]['values'][field] = value
+>       with pytest.raises(StructuredOutputError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE StructuredOutputError
+
+backend/tests/test_state_first_inventory.py:25: Failed
+_ test_inventory_generation_uses_registered_scalar_types[structure_optimization-anharmonic_quantum] _
+
+field = 'structure_optimization', value = 'anharmonic_quantum'
+
+    @pytest.mark.parametrize('field,value', [
+        ('structure_optimization', 'VASP，PAW，PBE几何优化'),
+        ('structure_optimization', 'anharmonic_quantum'),
+        ('state_kind', 'VASP'), ('reported_space_group_number', 19.5),
+    ])
+    def test_inventory_generation_uses_registered_scalar_types(field, value):
+        from backend.ingest.state_inventory import SCHEMA
+        from backend.rag.structured_output import validate_output, StructuredOutputError
+        values = dict(material='YH10', material_name=None, pressure_value_gpa=400,
+            reported_space_group_symbol='Fm-3m', reported_space_group_number=225,
+            state_kind='theoretical', structure_optimization='classical_static')
+        output = dict(states=[dict(values=values, source_ids=['source-1'], reason='原文静态几何优化')],
+                      assignments=[], record_assignments=[])
+        validate_output(output, SCHEMA)
+        output['states'][0]['values'][field] = value
+>       with pytest.raises(StructuredOutputError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE StructuredOutputError
+
+backend/tests/test_state_first_inventory.py:25: Failed
+___ test_inventory_generation_uses_registered_scalar_types[state_kind-VASP] ____
+
+field = 'state_kind', value = 'VASP'
+
+    @pytest.mark.parametrize('field,value', [
+        ('structure_optimization', 'VASP，PAW，PBE几何优化'),
+        ('structure_optimization', 'anharmonic_quantum'),
+        ('state_kind', 'VASP'), ('reported_space_group_number', 19.5),
+    ])
+    def test_inventory_generation_uses_registered_scalar_types(field, value):
+        from backend.ingest.state_inventory import SCHEMA
+        from backend.rag.structured_output import validate_output, StructuredOutputError
+        values = dict(material='YH10', material_name=None, pressure_value_gpa=400,
+            reported_space_group_symbol='Fm-3m', reported_space_group_number=225,
+            state_kind='theoretical', structure_optimization='classical_static')
+        output = dict(states=[dict(values=values, source_ids=['source-1'], reason='原文静态几何优化')],
+                      assignments=[], record_assignments=[])
+        validate_output(output, SCHEMA)
+        output['states'][0]['values'][field] = value
+>       with pytest.raises(StructuredOutputError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE StructuredOutputError
+
+backend/tests/test_state_first_inventory.py:25: Failed
+_ test_inventory_generation_uses_registered_scalar_types[reported_space_group_number-19.5] _
+
+field = 'reported_space_group_number', value = 19.5
+
+    @pytest.mark.parametrize('field,value', [
+        ('structure_optimization', 'VASP，PAW，PBE几何优化'),
+        ('structure_optimization', 'anharmonic_quantum'),
+        ('state_kind', 'VASP'), ('reported_space_group_number', 19.5),
+    ])
+    def test_inventory_generation_uses_registered_scalar_types(field, value):
+        from backend.ingest.state_inventory import SCHEMA
+        from backend.rag.structured_output import validate_output, StructuredOutputError
+        values = dict(material='YH10', material_name=None, pressure_value_gpa=400,
+            reported_space_group_symbol='Fm-3m', reported_space_group_number=225,
+            state_kind='theoretical', structure_optimization='classical_static')
+        output = dict(states=[dict(values=values, source_ids=['source-1'], reason='原文静态几何优化')],
+                      assignments=[], record_assignments=[])
+        validate_output(output, SCHEMA)
+        output['states'][0]['values'][field] = value
+>       with pytest.raises(StructuredOutputError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE StructuredOutputError
+
+backend/tests/test_state_first_inventory.py:25: Failed
+=========================== short test summary info ============================
+FAILED backend/tests/test_state_first_inventory.py::test_inventory_generation_uses_registered_scalar_types[structure_optimization-VASP\uff0cPAW\uff0cPBE\u51e0\u4f55\u4f18\u5316]
+FAILED backend/tests/test_state_first_inventory.py::test_inventory_generation_uses_registered_scalar_types[structure_optimization-anharmonic_quantum]
+FAILED backend/tests/test_state_first_inventory.py::test_inventory_generation_uses_registered_scalar_types[state_kind-VASP]
+FAILED backend/tests/test_state_first_inventory.py::test_inventory_generation_uses_registered_scalar_types[reported_space_group_number-19.5]
+4 failed in 0.20s

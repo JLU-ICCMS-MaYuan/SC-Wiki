@@ -51,6 +51,7 @@ export default {
     chart_discovery: '识别原图中的科学图表',
     chart_reading: '标定原图并读取各材料与系列的数据',
     structure_assignment: '核对完整结构的材料、物相和条件归属',
+    structure_optimization: '核对结构优化方法与适用范围',
     extracting: '提取正文与补充材料',
     reading: '提取科学结果及其来源',
     summarizing: '填写表单与自动核对',

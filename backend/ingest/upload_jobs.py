@@ -1451,10 +1451,11 @@ def _legacy_state_superconductor_kind(material_states: list[dict[str, Any]]) -> 
 def _bind_structure_candidates(draft: dict[str, Any], candidates: list[dict[str, Any]], *, sources=(), model=None, on_response=None) -> None:
     """模型联合原文确定结构归属；正式草稿只写S.structure。"""
     from .canonical_structure import assign_structures, assignment_response_schema
+    request_model = model or complete_json
     def complete_assignment(prompt, content):
-        return complete_json(prompt, content, response_schema=assignment_response_schema())
+        return request_model(prompt, content, response_schema=assignment_response_schema())
     with call_phase('structure_assignment'):
-        assign_structures(draft, candidates, sources, model or complete_assignment, on_response=on_response)
+        assign_structures(draft, candidates, sources, complete_assignment, on_response=on_response)
 
 
 def _prune_generated_properties(draft: dict[str, Any]) -> list[dict[str, Any]]:
@@ -2490,14 +2491,21 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         raw_draft["paper"].pop("research_motivation_evidences", None)
         if summary_error:
             logging.getLogger(__name__).warning("论文总结需要人工核对 task=%s reason=%s", task_id, summary_error)
-        from backend.ingest.state_optimization import resolve_candidates, assemble_candidates
+        from backend.ingest.state_optimization import resolve_candidates, assemble_candidates, optimization_response_schema
         optimization_attempts = []
         def save_optimization_response(response):
             optimization_attempts.append(response)
             _atomic_write_json(artifact_directory(task_id) / "structure_optimization_response.json", optimization_attempts)
-        resolved_candidates, optimization_issues = resolve_candidates(
-            candidates if document_set else summary_candidates, scientific_sources, complete_json,
-            on_response=save_optimization_response)
+        def complete_optimization(prompt, content):
+            return complete_json(prompt, content, response_schema=optimization_response_schema())
+        with call_phase('structure_optimization'):
+            resolved_candidates, optimization_issues = resolve_candidates(
+                candidates if document_set else summary_candidates, scientific_sources, complete_optimization,
+                source_blocks={file_id: {block.block_id for block in document.blocks}
+                               for file_id, document in document_set.items()},
+                on_request=lambda request: _atomic_write_json(
+                    artifact_directory(task_id) / 'structure_optimization_request.json', request),
+                on_response=save_optimization_response)
         _atomic_write_json(artifact_directory(task_id) / "structure_optimization_assessment.json", {
             "issues": optimization_issues,
             "states": [{"material": item.get("material"), "pressure_value_gpa": item.get("pressure_value_gpa"),
@@ -2651,7 +2659,7 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         })
         validate_draft_generated_english(draft)
         draft["structural_extraction_issues"] = structural_issues
-        _bind_structure_candidates(draft, structure_candidates, sources=form_sources(document_set, scientific_sources), model=complete_json,
+        _bind_structure_candidates(draft, structure_candidates, sources=form_sources(document_set, scientific_sources),
             on_response=lambda response: _atomic_write_json(artifact_directory(task_id) / 'structure_assignment_response.json', response))
         draft["structural_extraction_version"] = "structural-records-v1"
         draft["citation_extraction"] = citation_extraction

@@ -49,6 +49,7 @@ export default {
     chart_discovery: 'Identifying scientific charts in original pages',
     chart_reading: 'Calibrating original charts and reading material/series data',
     structure_assignment: 'Verifying structure material, phase and conditions',
+    structure_optimization: 'Verifying geometry optimization methods and scope',
     extracting: 'Extracting source documents',
     reading: 'Extracting scientific results and sources',
     summarizing: 'Filling form and checking evidence',

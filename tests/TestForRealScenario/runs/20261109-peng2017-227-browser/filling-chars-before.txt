@@ -1,0 +1,29 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+___ test_large_source_index_is_encoded_before_existing_character_guard[2600] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x122cad8e0>
+source_count = 2600
+
+    @pytest.mark.parametrize('source_count', [1100, 2600])
+    def test_large_source_index_is_encoded_before_existing_character_guard(monkeypatch, source_count):
+        from backend.ingest import scientific_form_filling as filling
+        import hashlib
+        state,_=fixture();file_id=hashlib.sha256(b'file').hexdigest()[:32]
+        sources=[{'source_id':f'source-{i}','file_id':file_id,'file_role':'supplementary','source_sha256':hashlib.sha256(b'PDF').hexdigest(),
+                  'source_version':1,'block_id':hashlib.sha256(f'block-{i}'.encode()).hexdigest(),'page_start':i%34+1,'page_end':i%34+1,
+                  'content':f'Unique source {i}: YH10 at 400 GPa.'} for i in range(source_count)]
+        monkeypatch.setattr(filling,'build_context',lambda *_,**__: {'sources':sources,'source_fingerprint':'fixture','gaps':[]})
+        calls=[]
+        def model(prompt,content):
+            calls.append((prompt,content));assert len(content)<250000
+            return {'done':False,'read_source_ids':[],'search':[]}
+        _,report=filling.fill_scientific_forms([state],sources,model,max_rounds=1)
+>       assert len(calls)==1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/01_decentralized_uploading/test_scientific_form_filling.py:257: AssertionError
+=========================== short test summary info ============================
+FAILED tests/01_decentralized_uploading/test_scientific_form_filling.py::test_large_source_index_is_encoded_before_existing_character_guard[2600]
+1 failed, 1 passed in 0.55s

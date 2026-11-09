@@ -1,0 +1,66 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+___________ test_model_request_failure_is_not_scientific_uncertainty ___________
+
+    def test_model_request_failure_is_not_scientific_uncertainty():
+        from backend.ingest.state_optimization import resolve_candidates
+        from backend.ingest.model_runtime import ModelRequestError
+        def fail(*_):
+            raise ModelRequestError('必要原文超过预算')
+>       with pytest.raises(ModelRequestError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ModelRequestError
+
+backend/tests/test_optimization_transport.py:19: Failed
+__ test_only_verified_program_locators_are_projected_and_original_quotes_bind __
+
+    def test_only_verified_program_locators_are_projected_and_original_quotes_bind():
+        from backend.ingest.state_optimization import resolve_candidates
+        block, literal = 'b' * 64, 'c' * 64
+        original = (f'<!-- page: 1 -->\n<!-- block: {block} -->\n'
+                    'Static DFT structural optimization was performed for H.\n\n'
+                    f'<!-- block: {literal} -->\nH at 100 GPa.\n')
+        sources = [{'file_id': 'main', 'content': original}]
+        snapshot, audits = deepcopy(sources), []
+        def model(_, content):
+            request = json.loads(content)
+            assert f'<!-- block: {block} -->' not in request['sources'][0]['content']
+            assert f'<!-- block: {literal} -->' in request['sources'][0]['content']
+            assert '<!-- page: 1 -->' in request['sources'][0]['content']
+            return {'workflows': [{'id': 'w', 'material': 'H', 'optimization': 'classical_static',
+                'evidences': [{'workflow_source_id': 'workflow-source-0'}]}],
+                'assignments': [{'target': '0/0', 'optimization': 'classical_static', 'workflow_id': 'w',
+                    'reason': '原文静态DFT几何优化', 'evidences': [{'source_index': 0, 'quote': 'H at 100 GPa.'}]}]}
+>       result, issues = resolve_candidates(candidate(), sources, model,
+            source_blocks={'main': {block}}, on_request=audits.append)
+E       TypeError: resolve_candidates() got an unexpected keyword argument 'source_blocks'
+
+backend/tests/test_optimization_transport.py:40: TypeError
+_ test_large_program_locator_payload_reaches_model_without_losing_scientific_text _
+
+    def test_large_program_locator_payload_reaches_model_without_losing_scientific_text():
+        from backend.ingest.state_optimization import resolve_candidates
+        blocks = [hashlib.sha256(str(i).encode()).hexdigest() for i in range(4000)]
+        paragraphs = [f'H at 100 GPa; original scientific source row {i}.' for i in range(4000)]
+        original = '\n\n'.join(f'<!-- block: {block} -->\n{paragraph}'
+                               for block, paragraph in zip(blocks, paragraphs))
+        calls = []
+        def model(_, content):
+            calls.append(content)
+            assert len(content) <= 450000
+            from backend.ingest.context_encoding import decode_context
+            data = json.loads(content)
+            if data.get('_context_encoding'): data = decode_context(data)
+            assert all(paragraph in data['sources'][0]['content'] for paragraph in paragraphs)
+            return {'workflows': [], 'assignments': [{'target': '0/0', 'optimization': 'unknown',
+                'workflow_id': None, 'reason': '未报告几何优化', 'evidences': []}]}
+>       _, issues = resolve_candidates(candidate(), [{'file_id': 'main', 'content': original}], model,
+                                      source_blocks={'main': set(blocks)})
+E       TypeError: resolve_candidates() got an unexpected keyword argument 'source_blocks'
+
+backend/tests/test_optimization_transport.py:65: TypeError
+=========================== short test summary info ============================
+FAILED backend/tests/test_optimization_transport.py::test_model_request_failure_is_not_scientific_uncertainty
+FAILED backend/tests/test_optimization_transport.py::test_only_verified_program_locators_are_projected_and_original_quotes_bind
+FAILED backend/tests/test_optimization_transport.py::test_large_program_locator_payload_reaches_model_without_losing_scientific_text
+3 failed in 0.69s

@@ -6,6 +6,25 @@ from copy import deepcopy
 import numpy as np
 import pytest
 
+
+@pytest.mark.parametrize('field,value', [
+    ('structure_optimization', 'VASP，PAW，PBE几何优化'),
+    ('structure_optimization', 'anharmonic_quantum'),
+    ('state_kind', 'VASP'), ('reported_space_group_number', 19.5),
+])
+def test_inventory_generation_uses_registered_scalar_types(field, value):
+    from backend.ingest.state_inventory import SCHEMA
+    from backend.rag.structured_output import validate_output, StructuredOutputError
+    values = dict(material='YH10', material_name=None, pressure_value_gpa=400,
+        reported_space_group_symbol='Fm-3m', reported_space_group_number=225,
+        state_kind='theoretical', structure_optimization='classical_static')
+    output = dict(states=[dict(values=values, source_ids=['source-1'], reason='原文静态几何优化')],
+                  assignments=[], record_assignments=[])
+    validate_output(output, SCHEMA)
+    output['states'][0]['values'][field] = value
+    with pytest.raises(StructuredOutputError):
+        validate_output(output, SCHEMA)
+
 def test_black_curve_samples_real_pixels_and_excludes_frame():
     from backend.spectra.digitize import extract_curve, LinearAxis
     rgb = np.full((100, 140, 3), 255, dtype=np.uint8)

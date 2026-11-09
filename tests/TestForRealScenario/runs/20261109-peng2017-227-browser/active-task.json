@@ -1,6 +1,6 @@
 {
   "task_id": "02b23f7c5e524f8ba718f48d92a07f75",
-  "job_id": "8558b665-ad17-40d9-b883-b3b7f565a0f6",
+  "job_id": "5e74a7ab-12cb-4e4c-b936-3a38936ae530",
   "files": [
     {
       "file_id": "a6013d5bea8d473b936d8cb8abe143c0",
@@ -40,5 +40,6 @@
       "prior_chunks_byte_equal": true,
       "method": "原Safari网页继续解析；仅重启本机原生上传Worker，配置并发10不变"
     }
-  ]
+  ],
+  "user_confirmed_current_resume": "保留当前续跑，继续完整黑盒（推荐）"
 }

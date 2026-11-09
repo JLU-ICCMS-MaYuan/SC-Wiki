@@ -38,7 +38,7 @@ def observe(browser=False):
         from operate import act
         record['page'] = act(
             'safari', 'http://127.0.0.1:5173/upload/tasks/' + TASK_ID,
-            'return {url:location.href,text:document.body.innerText};', window=7839,
+            'return {url:location.href,text_mode:"DOM textContent",text:document.body.textContent,activity:document.querySelector(\'[data-testid="upload-model-activity"]\')?.textContent};', window=7839,
         )
     output = ROOT / ('observe-' + datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ') + '.json')
     output.write_text(json.dumps(record, ensure_ascii=False, indent=2) + '\n')

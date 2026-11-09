@@ -1,0 +1,198 @@
+{
+  "scope": "正式生产编排至结构归属及最终来源/遗漏门；隔离JSON保存重读",
+  "not_covered": "is_shadow跳过逐字段建议/科学复核；引用匹配、业务保存、谱、角色交接及五阶段仍须正式网页",
+  "states": 53,
+  "structures": 31,
+  "filling_status": "completed",
+  "generation_issues": [],
+  "points": [
+    {
+      "material": "YH10",
+      "pressure": 400,
+      "tc": 303,
+      "raw": "303",
+      "mu_star": 0.1,
+      "lambda": 2.41,
+      "uncertainty": null
+    },
+    {
+      "material": "YH10",
+      "pressure": 400,
+      "tc": 287,
+      "raw": "287",
+      "mu_star": 0.13,
+      "lambda": 2.41,
+      "uncertainty": null
+    },
+    {
+      "material": "ScH6",
+      "pressure": 300,
+      "tc": 99,
+      "raw": "~99",
+      "mu_star": 0.1,
+      "lambda": 1.3,
+      "uncertainty": null
+    },
+    {
+      "material": "ScH6",
+      "pressure": 300,
+      "tc": 90,
+      "raw": "~90",
+      "mu_star": 0.13,
+      "lambda": 1.3,
+      "uncertainty": null
+    },
+    {
+      "material": "ScH9",
+      "pressure": 400,
+      "tc": 180,
+      "raw": "~180",
+      "mu_star": 0.1,
+      "lambda": 1.4,
+      "uncertainty": null
+    },
+    {
+      "material": "ScH9",
+      "pressure": 400,
+      "tc": 170,
+      "raw": "~170",
+      "mu_star": 0.13,
+      "lambda": 1.4,
+      "uncertainty": null
+    },
+    {
+      "material": "YH6",
+      "pressure": 120,
+      "tc": 264,
+      "raw": "~264",
+      "mu_star": 0.1,
+      "lambda": 2.9,
+      "uncertainty": null
+    },
+    {
+      "material": "YH6",
+      "pressure": 120,
+      "tc": 250,
+      "raw": "~250",
+      "mu_star": 0.13,
+      "lambda": 2.9,
+      "uncertainty": null
+    },
+    {
+      "material": "YH9",
+      "pressure": 150,
+      "tc": 276,
+      "raw": "276",
+      "mu_star": 0.1,
+      "lambda": 4.42,
+      "uncertainty": null
+    },
+    {
+      "material": "YH9",
+      "pressure": 150,
+      "tc": 253,
+      "raw": "253",
+      "mu_star": 0.13,
+      "lambda": 4.42,
+      "uncertainty": null
+    },
+    {
+      "material": "LaH6",
+      "pressure": 100,
+      "tc": 171,
+      "raw": "~171",
+      "mu_star": 0.1,
+      "lambda": 1.8,
+      "uncertainty": null
+    },
+    {
+      "material": "LaH6",
+      "pressure": 100,
+      "tc": 153,
+      "raw": "~153",
+      "mu_star": 0.13,
+      "lambda": 1.8,
+      "uncertainty": null
+    },
+    {
+      "material": "LaH9",
+      "pressure": 50,
+      "tc": 26,
+      "raw": "~26",
+      "mu_star": 0.1,
+      "lambda": 0.9,
+      "uncertainty": null
+    },
+    {
+      "material": "LaH9",
+      "pressure": 50,
+      "tc": 20,
+      "raw": "~20",
+      "mu_star": 0.13,
+      "lambda": 0.9,
+      "uncertainty": null
+    },
+    {
+      "material": "CeH9",
+      "pressure": 100,
+      "tc": 52,
+      "raw": "~52",
+      "mu_star": 0.1,
+      "lambda": 0.8,
+      "uncertainty": null
+    },
+    {
+      "material": "CeH9",
+      "pressure": 100,
+      "tc": 50,
+      "raw": "~50",
+      "mu_star": 0.13,
+      "lambda": 0.8,
+      "uncertainty": null
+    },
+    {
+      "material": "CeH10",
+      "pressure": 200,
+      "tc": 58,
+      "raw": "~58",
+      "mu_star": 0.1,
+      "lambda": 0.8,
+      "uncertainty": null
+    },
+    {
+      "material": "CeH10",
+      "pressure": 200,
+      "tc": 49,
+      "raw": "~49",
+      "mu_star": 0.13,
+      "lambda": 0.8,
+      "uncertainty": null
+    },
+    {
+      "material": "LaH10",
+      "pressure": 200,
+      "tc": 288,
+      "raw": "288",
+      "mu_star": 0.1,
+      "lambda": null,
+      "uncertainty": null
+    }
+  ],
+  "YH10_400GPa": {
+    "atoms": 44,
+    "cell_lengths": [
+      4.4788,
+      4.4788,
+      4.4788
+    ]
+  },
+  "code": {
+    "backend/ingest/model_memory.py": "1b804c37c80e5566a3caa1f827fdf7467f57d98cf81350e7e6a47f0e79550af9",
+    "backend/ingest/context_encoding.py": "a308a6dca23a60e4490148221fa6c52278b75e58059704b3112804d1b586394d",
+    "backend/ingest/state_inventory.py": "83f564729841af21575bd7190be1034014e26e70c2d3d00259a771ca007d073e",
+    "backend/ingest/state_optimization.py": "08044d443f1f3b78b3ed9154f1c5f3a6452e37bf69a6ebf23d16cab8be353f77",
+    "backend/ingest/canonical_structure.py": "73f07614d1888c047b3e1c27617551f75207b2287ba269fb23f0ff378b42a5b7",
+    "backend/ingest/upload_jobs.py": "aecf443746298d95d631962f18d4fdab03d7d3b7af49fce1b8752aca9c239b39",
+    "backend/data/scientific_form_contract.v1.json": "d4f8e5fe53038f7d103bc468c60ad022c1109f44b91b730b5ab29f52c13fe86a"
+  }
+}

@@ -20,13 +20,13 @@ def test_matching_space_group_and_pressure_do_not_cross_compounds():
     candidate = {"material_state_ref": "unassigned:supp", "reported_structure": {
         "material": "LaSc2H24", "space_group_symbol": "P6/mmm", "pressure_value_gpa": 300,
     }}
-    _bind_structure_candidates(draft, [candidate], model=lambda *args: {"assignments": []})
+    _bind_structure_candidates(draft, [candidate], model=lambda *args, **kwargs: {"assignments": []})
     assert not any(state.get("structure") for state in draft["material_states"])
     assert draft["structural_extraction_issues"]
     assert candidate["material_state_ref"] == "unassigned:supp"
     candidate["material_state_ref"] = "unassigned:supp"
     draft["material_states"] = draft["material_states"][1:]
-    _bind_structure_candidates(draft, [candidate], model=lambda *args: {"assignments": []})
+    _bind_structure_candidates(draft, [candidate], model=lambda *args, **kwargs: {"assignments": []})
     assert candidate["material_state_ref"] == "unassigned:supp"
     assert not any(state.get("structure") for state in draft["material_states"])
 
@@ -36,11 +36,11 @@ def test_binding_does_not_approve_failed_structure_or_pick_an_ambiguous_state():
     candidate = {"material_state_ref": "unassigned:supp", "status": "blocked", "confirmation": "unreviewed",
                  "reported_structure": {"material": "LaSc2H24", "space_group_symbol": "P6/mmm", "pressure_value_gpa": 300}}
     ambiguous = {"material_states": [state, dict(state)]}
-    _bind_structure_candidates(ambiguous, [candidate], model=lambda *args: {"assignments": []})
+    _bind_structure_candidates(ambiguous, [candidate], model=lambda *args, **kwargs: {"assignments": []})
     assert not any(item.get("structure") for item in ambiguous["material_states"])
     assert candidate["material_state_ref"] == "unassigned:supp"
     unique = {"material_states": [state]}
-    _bind_structure_candidates(unique, [candidate], model=lambda *args: {"assignments": []})
+    _bind_structure_candidates(unique, [candidate], model=lambda *args, **kwargs: {"assignments": []})
     assert not state.get("structure")
     assert unique["structural_extraction_issues"]
     assert candidate["material_state_ref"] == "unassigned:supp"

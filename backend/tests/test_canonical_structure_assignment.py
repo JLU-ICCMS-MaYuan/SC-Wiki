@@ -13,6 +13,26 @@ def candidate():
     return value
 
 
+def test_structure_request_order_survives_process_restart():
+    import os
+    import json
+    import subprocess
+    import sys
+    code = '''
+import json
+from backend.ingest.canonical_structure import _assignment_response
+rows = [{"file_id":f"file-{i}", "pdf_page":i+1, "source_id":f"source-{i}", "content":f"Original geometry {i}"} for i in range(6)]
+pending = [{"sources":[{"file_id":row["file_id"], "page":row["pdf_page"]}]} for row in rows]
+def model(prompt, content):
+    print(json.dumps([row["source_id"] for row in json.loads(content)["sources"]]))
+    return {"done":True,"assignments":[]}
+_assignment_response([], pending, rows, model)
+'''
+    observed = [json.loads(subprocess.check_output([sys.executable, '-c', code], text=True,
+                env={**os.environ, 'PYTHONHASHSEED': str(seed)}).splitlines()[-1]) for seed in (1, 2, 3)]
+    assert observed == [[f'source-{i}' for i in range(6)]] * 3
+
+
 def test_runtime_request_failure_is_not_swallowed_as_scientific_uncertainty():
     from backend.ingest.canonical_structure import assign_structures
     from backend.ingest.model_runtime import ModelRequestError
@@ -24,7 +44,8 @@ def test_runtime_request_failure_is_not_swallowed_as_scientific_uncertainty():
     assert not any(state.get('structure') for state in value['material_states'])
 
 
-def test_upload_assignment_declares_source_contract_and_keeps_geometry(monkeypatch):
+@pytest.mark.parametrize('explicit_model', [False, True])
+def test_upload_assignment_declares_source_contract_and_keeps_geometry(monkeypatch, explicit_model):
     import json
     from backend.ingest import upload_jobs
     from backend.ingest.model_memory import _cites_source_ids
@@ -36,7 +57,7 @@ def test_upload_assignment_declares_source_contract_and_keeps_geometry(monkeypat
             'structure_optimization': 'sscha', 'geometry_evidence': None, 'new_state': None,
             'source_ids': ['structure-source-0'], 'reason': '原文明确SSCHA结构'}]}
     monkeypatch.setattr(upload_jobs, 'complete_json', complete)
-    upload_jobs._bind_structure_candidates(value, [item])
+    upload_jobs._bind_structure_candidates(value, [item], model=complete if explicit_model else None)
     assert value['material_states'][1]['structure']['structure_text']
     assert not value['material_states'][0].get('structure')
 

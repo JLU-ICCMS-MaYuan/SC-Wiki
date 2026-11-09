@@ -254,21 +254,29 @@ def _compact_unread_index(request):
             'user_prompt':json.dumps(payload,ensure_ascii=False,separators=(',',':'))}
 
 
-def prepare_fixed_request(request, *, budget=96000):
+def prepare_fixed_request(request, *, budget=96000, max_chars=None):
     """纯传输准备；供旧字符预算门之前复用，不调用模型、不写当前科学数据。"""
+    def fits(value):
+        return (_fixed_token_estimate(value) < budget
+                and (max_chars is None or len(value.get('user_prompt') or '') <= max_chars))
+
     prepared = dict(request)
     for compact in (_compact_source_texts, _compact_source_catalog, _compact_unread_index, _compact_source_identifiers):
-        if _fixed_token_estimate(prepared) < budget:
+        if fits(prepared):
             return prepared
         prepared = compact(prepared)
-    if _fixed_token_estimate(prepared) >= budget:
-        # 重新从原始JSON编码，不把旧传输格式层层叠加；科学内容不做摘要或合并。
+    if not fits(prepared):
+        # 原始JSON及既有程序绑定的来源目录分别编码，不叠加旧文本/身份引用。
         from .context_encoding import encode_context
-        try:
-            original = json.loads(request['user_prompt'])
-        except (KeyError, TypeError, ValueError):
-            original = None
-        if original is not None:
+        bases = [request]
+        catalog = _compact_unread_index(_compact_source_catalog(request))
+        if catalog.get('user_prompt') != request.get('user_prompt'):
+            bases.append(catalog)
+        for base in bases:
+            try:
+                original = json.loads(base['user_prompt'])
+            except (KeyError, TypeError, ValueError):
+                continue
             instruction = ('\nInput uses lossless-tree-v1 JSON transport encoding. Interpret data as the original input: '
                 '{"_ref":N} means references[N], recursively expanded; '
                 '{"_rows":{"columns":[...],"values":[[...],...]}} is an ordered array of objects '
@@ -276,11 +284,13 @@ def prepare_fixed_request(request, *, budget=96000):
                 'sha256 verifies the fully expanded original JSON. All records, scientific values and source identities '
                 'remain distinct and unchanged. Read all expanded content. Output actual values and original source identities '
                 'under the original output contract; never output transport containers, references or indices.\n')
-            encoded = {**request, 'system_prompt': request.get('system_prompt', '') + instruction,
+            encoded = {**base, 'system_prompt': base.get('system_prompt', '') + instruction,
                        'user_prompt': json.dumps(encode_context(original), ensure_ascii=False, separators=(',', ':'))}
+            if fits(encoded):
+                return encoded
             if _fixed_token_estimate(encoded) < _fixed_token_estimate(prepared):
                 prepared = encoded
-    if _fixed_token_estimate(prepared) >= budget:
+    if not fits(prepared):
         raise ContextBudgetError('当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据')
     return prepared
 

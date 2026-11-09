@@ -1,0 +1,31 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_structure_request_order_survives_process_restart _____________
+
+    def test_structure_request_order_survives_process_restart():
+        import os
+        import json
+        import subprocess
+        import sys
+        code = '''
+    import json
+    from backend.ingest.canonical_structure import _assignment_response
+    rows = [{"file_id":f"file-{i}", "pdf_page":i+1, "source_id":f"source-{i}", "content":f"Original geometry {i}"} for i in range(6)]
+    pending = [{"sources":[{"file_id":row["file_id"], "page":row["pdf_page"]}]} for row in rows]
+    def model(prompt, content):
+        print(json.dumps([row["source_id"] for row in json.loads(content)["sources"]]))
+        return {"done":True,"assignments":[]}
+    _assignment_response([], pending, rows, model)
+    '''
+        observed = [json.loads(subprocess.check_output([sys.executable, '-c', code], text=True,
+                    env={**os.environ, 'PYTHONHASHSEED': str(seed)}).splitlines()[-1]) for seed in (1, 2, 3)]
+>       assert observed == [[f'source-{i}' for i in range(6)]] * 3
+E       AssertionError: assert [['source-1',..., 'source-1']] == [['source-0',..., 'source-5']]
+E
+E         At index 0 diff: ['source-1', 'source-3', 'source-0', 'source-4', 'source-2', 'source-5'] != ['source-0', 'source-1', 'source-2', 'source-3', 'source-4', 'source-5']
+E         Use -v to get more diff
+
+backend/tests/test_canonical_structure_assignment.py:33: AssertionError
+=========================== short test summary info ============================
+FAILED backend/tests/test_canonical_structure_assignment.py::test_structure_request_order_survives_process_restart
+1 failed in 1.27s

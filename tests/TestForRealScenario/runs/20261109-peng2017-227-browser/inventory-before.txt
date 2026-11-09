@@ -1,0 +1,67 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_large_citation_catalog_and_scientific_tree_fit_together _________
+
+    def test_large_citation_catalog_and_scientific_tree_fit_together():
+        import hashlib
+        from backend.ingest.state_inventory import _evidence
+        sources = [{'source_id': f's{i}', 'file_id': 'f' * 32, 'file_role': 'supplementary',
+                    'source_sha256': 'a' * 64, 'source_version': 1,
+                    'block_id': hashlib.sha256(str(i).encode()).hexdigest(),
+                    'page_start': i // 6 + 1, 'page_end': i // 6 + 1,
+                    'content': f'Original source row {i}: YH10 at 400 GPa with Tc 303 K; original condition and unit retained.'}
+                   for i in range(180)]
+        state = {'material': 'YH10', 'pressure_value_gpa': 400, 'property_modules': [
+            {'record_key': 'original-point', 'value_number': 303,
+             'parameters': {'mu_star': 0.1, 'lambda_ep': 2.41}, 'evidences': [sources[0]]}] * 12}
+        payload = {'sources': sources, 'candidates': [
+            {'candidate_id': f'c{i}', 'states': [state] * 5} for i in range(10)]}
+        request = {'system_prompt': 'Read all original rows and keep candidates distinct.',
+                   'user_prompt': json.dumps(payload), 'response_schema': {
+                       'type': 'object', 'properties': {'source_ids': {'type': 'array', 'items': {'type': 'string'}}},
+                       'required': ['source_ids'], 'additionalProperties': False},
+                   'images': ['data:image/png;base64,UNCHANGED']}
+        original = copy.deepcopy(request)
+>       prepared = prepare_fixed_request(request, budget=13000)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/test_context_encoding.py:59:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+request = {'system_prompt': 'Read all original rows and keep candidates distinct.', 'user_prompt': '{"sources": [{"source_id": "...'string'}}}, 'required': ['source_ids'], 'additionalProperties': False}, 'images': ['data:image/png;base64,UNCHANGED']}
+budget = 13000
+
+    def prepare_fixed_request(request, *, budget=96000):
+        """纯传输准备；供旧字符预算门之前复用，不调用模型、不写当前科学数据。"""
+        prepared = dict(request)
+        for compact in (_compact_source_texts, _compact_source_catalog, _compact_unread_index, _compact_source_identifiers):
+            if _fixed_token_estimate(prepared) < budget:
+                return prepared
+            prepared = compact(prepared)
+        if _fixed_token_estimate(prepared) >= budget:
+            # 重新从原始JSON编码，不把旧传输格式层层叠加；科学内容不做摘要或合并。
+            from .context_encoding import encode_context
+            try:
+                original = json.loads(request['user_prompt'])
+            except (KeyError, TypeError, ValueError):
+                original = None
+            if original is not None:
+                instruction = ('\nInput uses lossless-tree-v1 JSON transport encoding. Interpret data as the original input: '
+                    '{"_ref":N} means references[N], recursively expanded; '
+                    '{"_rows":{"columns":[...],"values":[[...],...]}} is an ordered array of objects '
+                    'formed by pairing each row with columns; {"_object":M} is a literal object M with its values expanded. '
+                    'sha256 verifies the fully expanded original JSON. All records, scientific values and source identities '
+                    'remain distinct and unchanged. Read all expanded content. Output actual values and original source identities '
+                    'under the original output contract; never output transport containers, references or indices.\n')
+                encoded = {**request, 'system_prompt': request.get('system_prompt', '') + instruction,
+                           'user_prompt': json.dumps(encode_context(original), ensure_ascii=False, separators=(',', ':'))}
+                if _fixed_token_estimate(encoded) < _fixed_token_estimate(prepared):
+                    prepared = encoded
+        if _fixed_token_estimate(prepared) >= budget:
+>           raise ContextBudgetError('当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据')
+E           backend.ingest.model_memory.ContextBudgetError: 当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据
+
+backend/ingest/model_memory.py:284: ContextBudgetError
+=========================== short test summary info ============================
+FAILED backend/tests/test_context_encoding.py::test_large_citation_catalog_and_scientific_tree_fit_together
+1 failed in 0.61s

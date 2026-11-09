@@ -10,14 +10,21 @@ def _json(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':'), allow_nan=False)
 
 
+def _shared_json(value):
+    if not isinstance(value, (dict, list, str)):
+        return None
+    text = _json(value)
+    # 短来源身份也会反复出现；对象/数组仍沿原阈值，内容不做任何改写。
+    return text if len(text) >= (32 if isinstance(value, str) else 64) else None
+
+
 def encode_context(value):
     counts = Counter()
 
     def count(node):
-        if isinstance(node, (dict, list, str)):
-            text = _json(node)
-            if len(text) >= 64:
-                counts[text] += 1
+        text = _shared_json(node)
+        if text is not None:
+            counts[text] += 1
         if isinstance(node, dict):
             for child in node.values():
                 count(child)
@@ -45,9 +52,9 @@ def encode_context(value):
         return node
 
     def pack(node):
-        if isinstance(node, (dict, list, str)):
-            text = _json(node)
-            if len(text) >= 64 and counts[text] > 1:
+        text = _shared_json(node)
+        if text is not None:
+            if counts[text] > 1:
                 if text not in indices:
                     index = len(references)
                     indices[text] = index

@@ -1,0 +1,74 @@
+..FF.                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_only_verified_program_locators_are_projected_and_original_quotes_bind[All the generated structures are optimized to their local minima by using DFT calculations.] _
+
+method_quote = 'All the generated structures are optimized to their local minima by using DFT calculations.'
+
+    @pytest.mark.parametrize('method_quote', [
+        'Static DFT structural optimization was performed for H.',
+        'All the generated structures are optimized to their local minima by using DFT calculations.',
+        'We optimized a number of low-enthalpy structures using static DFT.',
+    ])
+    def test_only_verified_program_locators_are_projected_and_original_quotes_bind(method_quote):
+        from backend.ingest.state_optimization import resolve_candidates
+        block, literal = 'b' * 64, 'c' * 64
+        original = (f'<!-- page: 1 -->\n<!-- block: {block} -->\n'
+                    f'{method_quote}\n\n'
+                    f'<!-- block: {literal} -->\nH at 100 GPa.\n')
+        sources = [{'file_id': 'main', 'content': original}]
+        snapshot, audits = deepcopy(sources), []
+        def model(_, content):
+            request = json.loads(content)
+            assert f'<!-- block: {block} -->' not in request['sources'][0]['content']
+            assert f'<!-- block: {literal} -->' in request['sources'][0]['content']
+            assert '<!-- page: 1 -->' in request['sources'][0]['content']
+            return {'workflows': [{'id': 'w', 'material': 'H', 'optimization': 'classical_static',
+                'evidences': [{'workflow_source_id': 'workflow-source-0'}]}],
+                'assignments': [{'target': '0/0', 'optimization': 'classical_static', 'workflow_id': 'w',
+                    'reason': '原文静态DFT几何优化', 'evidences': [{'source_index': 0, 'quote': 'H at 100 GPa.'}]}]}
+        result, issues = resolve_candidates(candidate(), sources, model,
+            source_blocks={'main': {block}}, on_request=audits.append)
+>       assert sources == snapshot and not issues
+E       AssertionError: assert ([{'file_id': ... 100 GPa.\n'}] == [{'file_id': ... 100 GPa.\n'}]
+E
+E         Use -v to get more diff and not [{'field': 'material_states.structure_optimization', 'code': 'optimization_unresolved', 'message': '结构优化方法来源编号无效或与引句不一致'}])
+
+backend/tests/test_optimization_transport.py:47: AssertionError
+_ test_only_verified_program_locators_are_projected_and_original_quotes_bind[We optimized a number of low-enthalpy structures using static DFT.] _
+
+method_quote = 'We optimized a number of low-enthalpy structures using static DFT.'
+
+    @pytest.mark.parametrize('method_quote', [
+        'Static DFT structural optimization was performed for H.',
+        'All the generated structures are optimized to their local minima by using DFT calculations.',
+        'We optimized a number of low-enthalpy structures using static DFT.',
+    ])
+    def test_only_verified_program_locators_are_projected_and_original_quotes_bind(method_quote):
+        from backend.ingest.state_optimization import resolve_candidates
+        block, literal = 'b' * 64, 'c' * 64
+        original = (f'<!-- page: 1 -->\n<!-- block: {block} -->\n'
+                    f'{method_quote}\n\n'
+                    f'<!-- block: {literal} -->\nH at 100 GPa.\n')
+        sources = [{'file_id': 'main', 'content': original}]
+        snapshot, audits = deepcopy(sources), []
+        def model(_, content):
+            request = json.loads(content)
+            assert f'<!-- block: {block} -->' not in request['sources'][0]['content']
+            assert f'<!-- block: {literal} -->' in request['sources'][0]['content']
+            assert '<!-- page: 1 -->' in request['sources'][0]['content']
+            return {'workflows': [{'id': 'w', 'material': 'H', 'optimization': 'classical_static',
+                'evidences': [{'workflow_source_id': 'workflow-source-0'}]}],
+                'assignments': [{'target': '0/0', 'optimization': 'classical_static', 'workflow_id': 'w',
+                    'reason': '原文静态DFT几何优化', 'evidences': [{'source_index': 0, 'quote': 'H at 100 GPa.'}]}]}
+        result, issues = resolve_candidates(candidate(), sources, model,
+            source_blocks={'main': {block}}, on_request=audits.append)
+>       assert sources == snapshot and not issues
+E       AssertionError: assert ([{'file_id': ... 100 GPa.\n'}] == [{'file_id': ... 100 GPa.\n'}]
+E
+E         Use -v to get more diff and not [{'field': 'material_states.structure_optimization', 'code': 'optimization_unresolved', 'message': '结构优化方法来源编号无效或与引句不一致'}])
+
+backend/tests/test_optimization_transport.py:47: AssertionError
+=========================== short test summary info ============================
+FAILED backend/tests/test_optimization_transport.py::test_only_verified_program_locators_are_projected_and_original_quotes_bind[All the generated structures are optimized to their local minima by using DFT calculations.]
+FAILED backend/tests/test_optimization_transport.py::test_only_verified_program_locators_are_projected_and_original_quotes_bind[We optimized a number of low-enthalpy structures using static DFT.]
+2 failed, 3 passed in 0.68s

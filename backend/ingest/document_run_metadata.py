@@ -16,7 +16,7 @@ def save_run_metadata(task_id, state, config, *, latency, cpu):
                      "complementary_ir.py", "grobid_document.py", "marker_pdf.py", "scientific_contracts.py", "pdf_parser_worker.py",
                      "chart_reading.py", "chart_calibration.py", "canonical_structure.py", "model_memory.py", "context_encoding.py",
                      "../services/http_transport.py", "../services/citation_graph.py",
-                     "upload_source_bundle.py", "tc_material_scope.py", "scientific_form_filling.py",
+                     "upload_source_bundle.py", "tc_material_scope.py", "scientific_form_filling.py", "state_inventory.py", "state_optimization.py",
                      "property_modules.py", "review_dependencies.py", "scientific_values.py")})
     _atomic_write_json(artifact_directory(task_id) / "run-metadata.json", {
         "task_id":task_id, "parser_profile":state.get("parser_profile", "legacy"),

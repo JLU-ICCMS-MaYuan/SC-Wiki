@@ -1,0 +1,19 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_short_source_identities_are_shared_without_changing_scientific_rows ___
+
+    def test_short_source_identities_are_shared_without_changing_scientific_rows():
+        import hashlib
+        identity = hashlib.sha256(b'original-file').hexdigest()[:32]
+        payload = [{'origin': identity, 'pressure': i, 'tc': 100 + i} for i in range(300)]
+        encoded = encode_context(payload)
+        assert decode_context(encoded) == payload
+        size = _fixed_token_estimate({'user_prompt': json.dumps(encoded)})
+        original_size = _fixed_token_estimate({'user_prompt': json.dumps(payload)})
+>       assert size < original_size / 2
+E       assert 8514 < (11133 / 2)
+
+backend/tests/test_context_encoding.py:94: AssertionError
+=========================== short test summary info ============================
+FAILED backend/tests/test_context_encoding.py::test_short_source_identities_are_shared_without_changing_scientific_rows
+1 failed in 0.47s

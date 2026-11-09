@@ -1,0 +1,78 @@
+..........FF..........F...F...........F                                  [100%]
+=================================== FAILURES ===================================
+____________ test_electronic_result_does_not_inherit_epc_treatment _____________
+
+    def test_electronic_result_does_not_inherit_epc_treatment():
+>       assert record_method_issue(record(vibrational_treatment="harmonic"))
+E       AssertionError: assert None
+E        +  where None = record_method_issue({'property_code': 'band_gap', 'record_type': 'property', 'value_number': 3.05, 'payload': {'calculation_conditions': {'vibrational_treatment': 'harmonic'}}})
+E        +    where {'property_code': 'band_gap', 'record_type': 'property', 'value_number': 3.05, 'payload': {'calculation_conditions': {'vibrational_treatment': 'harmonic'}}} = record(vibrational_treatment='harmonic')
+
+tests/01_decentralized_uploading/test_physical_method_scope.py:51: AssertionError
+__ test_reported_electron_phonon_correction_is_allowed_with_relation_evidence __
+
+    def test_reported_electron_phonon_correction_is_allowed_with_relation_evidence():
+        r=record(phonon_method="finite displacement",vibrational_treatment="harmonic",
+                 method_scope={"physical_object":"electronic","stage":"electronic_structure",
+                   "relation":"electron_phonon_renormalization",
+                   "relation_evidences":[{"quote":"The electronic band gap is renormalized by electron-phonon coupling."}]})
+        r["evidences"] = deepcopy(r["payload"]["calculation_conditions"]["method_scope"]["relation_evidences"])
+        assert record_method_issue(r) is None
+        r["payload"]["calculation_conditions"]["method_scope"]["relation_evidences"]=[]
+>       assert record_method_issue(r)
+E       AssertionError: assert None
+E        +  where None = record_method_issue({'property_code': 'band_gap', 'record_type': 'property', 'value_number': 3.05, 'payload': {'calculation_conditions': {...nic', 'stage': 'electronic_structure', 'relation': 'electron_phonon_renormalization', 'relation_evidences': []}}}, ...})
+
+tests/01_decentralized_uploading/test_physical_method_scope.py:65: AssertionError
+_ test_claiming_electron_phonon_relation_with_unlocated_quote_cannot_bypass_scope _
+
+    def test_claiming_electron_phonon_relation_with_unlocated_quote_cannot_bypass_scope():
+        r=record(vibrational_treatment="harmonic",method_scope={"relation":"electron_phonon_renormalization",
+          "relation_evidences":[{"quote":"Electronic band gap is renormalized by phonons."}]})
+        r["evidences"]=[{"quote":"The EPC calculation uses the harmonic approximation."}]
+>       assert record_method_issue(r)
+E       AssertionError: assert None
+E        +  where None = record_method_issue({'property_code': 'band_gap', 'record_type': 'property', 'value_number': 3.05, 'payload': {'calculation_conditions': {..._phonon_renormalization', 'relation_evidences': [{'quote': 'Electronic band gap is renormalized by phonons.'}]}}}, ...})
+
+tests/01_decentralized_uploading/test_physical_method_scope.py:140: AssertionError
+_ test_known_workflow_software_pressure_and_phase_are_real_scope_dependencies __
+
+    def test_known_workflow_software_pressure_and_phase_are_real_scope_dependencies():
+        from backend.ingest.scientific_context import _scope_matches
+        r=record(electronic_method="HF",calculation_code="VASP",
+                 method_scope={"stage":"electronic_structure","workflow_id":"electronic-v1"})
+        state={"material":"CaH2","pressure_value_gpa":150,"reported_space_group_symbol":"Pnma"}
+        for difference in [{"pressure_value_gpa":0},{"reported_space_group_symbol":"Im-3m"},
+                           {"software":"Quantum ESPRESSO"},{"workflow_id":"phonons-v1"}]:
+>           assert not _scope_matches({"material":"CaH2",**difference},state,r,"electronic_structure")
+E           AssertionError: assert not True
+E            +  where True = <function _scope_matches at 0x1068639c0>({'material': 'CaH2', 'workflow_id': 'phonons-v1'}, {'material': 'CaH2', 'pressure_value_gpa': 150, 'reported_space_group_symbol': 'Pnma'}, {'property_code': 'band_gap', 'record_type': 'property', 'value_number': 3.05, 'payload': {'calculation_conditions': {... 'HF', 'calculation_code': 'VASP', 'method_scope': {'stage': 'electronic_structure', 'workflow_id': 'electronic-v1'}}}}, 'electronic_structure')
+
+tests/01_decentralized_uploading/test_physical_method_scope.py:197: AssertionError
+_ test_general_anharmonic_scope_can_apply_to_explicit_quantum_anharmonic_workflow _
+
+    def test_general_anharmonic_scope_can_apply_to_explicit_quantum_anharmonic_workflow():
+        from test_issue139_scientific_context import draft
+        from backend.ingest.scientific_context import build_context,apply_associations,scientific_fingerprint
+        d=draft();r=d["material_states"][0]["property_modules"][0]["records"][0]
+        r["payload"]["calculation_conditions"]["vibrational_treatment"]="anharmonic_quantum"
+        ctx=build_context([{"file_id":"main","content":"For LaSc2H24, the SSCHA anharmonic workflow uses a 2x2x2 k grid."}])
+        candidate={"target":"s/m/r","expected_fingerprint":scientific_fingerprint(r),
+          "target_path":"/payload/calculation_conditions/extensions/-",
+          "value":{"key":"sscha.k_grid","value_kind":"text","value_raw":"2x2x2"},
+          "stage":"sscha","basis_kind":"paper_quote","scope":{"material":"LaSc2H24","approximation":"anharmonic"},
+          "reported_value_raw":"2x2x2","explanation":"The general anharmonic scope includes this explicitly quantum-anharmonic target.",
+          "fact_evidences":[{"source_id":"source-0"}],"scope_evidences":[{"source_id":"source-0"}]}
+        applied,gaps=apply_associations(d,[candidate],ctx)
+>       assert len(applied)==1 and not gaps
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests/01_decentralized_uploading/test_physical_method_scope.py:275: AssertionError
+=============================== warnings summary ===============================
+tests/01_decentralized_uploading/test_physical_method_scope.py: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+5 failed, 34 passed, 530 warnings in 0.72s

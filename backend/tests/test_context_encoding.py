@@ -36,6 +36,41 @@ def test_repeated_scientific_tree_fits_without_merging_records():
     assert 'lossless-tree-v1' in prepared['system_prompt']
 
 
+def test_large_citation_catalog_and_scientific_tree_fit_together():
+    import hashlib
+    from backend.ingest.state_inventory import _evidence
+    sources = [{'source_id': f's{i}', 'file_id': 'f' * 32, 'file_role': 'supplementary',
+                'source_sha256': 'a' * 64, 'source_version': 1,
+                'block_id': hashlib.sha256(str(i).encode()).hexdigest(),
+                'page_start': i // 6 + 1, 'page_end': i // 6 + 1,
+                'content': f'Original source row {i}: YH10 at 400 GPa with Tc 303 K; original condition and unit retained.'}
+               for i in range(180)]
+    state = {'material': 'YH10', 'pressure_value_gpa': 400, 'property_modules': [
+        {'record_key': 'original-point', 'value_number': 303,
+         'parameters': {'mu_star': 0.1, 'lambda_ep': 2.41}, 'evidences': [sources[0]]}] * 12}
+    payload = {'sources': sources, 'candidates': [
+        {'candidate_id': f'c{i}', 'states': [state] * 5} for i in range(10)]}
+    request = {'system_prompt': 'Read all original rows and keep candidates distinct.',
+               'user_prompt': json.dumps(payload), 'response_schema': {
+                   'type': 'object', 'properties': {'source_ids': {'type': 'array', 'items': {'type': 'string'}}},
+                   'required': ['source_ids'], 'additionalProperties': False},
+               'images': ['data:image/png;base64,UNCHANGED']}
+    original = copy.deepcopy(request)
+    prepared = prepare_fixed_request(request, budget=13000)
+    wire = decode_context(json.loads(prepared['user_prompt']))
+    catalog = wire['sources']['_context_source_catalog']
+    rows = [row for group in catalog['file_groups'] for row in group['sources']]
+    assert [(row['source_id'], row['content'], row['page_start']) for row in rows] == [
+        (row['source_id'], row['content'], row['page_start']) for row in sources]
+    assert wire['candidates'] == payload['candidates']
+    bound = _evidence(['s0'], {row['source_id']: row for row in sources})[0]
+    assert bound['block_id'] == sources[0]['block_id'] and bound['file_id'] == sources[0]['file_id']
+    assert catalog['candidate_source_anchors'][0]['block_id'] == bound['block_id']
+    assert _fixed_token_estimate(prepared) < 13000
+    assert prepared['images'] == request['images'] and prepared['response_schema'] == request['response_schema']
+    assert request == original
+
+
 @pytest.mark.parametrize('payload', [
     None, True, 0.1, '中文 μ*=0.13', [], {},
     {'nested': [{'a': 1, 'b': None}, {'b': False, 'a': 1.0}],
@@ -46,6 +81,17 @@ def test_repeated_scientific_tree_fits_without_merging_records():
 ])
 def test_whole_tree_roundtrip(payload):
     assert decode_context(encode_context(payload)) == payload
+
+
+def test_short_source_identities_are_shared_without_changing_scientific_rows():
+    import hashlib
+    identity = hashlib.sha256(b'original-file').hexdigest()[:32]
+    payload = [{'origin': identity, 'pressure': i, 'tc': 100 + i} for i in range(300)]
+    encoded = encode_context(payload)
+    assert decode_context(encoded) == payload
+    size = _fixed_token_estimate({'user_prompt': json.dumps(encoded)})
+    original_size = _fixed_token_estimate({'user_prompt': json.dumps(payload)})
+    assert size < original_size / 2
 
 
 @pytest.mark.parametrize('mutation', ['out_of_range', 'bool_ref', 'cycle', 'digest', 'columns', 'row'])

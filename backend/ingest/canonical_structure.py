@@ -40,7 +40,7 @@ static geometry cannot name a state whose optimization is SSCHA. Existing state 
 
 def assignment_response_schema():
     from .scientific_output_schema import obj, array, nullable, TEXT, NUMBER
-    optimization = {'type': 'string', 'enum': ['unknown', 'classical_static', 'quasi_harmonic', 'sscha']}
+    optimization = {'type': 'string', 'enum': CONTRACT['enums']['structure_optimization']}
     geometry = obj({'source_id': TEXT, 'cell_parameters': obj({key: nullable(NUMBER) for key in ('a', 'b', 'c')})})
     state = obj({'material': TEXT, 'material_name': nullable(TEXT), 'pressure_value_gpa': nullable(NUMBER),
                  'reported_space_group_symbol': nullable(TEXT), 'structure_optimization': optimization})
@@ -62,7 +62,7 @@ def _assignment_response(states, pending, source_rows, model):
             pages.setdefault((str(row.get('file_id') or ''), int(page)), []).append(row)
     geometry_pages = {(str(s.get('file_id') or ''), int(page_of(s)))
         for candidate in pending for s in candidate.get('sources') or [] if page_of(s) is not None}
-    read = {row['source_id']: row for key in geometry_pages for row in pages.get(key, [])}
+    read = {row['source_id']: row for key in sorted(geometry_pages) for row in pages.get(key, [])}
     if not pages: read = {row['source_id']: row for row in source_rows}
     catalog = {row['source_id']: row for row in source_rows}
     observation = None

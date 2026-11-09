@@ -411,7 +411,7 @@ def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=N
             from .scientific_output_schema import filling_schema
             try:
                 wire = prepare_fixed_request({'system_prompt':PROMPT,'user_prompt':content,
-                                              'response_schema':filling_schema()})
+                                              'response_schema':filling_schema()}, max_chars=250000)
                 wire_prompt, content = wire['system_prompt'], wire['user_prompt']
             except ContextBudgetError as exc:
                 error = str(exc)

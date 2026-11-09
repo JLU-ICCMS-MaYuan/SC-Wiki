@@ -1,0 +1,26 @@
+{
+  "structure_optimization": {
+    "stamp": 1794228871.534107,
+    "prepared_tokens": 85503,
+    "input_chars": 279120,
+    "request": "data/review_artifacts/02b23f7c5e524f8ba718f48d92a07f75/model-runtime/b35f6d5413336c69944afa9bf3b73b2873dcb8f24dda68f4e071737b3049a9a8/calls/6e16f4033332cf14f694d9f22fab82757c9ed074784cefd82367c370c69f5696-0/request.json"
+  },
+  "scientific_form_filling": {
+    "stamp": 1794229361.9476218,
+    "prepared_tokens": 64797,
+    "input_chars": 190524,
+    "request": "data/review_artifacts/02b23f7c5e524f8ba718f48d92a07f75/model-runtime/b35f6d5413336c69944afa9bf3b73b2873dcb8f24dda68f4e071737b3049a9a8/calls/b18eac8d2b0e49b70c2feca220c55083adbf854adb5181c0fe6066a3172a9bf0-0/request.json"
+  },
+  "structure_assignment": {
+    "stamp": 1794229528.3705797,
+    "prepared_tokens": 76113,
+    "input_chars": 215965,
+    "request": "data/review_artifacts/02b23f7c5e524f8ba718f48d92a07f75/model-runtime/b35f6d5413336c69944afa9bf3b73b2873dcb8f24dda68f4e071737b3049a9a8/calls/f65d697e9f9a282a5f37394896323358f6882af89d0c8c5e70b749f31e25295d-0/request.json"
+  },
+  "material_state_inventory": {
+    "stamp": 1794229052.085023,
+    "prepared_tokens": 94733,
+    "input_chars": 267446,
+    "request": "data/review_artifacts/02b23f7c5e524f8ba718f48d92a07f75/model-runtime/b35f6d5413336c69944afa9bf3b73b2873dcb8f24dda68f4e071737b3049a9a8/calls/6b906a0124db06083b922dfbdb7503c630caf9c5249938c861a781a1da592be9-0/request.json"
+  }
+}

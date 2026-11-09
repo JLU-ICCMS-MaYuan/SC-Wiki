@@ -1,0 +1,58 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+___ test_upload_assignment_declares_source_contract_and_keeps_geometry[True] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1321eadb0>
+explicit_model = True
+
+    @pytest.mark.parametrize('explicit_model', [False, True])
+    def test_upload_assignment_declares_source_contract_and_keeps_geometry(monkeypatch, explicit_model):
+        import json
+        from backend.ingest import upload_jobs
+        from backend.ingest.model_memory import _cites_source_ids
+        value, item = draft(), candidate()
+        def complete(system, prompt, **options):
+            assert _cites_source_ids(options.get('response_schema'))
+            assert json.loads(prompt)['candidates'][0]['candidate_id'] == item['candidate_id']
+            return {'assignments': [{'candidate_id': item['candidate_id'], 'state_key': 'quantum',
+                'structure_optimization': 'sscha', 'geometry_evidence': None, 'new_state': None,
+                'source_ids': ['structure-source-0'], 'reason': '原文明确SSCHA结构'}]}
+        monkeypatch.setattr(upload_jobs, 'complete_json', complete)
+        upload_jobs._bind_structure_candidates(value, [item], model=complete if explicit_model else None)
+>       assert value['material_states'][1]['structure']['structure_text']
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'structure'
+
+backend/tests/test_canonical_structure_assignment.py:41: KeyError
+=============================== warnings summary ===============================
+backend/tests/test_canonical_structure_assignment.py::test_upload_assignment_declares_source_contract_and_keeps_geometry[False]
+backend/tests/test_canonical_structure_assignment.py::test_upload_assignment_declares_source_contract_and_keeps_geometry[False]
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+backend/tests/test_canonical_structure_assignment.py::test_upload_assignment_declares_source_contract_and_keeps_geometry[False]
+backend/tests/test_canonical_structure_assignment.py::test_upload_assignment_declares_source_contract_and_keeps_geometry[False]
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+backend/tests/test_canonical_structure_assignment.py::test_upload_assignment_declares_source_contract_and_keeps_geometry[False]
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+backend/tests/test_canonical_structure_assignment.py: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+backend/tests/test_canonical_structure_assignment.py::test_upload_assignment_declares_source_contract_and_keeps_geometry[False]
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:438: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+backend/tests/test_canonical_structure_assignment.py::test_upload_assignment_declares_source_contract_and_keeps_geometry[False]
+backend/tests/test_canonical_structure_assignment.py::test_upload_assignment_declares_source_contract_and_keeps_geometry[False]
+backend/tests/test_canonical_structure_assignment.py::test_upload_assignment_declares_source_contract_and_keeps_geometry[True]
+backend/tests/test_canonical_structure_assignment.py::test_upload_assignment_declares_source_contract_and_keeps_geometry[True]
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/cell.py:106: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_canonical_structure_assignment.py::test_upload_assignment_declares_source_contract_and_keeps_geometry[True]
+1 failed, 1 passed, 540 warnings in 1.43s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

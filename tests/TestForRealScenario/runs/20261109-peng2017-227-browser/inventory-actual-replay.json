@@ -1,0 +1,11 @@
+{
+  "source_request": ".data/review_artifacts/02b23f7c5e524f8ba718f48d92a07f75/model-runtime/b35f6d5413336c69944afa9bf3b73b2873dcb8f24dda68f4e071737b3049a9a8/calls/5518be8c08f77946ffc5c8f95089024db86484185b4d7c1de26ae13a39bd5b1d-0/request.json",
+  "original_tokens": 292087,
+  "prepared_tokens": 92844,
+  "budget": 96000,
+  "source_rows": 1142,
+  "all_source_text_pages_ids_equal": true,
+  "all_candidates_equal": true,
+  "original_pages_equal": true,
+  "server_binding": "原始完整sources保持供source_id绑定，目录投影沿既有#224契约"
+}
