@@ -105,10 +105,10 @@
       "notes": [
         "holder 表示当前正式交接经手人，require_writer 阻止非持有者写入；write_epoch 使已结束页面的写凭证失效，revision 随工作稿保存递增并用于版本核对。",
         "通用写入按论文→工作周期→审核／返修稿→人工资料与核对记录的顺序加锁；同次后台保存与快照读取共用 SQL 会话，纯权限查看不申请写锁，外部模型调用不占保存事务。",
-        "保存与正式交接分开；相关内容或来源变化使对应旧结果失效。",
+        "保存与正式交接分开；相关内容或来源变化使对应旧结果失效。paper.research_materials 由论文当前值独立掌管，材料状态保存不自动覆盖；仅兼容缺少该字段的旧请求时从状态派生。",
         "已批准论文在修订、再次送审期间保持旧批准版公开，新稿合法批准时才切换；Go 更新接口只是存量兼容路径，不能绕过已有交接合同。"
       ],
-      "code": "frontend/src/pages/AdminPaperEditPage.tsx；backend/api/evidence.py::patch_field_draft / snapshot_for；backend/ingest/field_drafts.py::save_fields；backend/services/workdrafts.py::require / metadata / lock_scope；backend/services/manuscript_handoffs.py::require_writer；backend/ingest/property_evidence.py::persist_completed_results",
+      "code": "frontend/src/pages/AdminPaperEditPage.tsx；backend/api/evidence.py::patch_field_draft / snapshot_for；backend/ingest/field_drafts.py::save_fields；backend/services/workdrafts.py::require / metadata / lock_scope；backend/services/manuscript_handoffs.py::require_writer；backend/ingest/property_evidence.py::persist_completed_results；backend/ingest/material_state_contract.py::research_materials_for_save",
       "links": [
         {
           "href": "02-review-audit.html#save-edit",
@@ -117,6 +117,10 @@
         {
           "href": "#unified-field-settings",
           "label": "查看统一字段设置的专用控件优先规则"
+        },
+        {
+          "href": "#source-region-highlight",
+          "label": "查看原文上下文与来源标记"
         }
       ]
     },
@@ -554,7 +558,7 @@
       "description": "ReviewFieldSettings 先派发 scwiki:configure-field，让既有专用控件接管；只有 request.handled=false 且宿主提供 onApply 时，才渲染 UnifiedFieldSettings 作为无专用控件字段的回退。共享编辑器按原字段契约处理列表、枚举、布尔、数值和文字，应用仍调用宿主原回调更新当前字段，取消不修改，冻结只读不应用。",
       "notes": [
         "专用结构、派生或已接管控件保持优先，不创建第二份正式值，也不以只读兜底掩盖本可统一接入的普通字段。",
-        "应用只更新当前字段及真实依赖；外部值已变化时提示冲突，不覆盖较新的输入。"
+        "应用只更新当前字段及真实依赖；外部值已变化时提示冲突，不覆盖较新的输入。真实依赖不意味着材料状态会无条件重写论文级 research_materials，该清单按自身字段所有权保存。"
       ],
       "code": "frontend/src/components/ReviewFieldSettings.tsx；frontend/src/components/UnifiedFieldSettings.tsx；frontend/src/lib/evidenceProposals.ts；tests/01_decentralized_uploading/field-workflow-226.test.tsx",
       "links": [
@@ -565,6 +569,29 @@
         {
           "href": "#manual-decision",
           "label": "继续查看修改后的资料与人工决定"
+        }
+      ]
+    },
+    {
+      "id": "source-region-highlight",
+      "attachTo": "save-edit",
+      "side": "left",
+      "kind": "result",
+      "label": "只读来源定位",
+      "title": "原文上下文与可切换来源标记",
+      "summary": "唯一定位才高亮；失败不猜位置，不启动模型",
+      "owner": "Python evidence/region / React EvidenceRegion",
+      "description": "审核、返修与维护共用字段侧栏的只读定位。POST /api/rag/evidence/region 按文件、页码、块和引句限定范围；text_locator 在确定来源块内计算 Unicode 字符区间，前端以 mark 显示文字上下文，同一开关控制文字高亮和原图区域框。",
+      "notes": [
+        "重复匹配返回 ambiguous，找不到返回 unlocated；原文件哈希或页面几何不匹配时不渲染有效区域，无可靠坐标时仍可保留文本上下文。",
+        "图中点位只使用实际识别与标定位置，不根据科学数值反推坐标；来源定位不产生科学支持结论，也不增加一道模型核对门。",
+        "隐藏标记只改变显示，不删除原文、历史证据或文件。"
+      ],
+      "code": "backend/api/evidence.py::document_region；backend/ingest/document_regions.py::render_region；backend/ingest/source_highlight.py::text_locator；frontend/src/components/EvidenceRegion.tsx；frontend/src/components/EvidenceWorkflow.tsx",
+      "links": [
+        {
+          "href": "#save-edit",
+          "label": "返回局部保存与字段设置"
         }
       ]
     },
@@ -591,7 +618,7 @@
         },
         {
           "href": "#cah6-approval-blocked",
-          "label": "区分 CaH6 后续批准阻塞"
+          "label": "查看 CaH6 历史失败与迁移边界"
         }
       ]
     },
@@ -600,17 +627,17 @@
       "attachTo": "approve-commit",
       "side": "left",
       "kind": "stop",
-      "label": "真实环境未验收",
-      "title": "CaH6 新版批准受迁移缺失阻塞",
-      "summary": "review-commit 500 并回滚；旧公开版不等于新版成功",
+      "label": "历史失败与当前验收边界",
+      "title": "CaH6 批准曾回滚；缺列迁移此后已完成",
+      "summary": "旧公开版不等于新版成功；缺列不再是当前已证实阻塞",
       "owner": "本机 1208 正式页面 / Python 审核事务",
-      "description": "#226 当前验收记录中，CaH6 1208 第二次送审稿的 14 项结构家族已保存黄色 without_evidence，正式 submit-check 返回 200；随后 review-commit 因 Unknown column 'paper_references.match_evidence' 返回 500。并行 #225 新代码已加载而本机业务库尚未执行对应迁移，批准事务整体回滚，旧公开版、历史和当前黄色工作稿保持。",
+      "description": "#226 的一次验收中，CaH6 1208 第二次送审稿的 14 项结构家族已保存黄色 without_evidence，submit-check 返回 200；随后 review-commit 因当时缺少 paper_references.match_evidence 返回 500，批准事务整体回滚，旧公开版、历史和黄色工作稿保持。其后 #225 已记录在本机业务库执行 20261106_0225 并通过正式 ORM 查询，缺列 1054 未再出现。",
       "notes": [
-        "失败发生在批准事务内，尚未进入事务后发布；不能删除后续 publish_approved_paper 主链，也不能把 approved_revision=1 的旧版记作本轮批准成功。",
-        "新版批准、当前稿释放、新批准版与冻结重读、正常检索仍未完成；#226 SC-005 / T008 不宣称通过。",
-        "独立空业务行临时库的迁移演练不等于本机业务库已迁移，也不等于远端已部署。"
+        "历史失败发生在批准事务内，尚未进入事务后发布；不能把 approved_revision=1 的旧版记作该轮批准成功。",
+        "当前没有新的 #226 正式批准、当前稿释放、冻结重读和正常搜索成功回执，最终黑盒仍未验收；但不能继续把缺列写成今天仍存在的已证实原因。",
+        "#225 迁移完成只解除该结构阻塞，不证明后续论文批准已完成，也不等于远端已部署。"
       ],
-      "code": "docs/specs/226-field-workflow-convergence/validation.md#尚未完成新版批准与搜索；docs/specs/226-field-workflow-convergence/validation-assets/approve-failure.json；backend/services/field_review_commit.py::commit_review",
+      "code": "docs/specs/226-field-workflow-convergence/validation.md#尚未完成新版批准与搜索；docs/specs/226-field-workflow-convergence/validation-assets/approve-failure.json；docs/specs/225-citation-matching-and-static-graph/native-migration-20261109.md；backend/services/field_review_commit.py::commit_review",
       "links": [
         {
           "href": "#approve-commit",

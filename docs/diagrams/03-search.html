@@ -290,14 +290,15 @@
       "id": "export-path",
       "kind": "check",
       "title": "导出与分享出口",
-      "summary": "PaperEditView 状态卡片导出 JSON",
-      "owner": "Go API / React PaperEditView",
-      "description": "PaperEditView 在每个具有 state_key 的材料状态卡片上显示「导出材料状态」，调用 GET /api/papers/{paper_id}/material-states/{state_key}/export，按 paper_id+revision+state_key 精确定位并下载同 revision 的离线 JSON 包。",
+      "summary": "canViewPaper → 只读快照 → Python 谱补取 → 二次版本核验",
+      "owner": "Go API / Python 谱服务 / React PaperEditView",
+      "description": "PaperEditView 的状态卡片调用 GET /api/papers/{paper_id}/material-states/{state_key}/export。Go 先按 canViewPaper 检查详情可见性，再在只读 Repeatable Read 事务中按 paper_id+revision+state_key 建立材料、状态、结构、模块、Evidence 和定义快照；事务结束后，当前状态存在谱集合时携带 expected_revision 与原 Authorization 调用 Python 谱服务，将谱数据加入快照，最后再次查询 papers.content_revision 确认整个导出期间版本未变。",
       "notes": [
-        "导出包含材料、状态、结构、模块记录、Evidence、谱数据与定义快照，不暴露管理员审计字段。",
+        "导出包含材料、状态、结构、模块记录、Evidence、谱数据与定义快照，不暴露管理员审计字段。Go 前置鉴权复用详情可见性；存在谱集合时，Python 另要求上传者/管理员或 approved_revision=content_revision 的公开批准版，拒绝会由 Go 映射为 409 export_incomplete。",
+        "谱请求失败、非 200、响应解析失败或谱响应 revision 不符均返回 409 export_incomplete；谱补取后的最终版本复核变化返回 409 export_revision_conflict。",
         "当前没有 RIS 按钮／处理函数，也没有图表组合导出入口；这些未实现项不构成活动路径。"
       ],
-      "code": "goserver/handlers/material_state_export.go",
+      "code": "goserver/handlers/material_state_export.go::ExportMaterialState / materialStateSpectra；goserver/handlers/papers.go::canViewPaper；backend/api/spectra.py::state_spectra；backend/services/spectra.py::context / assert_version / listing",
       "links": [
         {
           "href": "03-search.html#export-path",
@@ -463,6 +464,32 @@
       ]
     },
     {
+      "id": "export-permissions",
+      "attachTo": "export-path",
+      "side": "left",
+      "kind": "stop",
+      "label": "导出前独立鉴权",
+      "title": "Go 前置无权限返回 403 export_forbidden",
+      "summary": "Go 初筛：approved 匿名；pending 已认证；rejected 上传者或管理员",
+      "owner": "Go API / canViewPaper / Python 谱服务",
+      "description": "材料状态导出在建立快照前先调用 canViewPaper：approved 通过匿名初筛；pending 通过任意已认证用户初筛，不要求上传者；rejected 仅上传者或已批准管理员；已批准 admin/superadmin 可通过各状态初筛。其他情况返回 403 export_forbidden。存在谱集合时还需通过 Python 第二道权限门：仅上传者/管理员或 approved_revision=content_revision 的公开批准版可读谱。",
+      "notes": [
+        "Go 前置权限复用详情可见性，不等同于完整导出一定成功。pending 的非上传者普通用户、approved 但版本未对齐的匿名请求，可能在 Python 谱补取时被拒绝并由 Go 返回 409 export_incomplete。",
+        "详情可见不代表所有管理员审计字段被导出；导出仍只包含既定快照字段。"
+      ],
+      "code": "goserver/handlers/material_state_export.go::ExportMaterialState / writeMaterialStateExportError；goserver/handlers/papers.go::canViewPaper；goserver/main.go；backend/services/spectra.py::context",
+      "links": [
+        {
+          "href": "#export-path",
+          "label": "返回材料状态导出主链"
+        },
+        {
+          "href": "#detail-permissions",
+          "label": "对比详情读取权限"
+        }
+      ]
+    },
+    {
       "id": "export-format",
       "attachTo": "export-path",
       "side": "left",
@@ -491,13 +518,13 @@
       "kind": "stop",
       "label": "完整性校验失败",
       "title": "导出不完整拦截",
-      "summary": "证据或结构关联不完整返回 409 不导出",
-      "owner": "Go API",
-      "description": "已批准材料状态导出要求每条物性记录至少一条当前 revision 的 Evidence；仅当记录提供 structure_key 时，才校验其匹配本状态的 structure-{id}。证据或已提供的结构关联不完整返回 409 export_incomplete；revision 不一致返回 409 export_revision_conflict。",
+      "summary": "快照、证据、结构或谱补取不完整返回 409 不导出",
+      "owner": "Go API / Python 谱服务",
+      "description": "已批准材料状态导出要求每条物性记录至少一条当前 revision 的 Evidence；仅当记录提供 structure_key 时，才校验其匹配本状态的 structure-{id}。证据、已提供的结构关联或 Python 谱补取不完整均返回 409 export_incomplete；主体快照预期 revision 及谱响应 revision 不一致也在此分支。谱数据成功加入后，Go 最终复查当前 content_revision 仍不一致时返回 409 export_revision_conflict。",
       "notes": [
-        "未提供 structure_key 的物性记录不要求具备结构关联。",
-        "跨 revision 关联无效。",
-        "查询按 paper_id + revision + state_key 精确定位。"
+        "未提供 structure_key 的物性记录不要求具备结构关联；跨 revision 关联无效。",
+        "谱服务请求失败、非 200 或响应解析失败统一按 export_incomplete 处理，不下载缺少谱数据的伪完整包。",
+        "查询按 paper_id + revision + state_key 精确定位，最终二次 revision 核验覆盖谱补取期间发生的版本变化。"
       ],
       "code": "goserver/handlers/material_state_export.go",
       "links": [

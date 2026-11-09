@@ -92,6 +92,10 @@
           "label": "查看迟到结果隔离"
         },
         {
+          "href": "#upload-token-usage",
+          "label": "查看本轮 token 用量"
+        },
+        {
           "href": "#context-memory",
           "label": "查看无损准备与 LangMem 记忆"
         }
@@ -102,7 +106,7 @@
       "title": "通用读取正文与补充材料",
       "summary": "先保存基础文本，再选择解析审核流程",
       "owner": "通用上传 Worker / 本地解析工具",
-      "description": "typed-parsing-v1 的通用入口逐份读取 main 与 supplementary，保存基础 Markdown、Document IR 和来源块，再组合供流程适用性判断的原文。新 PDF 使用 MinerU 主干，Docling / Marker 补强；此阶段不生成专用科学草稿。",
+      "description": "typed-parsing-v1 的通用入口逐份读取 main 与 supplementary，保存基础 Markdown、Document IR 和来源块，供论文级处理、科学图表读取及后续适用性判断共同使用。新 PDF 使用 MinerU 主干，Docling / Marker 补强；此阶段不生成材料状态等专用科学草稿。",
       "notes": [
         "通用读取异常进入 failed，保留阶段与错误；没有可用原文时适用性判断返回 uncertain。",
         "基础读取结果和原文件独立保留，不因没有匹配专用流程而删除。"
@@ -116,12 +120,50 @@
       ]
     },
     {
+      "id": "paper-stage",
+      "title": "论文级字段填写、核对与保存",
+      "summary": "仅处理 paper.*；完成检查点后再读科学图表",
+      "owner": "论文级整理模型 / 共享字段核对 / 草稿存储",
+      "description": "prepare_paper 在通用正文/SI读取后只填写和核对 paper.*，按 field_scope=paper 限定核对范围。题录、摘要、研究动机、关键词、理论子类与材料家族等论文级内容在此形成；核对成功后先持久保存，再写 paper-stage.json 完成检查点并更新 partial_draft，之后才开始科学图表读取。",
+      "notes": [
+        "同来源、模型和端点身份的已完成检查点可复用；核对技术失败时保留已保存内容和成功结论，但不进入材料状态处理。",
+        "材料阶段发现 research_materials 差异只生成待核对问题，不改写论文级值；后续保存保留显式提供的论文级清单，仅兼容缺少该字段的旧请求时从状态派生。",
+        "此阶段不生成材料状态或详细科学记录，也不等于整篇论文已适用或已批准。"
+      ],
+      "code": "backend/ingest/paper_first.py::prepare_paper / persist_paper / paper_conflicts；backend/ingest/material_state_contract.py::research_materials_for_save；backend/ingest/upload_jobs.py::_process_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse.html#paper-stage",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "chart-reading",
+      "title": "逐页盘点并精读科学图表",
+      "summary": "正文/SI图像盘点 → 目标面板精读标定 → 写回 Document IR",
+      "owner": "科学图表读取模型 / 图像标定程序",
+      "description": "论文级核对保存后，enrich_document 校验原 PDF 与 Document IR 的 SHA-256，对全部页面分批执行图像盘点，再对目标图和面板分别精读、标定并把读数与未解决项写回 IR。六页一批只是传输预算，不是文献页数上限；后续适用性判断与科学提取共同使用有效图源。",
+      "notes": [
+        "旧版本读数在新版本成功前不被替换；无法解决的图像问题保留为未解决项，不伪造读数。",
+        "图表读数进入适用性判断、科学提取及核对来源；它不改变论文级字段所有权。",
+        "只有存在对应 Document IR 的 main/supplementary PDF 进入此循环，原文件与 IR 哈希不一致时停止。"
+      ],
+      "code": "backend/ingest/chart_reading.py::enrich_document / calibrate_panel；backend/ingest/upload_jobs.py::_process_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse.html#chart-reading",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
       "id": "workflow-check",
       "kind": "check",
       "title": "适用性判断：匹配哪类流程？",
       "summary": "matched / unmatched / uncertain / failed",
       "owner": "typed-parsing-v1 / 适用性判断模型",
-      "description": "assess 完整读取非参考文献窗口，综合研究目标、摘要、结果、讨论、结论和方法，输出 paper_type、theoretical_subtype、superconductor_kind、理由及真实来源。每个窗口及汇总响应还以 tc_materials 盘点本文所有报告 Tc 的材料及其来源、具体值/范围标记和理由；collect_scope 合并全部窗口与汇总响应，生成 workflow_assessment.tc_material_scope，随后传播给结构读取、分段科学提取和材料状态规划。只有理论计算且常规超导机制的 matched 结果绑定 conventional-theory-calculation，并调用其专用入口。",
+      "description": "assess 在论文级核对和科学图表读取完成后完整读取非参考文献窗口，综合整篇文字、有效图源中的研究目标、摘要、结果、讨论、结论和方法，输出 paper_type、theoretical_subtype、superconductor_kind、理由及真实来源。每个窗口及汇总响应还以 tc_materials 盘点本文所有报告 Tc 的材料及其来源、具体值/范围标记和理由；collect_scope 合并全部窗口与汇总响应，生成 workflow_assessment.tc_material_scope，随后传播给结构读取、分段科学提取和材料状态规划。只有理论计算且常规超导机制的 matched 结果绑定 conventional-theory-calculation，并调用其专用入口。",
       "notes": [
         "tc_materials 是后端审计清单，同时包含保留与排除材料；仅当整篇正文/SI对某材料只有明确数值范围或单侧界限且没有任何具体 Tc 时才列入 excluded_materials。任一有效来源窗口报告具体 Tc 都保留该材料；未报告 Tc 不等于仅范围，也不能据此排除。",
         "contribution_source_ids 必须来自 source_ids 且指向主文（file_role=main）的本文直接贡献来源；SI、方法软件或他人工作不能单独证明本文贡献。section_role 只是排版线索，无小标题的结果段同样可以有效。",
@@ -280,15 +322,16 @@
     {
       "id": "read",
       "title": "分段读取并提取科学候选",
-      "summary": "按材料、条件、记录保留原文依据",
+      "summary": "完整科学块与有限上下文；最多2个 Worker 按原编号归位",
       "owner": "领域提取程序 / LLM",
-      "description": "按正文与补充材料的完整来源块提取材料、计算条件及科学候选。_process_conventional_upload_task 把 workflow_assessment.tc_material_scope 放入每个 extraction_source；_read_chunk 将对应 scope_prompt 加入系统请求，并在模型返回后以 assert_allowed 检查 material_states，已按整篇正文/SI确认的仅范围材料不能重新进入。模型只填写程序登记的字段，身份由程序生成；来源、方法和数值保留继续由正式流程核对。",
+      "description": "structured_chunks 保留完整正文块、表行、表头及必要表注，页或表过大时按登记边界拆分，并只附有限 context_only 邻页上下文。ordered_extract 以最多两个 Worker 受限并发提取，复制请求上下文并隔离子执行连接；完成顺序可以不同，结果仍写回原 index。_process_conventional_upload_task 把 workflow_assessment.tc_material_scope 放入每个 extraction_source；_read_chunk 将 scope_prompt 加入系统请求，并以 assert_allowed 阻止整篇仅范围材料重新进入。",
       "notes": [
+        "任一分段失败会停止尚未开始的任务并传播异常，不把乱序或部分结果当作整段成功；材料表单阶段另按小组串行，不与本步并发混同。",
         "只有整篇正文/SI均为范围或单侧界限且无具体 Tc 时才排除；任一有效来源的具体 Tc 保留材料，未报告 Tc 不等于仅范围。",
-        "模型输出使用严格结构化协议，不自行创建科学键或冒充人工扩展。",
+        "模型只填写程序登记字段，身份由程序生成；严格结构化协议不允许自行创建科学键或冒充人工扩展。",
         "不确定值可保留候选或留空，须有理由并等待人工审核。"
       ],
-      "code": "backend/ingest/upload_jobs.py::_read_chunk / _process_conventional_upload_task；backend/ingest/tc_material_scope.py::scope_prompt / assert_allowed；backend/ingest/scientific_output_schema.py；backend/rag/structured_output.py",
+      "code": "backend/ingest/domain_extraction.py::structured_chunks；backend/ingest/parallel_extraction.py::ordered_extract；backend/ingest/upload_jobs.py::_read_chunk / _process_conventional_upload_task；backend/ingest/tc_material_scope.py::scope_prompt / assert_allowed；backend/ingest/scientific_output_schema.py",
       "links": [
         {
           "href": "01-upload-parse.html#read",
@@ -366,26 +409,6 @@
       ]
     },
     {
-      "id": "form-fill",
-      "title": "整理固定科学表单",
-      "summary": "保留候选去向、来源与数值",
-      "description": "专门模型联合候选与原文整理去重、配对并定向查缺，程序核对候选保留与已登记字段。技术未完成保留预览及诊断，不能用旧结果冒充新提取。",
-      "code": "backend/ingest/scientific_form_filling.py::fill_scientific_forms；backend/ingest/scientific_output_schema.py::filling_schema",
-      "owner": "固定表单整理模型 / 程序",
-      "notes": [
-        "fill_scientific_forms 默认最多 4 轮；来源上下文约 60000 字符、首批读取约 65000 字符。先记录 original_input_chars；仅当原始 content 超过 250000 字符时调用 prepare_fixed_request 做可完整还原的文本去重、来源目录与未读索引分组，随后按实际 wire content 再执行 250000 字符门。",
-        "无损准备不调用模型、不删除科学原文或候选；原始 request 和实际 wire_input 分别留证。准备失败或 wire 仍超过 250000 字符时以 context_budget 停止并保留候选，不能按旧逻辑在准备前直接判 incomplete。",
-        "没有新来源可读时进入收尾，最终仍未完成写 form_filling_incomplete；不用旧结果冒充新提取。",
-        "软件参数只在所属 QE、EPW、SSCHA 组内填写；严格字段限制只约束模型，人工扩展入口继续保留。"
-      ],
-      "links": [
-        {
-          "href": "01-upload-parse.html#form-fill",
-          "label": "返回本功能主干"
-        }
-      ]
-    },
-    {
       "id": "structure-assign",
       "title": "核对并分配结构",
       "summary": "当前规范位置为 S.structure",
@@ -423,19 +446,43 @@
       ]
     },
     {
+      "id": "form-fill",
+      "title": "按材料小组整理并保存固定表单",
+      "summary": "每2个材料状态一组；填写 → 来源门 → 本组核对 → 保存 → 检查点",
+      "description": "process_material_groups 以 material-groups-v1 每两个材料状态一组串行执行。本组填写后定位并校验 Claim 来源，只核对本组 state_keys 对应字段，随后正式保存当前草稿；核对成功才写入 material-stage.json 完成检查点并启动下一组。前端显示当前组/总组数、填写/核对/保存动作及已保存材料数。",
+      "code": "backend/ingest/material_batches.py::process_material_groups；backend/ingest/scientific_form_filling.py::fill_scientific_forms；backend/ingest/upload_jobs.py::_process_conventional_upload_task；frontend/src/components/UploadParsingDetail.tsx",
+      "owner": "固定表单整理模型 / 共享核对程序 / 草稿存储",
+      "notes": [
+        "同源、同模型及相同状态身份的合法完成前缀可复用；当前组失败或取消时不启动后组，也不进入 ready。保存先于错误抛出，已保存内容和成功结论继续保留。",
+        "fill_scientific_forms 默认最多 4 轮；每轮调用 prepare_fixed_request，由默认 96000 token 估算预算与 250000 字符上限共同决定是否执行可完整还原的无损转换，再按实际 wire content 终检；准备失败或仍超限以 context_budget 停止。",
+        "本组核对只附当前字段引用来源及必要的进一步工具读取；模型不改变论文级值、状态身份/数量或其他组内容。软件参数只在所属 QE、EPW、SSCHA 组内填写。",
+        "没有新来源可读时进入收尾，最终仍未完成会抛出 MaterialBatchIncomplete；不用旧结果冒充新提取。"
+      ],
+      "links": [
+        {
+          "href": "01-upload-parse.html#form-fill",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#suggestion-error",
+          "label": "查看当前组失败出口"
+        }
+      ]
+    },
+    {
       "id": "evidence",
       "label": "否",
-      "title": "生成字段核对结果与候选",
-      "summary": "统一工具循环，分批保留结果",
+      "title": "汇总各材料组的字段核对结果",
+      "summary": "组内有界工具循环；全部组完成后聚合结果",
       "owner": "共享科学核对程序 / LLM",
-      "description": "字段按批进入统一模型核对循环，通常最多20项，含计算条件时最多12项。模型联合当前来源定位、判断值与配对，必要时读取更多正文、搜索或查看原页；有效同版本结果复用，部分成功项随批保留。",
+      "description": "每个材料小组在 form-fill 内调用 generate_upload_suggestions，仅以 field_scope=states 和当前 state_keys 核对本组字段；模型联合来源定位、判断值与配对，必要时读取更多正文、搜索或查看原页。全部小组成功后，程序聚合 review_results 与各组 review_report，并继续最终覆盖检查。",
       "notes": [
-        "来源、值、判断和候选由同一有界工具循环完成，不另起文本匹配重新裁决科学支持。",
+        "来源、值、判断和候选由同一有界工具循环完成，不另起文本匹配重新裁决科学支持；分组核对使用 referenced 来源策略。",
         "review_fields 默认最多 13 轮；工具动作另有预算，重复错误和预算耗尽会停止，未完成字段标 review_error 而不伪造通过。",
-        "通常每批最多 20 项，含计算条件时最多 12 项；有效同版本结果复用，部分成功项随批保留。",
+        "通常每批最多 20 项，含计算条件时最多 12 项；有效同版本结果复用。当前组的技术错误会阻止后组与 ready，不能沿旧描述继续完成整篇。",
         "保存与人工确认不自动触发模型或整篇批准。"
       ],
-      "code": "backend/ingest/property_evidence.py::generate_upload_suggestions；backend/ingest/model_review.py::review_draft / review_fields",
+      "code": "backend/ingest/material_batches.py::process_material_groups；backend/ingest/property_evidence.py::generate_upload_suggestions；backend/ingest/model_review.py::review_draft / review_fields；backend/ingest/upload_jobs.py::_process_conventional_upload_task",
       "links": [
         {
           "href": "01-upload-parse.html#evidence",
@@ -498,7 +545,7 @@
       "id": "automatic-complete",
       "title": "整理和字段核对完成？",
       "summary": "技术错误先进入 failed",
-      "description": "草稿已保留后，检查 form_filling_report 与 field_suggestions_error；整理或字段核对出现技术未完成时写 failed / automatic_review_incomplete，保留既有预览与成功结果。",
+      "description": "全部材料组成功、聚合结果并保存草稿后，complete_parsing_state 再检查 form_filling_report 与 field_suggestions_error 作为最终技术终检；此层发现未完成时写 failed / automatic_review_incomplete。材料组内部的填写或核对异常通常已在更外层直接进入 failed，不会先到达本节点。",
       "code": "backend/ingest/upload_jobs.py::complete_parsing_state",
       "owner": "上传 Worker",
       "kind": "check",
@@ -568,7 +615,7 @@
         "普通路径要求实际修改字段有人工理由和至少一项资料；模型可立即核对或提交时核对。读取失败、格式错误或技术失败保留真实回执，不伪装为已读或科学通过。",
         "without_evidence 是 field-review-v2 的 approve 人工决定，不是模型支持；有效时该字段普通提交不再发起模型，并清空 AI 理由、证据关联和模型审核字段。前端以 waived 黄色状态显示。",
         "当前值形成完整人工补证（非空 reason 且至少一项真实 items）、修改当前值、原始论文来源变化或真实状态适用范围变化，会使旧免证决定失效；只补理由或缺证说明不构成完整补证。结构类、未验证派生、非法空值或不满足字段 Schema 的当前值不能免证放行。",
-        "有效黄色可以进入送审、审核员批准、入库与检索；仍须通过任务 ready、权限、来源、流程绑定、整篇提交及最终审核员批准等其他门禁。当前工作区 #226 新版正式批准与搜索验收仍受本机 #225 迁移缺失阻塞，不把实现画成该黑盒已完成。"
+        "有效黄色可以进入送审、审核员批准、入库与检索；仍须通过任务 ready、权限、来源、流程绑定、整篇提交及最终审核员批准等其他门禁。#226 的一次正式批准曾因当时缺少 match_evidence 回滚；其后 #225 已有本机迁移完成记录。当前没有新的 #226 正式批准/搜索成功回执，因此最终黑盒仍未验收，但缺列不再是当前已证实的阻塞原因。"
       ],
       "code": "backend/api/evidence.py::save_field_decision / enqueue_review；backend/ingest/field_input.py::bind；backend/ingest/field_decisions.py::detail / decide；backend/ingest/field_review.py::valid_field_decision / blocking；backend/ingest/field_waiver.py；backend/ingest/manual_evidence.py；backend/ingest/manual_links.py",
       "links": [
@@ -591,6 +638,10 @@
         {
           "href": "#field-gate",
           "label": "查看程序资格与送审门禁"
+        },
+        {
+          "href": "#source-region-highlight",
+          "label": "查看原文上下文与来源标记"
         },
         {
           "href": "#handoff",
@@ -807,9 +858,9 @@
       "kind": "wait",
       "label": "unmatched / uncertain / failed",
       "title": "暂停为 needs_workflow",
-      "summary": "保留基础读取和原文件下载",
+      "summary": "保留基础读取、论文阶段草稿和原文件下载",
       "owner": "通用上传 Worker / 上传者",
-      "description": "通用入口在服务端保留基础 Markdown、来源、workflow_assessment 和适用的产物清单，清空 partial_draft，写 status=needs_workflow、processing_status=needs_input、reading_state=workflow_unavailable。needs_workflow 页面实际显示判断理由、基础题录和原文件下载，不据此扩大为页面可查看所有来源或完整 Markdown。只有 matched 才由 WORKFLOWS 执行 conventional-theory-calculation 专用入口。",
+      "description": "通用入口在服务端保留基础 Markdown、来源、论文阶段 partial_draft、workflow_assessment 和适用的产物清单，写 status=needs_workflow、processing_status=needs_input、reading_state=workflow_unavailable。needs_workflow 页面实际显示判断理由、基础题录和原文件下载，不因此变成 ready、可编辑科学草稿或可送审论文，也不据此扩大为页面可查看所有来源或完整 Markdown。只有 matched 才由 WORKFLOWS 执行 conventional-theory-calculation 专用入口。",
       "notes": [
         "服务端保留基础读取产物；页面展示范围不等于完整产物清单，needs_workflow 也不是 ready 或科学审核通过。",
         "needs_workflow 表示 unmatched / uncertain / failed 导致没有选定专用流程，processing_status=needs_input；它不是 #224 人工停止产生的 paused，不能用 POST /resume 绕过流程选择。paused 才沿同任务模型执行恢复入口继续。",
@@ -1356,6 +1407,51 @@
       ]
     },
     {
+      "id": "upload-token-usage",
+      "attachTo": "model-runtime",
+      "side": "right",
+      "kind": "result",
+      "label": "运行元信息",
+      "title": "按 run_id 聚合本轮 token 用量",
+      "summary": "输入/输出/总 token；缺回执明确标记不完整",
+      "owner": "上传运行器 / React UploadTaskCenter",
+      "description": "每个新解析轮次以 run_id 建立 extraction_token_usage，分别记录请求数与具有有效用量回执的请求数。任务中心展示输入、输出和总 token；历史任务、未开始轮次或存在缺失回执时显示不可用或不完整，不伪造完整统计。",
+      "notes": [
+        "旧 run_id 或已停止执行的迟到回执不能混入当前轮次；无合法回执的请求只计为 missing，不增加 token 数值。",
+        "用量是运行元信息，不影响科学字段、核对通过或批准门禁。"
+      ],
+      "code": "backend/ingest/upload_usage.py::new_extraction_token_usage / apply_token_usage_event / collect_upload_usage；frontend/src/lib/uploadTokenUsage.ts；frontend/src/components/UploadTaskCenter.tsx",
+      "links": [
+        {
+          "href": "#model-runtime",
+          "label": "返回模型运行器"
+        }
+      ]
+    },
+    {
+      "id": "source-region-highlight",
+      "attachTo": "field-review-workflow",
+      "side": "right",
+      "kind": "result",
+      "label": "只读来源定位",
+      "title": "原文上下文与可切换来源标记",
+      "summary": "唯一定位才高亮；失败不猜位置，不启动模型",
+      "owner": "Python evidence/region / React EvidenceRegion",
+      "description": "字段原文区通过 POST /api/rag/evidence/region 按文件、页码、块和引句只读定位。text_locator 在确定来源块内计算 Unicode 字符区间，前端以 mark 显示原文上下文；同一“显示/隐藏来源标记”开关同时控制文字高亮和原图区域框。",
+      "notes": [
+        "重复匹配返回 ambiguous，找不到返回 unlocated；原文件哈希或页面几何不匹配时不渲染有效区域，无可靠坐标时仍可保留文本上下文。",
+        "图中点位只使用实际识别与标定位置，不根据科学数值反推坐标；定位不产生科学支持结论，也不增加模型核对门。",
+        "隐藏标记只改变显示，不删除原文、历史证据或文件。"
+      ],
+      "code": "backend/api/evidence.py::document_region；backend/ingest/document_regions.py::render_region；backend/ingest/source_highlight.py::text_locator；frontend/src/components/EvidenceRegion.tsx；frontend/src/components/EvidenceWorkflow.tsx",
+      "links": [
+        {
+          "href": "#field-review-workflow",
+          "label": "返回逐字段人工处理"
+        }
+      ]
+    },
+    {
       "id": "field-gate",
       "attachTo": "field-review-workflow",
       "side": "left",
@@ -1368,7 +1464,7 @@
       "notes": [
         "有效 without_evidence 仅让本字段以人工 supported 通过；其他字段的不通过、正文来源不完整、文件身份确认、任务 ready、上传者权限、typed-parsing-v1 绑定、证据版本与工作稿写凭证仍分别检查。",
         "模型技术故障与科学不通过分开显示，不能用黄色或失败重试伪造 AI 结论。提交失败回滚 ready，正式批准由审核员独立执行。",
-        "当前工作区已落实代码与黄色字段操作；#226 记录的新版正式批准/搜索黑盒仍受本机 #225 数据库迁移缺失阻塞，因此本图只陈述源码行为，不宣称该最终验收已经完成。"
+        "当前工作区已落实代码与黄色字段操作；#226 记录的一次批准缺列失败之后，#225 已有本机迁移完成记录，但尚无新的 #226 正式批准/搜索成功回执，因此本图只陈述源码行为，不宣称最终黑盒已完成。"
       ],
       "code": "backend/ingest/field_waiver.py::allowed；backend/ingest/field_decisions.py::decide；backend/ingest/field_review.py::blocking；backend/api/evidence.py::enqueue_review；backend/ingest/property_evidence.py::resolve_results；backend/api/rag.py::_submit_upload_draft_locked；docs/specs/226-field-workflow-convergence/validation.md",
       "links": [
@@ -1417,11 +1513,12 @@
       "title": "保留草稿并标记失败",
       "summary": "failed；不会继续发布 ready",
       "owner": "上传 Worker",
-      "description": "自动整理或字段核对技术未完成时，complete_parsing_state 返回 failed，错误码为 automatic_review_incomplete；已提取内容、部分核对结果和预览继续保留。",
+      "description": "材料组填写、来源门或核对失败时，当前组之后的任务不再启动，外层直接写 failed：ParserError 保留自身错误码，其他异常通常为 paper_processing_failed；已保存内容、成功结论和预览保留。只有全部组完成后，complete_parsing_state 的最终技术终检失败才使用 automatic_review_incomplete。",
       "notes": [
-        "科学存疑与程序技术失败分开，不能把失败伪装为 ready。"
+        "科学存疑与程序技术失败分开，不能把失败伪装为 ready。",
+        "process_material_groups 在写组完成检查点前先保存当前草稿；因此失败不等于本轮所有写回都丢失，也不等于失败组被记为完成。"
       ],
-      "code": "backend/ingest/upload_jobs.py::complete_parsing_state",
+      "code": "backend/ingest/material_batches.py::process_material_groups；backend/ingest/upload_jobs.py::_process_conventional_upload_task / complete_parsing_state",
       "links": [
         {
           "href": "01-upload-parse.html#automatic-complete",

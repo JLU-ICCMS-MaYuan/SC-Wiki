@@ -173,7 +173,8 @@
       "code": "backend/api/community_ai.py::manual_question / generate_question / retry_batch / retry_task；backend/community/service.py::submit / retry_batch / retry_task；backend/community/jobs.py::prepare；backend/community/generation.py::create_question",
       "links": [
         {"href": "06-community.html#question-create", "label": "返回本功能主干"},
-        {"href": "06-community-details.html#question-lifecycle", "label": "查看 AI 建题状态机"}
+        {"href": "06-community-details.html#question-lifecycle", "label": "查看 AI 建题状态机"},
+        {"href": "#question-queue-unavailable", "label": "查看建题前后两阶段 queue_unavailable"}
       ]
     },
     {
@@ -189,7 +190,10 @@
         "入队本身不获取租约；Worker 认领前才非阻塞获取全局两槽容量，与任务组原子创建是两个阶段。"
       ],
       "code": "backend/api/community_ai.py::add_answer_group；backend/community/answers.py::enqueue_answers / dispatch",
-      "links": [{"href": "06-community.html#ai-queue", "label": "返回本功能主干"}]
+      "links": [
+        {"href": "06-community.html#ai-queue", "label": "返回本功能主干"},
+        {"href": "#answer-dispatch-recovery", "label": "查看提交后首次投递失败与监督补投"}
+      ]
     },
     {
       "id": "ai-generate",
@@ -470,6 +474,23 @@
       "links": [{"href": "06-community.html#edit-governance", "label": "返回主干对应支线"}]
     },
     {
+      "id": "question-queue-unavailable",
+      "attachTo": "question-create",
+      "side": "right",
+      "kind": "stop",
+      "label": "AI 建题队列不可用",
+      "title": "建批次前拒绝；建批次后持久失败",
+      "summary": "两阶段 queue_unavailable，不冒充正常 queued",
+      "owner": "Python 选题服务 / Redis / RQ",
+      "description": "AI 建题在数据库创建批次前先执行 Redis ping；失败直接抛 queue_unavailable，此时不创建批次。若批次已经提交而随后 enqueue 失败，则调用 fail_job 将已有批次置为 failed、错误码 queue_unavailable，不再保持正常 queued。",
+      "notes": [
+        "建批次前失败没有可重试的新批次；建批次后失败保留持久批次，可按既有失败重试路径处理。",
+        "该基础设施分支不同于 Worker 认领后的 capacity_busy，也不同于模型生成或去重失败。"
+      ],
+      "code": "backend/community/service.py::submit / enqueue / fail_job；backend/api/community_ai.py::generate_question",
+      "links": [{"href": "#question-create", "label": "返回独立建题动作"}]
+    },
+    {
       "id": "question-lifecycle",
       "attachTo": "question-create",
       "side": "left",
@@ -525,6 +546,24 @@
         {"href": "06-community.html#superadmin-gov", "label": "返回主干治理入口"},
         {"href": "06-community-details.html#content-management-ui", "label": "对比现有内容管理 UI"}
       ]
+    },
+    {
+      "id": "answer-dispatch-recovery",
+      "attachTo": "ai-queue",
+      "side": "left",
+      "kind": "wait",
+      "label": "数据库已提交，首次 dispatch 失败",
+      "title": "答案请求保持 queued，监督补投队首",
+      "summary": "不伪报未创建，也不把首次投递失败写成 failed",
+      "owner": "Python 答案队列 / 监督循环",
+      "description": "enqueue_answers 先在一个数据库事务中创建任务组和连续 sequence 请求并保存 Redis 凭据；提交后首次 dispatch 抛错会被捕获，接口仍返回已创建任务组，数据库记录保持 queued。监督 reconcile 后续再次 dispatch 仍为同题队首的 queued 请求；已有 RQ job 时不重复投递。",
+      "notes": [
+        "这是事务提交后的投递遗漏，不同于 AI 建题在 enqueue 失败后立即将批次标为 failed。",
+        "监督循环每 10 秒执行 reconcile；批次列表和答案队列读取也触发相应检查。本轮依赖失败保留任务，下周期重查。",
+        "同题仍按 FIFO 推进，首次投递失败不创建第二份任务组。"
+      ],
+      "code": "backend/community/answers.py::enqueue_answers / dispatch / reconcile_answers；backend/community/__main__.py；backend/api/community_ai.py",
+      "links": [{"href": "#ai-queue", "label": "返回答案原子入队"}]
     },
     {
       "id": "capacity-busy",
@@ -606,7 +645,7 @@
       "title": "失败继续，重试排队尾",
       "summary": "不阻塞同题后续 FIFO 项",
       "owner": "Python 队列",
-      "description": "生成、复核或 Worker 异常会把当前请求标为 failed 并保留安全错误码，finally 再 dispatch 同题下一队首，后续任务继续。上游上下文长度异常明确映射为 context_too_long。超管显式重试失败答案时创建新的请求和 sequence 排到该问题队尾，retry_of 指向原项，而不是原地覆盖或插队。",
+      "description": "普通生成或复核异常由 run 捕获，把当前请求标为 failed 并保留安全错误码，finally 再 dispatch 同题下一队首；硬中断、RQ 状态异常和凭据过期由 on_failure 或监督流程另行处理。上游上下文长度异常明确映射为 context_too_long。超管显式重试失败答案时创建新的请求和 sequence 排到该问题队尾，retry_of 指向原项，而不是原地覆盖或插队。",
       "notes": [
         "失败项保留供受保护队列查看。",
         "同题 FIFO 与失败继续并不矛盾：当前队首结束后才推进下一项。",
@@ -616,7 +655,29 @@
       "code": "backend/community/answers.py::run / finish_failure / retry_answer / dispatch / reconcile_answers",
       "links": [
         {"href": "06-community.html#queue-failure", "label": "返回主干对应支线"},
-        {"href": "#context-too-long", "label": "展开 context_too_long 错误映射"}
+        {"href": "#context-too-long", "label": "展开 context_too_long 错误映射"},
+        {"href": "#answer-worker-supervision", "label": "查看 Worker 中断、凭据过期与监督恢复"}
+      ]
+    },
+    {
+      "id": "answer-worker-supervision",
+      "attachTo": "queue-failure",
+      "side": "right",
+      "kind": "wait",
+      "label": "硬中断 / RQ 状态异常 / 凭据过期",
+      "title": "on_failure 与 reconcile 分离监督状态",
+      "summary": "worker_interrupted / credentials_expired；queued 队首可补投",
+      "owner": "Python RQ 回调 / 答案监督循环",
+      "description": "普通生成异常由 run 捕获并进入失败继续；Worker 硬中断或 RQ 状态异常由 on_failure、reconcile_answers 标记 worker_interrupted，保存凭据超过 TTL 时标记 credentials_expired。监督同时补投仍为同题队首的 queued 请求，已有 RQ job 时不重复投递。",
+      "notes": [
+        "worker_interrupted 与 credentials_expired 不是普通 generation_failed，也不是 capacity_busy。",
+        "失败请求保留真实状态供受保护队列读取和显式重试；监督恢复不把 failed 请求伪装为成功。",
+        "本轮 reconcile 依赖失败会保留任务并在后续周期重查，而非永久删除。"
+      ],
+      "code": "backend/community/answers.py::on_failure / reconcile_answers / dispatch；backend/community/__main__.py；backend/api/community_ai.py",
+      "links": [
+        {"href": "#queue-failure", "label": "返回普通失败与队尾重试"},
+        {"href": "#answer-dispatch-recovery", "label": "查看首次投递失败后的 queued 补投"}
       ]
     },
     {

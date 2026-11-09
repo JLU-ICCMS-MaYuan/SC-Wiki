@@ -53,6 +53,10 @@
         {
           "href": "05-rag-qa.html#q-submit",
           "label": "返回本功能主干"
+        },
+        {
+          "href": "#prompt-polish",
+          "label": "查看发送前的独立提示词润色"
         }
       ]
     },
@@ -191,6 +195,10 @@
         {
           "href": "05-rag-qa.html#conv-save",
           "label": "返回本功能主干"
+        },
+        {
+          "href": "#legacy-conversation-import",
+          "label": "查看显式导入旧本地会话"
         }
       ]
     },
@@ -215,6 +223,50 @@
     }
   ],
   "branches": [
+    {
+      "id": "prompt-polish",
+      "attachTo": "q-submit",
+      "side": "left",
+      "kind": "result",
+      "label": "发送前草稿操作",
+      "title": "独立提示词润色并回填输入框",
+      "summary": "不检索、不运行 Mentor/Inspiration、不写会话",
+      "owner": "React RagPage / Python polish_prompt",
+      "description": "POST /api/rag/prompts/polish 只改写当前草稿并回填输入框。validate_polish_response 检查正文完整性、长度以及原问题中的科学术语和数值；科学术语或数值未保留等校验失败返回 422 POLISH_INVALID。前端支持一次撤销，失败保留草稿，草稿变更使旧润色响应失效。",
+      "notes": [
+        "POLISH_MAX_TOKENS=4096 是润色响应输出额度，不是聊天上下文预算。",
+        "润色不是问答完成轮次，不触发检索、来源解析或云端会话保存；用户之后仍需显式发送问题。"
+      ],
+      "code": "frontend/src/pages/RagPage.tsx::handlePolish；backend/api/rag.py::rag_polish_prompt；backend/rag/service.py::polish_prompt / validate_polish_response",
+      "links": [
+        {
+          "href": "#q-submit",
+          "label": "返回问答入口"
+        }
+      ]
+    },
+    {
+      "id": "legacy-conversation-import",
+      "attachTo": "conv-save",
+      "side": "left",
+      "kind": "result",
+      "label": "登录后的显式迁移",
+      "title": "逐个导入旧本地会话",
+      "summary": "source_local_id 幂等；全部成功才标记已导入",
+      "owner": "React useStreamingChat / Python 会话服务",
+      "description": "登录且存在未导入本地会话时，页面显示独立导入按钮。importLegacy 逐个调用 /api/rag/conversations/import；import_local 以 source_local_id 幂等，仅保存配对的非空 user→assistant 消息并生成连续 sequence。全部成功后才写本地已导入标记并刷新云端列表。",
+      "notes": [
+        "导入要求登录；旧问题超长返回 413 HISTORY_TOO_LARGE，部分失败时不把整批标记为已导入。",
+        "这不是登录后自动同步，也不是每次问答时的隐式迁移；未导入的访客历史仍只在本机。"
+      ],
+      "code": "frontend/src/pages/RagPage.tsx；frontend/src/lib/useStreamingChat.ts::importLegacy；frontend/src/lib/ragConversations.ts::importLocalConversation；backend/api/rag.py::rag_import_conversation；backend/services/rag_chat_conversations.py::import_local",
+      "links": [
+        {
+          "href": "#conv-save",
+          "label": "返回云端会话保存"
+        }
+      ]
+    },
     {
       "id": "data-unavailable",
       "attachTo": "availability",

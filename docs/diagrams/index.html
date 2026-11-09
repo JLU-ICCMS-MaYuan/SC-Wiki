@@ -56,9 +56,9 @@
       "id": "upload",
       "module": "01",
       "title": "上传与解析",
-      "summary": "可恢复模型执行 → 适用性门禁 → 专用工作稿与引用匹配",
-      "description": "Worker 建立可恢复模型运行器，通用读取后执行 typed-parsing-v1 适用性判断；只有常规超导理论计算进入专用科学管线，其他类型、证据不足或判断失败进入 needs_workflow。临时传输故障持续退避，可停止保留进度后同任务继续并复用完整响应。汇总及科学核对后、ready 前完成程序与受限 LLM2 双向引用匹配并保存快照；上传者校对并正式提交才创建待审论文。",
-      "code": "backend/ingest/model_runtime.py；backend/ingest/parsing_workflows.py；backend/ingest/upload_jobs.py；backend/services/citation_matching.py；backend/api/rag.py",
+      "summary": "通用读取 → 论文级核对与图表读取 → 适用性门禁 → 材料分组与引用匹配",
+      "description": "Worker 建立可恢复模型运行器，通用读取后先填写、核对并保存论文级字段，再逐页盘点和精读正文/SI科学图表，随后执行 typed-parsing-v1 适用性判断；只有常规超导理论计算进入专用科学管线，其他类型、证据不足或判断失败进入 needs_workflow，并保留论文阶段草稿。临时传输故障持续退避，可停止保留进度后同任务继续并复用完整响应。材料状态按每两个一组串行执行填写、来源定位、核对与保存，写组检查点后才继续；汇总及科学核对后、ready 前完成程序与受限 LLM2 双向引用匹配并保存快照。上传者校对并正式提交才创建待审论文。",
+      "code": "backend/ingest/model_runtime.py；backend/ingest/paper_first.py；backend/ingest/chart_reading.py；backend/ingest/parsing_workflows.py；backend/ingest/material_batches.py；backend/ingest/upload_jobs.py；backend/services/citation_matching.py；backend/api/rag.py",
       "owner": "上传者 / Worker",
       "links": [
         {
@@ -72,7 +72,7 @@
       "module": "02",
       "title": "审核与维护",
       "summary": "排他工作稿 → 单人批准发布或拒绝返修",
-      "description": "审核员接手当前工作稿，经 Python 接口按字段保存和核对，显式提交后在 Python/MySQL 事务内校验版本、来源及权限，禁止自审。当前仅有批准发布与拒绝退回作者两种动作；首位合法审核员接手后可直接批准，无主动转交或第二人复审。失败与返修详情在独立页面。",
+      "description": "审核员接手当前工作稿，经 Python 接口按字段保存和核对；普通修改使用人工理由与多源资料，符合资格的字段也可作黄色免证人工决定，公开链接只在显式核对时有界读取。显式提交后在 Python/MySQL 事务内校验版本、来源及权限，禁止自审。当前稿件级仅有批准发布与拒绝退回作者两种动作；首位合法审核员接手后可直接批准，无主动转交或第二人复审。失败与返修详情在独立页面。",
       "code": "backend/services/field_review_commit.py；backend/services/manuscript_handoffs.py",
       "owner": "管理员 / 超级管理员",
       "kind": "check",
