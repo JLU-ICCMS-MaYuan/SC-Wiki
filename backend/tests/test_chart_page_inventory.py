@@ -30,3 +30,15 @@ def test_inventory_rejects_invalid_or_duplicate_regions():
     figure = {'bbox': [10, 20, 400, 300], 'label': 'a', 'target': True, 'reason': 'Tc'}
     with pytest.raises(ChartReadingError):
         page_inventory({'pages': [{'page': 1, 'figures': [figure, figure]}]}, {1: (200, 400)})
+
+
+def test_shared_caption_does_not_make_duplicate_non_target_rectangles_valid():
+    figures = [{'bbox': [98, 593, 910, 897], 'label': f'Fig S11({panel})',
+                'target': False, 'reason': '结构示意图，无受支持标量'} for panel in ('a', 'b')]
+    with pytest.raises(ChartReadingError):
+        page_inventory({'pages': [{'page': 11, 'figures': figures}]}, {11: (600, 800)})
+    targets, excluded = page_inventory({'pages': [{'page': 11, 'figures': [{
+        **figures[0], 'label': 'Fig S11(a,b)', 'reason': '两幅结构示意共用图注，无受支持标量'}]}]},
+        {11: (600, 800)})
+    assert not targets and len(excluded) == 1
+    assert excluded[0]['label'] == 'Fig S11(a,b)'

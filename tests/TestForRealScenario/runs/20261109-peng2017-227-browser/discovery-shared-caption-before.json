@@ -1,0 +1,182 @@
+{
+  "source_request": "/Users/mayuan/Codes/SC-Wiki/.data/review_artifacts/02b23f7c5e524f8ba718f48d92a07f75/model-runtime/b35f6d5413336c69944afa9bf3b73b2873dcb8f24dda68f4e071737b3049a9a8/calls/06c94b7d875f7c5d7899b3efbf74bdd6afa6c5d0226bcbe71c178111afc9b888-0/request.json",
+  "old_response": {
+    "pages": [
+      {
+        "figures": [
+          {
+            "bbox": [
+              98,
+              87,
+              908,
+              460
+            ],
+            "label": "Fig. S3",
+            "reason": "Formation-enthalpy convex hulls for La hydrides; enthalpy is not a supported quantity.",
+            "target": false
+          },
+          {
+            "bbox": [
+              98,
+              481,
+              910,
+              850
+            ],
+            "label": "Fig. S4",
+            "reason": "Formation-enthalpy convex hulls for Ce hydrides; enthalpy is not a supported quantity.",
+            "target": false
+          }
+        ],
+        "page": 7
+      },
+      {
+        "figures": [
+          {
+            "bbox": [
+              98,
+              110,
+              909,
+              434
+            ],
+            "label": "Fig. S5",
+            "reason": "Formation-enthalpy convex hulls for Pr hydrides; enthalpy is not a supported quantity.",
+            "target": false
+          },
+          {
+            "bbox": [
+              98,
+              488,
+              910,
+              860
+            ],
+            "label": "Fig. S6",
+            "reason": "Thermodynamic temperature-pressure phase diagram, not superconducting Tc; no supported scalar quantity is plotted.",
+            "target": false
+          }
+        ],
+        "page": 8
+      },
+      {
+        "figures": [
+          {
+            "bbox": [
+              98,
+              87,
+              910,
+              397
+            ],
+            "label": "Fig. S7(a), CeH8",
+            "reason": "Crystal-structure drawing; no supported scalar quantity. Box includes the shared caption.",
+            "target": false
+          },
+          {
+            "bbox": [
+              98,
+              87,
+              920,
+              397
+            ],
+            "label": "Fig. S7(b), PrH8",
+            "reason": "Crystal-structure drawing; no supported scalar quantity. Box includes the shared caption.",
+            "target": false
+          },
+          {
+            "bbox": [
+              98,
+              434,
+              910,
+              783
+            ],
+            "label": "Fig. S8",
+            "reason": "LaH11 crystal-structure drawing; no supported scalar quantity.",
+            "target": false
+          }
+        ],
+        "page": 9
+      },
+      {
+        "figures": [
+          {
+            "bbox": [
+              98,
+              123,
+              910,
+              667
+            ],
+            "label": "Fig. S9(a–i)",
+            "reason": "Electron-localization-function maps with a shared color scale; ELF is not a supported scalar quantity.",
+            "target": false
+          }
+        ],
+        "page": 10
+      },
+      {
+        "figures": [
+          {
+            "bbox": [
+              98,
+              99,
+              910,
+              568
+            ],
+            "label": "Fig. S10(a), YH6 COHP and ICOHP",
+            "reason": "Orbital Hamiltonian population and its integral, not electronic DOS or another supported quantity. Box includes the shared caption.",
+            "target": false
+          },
+          {
+            "bbox": [
+              98,
+              96,
+              910,
+              568
+            ],
+            "label": "Fig. S10(b), YH10 COHP and ICOHP",
+            "reason": "Orbital Hamiltonian population and its integral, not electronic DOS or another supported quantity. Box includes the shared caption.",
+            "target": false
+          },
+          {
+            "bbox": [
+              98,
+              593,
+              910,
+              897
+            ],
+            "label": "Fig. S11(a), YH24",
+            "reason": "Crystal-structure drawing; no supported scalar quantity. Box includes the shared caption.",
+            "target": false
+          },
+          {
+            "bbox": [
+              98,
+              593,
+              910,
+              897
+            ],
+            "label": "Fig. S11(b), YH13",
+            "reason": "Crystal-structure drawing; no supported scalar quantity. Box includes the shared caption.",
+            "target": false
+          }
+        ],
+        "page": 11
+      },
+      {
+        "figures": [
+          {
+            "bbox": [
+              98,
+              106,
+              910,
+              897
+            ],
+            "label": "Fig. S12(a–c)",
+            "reason": "Structure-search enthalpy and volume charts for YH6, YH9 and YH10; neither plotted quantity is supported.",
+            "target": false
+          }
+        ],
+        "page": 12
+      }
+    ]
+  },
+  "rejection": "图表盘点区域无效、重复或缺少理由",
+  "scope": "原失败响应固定重放；重复非目标区域保护保持"
+}
