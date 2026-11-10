@@ -1,0 +1,14 @@
+{
+  "base": "233f7f62d80674af9790b08996c46cabb9fdc847",
+  "overlays": {
+    "backend/ingest/scientific_form_filling.py": "446dc7bf99353a0c0e5dd1ac8ddaf27838e98e9ac7b91ed6f78381747af508e2",
+    "backend/ingest/upload_jobs.py": "541fb3fe6ac0b76e57b888c2979b997f2eb4e6ca9b57f3368fc28245d9861e64",
+    "backend/tests/test_cited_alternative_source.py": "85a6d2ff611e91d0c34fc8085b194ee243db169c552828d4a1777a2e7538ac44",
+    "backend/tests/test_complementary_pdf.py": "601e175fd50ea97829cc8f9ef981e64a38146b31b710af08ee001d047d16edbb",
+    "backend/tests/fixtures/cited_alternative/failed-source-handoff.json.gz": "4447c0c674aed41af443360f400bfda3b1fabf0a8d5ba5b9bde6699deb9c7076",
+    "tests/01_decentralized_uploading/test_scientific_form_filling.py": "846a88f5a09ce5c55af7e92cedaa636e1dddd5ff867218b24efc6bd44924b9f0"
+  },
+  "exit_code": 0,
+  "business_database_used": false,
+  "scope": "HEAD加本任务明确文件，SQLite内存配置，临时源码验证后移除"
+}

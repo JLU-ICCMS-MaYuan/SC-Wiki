@@ -1,5 +1,7 @@
 # 实施计划
 
+原候选明确引用的备用识别原块也属于来源完整性要求：填写宿主从当前材料候选收集引用，只读补入同文件/页/版本/引句一致的真实IR原块。来源门继续验证实际已读块，不将缺源降级为通过；来源可定位仍交既有科学核对查证。参见[#136交接验证](../136-complementary-pdf-parsing/cited-original-handoff.md)。
+
 沿用上传草稿→property_modules→records，不增加数据库或标准科学键。
 
 1. scientific_form_filling.apply_plan继续验证类型、候选身份、同状态模块、已读来源和分组结构；复用candidate_dispositions保存完整原候选及理由，合并原来源。不再把原数值必须重现当作科学裁决；移除candidate_relations重复协议。

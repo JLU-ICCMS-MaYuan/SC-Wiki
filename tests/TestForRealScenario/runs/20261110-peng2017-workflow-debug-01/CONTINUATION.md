@@ -1,3 +1,23 @@
+## 最新阻塞及修复：第1/27组已引用Marker备用原文未交接，固定源与回归完成待网页续跑
+
+Task d789acceee124022b3257f84780d1156、Job414a7e57-44b0-49d1-952d-026b9099d86a已failed/summarizing，processing_error=第1/27组填写未完成：原候选来源未读取或不存在，0组完成，无正式PaperID。最后业务observe-20261110T181452845222Z.json。前面已完成29/29、54状态规划、结构分配；CeH10@200真实规划结果Fm-3m，13原来源独立保留S31 R-3m声子，证据issues/phase-handoff/business-*。
+
+已定位并实现普通旧要求交接修复：两个原候选引用正文第4页Marker真实原文块d4668…/c56f…，IR selected_for_reading=false只是未选主干，前面显式Claim可定位，后面form_sources只提供主干导致原候选来源门拒绝。没有关闭保护。scientific_form_filling._referenced_original_views仅对当前material_states明确引用、同file/page/version/hash/quote的原始备用块补入只读视图，排除chart_reading/chart_unresolved，不改原IR和主备路由；upload_jobs材料来源调用传references。其他form_sources默认行为不变。
+
+实际同PDF/SI哈希/原IR/真实失败固定验证15个必要来源由缺2→0，目录1144→1146、预读19852字符；无新模型调用。共享/独立87、四宿主233、12变异、字段契约、compile/diff通过。旧四工具重试夹具在独立未改HEAD失败，改为部分输出后连接中断+次轮连接错误+末轮完整严格schema；不改产品非法JSON立即停止。其独立/data目录问题也通过tmp_path隔离修正；初次失败保留。详细docs/specs/136-complementary-pdf-parsing/cited-original-handoff.md、issues/cited-alternative-source/。
+
+当前这批修复尚待提交（mayuan）；只有本任务prod2文件、测试/fixtures、136/210文档及Overview/本轮记录，保留共享变化。接下来按root要求提交合理验证的检查点，再Safari18044实际核验账户/模型/DOI/Task，点击正常继续并记录新Job。需要真实新模型填写、原Claim/字段核对、保存和重读验证，不能以固定源验证宣称业务通过。所有早前源模型调用可按同请求缓存合法复用，统计新/复用范围。
+
+仍需完整排障轮五阶段，再按精确ID清理重传并完成无需debug完整五阶段，保留最终论文。阶段二至五仍全未执行，不得宣布完成。原纸名/哈希/用户和超管及返修要求见下文与case；图谱标题目标High-throughput Study on Rare-earth Clathrate Hydride High-temperature Superconductors。若笼状标签已正确，不能故意改坏制造返修。
+
+## 最新业务进展：原Job已完成29/29分段并进入结构优化/材料整理
+
+observe-20261110T180324089749Z.json：Task d789acceee124022b3257f84780d1156、Job414a7e57-44b0-49d1-952d-026b9099d86a，status/stage=summarizing、reading_state=coverage_checked、29/29、无processing_error，当前structure_optimization receiving。此次实际结构报告call-4/call-6均36条（业务收录范围），已越过原预算与覆盖阻塞；独立无范围SI验证38→38另计，不能混成同一层证据。正文/SI新结构读取后本轮分段0→29已观察。
+
+调用账本events.jsonl按2026-11-10T17:35:10Z之后区分completed/reused；已留call-counts-*.json，requesting有预算准备/实际尝试双事件不能当调用次数。runtime原图事件文件会覆盖同迭代名并保留旧高编号，读取时需按本Job开始mtime/运行器generation识别，不凭残留文件计新请求。Safari当前已能读取真实动态，曾后台标签JS慢，选中本轮隔离窗口标签后恢复；原生window18044 URL需每次重枚举，禁止固定tab号。Chrome1758018018仍account。
+
+源码214ee6ef，续跑记录233f7f62，未push/部署；原业务模型/哈希不变。当前仍阶段一，待完整整理/谱/引用/字段核对和草稿保存，再科学校对送审，之后真实两项退回、返修重提、带日志批准、YH10探索/正式库核验。完整排障轮后才能精确ID清理并同源重传完成无需debug的完整五阶段；无正式PaperID，阶段二至五全未执行。
+
 ## 最新：214ee6ef已提交，原任务已Safari正常续跑
 
 Task d789acceee124022b3257f84780d1156，新Job414a7e57-44b0-49d1-952d-026b9099d86a，真实Worker已消费、正文structure_reading requesting。原模型LLM2/gpt-6.1-sol、input/endpoint hash和两个原文件未改；29/29是前轮分段保留，不冒充本轮重提。实际observe-20261110T173528305816Z.json、浏览器操作JSONL有证据。Safari18044/account/任务页已重新核验用户邮箱、模型、文件名和DOI；曾account标签变/upload，已重新按URL枚举导航恢复，不能沿旧标签号。Chrome1758018018超管账号已核验但阶段二仍未进入。

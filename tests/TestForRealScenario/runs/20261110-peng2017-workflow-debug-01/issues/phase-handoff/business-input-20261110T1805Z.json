@@ -1,0 +1,182 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "414a7e57-44b0-49d1-952d-026b9099d86a",
+  "at": "2026-11-10T18:08:35.434573+00:00",
+  "request_path": ".data/review_artifacts/d789acceee124022b3257f84780d1156/material_state_inventory_request.json",
+  "request_sha256": "5f2fb5e696572a7b668894b5a0c3ff6918cb47fa70299319a98c6ac1df8bce7c",
+  "candidate": {
+    "material": "CeH10",
+    "material_name": null,
+    "state_kind": "theoretical",
+    "structure_optimization": "classical_static",
+    "pressure_value_gpa": 200.0,
+    "reported_space_group_symbol": null,
+    "reported_space_group_number": null,
+    "basis_kind": "paper_quote",
+    "state_key": "state-9",
+    "property_modules": [
+      {
+        "module_code": "electronic_properties",
+        "module_key": "module-electronic_properties",
+        "definition_key": "module.electronic_properties",
+        "definition_version": 1,
+        "records": [
+          {
+            "record_key": "assembled-8-electronic_properties-0",
+            "record_type": "property",
+            "property_code": "dos_fermi",
+            "custom_property_key": null,
+            "name_raw": "Hydrogen-derived DOS at the Fermi level per volume",
+            "value_kind": "number",
+            "value_raw": "~0.0228 states/(eV Å³)",
+            "value_number": 0.0228,
+            "value_min": null,
+            "value_max": null,
+            "value_text": null,
+            "value_boolean": null,
+            "uncertainty": null,
+            "unit_raw": "states/(eV Å³)",
+            "canonical_unit": "states/(eV Å³)",
+            "method_code": null,
+            "method_raw": null,
+            "criterion_code": null,
+            "criterion_raw": null,
+            "evidences": [
+              {
+                "source_id": "inventory-source-59",
+                "quote_span": [
+                  0,
+                  968
+                ]
+              }
+            ],
+            "basis_kind": "paper_quote"
+          },
+          {
+            "record_key": "assembled-8-electronic_properties-1",
+            "record_type": "property",
+            "property_code": "dos_fermi",
+            "custom_property_key": null,
+            "name_raw": "Electronic density of states at the Fermi level N_Ef",
+            "value_kind": "number",
+            "value_raw": "~0.0228 states/(eV Å³)",
+            "value_number": 0.0228,
+            "value_min": null,
+            "value_max": null,
+            "value_text": null,
+            "value_boolean": null,
+            "uncertainty": null,
+            "unit_raw": "states/(eV Å³)",
+            "canonical_unit": "states/(eV Å³)",
+            "method_code": null,
+            "method_raw": null,
+            "criterion_code": null,
+            "criterion_raw": null,
+            "evidences": [
+              {
+                "source_id": "inventory-source-294",
+                "quote_span": [
+                  0,
+                  909
+                ]
+              },
+              {
+                "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+                "source_version": 1,
+                "pdf_page": 26,
+                "printed_page": null,
+                "block_id": "chart-reading-8787c5ca2ceee313bf4d7845f8414a7d1f8f514f",
+                "bbox": [
+                  105.81,
+                  68.832,
+                  514.775,
+                  293.228
+                ],
+                "polygon": null,
+                "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Fig. S33\", \"panel\": \"N_Ef\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level, N_Ef\", \"unit\": \"states/eV/Å³\", \"value_number\": 0.0228, \"value_raw\": \"~0.0228 states/eV/Å³\", \"reading_precision\": 0.0004, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CeH10\", \"category\": \"CeH10\", \"series\": \"N_Ef\", \"pressure_value_gpa\": 200, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"conditions\": [], \"reason\": \"Blue bar above CeH10; caption pressure.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "vision",
+                "table_id": null,
+                "figure_id": "Fig. S33",
+                "page": 26
+              }
+            ],
+            "basis_kind": "paper_quote"
+          }
+        ]
+      },
+      {
+        "module_code": "superconductive_properties",
+        "module_key": "module-superconductive_properties",
+        "definition_key": "module.superconductive_properties",
+        "definition_version": 1,
+        "records": [
+          {
+            "record_key": "assembled-8-superconductive_properties-0",
+            "record_type": "predicted_tc",
+            "property_code": "tc",
+            "custom_property_key": null,
+            "name_raw": "Superconducting transition temperature",
+            "value_kind": "number",
+            "value_raw": "~58 K",
+            "value_number": 58.0,
+            "value_min": null,
+            "value_max": null,
+            "value_text": null,
+            "value_boolean": null,
+            "uncertainty": null,
+            "unit_raw": "K",
+            "canonical_unit": "K",
+            "method_code": "unknown",
+            "method_raw": "Eliashberg equation",
+            "criterion_code": null,
+            "criterion_raw": null,
+            "evidences": [
+              {
+                "source_id": "inventory-source-87",
+                "quote_span": [
+                  0,
+                  865
+                ]
+              }
+            ],
+            "basis_kind": "paper_quote"
+          },
+          {
+            "record_key": "assembled-8-superconductive_properties-1",
+            "record_type": "predicted_tc",
+            "property_code": "tc",
+            "custom_property_key": null,
+            "name_raw": "Superconducting transition temperature",
+            "value_kind": "number",
+            "value_raw": "~49 K",
+            "value_number": 49.0,
+            "value_min": null,
+            "value_max": null,
+            "value_text": null,
+            "value_boolean": null,
+            "uncertainty": null,
+            "unit_raw": "K",
+            "canonical_unit": "K",
+            "method_code": "unknown",
+            "method_raw": "Eliashberg equation",
+            "criterion_code": null,
+            "criterion_raw": null,
+            "evidences": [
+              {
+                "source_id": "inventory-source-88",
+                "quote_span": [
+                  0,
+                  867
+                ]
+              }
+            ],
+            "basis_kind": "paper_quote"
+          }
+        ]
+      }
+    ]
+  },
+  "scope": "当前业务规划输入CeH10@200GPa Tc/DOS的reported_space_group_symbol为null，未借用S31声子R-3m；最终Fm-3m归属与字段核对仍待后续，不作为审批"
+}

@@ -1,5 +1,7 @@
 # 实施计划：MinerU 核心的四工具互补解析
 
+明确引用的原始备用块须随当前候选进入后续填写：form_sources仅在只读视图补入同文件/页/版本/引句一致的所引原块，保留原IR路由，排除派生读图事实。调用者从当前material_states传递引用；后续来源门和科学核对不变。实施及验证见[cited-original-handoff.md](cited-original-handoff.md)。
+
 **日期**：2026-10-14。**Issue**：[#136](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/136)。**基线**：[Spec](spec.md) 与已确认的 [四工具架构](four-tool-architecture.md)。
 
 ## 范围与技术上下文

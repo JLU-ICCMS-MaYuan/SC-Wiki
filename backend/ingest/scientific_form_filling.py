@@ -99,9 +99,46 @@ def candidates(states, *, state_offset=0):
             if record.get("property_code") in SUPPORTED}
 
 
-def form_sources(documents, sources):
+def _referenced_original_views(documents, references):
+    """为当前明确引用补齐原始备用块；只改变请求视图，不改主备路由或原IR。"""
+    included = {}
+    def visit(value):
+        if isinstance(value, list):
+            for item in value:
+                visit(item)
+        elif isinstance(value, dict):
+            file_id = value.get('file_id')
+            ir = documents.get(file_id) if isinstance(file_id, str) else None
+            block_id, quote = value.get('block_id'), value.get('quote')
+            if ir is not None and isinstance(block_id, str) and isinstance(quote, str) and quote.strip():
+                page = next((value[k] for k in ('pdf_page', 'page_start', 'page')
+                             if value.get(k) is not None), None)
+                block = next((b for b in ir.blocks if b.block_id == block_id), None)
+                if (block and str(block.pdf_page) == str(page)
+                        and value.get('source_version') in (None, ir.source_version)
+                        and value.get('source_sha256') in (None, ir.source_sha256)
+                        and not {'chart_reading', 'chart_unresolved'} & set(block.metadata)
+                        and ' '.join(quote.split()) in ' '.join(block.text.split())):
+                    included.setdefault(ir.source_file_id, set()).add(block_id)
+            for item in value.values():
+                visit(item)
+    visit(references)
+    views = dict(documents)
+    for file_id, ids in included.items():
+        ir = documents[file_id]
+        if any(b.block_id in ids and b.metadata.get('selected_for_reading') is False for b in ir.blocks):
+            view = ir.model_copy(deep=True)
+            for block in view.blocks:
+                if block.block_id in ids:
+                    block.metadata['selected_for_reading'] = True
+            views[file_id] = view
+    return views
+
+
+def form_sources(documents, sources, *, references=None):
     """PDF 使用正式 IR 原块；不把 Markdown 页／块注释作为原文引句。"""
     from .domain_extraction import structured_chunks
+    documents = _referenced_original_views(documents, references)
     result = []
     for source in sources:
         ir = documents.get(source.get("file_id"))

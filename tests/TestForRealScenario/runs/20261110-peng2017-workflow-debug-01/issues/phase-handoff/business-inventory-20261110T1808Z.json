@@ -1,0 +1,178 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "414a7e57-44b0-49d1-952d-026b9099d86a",
+  "inventory_sha256": "3dabd145abd04241677e576b1b4939c3405cd2dd7244a995bc46fbf07d18d6ca",
+  "state": {
+    "reason": "200 GPa CeH10笼状状态拥有图4及S33标量和表S1完整Fm-3m坐标。S31的R-3m声子色散是另一相，不能替换本状态空间群。",
+    "source_ids": [
+      "inventory-source-44",
+      "inventory-source-59",
+      "inventory-source-87",
+      "inventory-source-88",
+      "inventory-source-294",
+      "inventory-source-983",
+      "inventory-source-984",
+      "inventory-source-985",
+      "inventory-source-988",
+      "inventory-source-999",
+      "inventory-source-185",
+      "inventory-source-187",
+      "inventory-source-273"
+    ],
+    "values": {
+      "material": "CeH10",
+      "material_name": null,
+      "pressure_value_gpa": 200,
+      "reported_space_group_number": 225,
+      "reported_space_group_symbol": "Fm-3m",
+      "state_kind": "theoretical",
+      "structure_optimization": "classical_static"
+    }
+  },
+  "sources": [
+    {
+      "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+      "file_role": "main",
+      "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "source_version": 1,
+      "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+      "page_start": 4,
+      "page_end": 4,
+      "content": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+      "source_id": "inventory-source-44"
+    },
+    {
+      "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+      "file_role": "main",
+      "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "source_version": 1,
+      "block_id": "chart-reading-c1add8b820ab1d073df0dbdb3ed2bde5e6b151e4",
+      "page_start": 4,
+      "page_end": 4,
+      "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"top\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Hydrogen-derived electronic density of states at the Fermi level per volume, N_Ef\", \"unit\": \"states/(eV Å³)\", \"value_number\": 0.0228, \"value_raw\": \"~0.0228 states/(eV Å³)\", \"reading_precision\": 0.0008, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CeH10\", \"category\": \"CeH10\", \"series\": \"H-derived DOS\", \"pressure_value_gpa\": 200, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"Ninth red H-derived DOS bar; shared CeH10 label and caption pressure 200 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+      "source_id": "inventory-source-59"
+    },
+    {
+      "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+      "file_role": "main",
+      "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "source_version": 1,
+      "block_id": "chart-reading-66f14e29423028c0ae92ce9ce767ca03a77617bd",
+      "page_start": 4,
+      "page_end": 4,
+      "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 58.0, \"value_raw\": \"~58 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CeH10\", \"category\": \"CeH10\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 200, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"CeH10 green left bar; caption pressure 200 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+      "source_id": "inventory-source-87"
+    },
+    {
+      "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+      "file_role": "main",
+      "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "source_version": 1,
+      "block_id": "chart-reading-36cc39e3dbf05ee6bf0f04aa0ac63dea5ecaa265",
+      "page_start": 4,
+      "page_end": 4,
+      "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 49.0, \"value_raw\": \"~49 K\", \"reading_precision\": 9.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CeH10\", \"category\": \"CeH10\", \"series\": \"μ*=0.13\", \"pressure_value_gpa\": 200, \"space_group_symbol\": null, \"mu_star\": 0.13, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"CeH10 navy right bar; caption pressure 200 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+      "source_id": "inventory-source-88"
+    },
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "file_role": "supplementary",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "source_version": 1,
+      "block_id": "03fa086c86ed4709a836dc268bed0854809b46648acf177e909403485ee0dbad",
+      "page_start": 2,
+      "page_end": 2,
+      "content": "Structure searches for rare earth (RE) hydrides of REHx (x = 1 - 12 and 13-24) with simulation cells ranging from one to four formula units were performed at 50, 100, 150, 200, 300, and 400 GPa. Our CALYPSO structural searches focus mainly on the REHx (x = 2-12) stoichiometries, Ab Initio Random Structure Searching (AIRSS) [10] calculations were also employed to confirm some of our key clathrate structures, while some H-richer stoichiometries REHx (x =13-24) were also considered in the AIRSS approach [10]. Each generation contained 50 structures, and structures in the first generation were produced randomly with symmetry constraints. All the generated structures are optimized to their local minima by using DFT calculations. Here, almost all geometrical optimization calculations are performed by using PAW potentials and VASP code [11]. There are two exceptions on La hydrides and Pr hydrides, where the geometrical optimizations are performed by OTF potentials and CASTEP code [12] since PAW potentials of La and Pr are invalid to be used at high pressure as tested. During structure evolution, 60% of structures in the first generation with lower enthalpies are selected to produce the structures in the next generation by PSO. 40% of the structures in the new generation are randomly generated. A structure fingerprinting technique of bond characterization matrix is applied to produce structures, so that identical structures are strictly forbidden. These procedures significantly enhance the diversity of structures, which is crucial for the searching efficiency of algorithm. The local optimizations are performed by use of the conjugate gradients method and the criteria of the enthalpy change is 2 \\times 1 0 ^ { - 5 }   \\mathrm { e V } per atom. For most of the cases, the structure searches reach the convergence after 50 generations covering about 2500 structures.",
+      "source_id": "inventory-source-185"
+    },
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "file_role": "supplementary",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "source_version": 1,
+      "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+      "page_start": 3,
+      "page_end": 3,
+      "content": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+      "source_id": "inventory-source-187"
+    },
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "file_role": "supplementary",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "source_version": 1,
+      "block_id": "678eb75e60a0cf061aaac21bf5e4c7e3cafa26f57787c105ddc0567b37683480",
+      "page_start": 24,
+      "page_end": 24,
+      "content": "Fig. S31. The calculated phonon dispersion curves of stable Ce hydrides. ( \\mathsf { a } ) \\mathrm { ~ - ~ } ( \\mathsf { e } ) are phonon dispersion curves of \\mathrm { C e H } _ { 3 } within R-3m phase at 50 GPa, \\mathrm { C e H _ { 4 } } within I 4 / m m m phase at 50 GPa, \\mathrm { { C e H _ { 8 } } } within P 6 _ { 3 } m c phase at 100 GPa,CeH9 within P 6 _ { 3 } / m m c phase at 2 0 0 \\; \\mathrm { G P a } _ { \\circ } and \\mathrm { C e H _ { 1 0 } } within R – 3 m phase at 200 GPa, respectively. The absence of imaginary frequency of Ce hydrides confirms their dynamic stabilities.",
+      "source_id": "inventory-source-273"
+    },
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "file_role": "supplementary",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "source_version": 1,
+      "block_id": "chart-reading-7b6b128e0dcd9cf7a42c03d781edb835b8136ece",
+      "page_start": 26,
+      "page_end": 26,
+      "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Fig. S33\", \"panel\": \"DOS at Fermi level\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Electronic density of states at the Fermi level N_Ef\", \"unit\": \"states/(eV Å³)\", \"value_number\": 0.0228, \"value_raw\": \"~0.0228 states/(eV Å³)\", \"reading_precision\": 0.0004, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"CeH10\", \"category\": \"CeH10\", \"series\": \"N_Ef\", \"pressure_value_gpa\": 200, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"Pressure\", \"unit\": \"GPa\", \"value\": \"200\"}], \"reason\": \"Blue bar above CeH10; caption supplies 200 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+      "source_id": "inventory-source-294"
+    },
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "file_role": "supplementary",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "source_version": 1,
+      "block_id": "9e9bf0046c6da010117e2b58284cd294f5e436936265e8886e74f51c1203fbe4",
+      "page_start": 33,
+      "page_end": 33,
+      "content": "CeH10",
+      "source_id": "inventory-source-983"
+    },
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "file_role": "supplementary",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "source_version": 1,
+      "block_id": "3e9c615e99141292c94b1223d8a3dfc0c96d983ead1021b962de2fb169fdd177",
+      "page_start": 33,
+      "page_end": 33,
+      "content": "(200 GPa)",
+      "source_id": "inventory-source-984"
+    },
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "file_role": "supplementary",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "source_version": 1,
+      "block_id": "63d56398d96bbf2727e66c3c028ab6944348bfcd7f1561cebab21499d420ae9e",
+      "page_start": 33,
+      "page_end": 33,
+      "content": "Fm-3m",
+      "source_id": "inventory-source-985"
+    },
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "file_role": "supplementary",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "source_version": 1,
+      "block_id": "1feef91b718300976ad84dcde7e4690579649ba2974b3d0dcd00b87d713bd9f5",
+      "page_start": 33,
+      "page_end": 33,
+      "content": "Ce(4b)",
+      "source_id": "inventory-source-988"
+    },
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "file_role": "supplementary",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "source_version": 1,
+      "block_id": "8640cee58d3749d80d4e73a87143293bc8a9d067dee086355f02435d4fd7f59b",
+      "page_start": 33,
+      "page_end": 33,
+      "content": "0.25000",
+      "source_id": "inventory-source-999"
+    }
+  ],
+  "scope": "真实规划输出采用CeH10@200GPa Fm-3m，S31 R-3m声子独立；后续填写、科学核对、保存和角色交接尚未完成"
+}

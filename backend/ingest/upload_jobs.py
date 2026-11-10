@@ -2757,7 +2757,7 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         from .scientific_form_filling import form_sources
         from .scientific_output_schema import filling_schema, decode_optional_containers
         from .paper_first import persist_paper
-        material_sources = form_sources(document_set, scientific_sources)
+        material_sources = form_sources(document_set, scientific_sources, references=draft['material_states'])
         update_state(task_id, suggestions_status='running', suggestions_error=None)
         def fill_existing_fields(prompt, content):
             with call_phase("scientific_form_filling"):

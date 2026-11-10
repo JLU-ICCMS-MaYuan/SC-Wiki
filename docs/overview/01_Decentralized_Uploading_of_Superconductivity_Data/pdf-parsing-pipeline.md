@@ -310,7 +310,7 @@ PDF提取在前置收录判断之前读取科学图表：模型结合原图、�
 
 ## 唯一四工具默认解析与区域证据
 
-上传页不再提供方案选择，新任务固定 `parser_profile=complementary`。MinerU 4.0.6 basic OCR 是完整正文/补充的主干；Docling 2.130.0 CPU 补强表格页，Marker 2.0.0 本地 Surya/llama.cpp 补强公式/图像、破损文字和空页。GROBID 分别读取当前论文 header、参考文献表和正文引文目标；有效正文题录优先使用 GROBID，缺字段经原文提取和人工核对。四个解析工具本地运行，DeepSeek 接收选中内容做科学提取，JSON 请求显式关闭 thinking；Marker 的额外 LLM 修订关闭，本地 VLM 仍运行。
+上传页不再提供方案选择，新任务固定 `parser_profile=complementary`。MinerU 4.0.6 basic OCR 是完整正文/补充的主干；Docling 2.130.0 CPU 补强表格页，Marker 2.0.0 本地 Surya/llama.cpp 补强公式/图像、破损文字和空页。材料候选已明确引用的真实备用原块按文件、页、版本、摘要和引句补入填写的只读来源视图，原IR主备路由保持；未引用备用块和派生读图事实不据此混入原文，后续来源门与科学核对保持。GROBID 分别读取当前论文 header、参考文献表和正文引文目标；有效正文题录优先使用 GROBID，缺字段经原文提取和人工核对。四个解析工具本地运行，DeepSeek 接收选中内容做科学提取，JSON 请求显式关闭 thinking；Marker 的额外 LLM 修订关闭，本地 VLM 仍运行。
 
 新 API 仅接受缺省/null/complementary，其他值返回 422。历史任务沿用已有方案及 IR，不自动重解析；TXT/MD 与结构附件保留原路由。其他适配器保留供历史内部读取，不作为新用户可选项。
 

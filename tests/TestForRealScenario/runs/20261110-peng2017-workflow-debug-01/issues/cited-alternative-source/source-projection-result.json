@@ -1,0 +1,12 @@
+{
+  "original_files_hash_equal": true,
+  "original_ir_unchanged": true,
+  "required_source_identities": 15,
+  "missing_before": 2,
+  "missing_after": 0,
+  "primary_sources": 1144,
+  "current_sources": 1146,
+  "preferred_input_chars": 19852,
+  "new_model_calls": 0,
+  "scope": "原PDF哈希/原IR和真实候选原引用的生产form_sources/build_context交接；新模型及正式保存待网页续跑"
+}

@@ -238,17 +238,29 @@ def test_each_model_retry_keeps_its_own_response_and_does_not_reuse_partial_text
     monkeypatch.setattr(llm_context, "get_llm_config", lambda: config)
     monkeypatch.setattr(llm.time, "sleep", lambda _: None)
     monkeypatch.setattr(upload_jobs, "_chunk_result_path", lambda *_: tmp_path / "chunk.json")
+    monkeypatch.setattr(upload_jobs, "artifact_directory", lambda _: tmp_path / "artifacts")
     from backend.storage import paths
     monkeypatch.setattr(paths, "object_mode", lambda: False)
     attempts = 0
-    valid = '{"extraction_version":"1","material_states":[]}'
+    from backend.ingest.domain_extraction import Extraction, EXTRACTION_OUTPUT_SCHEMA
+    from backend.rag.structured_output import validate_output
+    payload = Extraction(extraction_version='1', material_states=[]).model_dump(mode='json')
+    payload['metadata'] = {key: None for key in EXTRACTION_OUTPUT_SCHEMA['properties']['metadata']['properties']}
+    validate_output(payload, EXTRACTION_OUTPUT_SCHEMA)
+    valid = json.dumps(payload)
     def create(**_):
         nonlocal attempts
         attempts += 1
         if attempts == 2:
             raise APIConnectionError(request=httpx.Request("POST", "http://unused"))
+        if attempts == 1:
+            def interrupted():
+                yield SimpleNamespace(usage=None, choices=[SimpleNamespace(
+                    delta=SimpleNamespace(content='{invalid'), finish_reason=None)])
+                raise APIConnectionError(request=httpx.Request("POST", "http://unused"))
+            return interrupted()
         return [SimpleNamespace(usage=None, choices=[SimpleNamespace(
-            delta=SimpleNamespace(content="{invalid" if attempts == 1 else valid), finish_reason="stop")])]
+            delta=SimpleNamespace(content=valid), finish_reason="stop")])]
     monkeypatch.setattr(llm, "_client", lambda _: SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create))))
     chunk = Chunk(paper_id=0, chunk_index=0, section_name="Document IR", heading=None,
                   content=json.dumps({"file_id":"f", "pages":[]}), token_count=1)

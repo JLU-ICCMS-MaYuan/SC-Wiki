@@ -37,6 +37,68 @@ def response(sources):
                       'category': 'curve_only', 'source_ids': [sources[0]['source_id']]}], 'unresolved': []}
 
 
+def alternative_documents():
+    from backend.ingest.document_ir import DocumentIR, DocumentBlock, PageGeometry, content_hash
+    state, sources = fixture()
+    target = next(s for s in sources if '235 K' in s['content'] and s.get('pdf_page') == 3)
+    documents = {}
+    for source in sources:
+        file_id = source['file_id']
+        if file_id not in documents:
+            pages = sorted({s['pdf_page'] for s in sources if s['file_id'] == file_id})
+            documents[file_id] = DocumentIR(document_id=file_id, source_file_id=file_id,
+                source_sha256='a'*64, parse_profile='complementary',
+                pages=[PageGeometry(pdf_page=p, width=600, height=800) for p in pages])
+        selected = source['block_id'] != target['block_id']
+        documents[file_id].blocks.append(DocumentBlock(block_id=source['block_id'],
+            block_type='paragraph', pdf_page=source['pdf_page'], reading_order=len(documents[file_id].blocks),
+            text=source['content'], content_hash=content_hash(source['content']),
+            metadata={'selected_for_reading': selected, 'source_parser': 'mineru' if selected else 'marker'}))
+    return state, sources, target, documents
+
+
+def test_explicit_alternative_survives_form_sources_filling_and_reread(tmp_path):
+    from backend.ingest.scientific_form_filling import form_sources, fill_scientific_forms
+    from backend.ingest.scientific_context import build_context
+    state, sources, target, documents = alternative_documents()
+    before = {key: ir.model_dump(mode='json') for key, ir in documents.items()}
+    files = [{'file_id': key, 'file_role': 'main', 'content': ''} for key in documents]
+    ordinary = build_context(form_sources(documents, files))['sources']
+    assert target['block_id'] not in {s['block_id'] for s in ordinary}
+    requested = form_sources(documents, files, references=state)
+    calls = []
+    def model(system, prompt):
+        data = json.loads(prompt)
+        calls.append(data)
+        assert target['block_id'] in {s['block_id'] for s in data['sources']}
+        return response([{**s, 'pdf_page': s['page_start']} for s in data['sources']])
+    result, report = fill_scientific_forms([state], requested, model)
+    assert report['status'] == 'completed' and len(calls) == 1
+    records = result[0]['property_modules'][0]['records']
+    assert [r['value_number'] for r in records] == [235, 220]
+    assert all(target['block_id'] in {e['block_id'] for e in r['evidences']} for r in records)
+    path = tmp_path / 'filled.json'
+    path.write_text(json.dumps({'states': result, 'report': report}, ensure_ascii=False))
+    assert json.loads(path.read_text())['states'] == result
+    assert {key: ir.model_dump(mode='json') for key, ir in documents.items()} == before
+
+
+@pytest.mark.parametrize('fault', ['file', 'page', 'version', 'quote', 'derived'])
+def test_unverified_alternative_is_not_added_as_original_source(fault):
+    from backend.ingest.scientific_form_filling import form_sources
+    from backend.ingest.scientific_context import build_context
+    state, sources, target, documents = alternative_documents()
+    reference = {**target, 'quote': target['content']}
+    if fault == 'file': reference['file_id'] = 'another-file'
+    elif fault == 'page': reference['pdf_page'] += 100
+    elif fault == 'version': reference['source_version'] = 99
+    elif fault == 'quote': reference['quote'] = 'invented original text'
+    else: documents[target['file_id']].block(target['block_id']).metadata['chart_reading'] = {'value': 235}
+    files = [{'file_id': key, 'file_role': 'main', 'content': ''} for key in documents]
+    result = build_context(form_sources(documents, files, references={'evidences': [reference]}))
+    assert target['block_id'] not in {s['block_id'] for s in result['sources']}
+
+
 def test_real_four_candidates_become_one_group_two_points_with_all_origins():
     from backend.ingest.scientific_form_filling import apply_plan
     state, sources = fixture()
