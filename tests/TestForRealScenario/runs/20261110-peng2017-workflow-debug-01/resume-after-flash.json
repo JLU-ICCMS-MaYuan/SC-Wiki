@@ -1,0 +1,15 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "29ef38d7-65c0-42b0-b4c3-04ad63549d45",
+  "source_commit": "3d0802112edd0e6b4476767f2b8e9432f00c8481",
+  "browser_user_window": 18044,
+  "execution_model": {
+    "provider": "server:LLM2",
+    "model": "gpt-6.1-sol",
+    "catalog_id": "LLM2",
+    "input_hash": "ccaff15ce7571f2ce96e907a5152e8fd2340ee440552a040313a271016c5b5d3",
+    "endpoint_hash": "8f11cc1d483994c69a25d434dbc98dc8be8e43bd63ef3a59af2f68795f62e5af"
+  },
+  "operation": "网页核验账号/模型/原论文后继续；SI13真实输出，未重复上传",
+  "remaining": "阶段1未送审，完整五阶段和最终无需debug复测仍未完成"
+}

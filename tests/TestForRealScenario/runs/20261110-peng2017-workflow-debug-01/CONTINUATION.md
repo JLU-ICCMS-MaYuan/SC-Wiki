@@ -1,3 +1,51 @@
+## 最新：Flash/MySQL/旧失败前置已完成提交，原gpt任务已真实网页续跑
+
+当前Task d789acceee124022b3257f84780d1156，新Job29ef38d7-65c0-42b0-b4c3-04ad63549d45。实际Safari新隔离窗口18044（17885现有同URL两个标签所以不用），account重核myth620137018@163.com用户、头部openAI/gpt-6.1-sol后正常继续；超管Chrome1758018018仍/account，使用前再核验。每次按实际URL与window重新枚举，不沿标签序号。当前真实Job已消费、SI13页请求已送模型并接收，暂无processing_error；29/29为前轮候选，当前前置图源仍进行，实际重提/复用待账本核验。没有重复上传或业务回填。
+
+3d080211已本地提交Flash前置收尾：原模型Flash13次原PDF新图读38条/同原位图独立参照全部0偏差，ScH6 DOS.0156/lambda1.30/Tc99/86、mu=.1/.13/300GPa；01/02重复框失败保留，03图读后测试验证代码转义失败保留，修纯测试验证并编译，核心backend SHA一致才复用有效IR，另2次Flash真实normalize/assemble/fill/JSON重读完成，Sc四字段共同lambda/约数/图源保持。独立像素参照测试专用，不进生产/模型提示。PrH9无独立可定位值空着，其遮挡/截断措辞未证实，仅保留模型观察，不当物理事实。详FLASH-FIG4-VALIDATION.md及docs/specs/234-image-feedback-repair/flash-fig4-scientific-validation.md。
+
+当前/独立140项、四宿主233、12变异、字段契约通过；私有MySQL两次79项零skip（原6涵盖），业务库未使用、进程停止临时数据移除；旧失败当前16pass。b1348ad5目录/原文上下文修复已提交，原225154token目录1308压至215/70814，原文/图片不删。#232—235已更新评论6773336250/6773337290/6773338239/6773339319，继续OPEN，未push、官方OpenAI实际账号仍未覆盖。
+
+未提交剩余仅本轮阶段记录/既有Ce源交接验证docs（136/211）及helper，注意只纳入本任务，source code应已全部提交。接下来必须继续完整业务：解析/整理/字段审核/谱/引用→用户校对保存送审→超管真实两项退回→原用户修改重提→具体通过日志批准→探索YH10命中本轮与正式库主要数据/方法真实所有权及来源核验。排障轮完整五阶段后才能精确ID留证清理，再同原文件最终无debug完整五阶段并保留最终正式论文；不能以这些前置通过结束。
+
+当前无正式PaperID，阶段2—5全未执行。输入文件/角色/SHA/DOI在case。图谱标题目标High-throughput Study on Rare-earth Clathrate Hydride High-temperature Superconductors；五类笼状结构现有ID1，草稿已正确不可故意造改，届时需实际找真实返修项。CeH10@200GPa Tc/DOS最终Fm-3m用户已确认，声子R-3m证据独立；当前既有23fd2125源交接会在续跑把S1原文交给误提SI窗口，不放开跨物相保护，隔离probe已phase=null及正式normalize/JSON重读通过。实际业务纠正仍待核验，不能把隔离答案写回。
+
+## 最新用户追加要求及已通过前置：先Flash科学验收/MySQL/七项旧失败，再继续原文献完整黑盒
+
+用户已明确答复：本任务接手，并先完成Flash Fig.4科学读数、原6项MySQL及7项旧基线，再继续黑盒。因此此前“等待共享归属确认”已失效。共享基线71b02686、MySQL/旧失败修订9861300e已由原任务提交。本任务独立目录/原文上下文修复b1348ad5已经提交（102共享/独立，233表单，12变异、字段契约；真实SI13页5条读数及IR重读）。当前原业务Task仍d789acceee124022b3257f84780d1156、Job2a43b499…failed预算错误，尚未再次点击继续，遵守先完成前置，不删除/重传。
+
+Flash实际模型server:LLM1/deepseek-flash独立于原文献gpt-6.1-sol，浏览器模型未切换。新flash-fig4-current-01/02因盘点3面板重复同外框失败，已保留。当前未提交普通实现补齐：backend/ingest/discovery_feedback.py及chart_reading接线（旧page_inventory保护原样，错误页原模型+实际600DPI整图/图注重读，成功页面不重问，无新依据停止，复用13动作预算）；image_geometry.py提供无科学标签的像素框/轴/刻度/色块候选，image_reading/image_feedback接线帮助原模型定位，程序不赋材料、物理量或科学数值。
+
+flash-fig4-current-03已13次同Flash新模型实际读取原PDF Fig4，38事实、ScH6 DOS.0156、lambda1.3、Tc99/86与mu=.1/.13、300GPa。新测试专用fig4_pixel_reference.py按原始879×632位图已核对刻度/材料标签/基线连通柱建立独立参照（无GPT投票、无正文反推轴；3原位图像素容差不看模型自报精度），全部38条数值/柱归属/压力/mu/单位0错误。PrH9 Tc不可辨保留未读，不填0。旧Flash6事实被严格参照检出39问题；旧GPT38事实通过同参照。原图与参考JSON在run，生产无论文名单/预期值。
+
+03随后验收脚本的字面换行转义错误使后处理前SyntaxError，原失败留log；仅修测试验证代码并compile，核心backend源码未改。为不重发13次有效读图，run_visual_sources_validation.py增加--resume-ir守卫原PDF/模型/provider/逐核心文件SHA，flash-fig4-current-03-postprocess复用该IR，科学提取和正式normalize/assemble/fill另发2次同Flash真实调用，保存重读完成，scientific-verdict.json和form-scientific-verdict.json均passed/issues[]，Sc四字段/共用lambda/约数/原图来源完整。端点旧检查点没有摘要，resume.json如实披露，没有伪造；本轮沿同一LLM1，原业务模型/端点未切换。
+
+MySQL已用当前码重新启动私有临时MySQL8.4.2（127.0.0.1:60439，issue137_test_fe6fe4b20e18，绝非业务3307）：mysql-current-verification/pytest.log 79 passed零跳过，涵盖原6项；result.json business_database_used=false/server_stopped=true，目录实际已移除。七项旧夹具已986修，当前另跑test_property_field_review+test_structure_request_redundancy+test_mysql_isolation，old-seven-current-verification.log 16 passed。
+
+当前在收尾新geometry/discovery/科学参照的既有回归、四宿主/字段/变异与独立源码，然后更新232—234对应Spec/验证/Overview并仅提交本任务hunks（注意他人可能仍改同文档；code源当前只本任务修改，已提交源均不含他人未提交）。之后实际Safari17885重新核验账号与任务点击继续，记录新Job及实际v10；原gpt Task从原状态继续，现行CeH10源交接会让初始DOS不借声子R-3m，用户已确认Tc/DOS最终Fm-3m，声子证据独立。前置局部通过不代替业务。
+
+原五阶段与跨轮规则不变：先排障轮完整上传解析/送审→超管真实拒绝→同用户两项修改重提→通过日志批准→探索YH10命中本轮及正式库/来源/方法真实归属核验；完整排障通过才精确ID留证清理，再同原文件最终无需debug完整五阶段并保留正式记录。当前正式PaperID仍无，阶段2—5全未执行。图谱标题返修目标用户已指定；材料五类笼状结构，已正确不能造改，具体返修需草稿实际核实。
+
+## 最新阻塞：v10全量图像对象目录超本地预算，已提问修复归属
+
+当前Task d789acceee124022b3257f84780d1156，Job2a43b499-c176-4a94-8dfd-11a291d32160已failed，SI13页chart_reading在发模型前ContextBudgetError；不是503。原29段未删除，当前仍阶段1无PaperID，不能点击未修原请求反复试。已通过request_user_input_async询问：由负责232—235的任务修（需用户给任务名并授权消息），或本任务接手必要共享实现并提交。尚未得到答复，不能发消息给其他任务。
+
+实际失败225154估算tokens，payload.available_objects含1308对象（319827字符）及原文source_pages50273字符，7个工具schema还重复所有block_id。离线严格父表包含探针：排除已退出当前选择/派生读数目录，并将805个有同页、bbox完整包含父表的单元格入口收拢到父表，保留无父表/越界单元格能力；215目录项，预算70814<96000，全文和图片逐值不变。尚未改生产代码或发模型，不能宣称修复通过。issues/image-catalog-budget/含failure、catalog-probe、strict-parent-probe、805cell-parent映射、blocked-state及本地完整failed-request.json.gz。完整大请求不提交，轻量证据可以。
+
+目录/动作涉及其他任务尚未提交的新文件backend/ingest/image_feedback.py、image_reading.py及review_tool_contract新接线，依赖pdf_regions等未提交实现。无法把这几行独立提交而不带入整组新文件，须遵守AGENTS只提交本任务边界；不要擅自接管或重置对方代码。后续若用户授权接手，按需求/实现/失败先红后绿/原PDF受影响调用真实验证；不能提高96000预算、删正文/SI科学依据或把旧AI答案回填。
+
+此前CeH10初猜保护已调查：原29/29与coverage complete后，SI DOS借用声子R-3m触发规划保护。既有23fd2125源交接隔离正式_read_chunk新模型返回物相null，normalize/来源/JSON重读通过，9既有回归通过；用户已确认Tc/DOS最终Fm-3m，声子R-3m依据独立保留。该隔离探针未传整篇tc_material_scope，只证明物相源交接，不算整篇规划通过；已另存PHASE-HANDOFF.md及verify_phase_handoff_live.py。新Job在新读图v10前置预算处失败，实际业务尚未再次走到该纠正窗口。
+
+仍需完整排障五阶段→精确ID留证清理→相同原PDF最终无调试五阶段。用户Safari17885（/account重核myth620137018@163.com用户），超管Chrome1758018018使用前重核；每次按URL枚举。已修复提交b62b3946分片、4adc30d1柱边、9619fd05断流；记录提交fd38249d/2637ecb0。共享232—235源码保留未混入。图谱标题和五类笼状结构返修目标在case，草稿已正确不能造改；当前无草稿最终核验/送审。
+
+## 最新：CeH10旧初猜保护触发，既有源交接验证后网页续跑
+
+当前Task仍d789acceee124022b3257f84780d1156，新Job2a43b499-c176-4a94-8dfd-11a291d32160（Safari17885实际点击继续，账号重核myth620137018@163.com）。先observe，不重复续跑。此前073d351d已实际29/29、正文/SI coverage complete、requires_human=false；状态规划因CeH10@200GPa初始电子DOS借了S31声子R-3m，拟按S1改Fm-3m时，被现行跨物相保护拒绝。守卫正确，本次没有改生产代码或放宽保护。
+
+已对照#211 2026-11-10原确认与23fd2125既有机制：inventory_scope_sources能将S1等同SI原文交回误提SI窗口2。隔离verify_phase_handoff_live.py经正式_read_chunk/normalize/来源校验/JSON候选保存重读，新模型返回CeH10物相null，不再借声子；用户已明确Tc/DOS最终采用Fm-3m，声子R-3m独立保留。隔离结果不写业务、不拿旧答案当新提取；探针没有传整篇tc_material_scope，不能当整篇范围/规划通过。量值图源和未改文字复用，物相新判断。既有handoff在真实任务下一轮正常执行；若磁盘读图版本变化，需记录实际加载版本与重跑范围，不乱删任务。
+
+失败规划请求/响应、原SI候选已gzip备份issues/phase-handoff/，隔离模型及产物在live/，报告live-summary.json。当前依旧阶段1未送审，无PaperID。完整排障五阶段→精确ID留证清理→同原文件无调试最终五阶段规则不变。图谱标题与五类笼型结构返修条件在case；如新稿已正确不得造改。前三修复b62b3946/4adc30d1/9619fd05已提交，其他共享#232—235源码持续保留，不纳入本任务提交。
+
 ## 最新实际版本说明：当前Job加载v8，磁盘已变v9
 
 最新Job仍073d351d-afb7-4ad8-9ab7-c04695f8b6a3。9619fd05后真实网页继续，运行器重新加载了并行#232—235的未提交新图像/反馈代码，实际请求reader_version=scientific-chart-reading-v8（generation10），磁盘随后已v9；不能把当前磁盘版本当作已运行版本。原26/29候选未删，但新图源会使部分签名失效；实际复用/重跑必须据请求账本和新候选统计，不能宣称只补3段。

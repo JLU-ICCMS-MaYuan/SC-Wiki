@@ -32,11 +32,11 @@
   "started": "2026-11-10T06:21:03.520496+00:00",
   "source_commit": "2b06d1f18033f73bd40a6c54ac288fb52a776a15",
   "worktree_status": " M backend/rag/llm.py\n?? backend/tests/test_json_mode_request.py\n",
-  "status": "extracting",
+  "status": "parsing_after_flash_delivery",
   "phases": [
     {
       "id": "1",
-      "status": "服务端已核验同任务正文/SI角色大小哈希一致，实际Worker解析中"
+      "status": "阶段一原任务真实网页续跑解析中，尚未送审；其余阶段未执行"
     },
     {
       "id": "2",
@@ -97,18 +97,18 @@
     "CeH10_200GPa_Tc_DOS": "用户已明确确认Fm-3m，R-3m声子依据独立保留"
   },
   "browser_windows": {
-    "user_safari": 17885,
+    "user_safari": 18044,
     "superadmin_chrome": 1758018018
   },
   "pre_upload_note": "旧选择状态已空且未发任务；新建隔离Safari17122，角色邮箱核验后重新装入原文件",
   "source_commit_at_upload": "9e58ca05fe3a1d235064d85c91ddc82209c06519",
   "task_id": "d789acceee124022b3257f84780d1156",
-  "job_id": "073d351d-afb7-4ad8-9ab7-c04695f8b6a3",
+  "job_id": "29ef38d7-65c0-42b0-b4c3-04ad63549d45",
   "upload_helper": {
     "method": "正常拖放入口",
     "sha256": "4faa51d1225cccdda7c6ea7e286784db4bb2b5bcc87d08c87acbbd00b1817e27",
     "note": "仅测试辅助修改，服务器已验证同原文件哈希"
   },
-  "latest_resume_commit": "9619fd054cbe875800fe599c1489ca82d4427f4c",
-  "latest_verified_step": "新Job073d351d generation10实际加载v8（磁盘后来v9）；图表复读结束，结构读取中，暂无错误；26/29为上轮完整分段数，当前输入变化后实际复用待核验"
+  "latest_resume_commit": "3d0802112edd0e6b4476767f2b8e9432f00c8481",
+  "latest_verified_step": "Flash全38数据/原图像素参照/Sc后处理前置通过，MySQL79零skip和旧失败16通过；代码3d080211已提交，原gpt任务真实Safari18044续跑新Job29ef38d7…已越SI13预算拦截"
 }

@@ -199,3 +199,8 @@ Peng2017网页任务`a9f7f398895249f58cf3fd6137176746`停在正文Marker初始�
 相邻CeH9的初猜物相也不再从声子图直接借用；10项unknown优化分类依据新增原Methods确定为classical_static。相邻变化及全部原数值比较见adjacent-fields.json/verification.json，不把初始阶段的条件完善当最终科学通过。
 
 第一次辅助脚本窗口摘要页码误写22而非实际18—28，已停止该私有隔离进程，原请求/部分输出保留且不计通过；修正为读取原_source后重跑。原PDF图像/块页码及业务任务未改。证据runs/20261110-peng2017-phase/，原页、真实失败重放、用户确认、隔离新提取及保存重读分别保留。
+
+
+## 2026-11-10 适用条件原文交接续轮验证
+
+新Y-H任务电子DOS借用声子R-3m时，现有23fd2125已能找回同SI S1原文，不传规划答案或人工确认作原句。隔离正式_read_chunk新模型、normalize、来源及JSON保存重读返回物相未知，9项既有回归通过。没有改生产代码；Tc/DOS最终采用Fm-3m的既有确认与声子R-3m分开保留。真实网页已继续，完整规划及五阶段仍未完成，见tests/TestForRealScenario/runs/20261110-peng2017-workflow-debug-01/PHASE-HANDOFF.md，不以局部交接当整篇通过。
