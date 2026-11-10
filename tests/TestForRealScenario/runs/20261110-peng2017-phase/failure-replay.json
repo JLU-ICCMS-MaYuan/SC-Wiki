@@ -1,0 +1,14 @@
+{
+  "task_id": "02b23f7c5e524f8ba718f48d92a07f75",
+  "job_id": "6dc44e55-8591-4de5-a688-720963001c69",
+  "guard_error": "材料状态规划不能改写原候选已知条件：reported_space_group_symbol",
+  "input_unchanged": true,
+  "candidate": "state-24",
+  "material": "CeH10",
+  "pressure_gpa": 200,
+  "initial_space_group": "R-3m",
+  "planned_space_group": "Fm-3m",
+  "cause": "初始DOS候选借用另一物理量的声子图物相；规划试图跨物相更改，原保护拦截",
+  "source_commit": "e521c5264d74b320b4084fafb34a63c22329cdfa",
+  "decision": "已向用户询问，未获答复；未实施任何物相修订或保护变更"
+}

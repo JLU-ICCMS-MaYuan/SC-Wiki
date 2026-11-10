@@ -1,0 +1,12 @@
+{
+  "claims": 30,
+  "invalid": 0,
+  "unreadable": 0,
+  "original_numeric_results_unchanged": true,
+  "new_initial_phase": null,
+  "formal_inventory_phase": "Fm-3m",
+  "same_input_reused": true,
+  "model": "gpt-6.1-sol",
+  "provider": "server:LLM2",
+  "scope": "真实SI窗口重新提取与存读；旧规划CeH10提案仅按新候选身份做单候选隔离重放，原保护未改；非真实完整规划/业务验收"
+}

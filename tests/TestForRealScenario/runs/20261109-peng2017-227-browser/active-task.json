@@ -17,7 +17,7 @@
       "original_filename": "2017 YHn LaHn-彭枫 Supplementary.pdf"
     }
   ],
-  "status": "extracting",
+  "status": "failed",
   "model": {
     "provider": "server:LLM2",
     "model": "gpt-6.1-sol",

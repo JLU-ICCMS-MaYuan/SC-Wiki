@@ -1,0 +1,15 @@
+{
+  "task_id": "02b23f7c5e524f8ba718f48d92a07f75",
+  "job_id": "6dc44e55-8591-4de5-a688-720963001c69",
+  "status": "failed",
+  "completed_chunks": 29,
+  "reading_state": "coverage_checked",
+  "source_handoff": "同哈希原页+Marker原块重提；其余28窗口复用",
+  "coverage": {
+    "a6013d5bea8d473b936d8cb8abe143c0": "complete",
+    "ac262d3aa07f48b0a43280ddc72254c3": "complete"
+  },
+  "next_blocker": "材料状态规划不能改写原候选已知条件：reported_space_group_symbol",
+  "paper_id": null,
+  "scope": "真实任务来源与覆盖通过，不代表材料整理或五阶段完成"
+}

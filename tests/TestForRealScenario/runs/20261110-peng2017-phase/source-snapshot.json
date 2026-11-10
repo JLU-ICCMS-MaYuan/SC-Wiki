@@ -1,0 +1,10 @@
+{
+  "base_commit": "71f87d91b406428b4cf753bb474b0e0d80086d99",
+  "files": {
+    "backend/ingest/extraction_sources.py": "318f142321d40319a8ad09811deb9c0f43d42c172d9ada44ad5403e9727fa758",
+    "backend/ingest/upload_jobs.py": "df8efac47703ed1b25642c67b98e28f2399a2c19e0be6cdf1fbda1af66f80b48",
+    "backend/ingest/state_inventory.py": "705a56b4e8855d1c6ca709c8d0dac2aedb9157ebdf9b59bf1d6bce9fb4daf59f"
+  },
+  "guard_unchanged": true,
+  "scope": "仅原始上下文回交；不直接改物相，不改真实任务/DB"
+}

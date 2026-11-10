@@ -555,20 +555,31 @@ def _read_chunk(
     source_handoff = None
     base_signature = signature
     cached = json.loads(result_path.read_text(encoding="utf-8")) if result_path.exists() else {}
+    inventory_path = (artifact_directory(task_id) / 'material_state_inventory.json'
+        if structured and profile == 'complementary' else None)
     if structured and profile == 'complementary' and (cached.get('_source_resolution') or any(
-            e.get('category') == 'unreadable' for e in cached.get('coverage_exclusions', []))):
-        from .extraction_sources import prepare_source_handoff, HANDOFF_PROMPT
+            e.get('category') == 'unreadable' for e in cached.get('coverage_exclusions', []))
+            or cached.get('material_states') and inventory_path.is_file()):
+        from .extraction_sources import prepare_source_handoff, inventory_scope_sources, HANDOFF_PROMPT, SCOPE_PROMPT
         from .chart_cache import load_document_ir
         ir_path = artifact_directory(task_id) / 'document_ir' / f"{context['file_id']}.json"
         if ir_path.is_file():
             ir = load_document_ir(ir_path)
+            scope_sources = None
+            request_path = inventory_path.with_name('material_state_inventory_request.json')
+            if inventory_path.is_file() and request_path.is_file():
+                scope_sources = inventory_scope_sources(context, cached, ir,
+                    json.loads(request_path.read_text()), json.loads(inventory_path.read_text()))
             source_handoff = prepare_source_handoff(context, cached, ir,
-                _source_path({'task_id': task_id}, source or {}, Path(str((source or {}).get('stored_path') or ''))))
+                _source_path({'task_id': task_id}, source or {}, Path(str((source or {}).get('stored_path') or ''))),
+                scope_sources=scope_sources)
         if source_handoff:
             context = source_handoff['context']
             context['source_handoff'] = source_handoff['audit']
             generation_schema = bind_extraction_sources(EXTRACTION_OUTPUT_SCHEMA, context, allow_block_references=True)
             system_prompt += HANDOFF_PROMPT
+            if source_handoff['audit'].get('scope_source_blocks'):
+                system_prompt += SCOPE_PROMPT
             signature = hashlib.sha256(json.dumps({'base': base_signature,
                 'handoff': source_handoff['audit'], 'prompt': system_prompt,
                 'output_schema': generation_schema}, sort_keys=True).encode()).hexdigest()

@@ -1,0 +1,8 @@
+{
+  "scope": "隔离辅助脚本页码摘要，非产品错误",
+  "first_page_header": 22,
+  "actual_window_start": 18,
+  "actual_window_end": 28,
+  "action": "仅停止本隔离进程54918，改从原块_source元数据读取；原请求/部分输出保留，不计通过",
+  "business_task_unchanged": true
+}

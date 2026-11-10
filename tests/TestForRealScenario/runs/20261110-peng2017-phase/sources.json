@@ -1,0 +1,9 @@
+{
+  "role": "supplementary",
+  "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+  "pages": {
+    "24": "Fig.S31 CeH10 200GPa R-3m",
+    "33": "TableS1 CeH10 200GPa Fm-3m"
+  },
+  "images": "同一原PDF直接渲染，未修改原文"
+}

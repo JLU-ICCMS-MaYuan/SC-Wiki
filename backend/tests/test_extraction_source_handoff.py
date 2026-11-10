@@ -105,3 +105,59 @@ def test_full_read_chunk_recovers_only_failed_source_then_reuses_same_response(t
     invalid[0].evidences[-1].quote='invented quote'
     assert audit_coverage(ir,invalid,processed_pages=[1]).requires_human
     assert (d/'main.json').read_text()==ir.model_dump_json()
+
+
+@pytest.mark.parametrize('retired_reading', [False, True])
+def test_phase_conflict_only_hands_back_original_sources_never_planner_answers(tmp_path,retired_reading):
+    from backend.ingest.extraction_sources import inventory_scope_sources, prepare_source_handoff
+    path,ir,context,_=case(tmp_path)
+    extra=ir.blocks[1].model_copy(deep=True)
+    extra.block_id='table-phase';extra.text='LaH10 at 150 GPa: Fm-3m.'
+    extra.bbox=(10,80,190,110);extra.metadata['selected_for_reading']=True
+    ir.blocks.append(extra)
+    previous={'material_states':[{'material':'LaH10','pressure_value_gpa':150,
+        'reported_space_group_symbol':'R-3m','property_modules':[{'records':[
+            {'evidences':[{'file_id':'main','block_id':'ocr'}]}]}]}]}
+    request={'sources':[{'source_id':'old','file_id':'main','block_id':'ocr','source_sha256':ir.source_sha256,
+        'content':ir.blocks[0].text},{'source_id':'new','file_id':'main','block_id':'table-phase',
+        'source_sha256':ir.source_sha256,'content':extra.text}],
+        'candidates':[{'state_key':'initial','material':'LaH10','pressure_value_gpa':150,
+            'reported_space_group_symbol':'R-3m','property_modules':[{'records':[
+                {'evidences':[{'source_id':'old'}]}]}]}]}
+    response={'states':[{'values':{'material':'LaH10','pressure_value_gpa':150,
+        'reported_space_group_symbol':'Fm-3m'},'source_ids':['new']}],
+        'assignments':[{'candidate_state_key':'initial','target_index':0,'source_ids':['new'],
+                        'reason':'MODEL ANSWER MUST NOT BECOME SOURCE'}]}
+    if retired_reading:
+        ir.blocks[0].metadata.update(selected_for_reading=False,chart_reading={'version':'old'})
+        current=ir.blocks[0].model_copy(deep=True)
+        current.block_id='current-caption';current.block_type='caption';current.text='Actual original figure caption.'
+        current.content_hash=content_hash(current.text);current.metadata={'selected_for_reading':True}
+        ir.blocks.append(current)
+        context['pages'][0]['blocks']=[current.model_dump(mode='json')]
+    scope=inventory_scope_sources(context,previous,ir,request,response)
+    assert scope['source_blocks']==['table-phase']
+    assert scope['targets']==(['current-caption'] if retired_reading else ['ocr'])
+    handoff=prepare_source_handoff(context,previous,ir,path,scope_sources=scope)
+    assert any(b['block_id']=='table-phase' for p in handoff['context']['pages'] for b in p['blocks'])
+    assert 'MODEL ANSWER' not in json.dumps(handoff)
+    if retired_reading:assert 'LaH1O' not in json.dumps(handoff['context'])
+    assert previous['material_states'][0]['reported_space_group_symbol']=='R-3m'
+    saved={**previous,'_source_resolution':handoff['audit']}
+    assert prepare_source_handoff(context,saved,ir,path)['audit']==handoff['audit']
+    response['states'][0]['values']['reported_space_group_symbol']='R-3m'
+    assert inventory_scope_sources(context,previous,ir,request,response) is None
+
+
+def test_phase_scope_ignores_other_material_or_foreign_owned_record(tmp_path):
+    from backend.ingest.extraction_sources import inventory_scope_sources
+    _,ir,context,_=case(tmp_path)
+    previous={'material_states':[{'material':'LaH10','pressure_value_gpa':150,
+        'reported_space_group_symbol':'R-3m','property_modules':[{'records':[
+            {'evidences':[{'file_id':'main','block_id':'ocr'}]}]}]}]}
+    request={'sources':[],'candidates':[{'state_key':'other','material':'YH10','pressure_value_gpa':150,
+        'reported_space_group_symbol':'R-3m','property_modules':[]}]}
+    response={'states':[{'values':{'material':'YH10','pressure_value_gpa':150,
+        'reported_space_group_symbol':'Fm-3m'},'source_ids':[]}],
+        'assignments':[{'candidate_state_key':'other','target_index':0,'source_ids':[]}]}
+    assert inventory_scope_sources(context,previous,ir,request,response) is None

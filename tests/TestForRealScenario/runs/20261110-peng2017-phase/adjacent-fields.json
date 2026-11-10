@@ -1,0 +1,110 @@
+[
+  {
+    "material": "YH13",
+    "pressure": 200.0,
+    "fields": {
+      "structure_optimization": {
+        "before": "unknown",
+        "after": "classical_static"
+      }
+    }
+  },
+  {
+    "material": "YH9",
+    "pressure": 200.0,
+    "fields": {
+      "structure_optimization": {
+        "before": "unknown",
+        "after": "classical_static"
+      }
+    }
+  },
+  {
+    "material": "YH10",
+    "pressure": 200.0,
+    "fields": {
+      "structure_optimization": {
+        "before": "unknown",
+        "after": "classical_static"
+      }
+    }
+  },
+  {
+    "material": "YH6",
+    "pressure": 200.0,
+    "fields": {
+      "structure_optimization": {
+        "before": "unknown",
+        "after": "classical_static"
+      }
+    }
+  },
+  {
+    "material": "YH24",
+    "pressure": 200.0,
+    "fields": {
+      "structure_optimization": {
+        "before": "unknown",
+        "after": "classical_static"
+      }
+    }
+  },
+  {
+    "material": "ScH6",
+    "pressure": 200.0,
+    "fields": {
+      "structure_optimization": {
+        "before": "unknown",
+        "after": "classical_static"
+      }
+    }
+  },
+  {
+    "material": "ScH9",
+    "pressure": 200.0,
+    "fields": {
+      "structure_optimization": {
+        "before": "unknown",
+        "after": "classical_static"
+      }
+    }
+  },
+  {
+    "material": "LaH6",
+    "pressure": 200.0,
+    "fields": {
+      "structure_optimization": {
+        "before": "unknown",
+        "after": "classical_static"
+      }
+    }
+  },
+  {
+    "material": "CeH9",
+    "pressure": 200.0,
+    "fields": {
+      "reported_space_group_symbol": {
+        "before": "P6_3/mmc",
+        "after": null
+      },
+      "structure_optimization": {
+        "before": "unknown",
+        "after": "classical_static"
+      }
+    }
+  },
+  {
+    "material": "CeH10",
+    "pressure": 200.0,
+    "fields": {
+      "reported_space_group_symbol": {
+        "before": "R-3m",
+        "after": null
+      },
+      "structure_optimization": {
+        "before": "unknown",
+        "after": "classical_static"
+      }
+    }
+  }
+]
