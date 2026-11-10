@@ -1,0 +1,12 @@
+{
+  "claims": 36,
+  "invalid": 0,
+  "unreadable": 0,
+  "YH10_400GPa_lambda": 2.41,
+  "YH9_150GPa_lambda": 4.42,
+  "source_blocks_preserved": true,
+  "same_input_reused": true,
+  "model": "gpt-6.1-sol",
+  "provider": "server:LLM2",
+  "scope": "隔离正式提取/后处理/来源/保存重读；尚未正式任务续跑或业务验收"
+}

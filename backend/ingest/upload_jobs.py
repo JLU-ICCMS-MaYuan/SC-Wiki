@@ -551,14 +551,35 @@ def _read_chunk(
         "output_schema": generation_schema if structured else None,
     }, sort_keys=True).encode("utf-8")).hexdigest()
 
+    context = json.loads(chunk.content) if structured else None
+    source_handoff = None
+    base_signature = signature
+    cached = json.loads(result_path.read_text(encoding="utf-8")) if result_path.exists() else {}
+    if structured and profile == 'complementary' and (cached.get('_source_resolution') or any(
+            e.get('category') == 'unreadable' for e in cached.get('coverage_exclusions', []))):
+        from .extraction_sources import prepare_source_handoff, HANDOFF_PROMPT
+        from .chart_cache import load_document_ir
+        ir_path = artifact_directory(task_id) / 'document_ir' / f"{context['file_id']}.json"
+        if ir_path.is_file():
+            ir = load_document_ir(ir_path)
+            source_handoff = prepare_source_handoff(context, cached, ir,
+                _source_path({'task_id': task_id}, source or {}, Path(str((source or {}).get('stored_path') or ''))))
+        if source_handoff:
+            context = source_handoff['context']
+            context['source_handoff'] = source_handoff['audit']
+            generation_schema = bind_extraction_sources(EXTRACTION_OUTPUT_SCHEMA, context, allow_block_references=True)
+            system_prompt += HANDOFF_PROMPT
+            signature = hashlib.sha256(json.dumps({'base': base_signature,
+                'handoff': source_handoff['audit'], 'prompt': system_prompt,
+                'output_schema': generation_schema}, sort_keys=True).encode()).hexdigest()
+
     if result_path.exists():
-        cached = json.loads(result_path.read_text(encoding="utf-8"))
         if (cached.get("_schema_version") == CHUNK_RESULT_SCHEMA_VERSION
                 and cached.get("_document_signature") == signature):
             return cached
     prompt = (
         f"章节：{chunk.section_name or '正文'}\n页码：{getattr(chunk, 'source_page', None) or '未知'}\n"
-        f"分段编号：{chunk.chunk_index}\n\n{chunk.content}"
+        f"分段编号：{chunk.chunk_index}\n\n{json.dumps(context, ensure_ascii=False) if source_handoff else chunk.content}"
     )
     attempt_directory = None
     if profile == "complementary":
@@ -581,6 +602,8 @@ def _read_chunk(
                 response.replace(archived)
     callbacks = {"on_partial":archive_partial,"on_call":archive_call} if profile == "complementary" else {}
     schema_options = {"response_schema": generation_schema} if structured else {}
+    if source_handoff:
+        schema_options['images'] = source_handoff['images']
     result = complete_json(system_prompt, prompt, **schema_options, **callbacks)
     if attempt_directory:
         _atomic_write_json(attempt_directory / "raw.json", result)
@@ -593,7 +616,6 @@ def _read_chunk(
     if structured:
         from backend.ingest.scientific_output_schema import decode_optional_containers
         result = decode_optional_containers(result)
-        context = json.loads(chunk.content)
         allowed = {(context["file_id"], block["pdf_page"], block["block_id"])
                    for page in context["pages"] for block in page["blocks"]}
         # 排除项校验需要表格行数与页号集合；与块集合同源（同一 IR 分组）。
@@ -640,6 +662,8 @@ def _read_chunk(
     validate_chunk_generated_english(result)
     result["_schema_version"] = CHUNK_RESULT_SCHEMA_VERSION
     result["_document_signature"] = signature
+    if source_handoff:
+        result['_source_resolution'] = source_handoff['audit']
     if model_metadata is not None:
         result["_extraction_model"] = model_metadata
     result["_source"] = {

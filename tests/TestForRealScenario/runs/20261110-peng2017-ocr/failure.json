@@ -1,0 +1,6 @@
+{
+  "task_id": "02b23f7c5e524f8ba718f48d92a07f75",
+  "source_commit": "2f5e12f174397e8fc006ebb9edde8f6acf794366",
+  "reason": "OCR将YH10识别为NH10，Marker正确原块未交接",
+  "scope": "失败只读留证，未改任务/数据库/草稿"
+}

@@ -1,0 +1,9 @@
+{
+  "base_commit": "2f5e12f174397e8fc006ebb9edde8f6acf794366",
+  "files": {
+    "backend/ingest/extraction_sources.py": "b124e0f928fb8be147fc364944f3f81583077ebef774807c22a6ce5c1206f1f7",
+    "backend/ingest/upload_jobs.py": "658ddd250d697cab910836b024fc85fa5519f7b5968cba5e08e7823537a6cd68",
+    "backend/ingest/coverage_audit.py": "3c389a0a3c87bbac4b0639db4e6d92d9b7520ca0c4bf660c0571915aba64e226"
+  },
+  "scope": "本轮互补来源交接，真实PDF重提；业务五阶段未完成"
+}

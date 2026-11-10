@@ -73,6 +73,7 @@ class CoverageReport(BaseModel):
 def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncated: bool = False,
                    processed_pages: list[int] | None = None,
                    exclusions: list[dict] | None = None) -> CoverageReport:
+    source_ir = ir  # 备选原块仍是合法来源；覆盖计数只遍历主干选中区域。
     if ir.parse_profile == "complementary":
         selected = {b.block_id for b in ir.blocks if b.metadata.get("selected_for_reading") is not False}
         ir = ir.model_copy(deep=True)
@@ -82,7 +83,7 @@ def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncat
     processed = set(processed_pages or [])
     covered_claims, missing, covered_blocks, result_blocks = [], [], set(), set()
     for claim in claims or []:
-        result = validate_claim(claim, ir)
+        result = validate_claim(claim, source_ir)
         if result.valid:
             covered_claims.append(claim.claim_id)
             covered_blocks.update(e.block_id for e in result.claim.evidences)
