@@ -1,0 +1,52 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "doi": "10.1103/PhysRevLett.119.107001",
+  "sources": [
+    {
+      "role": "main",
+      "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846"
+    },
+    {
+      "role": "supplementary",
+      "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93"
+    }
+  ],
+  "checkpoint": {
+    "completed": true,
+    "value": "",
+    "error": "source_absent",
+    "origin": "missing"
+  },
+  "requests": [
+    {
+      "name": "motivation-window-main",
+      "original_request": ".data/review_artifacts/d789acceee124022b3257f84780d1156/model-runtime/ccaff15ce7571f2ce96e907a5152e8fd2340ee440552a040313a271016c5b5d3/calls/bfe34ccbecfdb94ec8ef415ec9347472bc7e5e77346c37430f58babf2d32186c-0/request.json",
+      "request_sha256": "1dcf3a5d4a4c878fd23cf56e570b03d21392552c13f4a9d1a7240ef0f86cfb75",
+      "response_sha256": "21403b76bc52c19bca7cb972693f5b5aa9967abcdf3d30eb5af788fb5129e2f8"
+    },
+    {
+      "name": "motivation-window-si",
+      "original_request": ".data/review_artifacts/d789acceee124022b3257f84780d1156/model-runtime/ccaff15ce7571f2ce96e907a5152e8fd2340ee440552a040313a271016c5b5d3/calls/afc8a8141154a5eae35c3cd3ac31f1b7cba7e3dbb4a51fae030a6cdd858c42d9-0/request.json",
+      "request_sha256": "7f968854072622549de3d9f7c52e0fcb6aa44a875d7495bd63e6c25a3298d5c9",
+      "response_sha256": "c2db195bfdf6a4cbd1e430751126079dc563fec748fd4dbc9b91f99b268b4f33"
+    },
+    {
+      "name": "motivation-aggregation",
+      "original_request": ".data/review_artifacts/d789acceee124022b3257f84780d1156/model-runtime/ccaff15ce7571f2ce96e907a5152e8fd2340ee440552a040313a271016c5b5d3/calls/d268989955f624201a071a16ee3493c10c757980eaff387064e9734cb280d671-0/request.json",
+      "request_sha256": "4da8b8b25adb92cb4bf6c84d2d6c43e2a376cf9c4e6e573d7a52a1731f8a4142",
+      "response_sha256": "ee4867be9e79cb32eacf9899ac638e48a988a07502d802956a38588be67f40de"
+    },
+    {
+      "name": "paper-filling",
+      "original_request": ".data/review_artifacts/d789acceee124022b3257f84780d1156/model-runtime/ccaff15ce7571f2ce96e907a5152e8fd2340ee440552a040313a271016c5b5d3/calls/f7f892e0885a5c162e560397cd9a6fe846208c2cccd436818bc3f07dfdd48991-0/request.json",
+      "request_sha256": "1c369d4251643861114e05e7ef298a947da3282560bb4a7c539051bcea8b0f2c",
+      "response_sha256": "238023f79388bd08fa0782ab2fe60c8e032f096bd34612f1f385c1bb5d707845"
+    }
+  ],
+  "boundary": "只复制缺陷证据；未改运行任务、草稿、数据库或源代码。4候选尚非4条科学接受结果。",
+  "evidence_capture_commit": "e6ca48632db2e58ee5ef8da16e6c981307a1eade",
+  "model": {
+    "provider": "server:LLM2",
+    "model": "gpt-6.1-sol"
+  }
+}
