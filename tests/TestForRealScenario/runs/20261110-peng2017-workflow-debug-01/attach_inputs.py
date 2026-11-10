@@ -6,7 +6,7 @@ sys.path.insert(0,str(ROOT.parents[1]))
 import scenario
 original=scenario.call_browser
 URL='http://127.0.0.1:5173/upload'
-WINDOW=7839
+WINDOW=17122
 
 def safe_browser(browser,origin,window=None,tab=None,source=None):
     if source is None:return original(browser,origin)
@@ -20,4 +20,4 @@ def safe_browser(browser,origin,window=None,tab=None,source=None):
 
 scenario.call_browser=safe_browser
 case=json.loads((ROOT/'case.json').read_text())
-scenario.attach_pdfs(ROOT,case,WINDOW,1)
+scenario.attach_pdfs(ROOT,case,WINDOW,1,method="drop")

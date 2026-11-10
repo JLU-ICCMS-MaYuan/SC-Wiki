@@ -1,0 +1,2 @@
+if(location.href!=="http://127.0.0.1:5173/upload") throw new Error('论文地址已变化');
+const link=[...document.querySelectorAll('a')].filter(a=>a.href==='http://127.0.0.1:5173/upload/tasks/d789acceee124022b3257f84780d1156');if(link.length!==1)throw new Error('本轮任务入口不唯一');link[0].click();return {action:'打开本轮任务校对页',task:'d789acceee124022b3257f84780d1156'};

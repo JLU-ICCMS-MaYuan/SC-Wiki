@@ -1,0 +1,2 @@
+if(location.href!=="http://127.0.0.1:5173/account") throw new Error('论文地址已变化');
+const text=document.body.textContent;if(!text.includes('myth620137018@163.com'))throw new Error('实际上传者邮箱未确认');return {url:location.href,email:'myth620137018@163.com',role:'用户'};

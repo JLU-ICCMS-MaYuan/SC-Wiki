@@ -1,0 +1,19 @@
+{
+  "time": "2026-11-10T07:45:08.153290+00:00",
+  "kind": "browser",
+  "browser": "safari",
+  "url": "http://127.0.0.1:5173/upload",
+  "window": 17122,
+  "tab": 1,
+  "script": "action-e9ca95f2c3.js",
+  "result": {
+    "url": "http://127.0.0.1:5173/upload",
+    "text": "\n    SCSC-Wiki探索热点脉络社区排行榜Tc~X 演变AI 学术讨论上传对话预测切换模型openAI · gpt-6.1-sol中文English消息通知用户mayuanMUpload上传论文上传组合导入 (JSON)新建论文上传任务分别上传一个正文、可选的多份补充材料和结构源数据文件，共同填写一张论文表单。每个文件最大 50 MB · 同时上传最多 3 个论文正文必填，限一个 · PDF、TXT、MD选择或拖入论文正文补充材料可选，可多个 · PDF、TXT、MD；包括发表后的补充说明和纠正文稿选择或拖入补充材料源数据文件可选，可多个 · CIF、POSCAR、VASP、CONTCAR 结构文件选择或拖入源数据文件开始上传并解析上传解析记录 1/100全选刷新2017 YHn LaHn-彭枫.pdf提取内容用时：0 分 1 秒解析 token：0读取文档与选择流程取消\n    \n  \n\n",
+    "links": [
+      {
+        "href": "http://127.0.0.1:5173/upload/tasks/d789acceee124022b3257f84780d1156",
+        "text": "2017 YHn LaHn-彭枫.pdf"
+      }
+    ]
+  }
+}

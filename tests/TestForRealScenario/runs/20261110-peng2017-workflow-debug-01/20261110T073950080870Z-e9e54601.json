@@ -1,0 +1,15 @@
+{
+  "time": "2026-11-10T07:39:50.081095+00:00",
+  "kind": "browser",
+  "browser": "safari",
+  "url": "http://127.0.0.1:5173/upload",
+  "window": 17122,
+  "tab": 1,
+  "script": "action-cf72c26a58.js",
+  "result": {
+    "secure": true,
+    "uuid": "function",
+    "alerts": [],
+    "selected": []
+  }
+}

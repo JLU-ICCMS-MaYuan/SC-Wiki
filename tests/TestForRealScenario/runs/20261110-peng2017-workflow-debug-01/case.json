@@ -32,11 +32,11 @@
   "started": "2026-11-10T06:21:03.520496+00:00",
   "source_commit": "2b06d1f18033f73bd40a6c54ac288fb52a776a15",
   "worktree_status": " M backend/rag/llm.py\n?? backend/tests/test_json_mode_request.py\n",
-  "status": "文件已交给正常Safari上传组件，检查通过，提交修复后开始上传",
+  "status": "extracting",
   "phases": [
     {
       "id": "1",
-      "status": "未执行"
+      "status": "服务端已核验同任务正文/SI角色大小哈希一致，实际Worker解析中"
     },
     {
       "id": "2",
@@ -95,5 +95,18 @@
   },
   "scientific_decisions": {
     "CeH10_200GPa_Tc_DOS": "用户已明确确认Fm-3m，R-3m声子依据独立保留"
+  },
+  "browser_windows": {
+    "user_safari": 17122,
+    "superadmin_chrome": 1758018018
+  },
+  "pre_upload_note": "旧选择状态已空且未发任务；新建隔离Safari17122，角色邮箱核验后重新装入原文件",
+  "source_commit_at_upload": "9e58ca05fe3a1d235064d85c91ddc82209c06519",
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "a90b6d55-4966-4377-b8fc-8326ec8af960",
+  "upload_helper": {
+    "method": "正常拖放入口",
+    "sha256": "4faa51d1225cccdda7c6ea7e286784db4bb2b5bcc87d08c87acbbd00b1817e27",
+    "note": "仅测试辅助修改，服务器已验证同原文件哈希"
   }
 }

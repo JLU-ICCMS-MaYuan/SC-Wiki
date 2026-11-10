@@ -130,8 +130,10 @@ def run_dir(value):
     return path
 
 
-def attach_pdfs(run, case, window, tab):
-    """将给定路径的真实 PDF 字节交给网页文件输入，触发正常上传组件。"""
+def attach_pdfs(run, case, window, tab, *, method="input"):
+    """将真实PDF字节交给正常文件输入或拖放入口，不调用业务API。"""
+    if method not in {"input", "drop"}:
+        raise ValueError("附件入口仅支持正常文件输入或组件拖放")
     files = validate_case(case)
     if files != case["files"]:
         raise ValueError("PDF 已变化，需要建立新一轮来源记录")
@@ -141,7 +143,7 @@ def attach_pdfs(run, case, window, tab):
     labels = {"main": "论文正文", "supplementary": "补充材料"}
     buffer_key = "__scwiki_test_files_" + uuid4().hex
     key = json.dumps(buffer_key)
-    event = {"kind": "attach_pdfs", "actor": "user", "window": window, "tab": tab,
+    event = {"kind": "attach_pdfs", "actor": "user", "window": window, "tab": tab, "method": method,
              "files": files}
     remove_selector = json.dumps('button[aria-label^="移除 "]')
     selected_selector = json.dumps('[role="region"] button[aria-label^="移除 "]')
@@ -165,16 +167,27 @@ def attach_pdfs(run, case, window, tab):
                 modified = int(Path(item["path"]).stat().st_mtime_ns // 1_000_000)
                 execute(f"window[{key}].files.push(new File(window[{key}].chunks,{name},{{type:'application/pdf',lastModified:{modified}}}));"
                         f"window[{key}].chunks=[]; return true;")
+            dispatch = (
+                "input.closest('[role=region]').dispatchEvent(new DragEvent('drop',"
+                "{bubbles:true,cancelable:true,dataTransfer:dt}));"
+                if method == "drop" else
+                "input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));"
+            )
             execute(
                 f"const dt=new DataTransfer(); for(const file of window[{key}].files) dt.items.add(file);"
-                f"const input=document.querySelector({selector}); input.files=dt.files;"
-                "input.dispatchEvent(new Event('change',{bubbles:true}));"
+                f"const input=document.querySelector({selector});" + dispatch +
                 "return true;"
             )
-            event[role] = execute(
-                f"return [...document.querySelector({selector}).closest('[role=region]')"
-                f".querySelectorAll({remove_selector})].map(b=>b.getAttribute('aria-label'));"
-            )
+            # React提交DOM可晚于事件返回；仍要求原数量，不放宽文件角色/数量断言。
+            import time
+            for _ in range(10):
+                event[role] = execute(
+                    f"return [...document.querySelector({selector}).closest('[role=region]')"
+                    f".querySelectorAll({remove_selector})].map(b=>b.getAttribute('aria-label'));"
+                )
+                if len(event[role]) == len(role_files):
+                    break
+                time.sleep(.2)
             if len(event[role]) != len(role_files):
                 raise ValueError("网页文件清单数量与本轮来源不一致，停止上传")
             execute(f"delete window[{key}]; return true;")

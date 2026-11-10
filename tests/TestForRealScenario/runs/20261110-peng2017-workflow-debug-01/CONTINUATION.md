@@ -1,3 +1,13 @@
+## 最新真实状态优先
+
+JSON修复已提交9e58ca05，实际新上传Task d789acceee124022b3257f84780d1156、Job a90b6d55-4966-4377-b8fc-8326ec8af960。文件已由正常Safari拖放组件上传并服务器SHA/大小/角色全部核验，实际scwiki-upload Worker已消费，queue0。不要再attach/再创建上传。新case/active-task.json已更新，observe.py只读新Task；verify_formal.py为本轮冻结只读核验，待有PaperID再用。当前处于paper_info_extraction，无错误，先observe当前状态再操作。
+
+Safari当前本轮隔离窗口17122（不是7839），任务页URL http://127.0.0.1:5173/upload/tasks/d789acceee124022b3257f84780d1156，/account已核验myth620137018@163.com用户，Chrome1758018018 /account超管mayuan_mark@163.com。每次按URL重新枚举，标签会变；旧7839有多个upload页面不是本轮操作窗口，保留不用。
+
+原文件输入Event辅助在新页未被组件接收，业务尚未启动；已改测试helper为正常拖放入口、等待React提交，不改产品。scenario.py添加method可选input/drop，attach_inputs.py目前使用drop。两份文件已正常上传且精确哈希符合，证明真实字节。需要仅提交本测试辅助及实际运行记录，不把此误记产品字段故障。
+
+最终仍必须排障轮五阶段完整→留证按ID清理该轮表单/正式论文/解析→同文件新上传无调试最终轮五阶段→保留最终正式记录。当前只阶段1解析中，没有正式PaperID/送审。用户标题和笼型结构返修条件见case。旧02已清理不能恢复，其证据完整tar本地保留。
+
 # Y-H文献通用流程黑盒
 
 最新用户要求以tests/TestForRealScenario/document-upload-blackbox-workflow.md执行：先完整排障五阶段，再留证按精确ID清理该轮表单/正式论文/解析数据，原文件新上传无调试五阶段通过后才结束，最终轮保留正式论文。旧历史保留current-task要求已由这次新流程更新。

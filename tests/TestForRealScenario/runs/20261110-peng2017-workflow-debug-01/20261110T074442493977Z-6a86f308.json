@@ -1,0 +1,22 @@
+{
+  "time": "2026-11-10T07:44:42.494061+00:00",
+  "kind": "browser",
+  "browser": "safari",
+  "url": "http://127.0.0.1:5173/upload",
+  "window": 17122,
+  "tab": 1,
+  "script": "action-938150c810.js",
+  "result": {
+    "url": "http://127.0.0.1:5173/upload",
+    "action": "正常组件开始上传并解析",
+    "selected": {
+      "论文正文": [
+        "移除 2017 YHn LaHn-彭枫.pdf"
+      ],
+      "补充材料": [
+        "移除 2017 YHn LaHn-彭枫 Supplementary.pdf"
+      ]
+    },
+    "time": "2026-11-10T07:44:42.471Z"
+  }
+}

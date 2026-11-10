@@ -1,0 +1,16 @@
+{
+  "time": "2026-11-10T07:42:10.921325+00:00",
+  "kind": "browser",
+  "browser": "safari",
+  "url": "http://127.0.0.1:5173/upload",
+  "window": 17122,
+  "tab": 1,
+  "script": "action-bd41d22f69.js",
+  "result": {
+    "url": "http://127.0.0.1:5173/upload",
+    "selected": [
+      "移除 2017 YHn LaHn-彭枫.pdf"
+    ],
+    "alerts": []
+  }
+}

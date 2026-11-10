@@ -1,0 +1,2 @@
+if(location.href!=="http://127.0.0.1:5173/upload") throw new Error('论文地址已变化');
+return {url:location.href,selected:[...document.querySelectorAll('[role="region"] button[aria-label^="移除 "]')].map(x=>x.getAttribute("aria-label")),alerts:[...document.querySelectorAll('[role="alert"]')].map(x=>x.textContent)};

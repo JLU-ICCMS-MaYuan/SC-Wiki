@@ -1,0 +1,23 @@
+{
+  "time": "2026-11-10T07:34:48.870875+00:00",
+  "kind": "attach_pdfs",
+  "actor": "user",
+  "window": 17122,
+  "tab": 1,
+  "files": [
+    {
+      "path": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261106-peng2017/sources/2017 YHn LaHn-彭枫.pdf",
+      "role": "main",
+      "size": 3476148,
+      "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846"
+    },
+    {
+      "path": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261106-peng2017/sources/2017 YHn LaHn-彭枫 Supplementary.pdf",
+      "role": "supplementary",
+      "size": 14260391,
+      "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93"
+    }
+  ],
+  "main": [],
+  "error": "网页文件清单数量与本轮来源不一致，停止上传"
+}

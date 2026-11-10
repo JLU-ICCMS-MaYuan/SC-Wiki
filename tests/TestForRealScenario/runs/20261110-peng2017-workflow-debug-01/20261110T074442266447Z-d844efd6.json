@@ -1,0 +1,14 @@
+{
+  "time": "2026-11-10T07:44:42.266676+00:00",
+  "kind": "browser",
+  "browser": "safari",
+  "url": "http://127.0.0.1:5173/account",
+  "window": 17122,
+  "tab": 2,
+  "script": "action-1a6f77d276.js",
+  "result": {
+    "url": "http://127.0.0.1:5173/account",
+    "email": "myth620137018@163.com",
+    "role": "用户"
+  }
+}

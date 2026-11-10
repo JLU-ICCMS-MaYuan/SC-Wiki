@@ -1,0 +1,20 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "a90b6d55-4966-4377-b8fc-8326ec8af960",
+  "files": [
+    {
+      "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+      "role": "main",
+      "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "size": 3476148,
+      "original_filename": "2017 YHn LaHn-彭枫.pdf"
+    },
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "role": "supplementary",
+      "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "size": 14260391,
+      "original_filename": "2017 YHn LaHn-彭枫 Supplementary.pdf"
+    }
+  ]
+}
