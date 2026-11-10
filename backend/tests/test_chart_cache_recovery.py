@@ -33,7 +33,7 @@ def repeated_notes(tmp_path):
             return {'pages': [{'page': 1, 'figures': [
                 {'bbox': [100, 100, 900, 450], 'label': 'top', 'target': True, 'reason': 'Tc'},
                 {'bbox': [100, 550, 900, 900], 'label': 'bottom', 'target': True, 'reason': 'Tc'}]}]}
-        return {'panels': [], 'notes': ['无法读取，不能假设为零'] * 2}
+        return {'panels': [], 'notes': [{'scope':'target','reason':'无法读取，不能假设为零'}] * 2}
     enrich_document(ir, path, source, model)
     return path, ir, source
 

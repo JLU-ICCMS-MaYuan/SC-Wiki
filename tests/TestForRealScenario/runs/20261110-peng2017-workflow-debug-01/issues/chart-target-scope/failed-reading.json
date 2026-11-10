@@ -1,0 +1,237 @@
+{
+  "stage": "reading",
+  "status": "completed",
+  "pages": [
+    4
+  ],
+  "response": {
+    "notes": [
+      "The DOS panel above and Tc panel below are clipped in image 2; their value axes and bar endpoints cannot be fully calibrated from this crop. Only the complete middle panel is digitized."
+    ],
+    "panels": [
+      {
+        "axis": {
+          "bounds": [
+            151,
+            808
+          ],
+          "scale": "linear",
+          "ticks": [
+            {
+              "position": 808,
+              "value": 0
+            },
+            {
+              "position": 544,
+              "value": 2
+            },
+            {
+              "position": 280,
+              "value": 4
+            }
+          ]
+        },
+        "categories": [
+          "ScH6",
+          "ScH9",
+          "YH6",
+          "YH9",
+          "YH10",
+          "LaH6",
+          "LaH9",
+          "CeH9",
+          "CeH10",
+          "PrH9"
+        ],
+        "colorbar": null,
+        "figure": "4",
+        "kind": "bar",
+        "layout": "matrix",
+        "panel": "middle",
+        "points": [
+          {
+            "category": "ScH6",
+            "conditions": [],
+            "label_text": null,
+            "label_value": null,
+            "material": "ScH6",
+            "method_raw": "linear response theory",
+            "mu_star": null,
+            "pixel_error": 5,
+            "pressure_value_gpa": 300,
+            "reading": "position",
+            "reason": "First blue bar; shared material labels identify ScH6, and the caption assigns 300 GPa.",
+            "series": "EPC parameter λ",
+            "space_group_symbol": null,
+            "x": 250,
+            "y": 633
+          },
+          {
+            "category": "ScH9",
+            "conditions": [],
+            "label_text": null,
+            "label_value": null,
+            "material": "ScH9",
+            "method_raw": "linear response theory",
+            "mu_star": null,
+            "pixel_error": 5,
+            "pressure_value_gpa": 400,
+            "reading": "position",
+            "reason": "Second blue bar; shared material labels identify ScH9, and the caption assigns 400 GPa.",
+            "series": "EPC parameter λ",
+            "space_group_symbol": null,
+            "x": 322,
+            "y": 625
+          },
+          {
+            "category": "YH6",
+            "conditions": [],
+            "label_text": null,
+            "label_value": null,
+            "material": "YH6",
+            "method_raw": "linear response theory",
+            "mu_star": null,
+            "pixel_error": 5,
+            "pressure_value_gpa": 120,
+            "reading": "position",
+            "reason": "Third blue bar; shared material labels identify YH6, and the caption assigns 120 GPa.",
+            "series": "EPC parameter λ",
+            "space_group_symbol": null,
+            "x": 395,
+            "y": 427
+          },
+          {
+            "category": "YH9",
+            "conditions": [],
+            "label_text": null,
+            "label_value": null,
+            "material": "YH9",
+            "method_raw": "linear response theory",
+            "mu_star": null,
+            "pixel_error": 5,
+            "pressure_value_gpa": 150,
+            "reading": "position",
+            "reason": "Fourth blue bar; shared material labels identify YH9, and the caption assigns 150 GPa.",
+            "series": "EPC parameter λ",
+            "space_group_symbol": null,
+            "x": 467,
+            "y": 244
+          },
+          {
+            "category": "YH10",
+            "conditions": [],
+            "label_text": null,
+            "label_value": null,
+            "material": "YH10",
+            "method_raw": "linear response theory",
+            "mu_star": null,
+            "pixel_error": 5,
+            "pressure_value_gpa": 400,
+            "reading": "position",
+            "reason": "Fifth blue bar; shared material labels identify YH10, and the caption assigns 400 GPa.",
+            "series": "EPC parameter λ",
+            "space_group_symbol": null,
+            "x": 540,
+            "y": 492
+          },
+          {
+            "category": "LaH6",
+            "conditions": [],
+            "label_text": null,
+            "label_value": null,
+            "material": "LaH6",
+            "method_raw": "linear response theory",
+            "mu_star": null,
+            "pixel_error": 5,
+            "pressure_value_gpa": 100,
+            "reading": "position",
+            "reason": "Sixth blue bar; shared material labels identify LaH6, and the caption assigns 100 GPa.",
+            "series": "EPC parameter λ",
+            "space_group_symbol": null,
+            "x": 613,
+            "y": 571
+          },
+          {
+            "category": "LaH9",
+            "conditions": [],
+            "label_text": null,
+            "label_value": null,
+            "material": "LaH9",
+            "method_raw": "linear response theory",
+            "mu_star": null,
+            "pixel_error": 5,
+            "pressure_value_gpa": 50,
+            "reading": "position",
+            "reason": "Seventh blue bar; shared material labels identify LaH9, and the caption assigns 50 GPa.",
+            "series": "EPC parameter λ",
+            "space_group_symbol": null,
+            "x": 685,
+            "y": 692
+          },
+          {
+            "category": "CeH9",
+            "conditions": [],
+            "label_text": null,
+            "label_value": null,
+            "material": "CeH9",
+            "method_raw": "linear response theory",
+            "mu_star": null,
+            "pixel_error": 5,
+            "pressure_value_gpa": 100,
+            "reading": "position",
+            "reason": "Eighth blue bar; shared material labels identify CeH9, and the caption assigns 100 GPa.",
+            "series": "EPC parameter λ",
+            "space_group_symbol": null,
+            "x": 758,
+            "y": 708
+          },
+          {
+            "category": "CeH10",
+            "conditions": [],
+            "label_text": null,
+            "label_value": null,
+            "material": "CeH10",
+            "method_raw": "linear response theory",
+            "mu_star": null,
+            "pixel_error": 5,
+            "pressure_value_gpa": 200,
+            "reading": "position",
+            "reason": "Ninth blue bar; shared material labels identify CeH10, and the caption assigns 200 GPa.",
+            "series": "EPC parameter λ",
+            "space_group_symbol": null,
+            "x": 830,
+            "y": 705
+          },
+          {
+            "category": "PrH9",
+            "conditions": [],
+            "label_text": null,
+            "label_value": null,
+            "material": "PrH9",
+            "method_raw": "linear response theory",
+            "mu_star": null,
+            "pixel_error": 5,
+            "pressure_value_gpa": 100,
+            "reading": "position",
+            "reason": "Tenth blue bar; shared material labels identify PrH9, and the caption assigns 100 GPa.",
+            "series": "EPC parameter λ",
+            "space_group_symbol": null,
+            "x": 903,
+            "y": 773
+          }
+        ],
+        "quantity": "lambda_ep",
+        "quantity_name": "Electron–phonon coupling parameter λ",
+        "reason": "The complete middle panel shows one blue EPC bar per clathrate hydride. Material order and individual pressures are mapped using the original page's shared labels and Figure 4 caption. Coordinates and value-axis ticks are measured in image 2. The body identifies linear response theory for the EPC calculations; Coulomb pseudopotentials apply to Tc calculations, not these λ bars.",
+        "series": [
+          "EPC parameter λ"
+        ],
+        "unit": "dimensionless",
+        "unresolved": [],
+        "x_axis": null,
+        "x_quantity": null,
+        "x_unit": null
+      }
+    ]
+  }
+}

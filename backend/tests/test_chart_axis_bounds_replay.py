@@ -6,7 +6,7 @@ from pathlib import Path
 from PIL import Image
 import pytest
 
-from backend.ingest.chart_reading import calibrate_panel, append_readings, reading_schema
+from backend.ingest.chart_reading import calibrate_panel, append_readings
 from backend.ingest.document_ir import DocumentIR, PageGeometry
 from backend.rag.structured_output import validate_output
 
@@ -19,7 +19,8 @@ SOURCE = {'file_id': 'peng2017-main',
 @pytest.mark.parametrize('filename', ['gpt-tc-response.json', 'gpt-tc-repeat1-response.json'])
 def test_real_reversed_axis_keeps_values_conditions_and_original_response(filename):
     answer = json.loads((FIXTURES / filename).read_text())
-    validate_output(answer, reading_schema())
+    # 原始v4回执不可改写成v5说明；历史数值重放使用其生产时的严格协议快照。
+    validate_output(answer, json.loads((FIXTURES / 'reading-schema-v4.json').read_text()))
     before = deepcopy(answer)
     panel = answer['panels'][0]
     assert panel['axis']['bounds'] == [795, 0]
