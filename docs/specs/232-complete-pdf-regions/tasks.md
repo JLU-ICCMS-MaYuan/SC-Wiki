@@ -57,4 +57,8 @@
 
 ## 本轮验收边界
 
-所有已勾项的证据和失败边界见[validation.md](validation.md)。真实GPT局部新提取及正式填写/JSON保存重读通过；Flash能输入图片和调用工具，但Y-H科学读数未通过；官方OpenAI账号端点与MySQL并发未实测，不宣称整篇五阶段通过。远程Spec未push，Issue保持OPEN。
+所有已勾项的证据和失败边界见[validation.md](validation.md)。真实GPT局部新提取及正式填写/JSON保存重读通过；Flash能输入图片和调用工具，但Y-H科学读数未通过；官方OpenAI账号端点未实测；MySQL并发已在独立实例补齐，不宣称整篇五阶段通过。远程Spec未push，Issue保持OPEN。
+
+## MySQL与旧失败补验收
+
+- [x] T016 按用户对MySQL跳过/旧基线的标注补验收：独立实例运行原六项及79项扩展，修正七项过期夹具，隔离源码综合525项通过；保留失败前后证据、业务库准入和清理记录。详见[共享补验收](../232-complete-pdf-regions/mysql-and-baseline-validation.md)。不替代Flash、官方账号、整篇或远程门。

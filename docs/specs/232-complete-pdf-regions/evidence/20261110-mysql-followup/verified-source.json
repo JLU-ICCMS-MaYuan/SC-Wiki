@@ -1,0 +1,24 @@
+{
+  "base": "71b02686917f10a768eaa90ad7ef29a0db2b7cd4",
+  "root": "/tmp/scwiki-232-235-followup/verified-tree",
+  "task_files": [
+    "backend/tests/mysql_isolation.py",
+    "backend/tests/test_mysql_isolation.py",
+    "backend/tests/test_property_field_review.py",
+    "backend/tests/test_spectra_manual.py",
+    "backend/tests/test_spectra_mysql.py",
+    "backend/tests/test_visual_source_reuse.py",
+    "tests/TestForRealScenario/test_structure_request_redundancy.py",
+    "scripts/verify_visual_mysql_isolated.py"
+  ],
+  "sha256": {
+    "backend/tests/mysql_isolation.py": "4288eef461a8fe4b9c65b7315eff05fd6f7f3be07a9dd574efe8aa17498701b6",
+    "backend/tests/test_mysql_isolation.py": "1f65f44ae3d8997bffd92fe553f81727597d32d2a119d0daf960ed5338e25e85",
+    "backend/tests/test_property_field_review.py": "4975095a4a26e8c7216a5f8b67800a6dd6159ca79fc1aa520ade9f928b52ece4",
+    "backend/tests/test_spectra_manual.py": "e352d8ae917df09198405d0edbfb6e68cd59effafff0e3a798b8a064f8d42971",
+    "backend/tests/test_spectra_mysql.py": "5aaed7e0c07a5fb32b894a6c379cd72ab6b773381e0fa8b3271e6c7897f04808",
+    "backend/tests/test_visual_source_reuse.py": "f02d63e952a198d71929e0cd45d5bc6ae001dda88d3db0b8ca0640d5c87f7218",
+    "tests/TestForRealScenario/test_structure_request_redundancy.py": "9ae520747d9325e9aa32be09d81b2823c748b22287c335b570645b242c5d20f2",
+    "scripts/verify_visual_mysql_isolated.py": "56c898355a5669e35df95e4a64921c023548763a82914963d711386e19381476"
+  }
+}

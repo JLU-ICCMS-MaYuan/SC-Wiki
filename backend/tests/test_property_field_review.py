@@ -8,14 +8,16 @@ from backend.ingest.evidence_audit import append_review_event
 
 
 def draft():
-    return {'material_states': [{'state_key': 's', 'material': 'LaSc2H24', 'pressure_value_gpa': 150,
+    return {'_field_edit_format': 1, '_form_contract_version': 1,
+      'material_states': [{'state_key': 's', 'material': 'LaSc2H24', 'pressure_value_gpa': 150,
       'property_modules': [{'module_key': 'm', 'module_code': 'superconductive_properties', 'records': [
       {'record_key': 'r', 'record_type': 'predicted_tc', 'property_code': 'tc', 'method_code': 'isotropic_eliashberg',
        'name_raw': 'Tc', 'value_kind': 'number', 'value_number': 311, 'value_raw': '311', 'unit_raw': 'K',
-       'definition_key': 'record.superconductive_properties.predicted_tc.isotropic_eliashberg', 'definition_version': 1,
-       'payload': {'parameters': {'lambda_ep': 3.94, 'omega_log': 745, 'mu_star': .1},
-        'calculation_conditions': {'calculation_code': 'Quantum ESPRESSO', 'k_grid': '24x24x24',
-          'extensions': [{'key': 'sscha.energy_cutoff', 'value_kind': 'number', 'value_number': 80, 'unit_raw': 'Ry'},
+       'definition_key': 'record.superconductive_properties.predicted_tc.isotropic_eliashberg', 'definition_version': 2,
+       'payload': {'parameters': {'lambda_ep': 3.94, 'omega_log': 745, 'mu_star': .1,
+          'field_settings': {'lambda_ep': {'name_raw': '耦合常数', 'unit_raw': '1'}}},
+        'calculation_conditions': {'calculation_code': 'Quantum ESPRESSO', 'qe': {'k_grid': '24x24x24'},
+          'extensions': [{'field_key': 'manual-a', 'name_raw': '收敛对照说明', 'value_kind': 'text', 'value_raw': '独立对照'},
                          {'field_key': 'manual-x', 'name_raw': '说明', 'value_kind': 'text', 'value_raw': '原文'}]}}}]}]}]}
 
 
@@ -30,7 +32,14 @@ def leaves(d):
 def test_leaf_claims_scope_dependencies_and_no_parent_grant():
     d = draft(); before = deepcopy(d); first = leaves(d)
     assert d == before
-    assert len(first) == 14
+    assert {'method_code', 'value_number', 'payload.parameters.lambda_ep',
+            'payload.parameters.omega_log', 'payload.parameters.mu_star',
+            'payload.calculation_conditions.qe.k_grid',
+            'payload.parameters.field_settings.lambda_ep.name_raw',
+            'payload.parameters.field_settings.lambda_ep.unit_raw'} <= set(first)
+    from backend.ingest.fixed_form_contract import parameter_paths
+    conditions = d['material_states'][0]['property_modules'][0]['records'][0]['payload']['calculation_conditions']
+    assert {'payload.calculation_conditions.' + path for path, _ in parameter_paths(conditions)} <= set(first)
     assert not any(r['kind'] == 'property' for r in snapshot(d)['records'])
     d['material_states'][0]['property_modules'][0]['records'][0]['payload']['parameters']['mu_star'] = .16
     after = leaves(d)
@@ -49,8 +58,9 @@ def test_stable_extensions_and_shared_groups_do_not_merge_methods_or_points():
     d = draft(); r = d['material_states'][0]['property_modules'][0]['records'][0]
     first = leaves(d); r['payload']['calculation_conditions']['extensions'].reverse()
     second = leaves(d)
-    assert first['payload.calculation_conditions.extensions.0']['item_key'] == second['payload.calculation_conditions.extensions.1']['item_key']
-    assert first['payload.calculation_conditions.extensions.0']['content_hash'] == second['payload.calculation_conditions.extensions.1']['content_hash']
+    for field in ('name_raw', 'value_kind', 'value_raw'):
+        assert first['payload.calculation_conditions.extensions.0.' + field]['item_key'] == second['payload.calculation_conditions.extensions.1.' + field]['item_key']
+        assert first['payload.calculation_conditions.extensions.0.' + field]['content_hash'] == second['payload.calculation_conditions.extensions.1.' + field]['content_hash']
     r['payload']['tc_group'] = {'version': 1, 'group_key': 'g', 'method_key': 'a', 'point_key': 'r'}
     other = deepcopy(r); other['record_key'] = 'r2';other['value_number'] = 250;other['method_code'] = 'allen_dynes'
     other['payload']['tc_group'].update(method_key='b', point_key='r2')
@@ -68,7 +78,7 @@ def test_single_field_proposals_and_no_default_scientific_autofill():
     changed = expected_claim(leaf, {'': .16})
     assert changed['value'] == .16
     assert changed['context'] == leaf['claim']['context']
-    empty = leaves(d)['payload.calculation_conditions.k_broadening']
+    empty = leaves(d)['payload.calculation_conditions.qe.k_broadening']
     assert not empty['required']
     assert not ev._fill_empty_fields(d, empty, {'basis_kind': 'general_knowledge', 'values': {'': .02}})
 
@@ -78,7 +88,10 @@ def test_annotation_changes_only_own_leaf_and_new_events_are_authoritative():
     r = d['material_states'][0]['property_modules'][0]['records'][0]
     r['payload']['parameters']['field_settings'] = {'lambda_ep': {'name_raw': 'λ', 'unit_raw': '1'}}
     second = leaves(d)
-    assert first['payload.parameters.lambda_ep']['content_hash'] != second['payload.parameters.lambda_ep']['content_hash']
+    # #226把名称/单位作为独立字段；改名称不能冒充数值变化。
+    assert first['payload.parameters.lambda_ep']['content_hash'] == second['payload.parameters.lambda_ep']['content_hash']
+    assert first['payload.parameters.field_settings.lambda_ep.name_raw']['content_hash'] != second['payload.parameters.field_settings.lambda_ep.name_raw']['content_hash']
+    assert first['payload.parameters.field_settings.lambda_ep.unit_raw']['content_hash'] == second['payload.parameters.field_settings.lambda_ep.unit_raw']['content_hash']
     assert first['payload.parameters.omega_log']['content_hash'] == second['payload.parameters.omega_log']['content_hash']
     record = second['payload.parameters.lambda_ep']
     response = {'model': 'actual-test-model', 'reason': '核对原文', '_audit_action': 'ai_review', '_audit_event_id': 'run-1'}
@@ -96,7 +109,7 @@ def test_annotation_changes_only_own_leaf_and_new_events_are_authoritative():
     assert human['audit_events'][0]['kind'] == 'change'
 
 
-def test_explicit_range_split_keeps_field_identities_and_scientific_versions():
+def test_explicit_range_split_keeps_point_ids_and_rechecks_new_method_binding():
     d = draft();r = d['material_states'][0]['property_modules'][0]['records'][0]
     r.update(value_kind='range', value_number=None, value_min=281, value_max=311, value_raw='281–311')
     r['payload']['parameters'].pop('mu_star')
@@ -111,9 +124,25 @@ def test_explicit_range_split_keeps_field_identities_and_scientific_versions():
         points.append(point)
     d['material_states'][0]['property_modules'][0]['records']=points
     after={x['item_key']:x for x in snapshot(d)['records']if x.get('record_field')}
-    assert set(before)==set(after)
+    # 从无显式方法归属的旧范围建立共同方法，身份保留，新的归属不能继承旧科学通过。
+    extra = set(after) - set(before)
+    assert set(before) <= set(after) and len(extra) == 4
+    assert {after[key]['record_field'] for key in extra} == {
+        'payload.field_settings.mu_star.name_raw', 'payload.field_settings.mu_star.unit_raw'}
+    assert all(after[key]['current_value'] is None for key in extra)
     for key in before:
-        assert before[key]['content_hash']==after[key]['content_hash'],before[key]['record_field']
+        old, new = before[key], after[key]
+        assert old['current_value'] == new['current_value']
+        path = old['record_field']
+        rebound = path in {'method_code', 'value_min', 'value_max'} or path.startswith((
+            'payload.parameters.extensions.', 'payload.field_settings.tc.'))
+        if rebound:
+            assert old['content_hash'] != new['content_hash'], path
+        else:
+            assert old['content_hash'] == new['content_hash'], path
+    tc_rows = [row for row in after.values() if row['record_field'] == 'value_number']
+    assert {(row['current_value'], row['claim']['context']['paired_mu_star']) for row in tc_rows} == {
+        (281, .16), (311, .1)}
 
 
 def test_saved_changes_track_actor_values_settings_without_dependency_noise():
@@ -131,8 +160,9 @@ def test_saved_changes_track_actor_values_settings_without_dependency_noise():
     annotated = deepcopy(after)
     annotated['material_states'][0]['property_modules'][0]['records'][0]['payload']['parameters']['field_settings'] = {'lambda_ep': {'name_raw': '耦合', 'unit_raw': '1'}}
     event, = draft_change_events(after, annotated, user)
-    assert event['summary'] == '修改并保存字段设置'
-    assert event['after_settings']['name_raw'] == '耦合'
+    assert event['summary'] == '修改并保存字段'
+    assert event['field'].endswith('payload.parameters.field_settings.lambda_ep.name_raw')
+    assert event['before_value'] == '耦合常数' and event['after_value'] == '耦合'
 
 
 def test_upload_save_audit_is_server_owned_atomic_and_does_not_change_retention(monkeypatch):
@@ -155,15 +185,16 @@ def test_upload_save_audit_is_server_owned_atomic_and_does_not_change_retention(
     after = draft(); after['material_states'][0]['property_modules'][0]['records'][0]['value_number'] = 310
     after['_field_change_events'] = [{'id': 'forged'}]
     upload_tasks.save_draft('audit', after, editor=SimpleNamespace(id=27, username='actual-editor'))
-    state = json.loads(client.values[upload_tasks.task_key('audit')]); event, = state['_field_change_events']
+    state = json.loads(client.values[upload_tasks.task_key('audit')]); event, = state['_field_baselines'].values()
+    assert not state.get('_field_change_events')  # 新保存维护当前基线，不伪造不可变历史。
     assert event['actor']['user_id'] == 27  # 不能冒用owner=99。
     assert event['before_value'] == 311 and event['after_value'] == 310
     assert client.ttls[upload_tasks.task_key('audit')] == client.ttls[upload_tasks.draft_key('audit')]
     upload_tasks.save_draft('audit', after, editor=SimpleNamespace(id=27, username='actual-editor'))
-    assert json.loads(client.values[upload_tasks.task_key('audit')])['_field_change_events'] == [event]
+    assert list(json.loads(client.values[upload_tasks.task_key('audit')])['_field_baselines'].values()) == [event]
     after['material_states'][0]['property_modules'][0]['records'][0]['value_number'] = 309
     upload_tasks.save_draft('audit', after)  # 后台调用不能伪造人工事件。
-    assert json.loads(client.values[upload_tasks.task_key('audit')])['_field_change_events'] == [event]
+    assert list(json.loads(client.values[upload_tasks.task_key('audit')])['_field_baselines'].values()) == [event]
 
 
 def test_only_successful_model_evaluation_creates_ai_review_event(monkeypatch):

@@ -1,0 +1,12 @@
+{
+  "before-old-tests.log": "319b0b0a26e363e3aef5ca3700e4fcb010fdfe04ebd217828c737a23d1ccbc9c",
+  "old-tests-and-guards.log": "f53d81fbc27f232c112eaaa054e6561d50fafbba3aae79354566982461521a1d",
+  "mysql-six-before-fixture-fix.log": "8614def2e228d4f936ac408bdfea77b3711495a8c39dd59dae1ef94c2cdc4f2f",
+  "mysql-six-passed.log": "7f31524ef01c3151607a8baf3d097fb56a16903f20e01d28dbf5cb3060c7a387",
+  "mysql-expanded.log": "d595ab89ac6235a71ed65b5f5166924d6a75618dd9fb449e2158bcccd0d6ffdc",
+  "mysql-visual-sources.log": "ae75ff2f5a95d2bb163cb06114c2e20a66b31c0a72a48cb8e0fe2742a3f57210",
+  "final-regressions.log": "38f096f647ea4c17b0cdac15413d224ffc5194791c226d7deff61f58d6c0b068",
+  "mysql-final.log": "49069a4dd9a353bc2f747b6b38ee680e7736d60a3e6d13f91968c6a2799cb6fc",
+  "mysql-schema.log": "68fc2badacfe6fe8e739c954d8212c4648596308036776401d867d409427c557",
+  "mysql-server.log": "a74d851beac666760458926090d1c3ca16fd88f59e7308392ec2dc697864e0d8"
+}

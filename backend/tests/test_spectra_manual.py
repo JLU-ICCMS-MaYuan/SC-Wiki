@@ -28,18 +28,13 @@ def manual_storage(tmp_path):
     engine=create_engine(url)
     task="issue161-test-"+uuid.uuid4().hex
     if engine.dialect.name == "mysql":
-        from scripts.local_deploy.config import read_config
-        from sqlalchemy.engine import make_url
-        from sqlalchemy import inspect
-        assert os.environ.get("SCWIKI_MANUAL_CURRENT_MYSQL")=="1", "当前库测试需要本次明确授权开关"
-        configured=make_url(read_config(Path.cwd())["DATABASE_URL"])
-        assert (engine.url.host,engine.url.port,engine.url.database)==(configured.host,configured.port,configured.database), "不是当前配置的MySQL目标"
-        assert engine.url.host in {"127.0.0.1","localhost"} and engine.url.port==3307 and engine.url.database=="scwiki", "不是本次授权目标"
-        with engine.connect() as connection:
-            assert connection.scalar(text("SELECT DATABASE()"))=="scwiki"
-            assert all(inspect(connection).has_table(name) for name in ("spectrum_collections","spectrum_runs")), "现有谱表尚未准备就绪"
+        if os.environ.get('SCWIKI_SPECTRA_MYSQL_TEST') == '1':
+            from backend.tests.mysql_isolation import require_isolated_mysql
+            require_isolated_mysql(engine)
+        else:
+            _require_current_mysql(engine)
     else:
-        assert engine.dialect.name == "sqlite", "非SQLite测试仅支持明确授权的当前MySQL"
+        assert engine.dialect.name == "sqlite", "非SQLite测试仅支持明确授权的MySQL"
         models.Base.metadata.create_all(engine,tables=[models.SpectrumCollection.__table__,models.SpectrumRun.__table__])
     try:
         yield engine,task
@@ -53,6 +48,20 @@ def manual_storage(tmp_path):
                 connection.execute(models.SpectrumCollection.__table__.delete().where(
                     models.SpectrumCollection.id.in_(ids),models.SpectrumCollection.target_id==task))
         engine.dispose()
+
+
+def _require_current_mysql(engine):
+    """保留已有显式业务库授权路径；本次补验收不启用此分支。"""
+    from scripts.local_deploy.config import read_config
+    from sqlalchemy.engine import make_url
+    from sqlalchemy import inspect
+    assert os.environ.get("SCWIKI_MANUAL_CURRENT_MYSQL")=="1", "当前库测试需要本次明确授权开关"
+    configured=make_url(read_config(Path.cwd())["DATABASE_URL"])
+    assert (engine.url.host,engine.url.port,engine.url.database)==(configured.host,configured.port,configured.database), "不是当前配置的MySQL目标"
+    assert engine.url.host in {"127.0.0.1","localhost"} and engine.url.port==3307 and engine.url.database=="scwiki", "不是本次授权目标"
+    with engine.connect() as connection:
+        assert connection.scalar(text("SELECT DATABASE()"))=="scwiki"
+        assert all(inspect(connection).has_table(name) for name in ("spectrum_collections","spectrum_runs")), "现有谱表尚未准备就绪"
 
 
 @pytest.fixture
@@ -74,6 +83,9 @@ def manual_http(manual_storage, monkeypatch):
     query=dict(target="upload",target_id=task)
     with Session(engine) as session:
         ctx=service.context(session,**query,user=actor[0],write=True)
+        # 完整MySQL架构会建立规范工作稿；后续模拟读取也须返回同一权威内容。
+        saved_draft=copy.deepcopy(ctx['draft'])
+        draft.clear();draft.update(saved_draft)
         rgb,panel=fixture();row=service.collection(session,ctx,"source","panel",dict(source_sha256="source",size_px=[160,100],pdf_page=1))
         run,_=service.new_run(session,row,panel,ctx["states"][0]);service.complete_run(run,extract_panel(rgb,panel));service.activate(row,run,ctx["states"][0])
         row.review_json={"a":{"status":"accepted"}};session.commit()

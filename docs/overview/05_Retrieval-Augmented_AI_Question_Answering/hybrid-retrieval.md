@@ -53,4 +53,4 @@ Mentor现有工具中增加visual_source_catalog和visual_source_image。先取�
 
 图片工具的文字回执保留原tool_call_id，实际PNG进入同一模型的user图片内容；本地路径或图片编号不能冒充已发送像素。原件与定位匹配后才重建，缓存不含展示高亮。历史入口另沿既有整稿交接权限读取旧文件和旧定位，不通过公开RAG暴露。
 
-图片缓存节省重复渲染及存储；按已知坐标重建不消耗模型token，模型再次看图仍有实际图片用量。真实SQL/权限和模型图片交接覆盖见[#235验收](../../specs/235-rebuildable-visual-sources/validation.md)，MySQL竞争和完整公开业务验收尚未完成。
+图片缓存节省重复渲染及存储；按已知坐标重建不消耗模型token，模型再次看图仍有实际图片用量。真实SQL/权限和模型图片交接覆盖见[#235验收](../../specs/235-rebuildable-visual-sources/validation.md)。后续独立MySQL 8.4.2已验证来源/冻结快照及谱并发，扩展79项零跳过；完整公开业务仍未验收。复核入口与边界见[MySQL补验收](../../specs/232-complete-pdf-regions/mysql-and-baseline-validation.md)。

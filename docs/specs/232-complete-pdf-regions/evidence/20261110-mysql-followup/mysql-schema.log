@@ -1,0 +1,73 @@
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 20260609_0001, initial mysql schema
+INFO  [alembic.runtime.migration] Running upgrade 20260609_0001 -> 20260610_0002, add superconductors structures
+INFO  [alembic.runtime.migration] Running upgrade 20260610_0002 -> b95420be551f, add missing columns from sqlite schema
+INFO  [alembic.runtime.migration] Running upgrade b95420be551f -> 20260819_0003, add theoretical paper subtype
+INFO  [alembic.runtime.migration] Running upgrade 20260819_0003 -> 20260820_0004, add paper review events for contribution ranking
+INFO  [alembic.runtime.migration] Running upgrade 20260820_0004 -> 20260820_0005, add multi-file uploads and paper access fields
+INFO  [alembic.runtime.migration] Running upgrade 20260820_0005 -> 20260821_0006, add public usernames and immutable rename audit
+INFO  [alembic.runtime.migration] Running upgrade 20260821_0006 -> 20260821_0007, add current-generation paper lineage schema
+INFO  [alembic.runtime.migration] Running upgrade 20260821_0007 -> 20260821_0008, add condition-aware superconducting data model
+INFO  [alembic.runtime.migration] Running upgrade 20260821_0008 -> 20260824_0009, add account identity, applications and governance
+INFO  [alembic.runtime.migration] Running upgrade 20260824_0009 -> 20260824_0010, add reported space group to material states
+INFO  [alembic.runtime.migration] Running upgrade 20260824_0010 -> 20260824_0011, Remove the ambiguous material-state phase label.
+INFO  [alembic.runtime.migration] Running upgrade 20260824_0011 -> 20260825_0012, add material-state classification catalogs and governance
+INFO  [alembic.runtime.migration] Running upgrade 20260825_0012 -> 20260825_0013, Simplify classification governance into the paper review transaction.
+INFO  [alembic.runtime.migration] Running upgrade 20260825_0013 -> 20260826_0014, add material_states.superconductor_kind and tc_results.tc_method_custom
+INFO  [alembic.runtime.migration] Running upgrade 20260826_0014 -> 20260826_0015, add material_states.crystal_system
+INFO  [alembic.runtime.migration] Running upgrade 20260826_0015 -> 20260826_0016, relax material_states pressure range to allow one-sided intervals
+INFO  [alembic.runtime.migration] Running upgrade 20260826_0016 -> 20260831_0063, 独立自动资讯表，不修改正式科研数据。
+INFO  [alembic.runtime.migration] Running upgrade 20260831_0063 -> 20260831_0064, create news_items table for manual news
+INFO  [alembic.runtime.migration] Running upgrade 20260831_0064 -> 20260831_0065, create chart_groups and chart_group_items tables
+INFO  [alembic.runtime.migration] Running upgrade 20260831_0065 -> 20260831_0066, rename papers.rationale to research_motivation, preserving data
+INFO  [alembic.runtime.migration] Running upgrade 20260831_0066 -> add_kg_title, add knowledge_graph_title to papers
+INFO  [alembic.runtime.migration] Running upgrade add_kg_title -> revision_cascade_chain, revision cascade chain for paper lineage tables
+INFO  [alembic.runtime.migration] Running upgrade revision_cascade_chain -> fill_elemental_name_en, fill canonical English name for the elemental superconductor family
+INFO  [alembic.runtime.migration] Running upgrade fill_elemental_name_en -> paper_material_families, move Material family ownership from material states to papers
+INFO  [alembic.runtime.migration] Running upgrade paper_material_families -> paper_superconductor_kind, move Superconductor type ownership from material states to papers
+INFO  [alembic.runtime.migration] Running upgrade paper_superconductor_kind -> paper_citation_graph, add citation facts and paper graph marks
+INFO  [alembic.runtime.migration] Running upgrade paper_citation_graph -> experimental_tc_context, enforce tc method driven contexts
+INFO  [alembic.runtime.migration] Running upgrade experimental_tc_context -> paper_history_events, evolve paper review events into immutable paper history
+INFO  [alembic.runtime.migration] Running upgrade paper_history_events -> networked_news_discovery, 为联网超导资讯发现增加溯源和内容语义字段。
+INFO  [alembic.runtime.migration] Running upgrade networked_news_discovery -> issue90_expand_v1, Issue #90 Expand: create the target schema without changing legacy reads.
+INFO  [alembic.runtime.migration] Running upgrade issue90_expand_v1 -> issue90_copy_v1, Issue #90 Copy: execute the repeatable data copy.
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade issue90_copy_v1 -> issue90_contract_v1, Issue #90 Contract: retire legacy tables after observed target cutover.
+INFO  [alembic.runtime.migration] Running upgrade issue90_contract_v1 -> issue90_audit_cleanup_v1, Retire Issue #90 migration bookkeeping after completed Contract.
+INFO  [alembic.runtime.migration] Running upgrade issue90_audit_cleanup_v1 -> issue90_data_integrity_repair_v1, 修复 Issue #90 初始定义字段和旧结构引用。
+INFO  [alembic.runtime.migration] Running upgrade issue90_data_integrity_repair_v1 -> 20260909_0099, 为论文新增独立期号，兼容历史空值。
+INFO  [alembic.runtime.migration] Running upgrade 20260909_0099 -> 20260911_0103, 保存与物性内容、来源绑定的证据核对结果。
+INFO  [alembic.runtime.migration] Running upgrade 20260911_0103 -> 20260915_0103, 全科学数据持久核对及正式来源；不回填历史数据。
+INFO  [alembic.runtime.migration] Running upgrade 20260915_0103 -> 20260915_0104, 保留已核对上传草稿，防止运行缓存丢失造成结果无法恢复。
+INFO  [alembic.runtime.migration] Running upgrade 20260915_0104 -> 20260916_0105, 增加材料名字段。
+INFO  [alembic.runtime.migration] Running upgrade 20260916_0105 -> 20260916_0106, 允许只有材料名的状态不关联化学式实体。
+INFO  [alembic.runtime.migration] Running upgrade 20260916_0106 -> 20260917_0107, 新增社区问答、评论、弹幕及治理通知表；不回填或改写原业务数据。
+INFO  [alembic.runtime.migration] Running upgrade 20260917_0107 -> 20260918_0108, 上传者的持久返修草稿，不改变正式论文的审核状态。
+INFO  [alembic.runtime.migration] Running upgrade 20260918_0108 -> 20260923_0114, Issue #114：当前论文 revision 的 Document IR 与区域 Evidence 定位。
+INFO  [alembic.runtime.migration] Running upgrade 20260923_0114 -> 20260924_0114, 补齐 #114 直接领域提取所需的已有 Tc 方法定义，不覆盖已发布版本。
+INFO  [alembic.runtime.migration] Running upgrade 20260924_0114 -> 20261009_0115, 为 #114 发布首批电子性质定义，不改写已有物性记录。
+INFO  [alembic.runtime.migration] Running upgrade 20261009_0115 -> 20261009_0125, #125：按账号保存 RAG 完成会话。
+INFO  [alembic.runtime.migration] Running upgrade 20261009_0125 -> 20261009_0126, #109：人工修改理由和独立证据。
+INFO  [alembic.runtime.migration] Running upgrade 20261009_0126 -> 20261010_0127, #127：清理材料关系并删除论文专列。
+INFO  [alembic.runtime.migration] Running upgrade 20261010_0127 -> 20261014_0137, #137 独立谱集合与提取运行，不迁移既有论文数值。
+INFO  [alembic.runtime.migration] Running upgrade 20260911_0103 -> 20260914_0052, 补齐非超导模块的通用物性录入定义，不覆盖已有已发布版本。
+INFO  [alembic.runtime.migration] Running upgrade 20260914_0052, 20261014_0137 -> 20261015_0094, #94：材料状态核处理、退役 mixed 和单份规范几何，合并既有双头。
+INFO  [alembic.runtime.migration] Running upgrade 20261015_0094 -> 20261020_0142, #142：只读社区与多模型 AI 生成；保留历史内容。
+INFO  [alembic.runtime.migration] Running upgrade 20261020_0142 -> 20261020_0143, #143：问题内排队和同模型追加；与其他功能分支独立。
+INFO  [alembic.runtime.migration] Running upgrade 20261020_0143 -> 20261020_0143b, #143：原子多模型提交的幂等组，不改动已有答案。
+INFO  [alembic.runtime.migration] Running upgrade 20261020_0143b -> 20261021_0147, 管理员逐字段编辑暂存，不改正式数据。
+INFO  [alembic.runtime.migration] Running upgrade 20261021_0147 -> 20261022_0147b, 结构核对身份独立于几何摘要和重建后的数据库ID。
+INFO  [alembic.runtime.migration] Running upgrade 20261022_0147b -> 20261022_0153, 为自动资讯增加独立分类结果和已有材料家族关联。
+INFO  [alembic.runtime.migration] Running upgrade 20261022_0153 -> 20261029_0181, 结构优化物理目标和实际几何自由度；不改写历史科学值。
+INFO  [alembic.runtime.migration] Running upgrade 20261029_0181 -> 20261030_0192, 当前工作稿和去重来源目录；不改写存量业务记录。
+INFO  [alembic.runtime.migration] Running upgrade 20261030_0192 -> 20261101_0198, 取消结构优化独立详情，仅处理当前工作稿，不改原文及不可变交接快照。
+INFO  [alembic.runtime.migration] Running upgrade 20261020_0142 -> 20261020_0049, #49：与材料状态独立的论文结构资料。
+INFO  [alembic.runtime.migration] Running upgrade 20261020_0049, 20261101_0198 -> 20261102_0160, 持久化收录前的期刊候选，不修改已有公开资讯或科研数据。
+INFO  [alembic.runtime.migration] Context impl MySQLImpl.
+INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 20261020_0049, 20261101_0198 -> 20261102_0203_merge, #203：合并两个已存在的迁移头，不修改旧迁移。
+INFO  [alembic.runtime.migration] Running upgrade 20261102_0203_merge -> 20261102_0203, #203：固定字段契约，显式转换当前数据并退役压力辅助列。
+INFO  [alembic.runtime.migration] Running upgrade 20261102_0203 -> 20261102_0204, #204：规范结构承接来源与派生表示，当前工作稿退出根候选容器。
+INFO  [alembic.runtime.migration] Running upgrade 20261102_0204 -> 20261106_0225, #225：持久引用匹配快照、决定依据和按输入签名复用的模型缓存。

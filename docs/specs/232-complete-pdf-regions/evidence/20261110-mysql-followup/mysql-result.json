@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "business_database_used": false,
+  "mysql_version": "8.4.2",
+  "port": 56498,
+  "database": "issue137_test_e5566e201183",
+  "data_directory": "/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/scwiki-visual-mysql-rgfg7dh2/data",
+  "test_paths": [
+    "backend/tests/test_spectra_mysql.py",
+    "backend/tests/test_spectra_manual.py",
+    "backend/tests/test_spectra_recalculate.py",
+    "backend/tests/test_spectra_revalidation.py",
+    "backend/tests/test_visual_source_reuse.py"
+  ],
+  "exit_code": 0,
+  "server_stopped": true,
+  "data_directory_removed": true
+}

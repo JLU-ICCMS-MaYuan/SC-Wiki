@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 
 import pytest
 from sqlalchemy import create_engine
@@ -17,8 +18,19 @@ def database(tmp_path):
     locator=region_locator(path,'main',ir.source_sha256,1,[30,35,210,218])
     ir.blocks[0].metadata['region_locator']=locator
     ir.coverage['visual_regions']={locator['region_id']:locator}
-    engine=create_engine('sqlite:///:memory:',connect_args={'check_same_thread':False});Base.metadata.create_all(engine)
+    url=os.environ.get('SCWIKI_VISUAL_TEST_DATABASE_URL')
+    if url:
+        from backend.tests.mysql_isolation import require_isolated_mysql
+        engine=create_engine(url)
+        require_isolated_mysql(engine)
+    else:
+        engine=create_engine('sqlite:///:memory:',connect_args={'check_same_thread':False})
+        Base.metadata.create_all(engine)
     session=Session(engine)
+    if url and session.get(models.User,2) is None:
+        session.add(models.User(id=2,email='source-fixture@isolation.invalid',username='source-fixture',
+            password_hash='test-only',real_name='来源隔离测试',role='user'))
+        session.flush()
     paper=models.Paper(year=2026,review_status='approved',content_revision=1,approved_revision=1)
     session.add(paper);session.flush()
     file=models.PaperFile(paper_id=paper.id,paper_revision=1,role='main',sort_order=0,

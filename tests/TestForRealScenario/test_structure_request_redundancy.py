@@ -19,14 +19,19 @@ def test_real_read_document_receipt_references_current_sources_without_repeating
               'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
     ir = _native_document(path, source)
     originals = {b.block_id:b.text for b in ir.blocks}
-    requests = []
+    requests, events = [], []
     class Captured(Exception):
         pass
     def model(_system, payload, **options):
         request = json.loads(payload)
         requests.append(request)
-        rows = {r['block_id']:r for r in request['sources']}
-        assert {key:row['content'] for key,row in rows.items()} == originals
+        rows = {r['source_id']:r for r in request['sources']}
+        assert len(rows)==len(originals)
+        assert {row['content'] for row in rows.values()} == set(originals.values())
+        assert all(set(row)=={'source_id','pdf_page','content'} for row in rows.values())
+        original_rows=events[-1]['original_context']['request']['sources']
+        assert {row['block_id']:row['content'] for row in original_rows}==originals
+        assert all(rows[row['source_id']]['pdf_page']==row['pdf_page'] for row in original_rows)
         if len(requests) == 1:
             return {'action':{'name':'read_document','arguments':{'file_id':'current-si'}},
                 '_tool_call':{'id':'actual-read-document','type':'function',
@@ -35,15 +40,14 @@ def test_real_read_document_receipt_references_current_sources_without_repeating
         assert history[0]['tool_calls'][0]['id'] == history[1]['tool_call_id'] == 'actual-read-document'
         receipt = json.loads(history[1]['content'])
         assert receipt['truncated'] is False
-        assert {b['block_id'] for b in receipt['blocks']} == set(originals)
-        for block in receipt['blocks']:
-            assert block['source_id'] == rows[block['block_id']]['source_id']
-            assert block['pdf_page'] == rows[block['block_id']]['pdf_page']
-            assert 'text' not in block and 'content_hash' not in block
-        assert all(set(row) == {'source_id','pdf_page'} for row in request['source_index'])
+        assert 'blocks' not in receipt
+        assert set(receipt['source_ids'])==set(rows)
+        full_receipt=json.loads(events[-1]['original_context']['tool_history'][1]['content'])
+        assert {b['block_id']:b['text'] for b in full_receipt['blocks']}==originals
+        assert request['source_index']==[]
         raise Captured()
     with pytest.raises(Captured):
-        extract_structure_candidates('', source=source, pdf_path=path, model=model)
+        extract_structure_candidates('', source=source, pdf_path=path, model=model,on_event=events.append)
     assert len(requests) == 2
 
 

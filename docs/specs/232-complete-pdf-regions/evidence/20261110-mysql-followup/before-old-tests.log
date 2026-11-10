@@ -1,0 +1,200 @@
+FF.FFFF..F.                                                              [100%]
+=================================== FAILURES ===================================
+___________ test_leaf_claims_scope_dependencies_and_no_parent_grant ____________
+
+    def test_leaf_claims_scope_dependencies_and_no_parent_grant():
+        d = draft(); before = deepcopy(d); first = leaves(d)
+        assert d == before
+>       assert len(first) == 14
+E       AssertionError: assert 45 == 14
+E        +  where 45 = len({'method_code': {'state_index': 0, 'module_code': 'superconductive_properties', 'module_key': 'm', 'record_key': 'r', ..._raw': {'state_index': 0, 'module_code': 'superconductive_properties', 'module_key': 'm', 'record_key': 'r', ...}, ...})
+
+backend/tests/test_property_field_review.py:33: AssertionError
+___ test_stable_extensions_and_shared_groups_do_not_merge_methods_or_points ____
+
+    def test_stable_extensions_and_shared_groups_do_not_merge_methods_or_points():
+        d = draft(); r = d['material_states'][0]['property_modules'][0]['records'][0]
+        first = leaves(d); r['payload']['calculation_conditions']['extensions'].reverse()
+        second = leaves(d)
+>       assert first['payload.calculation_conditions.extensions.0']['item_key'] == second['payload.calculation_conditions.extensions.1']['item_key']
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'payload.calculation_conditions.extensions.0'
+
+backend/tests/test_property_field_review.py:52: KeyError
+____ test_annotation_changes_only_own_leaf_and_new_events_are_authoritative ____
+
+    def test_annotation_changes_only_own_leaf_and_new_events_are_authoritative():
+        d = draft(); first = leaves(d)
+        r = d['material_states'][0]['property_modules'][0]['records'][0]
+        r['payload']['parameters']['field_settings'] = {'lambda_ep': {'name_raw': 'λ', 'unit_raw': '1'}}
+        second = leaves(d)
+>       assert first['payload.parameters.lambda_ep']['content_hash'] != second['payload.parameters.lambda_ep']['content_hash']
+E       AssertionError: assert '30bfc756b9f39d96bf575c2eb8be7b27f916509b41566985fe032718a960c084' != '30bfc756b9f39d96bf575c2eb8be7b27f916509b41566985fe032718a960c084'
+
+backend/tests/test_property_field_review.py:81: AssertionError
+___ test_explicit_range_split_keeps_field_identities_and_scientific_versions ___
+
+    def test_explicit_range_split_keeps_field_identities_and_scientific_versions():
+        d = draft();r = d['material_states'][0]['property_modules'][0]['records'][0]
+        r.update(value_kind='range', value_number=None, value_min=281, value_max=311, value_raw='281–311')
+        r['payload']['parameters'].pop('mu_star')
+        r['payload']['parameters']['extensions'] = [{'key':'mu_star','value_kind':'range','value_min':.1,'value_max':.16}]
+        before = {x['item_key']:x for x in snapshot(d)['records']if x.get('record_field')}
+        points=[]
+        for i,(tc,mu) in enumerate([(281,.16),(311,.1)]):
+            point=deepcopy(r);point.update(record_key='r' if i==0 else 'new-point',value_kind='number',value_number=tc,value_min=None,value_max=None,value_raw=str(tc))
+            point['payload']['parameters'].update(mu_star=mu,extensions=[])
+            point['payload']['tc_group']={'version':1,'group_key':'r','method_key':'r','point_key':f'r:{i}'}
+            point['payload']['tc_range_origin']={'value_kind':'range','value_min':281,'value_max':311}
+            points.append(point)
+        d['material_states'][0]['property_modules'][0]['records']=points
+        after={x['item_key']:x for x in snapshot(d)['records']if x.get('record_field')}
+>       assert set(before)==set(after)
+E       AssertionError: assert {'02f3a1a2d9f...d5b32f9', ...} == {'02f3a1a2d9f...d5b32f9', ...}
+E
+E         Extra items in the right set:
+E         '9c152c9932b7625c530c83aee7cdf7d5d713f7b1f2f39116e1b9e5ec67f68404'
+E         '2773f2f998b2f06784170b5e80963d15eb62794bb3081dbfa31907c2d3bf0db5'
+E         '11fffbfed23fe4d95cc9dc3b3bff2d194eb570375e93ae316b4a0a2d9b8e99fb'
+E         '33f97f6f6a7dcba07d87fa218f2fa673c98681f53cc274274a5db24d4d60b13c'
+E         Use -v to get more diff
+
+backend/tests/test_property_field_review.py:114: AssertionError
+___ test_saved_changes_track_actor_values_settings_without_dependency_noise ____
+
+    def test_saved_changes_track_actor_values_settings_without_dependency_noise():
+        from backend.ingest.evidence_audit import draft_change_events
+        user = SimpleNamespace(id=27, username='actual-editor')
+        before = draft(); after = deepcopy(before)
+        r = after['material_states'][0]['property_modules'][0]['records'][0]
+        r['payload']['parameters']['mu_star'] = .16
+        events = draft_change_events(before, after, user)
+        assert len(events) == 1  # Tc依赖失效，但用户没有修改Tc值。
+        assert events[0]['actor'] == {'kind': 'human', 'user_id': 27, 'name': 'actual-editor'}
+        assert events[0]['before_value'] == .1 and events[0]['after_value'] == .16
+        assert events[0]['occurred_at'].endswith('+00:00')
+        assert draft_change_events(after, deepcopy(after), user) == []
+        annotated = deepcopy(after)
+        annotated['material_states'][0]['property_modules'][0]['records'][0]['payload']['parameters']['field_settings'] = {'lambda_ep': {'name_raw': '耦合', 'unit_raw': '1'}}
+>       event, = draft_change_events(after, annotated, user)
+        ^^^^^^
+E       ValueError: too many values to unpack (expected 1)
+
+backend/tests/test_property_field_review.py:133: ValueError
+_ test_upload_save_audit_is_server_owned_atomic_and_does_not_change_retention __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x16d0bd340>
+
+    def test_upload_save_audit_is_server_owned_atomic_and_does_not_change_retention(monkeypatch):
+        import json
+        from backend.ingest import upload_tasks
+        class Redis:
+            def __init__(self):
+                self.values = {upload_tasks.task_key('audit'): json.dumps({'user_id': 99, 'is_shadow': True}),
+                               upload_tasks.draft_key('audit'): json.dumps(draft())}
+                self.ttls = {}
+            def get(self, key): return self.values.get(key)
+            def pipeline(self, transaction):
+                assert transaction
+                return self
+            def __enter__(self): return self
+            def __exit__(self, *args): pass
+            def setex(self, key, ttl, value): self.values[key] = value; self.ttls[key] = ttl
+            def execute(self): pass
+        client = Redis();monkeypatch.setattr(upload_tasks, 'redis_client', lambda: client)
+        after = draft(); after['material_states'][0]['property_modules'][0]['records'][0]['value_number'] = 310
+        after['_field_change_events'] = [{'id': 'forged'}]
+        upload_tasks.save_draft('audit', after, editor=SimpleNamespace(id=27, username='actual-editor'))
+>       state = json.loads(client.values[upload_tasks.task_key('audit')]); event, = state['_field_change_events']
+                                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '_field_change_events'
+
+backend/tests/test_property_field_review.py:158: KeyError
+_ test_real_read_document_receipt_references_current_sources_without_repeating_blocks _
+
+tmp_path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-412/test_real_read_document_receip0')
+
+    def test_real_read_document_receipt_references_current_sources_without_repeating_blocks(tmp_path):
+        from backend.ingest.structure_reading import extract_structure_candidates, _native_document
+        path = tmp_path / 'source.pdf'
+        with pymupdf.open() as pdf:
+            for index in range(3):
+                page = pdf.new_page()
+                for row in range(30):
+                    page.insert_text((40, 40 + row * 20), f'Original row {index}-{row}: reported number {row}.')
+            pdf.save(path)
+        source = {'file_id':'current-si','role':'supplementary','filename':path.name,
+                  'sha256':hashlib.sha256(path.read_bytes()).hexdigest()}
+        ir = _native_document(path, source)
+        originals = {b.block_id:b.text for b in ir.blocks}
+        requests = []
+        class Captured(Exception):
+            pass
+        def model(_system, payload, **options):
+            request = json.loads(payload)
+            requests.append(request)
+            rows = {r['block_id']:r for r in request['sources']}
+            assert {key:row['content'] for key,row in rows.items()} == originals
+            if len(requests) == 1:
+                return {'action':{'name':'read_document','arguments':{'file_id':'current-si'}},
+                    '_tool_call':{'id':'actual-read-document','type':'function',
+                        'function':{'name':'read_document','arguments':'{"file_id":"current-si"}'}}}
+            history = options['tool_history']
+            assert history[0]['tool_calls'][0]['id'] == history[1]['tool_call_id'] == 'actual-read-document'
+            receipt = json.loads(history[1]['content'])
+            assert receipt['truncated'] is False
+            assert {b['block_id'] for b in receipt['blocks']} == set(originals)
+            for block in receipt['blocks']:
+                assert block['source_id'] == rows[block['block_id']]['source_id']
+                assert block['pdf_page'] == rows[block['block_id']]['pdf_page']
+                assert 'text' not in block and 'content_hash' not in block
+            assert all(set(row) == {'source_id','pdf_page'} for row in request['source_index'])
+            raise Captured()
+        with pytest.raises(Captured):
+>           extract_structure_candidates('', source=source, pdf_path=path, model=model)
+
+tests/TestForRealScenario/test_structure_request_redundancy.py:46:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+backend/ingest/structure_reading.py:386: in extract_structure_candidates
+    answer = model(PROMPT + scope_prompt(material_scope),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+_system = 'Read the actual PDF contents to discover ALL reported crystal geometries.\nHeadings such as Atomic positions, atomic ...omplete, report\nit in uncertainties instead of pretending absence. Give short source-backed reasons, no deliberation.'
+payload = '{"document": {"file_id": "current-si", "role": "supplementary", "filename": "source.pdf", "pages": [1, 2, 3], "sha256... reported number 29."}], "source_index": [], "attached_page_images": [], "observation": null, "remaining_actions": 12}'
+options = {'tool_definitions': [{'type': 'function', 'function': {'name': 'read_document', 'description': '读取当前文档的文本块，不提供页面图像。',...: False}}}, ...], 'on_partial': <function extract_structure_candidates.<locals>.remember at 0x328f3b380>, 'retries': 0}
+
+    def model(_system, payload, **options):
+        request = json.loads(payload)
+        requests.append(request)
+>       rows = {r['block_id']:r for r in request['sources']}
+                ^^^^^^^^^^^^^
+E       KeyError: 'block_id'
+
+tests/TestForRealScenario/test_structure_request_redundancy.py:28: KeyError
+=============================== warnings summary ===============================
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_property_field_review.py::test_leaf_claims_scope_dependencies_and_no_parent_grant
+FAILED backend/tests/test_property_field_review.py::test_stable_extensions_and_shared_groups_do_not_merge_methods_or_points
+FAILED backend/tests/test_property_field_review.py::test_annotation_changes_only_own_leaf_and_new_events_are_authoritative
+FAILED backend/tests/test_property_field_review.py::test_explicit_range_split_keeps_field_identities_and_scientific_versions
+FAILED backend/tests/test_property_field_review.py::test_saved_changes_track_actor_values_settings_without_dependency_noise
+FAILED backend/tests/test_property_field_review.py::test_upload_save_audit_is_server_owned_atomic_and_does_not_change_retention
+FAILED tests/TestForRealScenario/test_structure_request_redundancy.py::test_real_read_document_receipt_references_current_sources_without_repeating_blocks
+7 failed, 4 passed, 535 warnings in 1.15s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

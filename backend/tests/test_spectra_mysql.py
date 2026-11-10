@@ -17,6 +17,8 @@ pytestmark=pytest.mark.skipif(os.environ.get("SCWIKI_SPECTRA_MYSQL_TEST")!="1",r
 
 
 def ensure_isolated():
+    from backend.tests.mysql_isolation import require_isolated_mysql
+    require_isolated_mysql(SessionLocal.kw['bind'])
     sync_url = SessionLocal.kw["bind"].url
     async_url = async_session_factory.kw["bind"].url
     for url in (sync_url, async_url):

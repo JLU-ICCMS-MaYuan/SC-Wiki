@@ -1,0 +1,54 @@
+COMMAND /Users/mayuan/software/miniconda3/envs/sc-wiki/bin/python -m pytest -q -rs backend/tests/test_chart_axis_bounds_replay.py backend/tests/test_chart_bar_shading.py backend/tests/test_chart_cache_recovery.py backend/tests/test_chart_calibration.py backend/tests/test_chart_page_inventory.py backend/tests/test_chart_reading.py backend/tests/test_chart_scalar_quantities.py backend/tests/test_chart_target_scope.py backend/tests/test_chart_workflow_dispatch.py backend/tests/test_image_feedback.py backend/tests/test_image_input_tiling.py backend/tests/test_image_reading.py backend/tests/test_model_runtime.py backend/tests/test_pdf_review_tools.py backend/tests/test_responses_image_tools.py backend/tests/test_spectra.py backend/tests/test_spectra_delete.py backend/tests/test_spectra_details.py backend/tests/test_spectra_dos_relative.py backend/tests/test_spectra_false_peak.py backend/tests/test_spectra_frequency_repair.py backend/tests/test_spectra_manual.py backend/tests/test_spectra_mysql.py backend/tests/test_spectra_no_zero_review.py backend/tests/test_spectra_preflight.py backend/tests/test_spectra_recalculate.py backend/tests/test_spectra_revalidation.py backend/tests/test_visual_source_reuse.py backend/tests/test_pdf_regions.py backend/tests/test_strict_scientific_output.py tests/01_decentralized_uploading/test_manuscript_handoffs.py tests/01_decentralized_uploading/test_issue114_storage_regions.py tests/01_decentralized_uploading/test_handoff_spectra.py tests/01_decentralized_uploading/test_handoff_manual.py tests/TestForRealScenario/test_structure_reading.py tests/TestForRealScenario/test_structure_context_payload.py backend/tests/test_property_field_review.py backend/tests/test_mysql_isolation.py tests/TestForRealScenario/test_structure_request_redundancy.py
+........................................................................ [ 13%]
+........................................................................ [ 27%]
+........................................................................ [ 40%]
+........................................................................ [ 54%]
+.............................................s..........sss............. [ 67%]
+.........................................s.................s............ [ 81%]
+........................................................................ [ 94%]
+...........................                                              [100%]
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+../../../../Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../../../Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+backend/tests/test_spectra.py::test_confirmed_structure_candidate_provides_primitive_count
+backend/tests/test_spectra_dos_relative.py::test_normalization_saved_then_invalidated_by_real_manual_route
+backend/tests/test_spectra_dos_relative.py::test_tdos_real_recalculate_persists_rereads_exports_and_preserves_history[False]
+backend/tests/test_spectra_dos_relative.py::test_tdos_real_recalculate_persists_rereads_exports_and_preserves_history[True]
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/cell.py:152: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error()
+
+tests/TestForRealScenario/test_structure_reading.py::test_complete_source_geometry_exports_and_retains_original_coordinate_rows
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:438: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+tests/TestForRealScenario/test_structure_reading.py: 24 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/cell.py:106: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] backend/tests/test_spectra_manual.py:256: 行锁竞争只在明确授权的MySQL上验证
+SKIPPED [1] backend/tests/test_spectra_mysql.py:40: 只在显式指定的隔离MySQL运行
+SKIPPED [1] backend/tests/test_spectra_mysql.py:92: 只在显式指定的隔离MySQL运行
+SKIPPED [1] backend/tests/test_spectra_mysql.py:110: 只在显式指定的隔离MySQL运行
+SKIPPED [1] backend/tests/test_spectra_recalculate.py:196: 重算行锁竞争仅在明确授权的MySQL上验证
+SKIPPED [1] backend/tests/test_spectra_revalidation.py:134: 行锁竞争仅当前MySQL验证
+525 passed, 6 skipped, 565 warnings in 37.71s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

@@ -1,0 +1,14 @@
+2026-11-10T14:22:11.459556Z 0 [System] [MY-015015] [Server] MySQL Server - start.
+2026-11-10T14:22:11.594960Z 0 [System] [MY-010116] [Server] /Users/mayuan/software/miniconda3/envs/sc-wiki/bin/mysqld (mysqld 8.4.2) starting as process 83969
+2026-11-10T14:22:11.595711Z 0 [Warning] [MY-013242] [Server] --character-set-server: 'utf8' is currently an alias for the character set UTF8MB3, but will be an alias for UTF8MB4 in a future release. Please consider using UTF8MB4 in order to be unambiguous.
+2026-11-10T14:22:11.595714Z 0 [Warning] [MY-013244] [Server] --collation-server: 'utf8mb3_general_ci' is a collation of the deprecated character set UTF8MB3. Please consider using UTF8MB4 with an appropriate collation instead.
+2026-11-10T14:22:11.595869Z 0 [Warning] [MY-010159] [Server] Setting lower_case_table_names=2 because file system for /var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/scwiki-visual-mysql-rgfg7dh2/data/ is case insensitive
+2026-11-10T14:22:11.597840Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+2026-11-10T14:22:11.597886Z 1 [Warning] [MY-012947] [InnoDB] MySQL was built without a memory barrier capability on this architecture, which might allow a mutex/rw_lock violation under high thread concurrency. This may cause a hang.
+2026-11-10T14:22:11.627070Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+2026-11-10T14:22:11.734163Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+2026-11-10T14:22:11.734184Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+2026-11-10T14:22:11.739058Z 0 [System] [MY-010931] [Server] /Users/mayuan/software/miniconda3/envs/sc-wiki/bin/mysqld: ready for connections. Version: '8.4.2'  socket: '/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/scwiki-visual-mysql-rgfg7dh2/mysql.sock'  port: 56498  conda-forge.
+2026-11-10T14:22:22.326262Z 0 [System] [MY-013172] [Server] Received SHUTDOWN from user <via user signal>. Shutting down mysqld (Version: 8.4.2).
+2026-11-10T14:22:22.748368Z 0 [System] [MY-010910] [Server] /Users/mayuan/software/miniconda3/envs/sc-wiki/bin/mysqld: Shutdown complete (mysqld 8.4.2)  conda-forge.
+2026-11-10T14:22:22.748384Z 0 [System] [MY-015016] [Server] MySQL Server - end.

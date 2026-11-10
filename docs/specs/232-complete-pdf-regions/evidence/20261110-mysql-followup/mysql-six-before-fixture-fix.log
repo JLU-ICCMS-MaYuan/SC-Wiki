@@ -1,0 +1,139 @@
+...EEE                                                                   [100%]
+==================================== ERRORS ====================================
+_ ERROR at setup of test_mysql_concurrent_manual_saves_only_one_version_commits _
+
+manual_storage = (Engine(mysql+pymysql://root@127.0.0.1:52933/issue137_test_3a3ce0b33d7d), 'issue161-test-3e557f674375467193d344d1974427f4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x16c3a5e50>
+
+    @pytest.fixture
+    def manual_http(manual_storage, monkeypatch):
+        engine,task=manual_storage
+        actor=[SimpleNamespace(id=1,role="user",is_approved=True)]
+        draft={"material_states":[dict(state_key="s1",material="H3S",pressure_value_gpa=200,property_modules=[dict(records=[dict(
+            property_code="lambda",value_number=.12,method_code="test",
+            payload={"parameters":{"omega_log":100.}},
+            evidences=[dict(quote="合成同条件参考",page_start=1,source_name="fixture.pdf")])])])]}
+        monkeypatch.setattr(upload_tasks,"get_state",lambda identity:dict(user_id=1,status="ready",files=[dict(file_id="main",kind="pdf",role="main",sha256="source")]) if identity==task else None)
+        monkeypatch.setattr(upload_tasks,"get_draft",lambda _:draft)
+        def db():
+            with Session(engine) as session:yield session
+        app=FastAPI();app.include_router(routes.router)
+        app.dependency_overrides[get_db]=db
+        app.dependency_overrides[get_current_user]=lambda:actor[0]
+        app.dependency_overrides[get_current_user_optional]=lambda:actor[0]
+        query=dict(target="upload",target_id=task)
+        with Session(engine) as session:
+            ctx=service.context(session,**query,user=actor[0],write=True)
+            rgb,panel=fixture();row=service.collection(session,ctx,"source","panel",dict(source_sha256="source",size_px=[160,100],pdf_page=1))
+            run,_=service.new_run(session,row,panel,ctx["states"][0]);service.complete_run(run,extract_panel(rgb,panel));service.activate(row,run,ctx["states"][0])
+            row.review_json={"a":{"status":"accepted"}};session.commit()
+            identity,old_run,old_result=row.id,run.id,copy.deepcopy(run.result_json)
+        with TestClient(app) as client:
+            listing=client.get("/api/rag/spectra",params=query).json();item=listing["items"][0]
+            params={**query,"kind":"alpha2f","collection_version":item["version"],"run_id":item["run"]["id"]}
+            response=client.get(f"/api/rag/spectra/{identity}/manual",params=params)
+>           assert response.status_code==200,response.text
+E           AssertionError: {"detail":{"code":"spectra_manual_invalid","message":"材料状态已变化，请先核对材料条件后继续编辑"}}
+E           assert 409 == 200
+E            +  where 409 = <Response [409 Conflict]>.status_code
+
+backend/tests/test_spectra_manual.py:94: AssertionError
+___ ERROR at setup of test_mysql_concurrent_recalculations_only_one_commits ____
+
+manual_storage = (Engine(mysql+pymysql://root@127.0.0.1:52933/issue137_test_3a3ce0b33d7d), 'issue161-test-66e28f2c683049c4950c246ef67978ec')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x16e720890>
+
+    @pytest.fixture
+    def manual_http(manual_storage, monkeypatch):
+        engine,task=manual_storage
+        actor=[SimpleNamespace(id=1,role="user",is_approved=True)]
+        draft={"material_states":[dict(state_key="s1",material="H3S",pressure_value_gpa=200,property_modules=[dict(records=[dict(
+            property_code="lambda",value_number=.12,method_code="test",
+            payload={"parameters":{"omega_log":100.}},
+            evidences=[dict(quote="合成同条件参考",page_start=1,source_name="fixture.pdf")])])])]}
+        monkeypatch.setattr(upload_tasks,"get_state",lambda identity:dict(user_id=1,status="ready",files=[dict(file_id="main",kind="pdf",role="main",sha256="source")]) if identity==task else None)
+        monkeypatch.setattr(upload_tasks,"get_draft",lambda _:draft)
+        def db():
+            with Session(engine) as session:yield session
+        app=FastAPI();app.include_router(routes.router)
+        app.dependency_overrides[get_db]=db
+        app.dependency_overrides[get_current_user]=lambda:actor[0]
+        app.dependency_overrides[get_current_user_optional]=lambda:actor[0]
+        query=dict(target="upload",target_id=task)
+        with Session(engine) as session:
+            ctx=service.context(session,**query,user=actor[0],write=True)
+            rgb,panel=fixture();row=service.collection(session,ctx,"source","panel",dict(source_sha256="source",size_px=[160,100],pdf_page=1))
+            run,_=service.new_run(session,row,panel,ctx["states"][0]);service.complete_run(run,extract_panel(rgb,panel));service.activate(row,run,ctx["states"][0])
+            row.review_json={"a":{"status":"accepted"}};session.commit()
+            identity,old_run,old_result=row.id,run.id,copy.deepcopy(run.result_json)
+        with TestClient(app) as client:
+            listing=client.get("/api/rag/spectra",params=query).json();item=listing["items"][0]
+            params={**query,"kind":"alpha2f","collection_version":item["version"],"run_id":item["run"]["id"]}
+            response=client.get(f"/api/rag/spectra/{identity}/manual",params=params)
+>           assert response.status_code==200,response.text
+E           AssertionError: {"detail":{"code":"spectra_manual_invalid","message":"材料状态已变化，请先核对材料条件后继续编辑"}}
+E           assert 409 == 200
+E            +  where 409 = <Response [409 Conflict]>.status_code
+
+backend/tests/test_spectra_manual.py:94: AssertionError
+___ ERROR at setup of test_mysql_revalidation_row_lock_only_one_confirmation ___
+
+manual_storage = (Engine(mysql+pymysql://root@127.0.0.1:52933/issue137_test_3a3ce0b33d7d), 'issue161-test-2b4d305f00a445d2822cc124544e0243')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x16e959a00>
+
+    @pytest.fixture
+    def manual_http(manual_storage, monkeypatch):
+        engine,task=manual_storage
+        actor=[SimpleNamespace(id=1,role="user",is_approved=True)]
+        draft={"material_states":[dict(state_key="s1",material="H3S",pressure_value_gpa=200,property_modules=[dict(records=[dict(
+            property_code="lambda",value_number=.12,method_code="test",
+            payload={"parameters":{"omega_log":100.}},
+            evidences=[dict(quote="合成同条件参考",page_start=1,source_name="fixture.pdf")])])])]}
+        monkeypatch.setattr(upload_tasks,"get_state",lambda identity:dict(user_id=1,status="ready",files=[dict(file_id="main",kind="pdf",role="main",sha256="source")]) if identity==task else None)
+        monkeypatch.setattr(upload_tasks,"get_draft",lambda _:draft)
+        def db():
+            with Session(engine) as session:yield session
+        app=FastAPI();app.include_router(routes.router)
+        app.dependency_overrides[get_db]=db
+        app.dependency_overrides[get_current_user]=lambda:actor[0]
+        app.dependency_overrides[get_current_user_optional]=lambda:actor[0]
+        query=dict(target="upload",target_id=task)
+        with Session(engine) as session:
+            ctx=service.context(session,**query,user=actor[0],write=True)
+            rgb,panel=fixture();row=service.collection(session,ctx,"source","panel",dict(source_sha256="source",size_px=[160,100],pdf_page=1))
+            run,_=service.new_run(session,row,panel,ctx["states"][0]);service.complete_run(run,extract_panel(rgb,panel));service.activate(row,run,ctx["states"][0])
+            row.review_json={"a":{"status":"accepted"}};session.commit()
+            identity,old_run,old_result=row.id,run.id,copy.deepcopy(run.result_json)
+        with TestClient(app) as client:
+            listing=client.get("/api/rag/spectra",params=query).json();item=listing["items"][0]
+            params={**query,"kind":"alpha2f","collection_version":item["version"],"run_id":item["run"]["id"]}
+            response=client.get(f"/api/rag/spectra/{identity}/manual",params=params)
+>           assert response.status_code==200,response.text
+E           AssertionError: {"detail":{"code":"spectra_manual_invalid","message":"材料状态已变化，请先核对材料条件后继续编辑"}}
+E           assert 409 == 200
+E            +  where 409 = <Response [409 Conflict]>.status_code
+
+backend/tests/test_spectra_manual.py:94: AssertionError
+=============================== warnings summary ===============================
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+3 passed, 536 warnings, 3 errors in 1.09s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
