@@ -1,6 +1,6 @@
 # SC-Wiki 当前功能总览
 
-科学字段右侧栏的功能与设计唯一入口为 [#221](../specs/221-scientific-field-sidebar/spec.md)。已落地能力、产品验收及历史迁移在该入口分别记录；标红判定和消除仍只引用 [#220](../specs/220-field-red-marking/spec.md)，不在本总览重复定义。补充 PDF 联合核对的最新已验证行为见 [#221 补证验收](../specs/221-scientific-field-sidebar/validation.md#补充pdf实际读取验收)。合法空值的人工确认及可选模型核对已落地，四宿主与真实来源隔离验收见 [#221 留空验收](../specs/221-scientific-field-sidebar/validation.md#合法空值两条路径验收)；该入口同时记录再次修改、旧AI理由区分和本机运行边界。
+科学字段右侧栏的功能与设计唯一入口为 [#221](../specs/221-scientific-field-sidebar/spec.md)。已落地能力、产品验收及历史迁移在该入口分别记录；标红判定和消除仍只引用 [#220](../specs/220-field-red-marking/spec.md)，不在本总览重复定义。补充 PDF 联合核对的来源验证见 [#221 补证验收](../specs/221-scientific-field-sidebar/validation.md#补充pdf实际读取验收)。四宿主共用字段设置、多源人工资料和人工决定的最新实现及验收边界见 [#226 验证](../specs/226-field-workflow-convergence/validation.md)；此前合法空值两条路径的验收保留为历史，不作为新人工操作入口的定义。真实CaH6字段操作已完成，新版发布及搜索仍受本机并行迁移缺失阻塞。
 
 ## 项目说明
 

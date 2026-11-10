@@ -1,0 +1,26 @@
+[
+  {
+    "id": "IMG-001",
+    "order": 1,
+    "original": "codex-clipboard-9a38778b-2a79-4d1f-bdc7-bbd5c7ec2ab5.png",
+    "path": "docs/specs/226-field-workflow-convergence/assets/IMG-001.png",
+    "status": "原图已保存",
+    "sha256": "ccc4f91f88193c4a123b3cef8a2de17691de5ea62f59e4f239b50f124fd3d211"
+  },
+  {
+    "id": "IMG-002",
+    "order": 2,
+    "original": "codex-clipboard-5c6ab00a-7b8f-4581-8579-18b3e7d1bdab.png",
+    "path": "docs/specs/226-field-workflow-convergence/assets/IMG-002.png",
+    "status": "原图已保存",
+    "sha256": "1309f3f76d99250d8bbc3f6b370fb50737d5d76372f7c785c9e212a7345c9d5b"
+  },
+  {
+    "id": "IMG-003",
+    "order": 3,
+    "original": "codex-clipboard-a0e20bc4-59cc-4763-b36e-9ca79a7ee73b.png",
+    "path": "docs/specs/226-field-workflow-convergence/assets/IMG-003.png",
+    "status": "原图已保存",
+    "sha256": "185a503fdaa489f27aa0b6769b3ce82940224f7e6eae484502ec7131022e0b4a"
+  }
+]

@@ -1,0 +1,264 @@
+{
+  "phase": "families",
+  "paper_id": 1208,
+  "results": [
+    {
+      "state_key": "state-bcc51525bdb07e820aed",
+      "material": "CaH6",
+      "pressure": 150,
+      "value": [
+        "笼型结构"
+      ],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-1e8427cef05dd3bc84e1",
+      "material": "CaH6",
+      "pressure": 200,
+      "value": [
+        "笼型结构"
+      ],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-e0a932afd46925c1f0b9",
+      "material": "CaH6",
+      "pressure": 250,
+      "value": [
+        "笼型结构"
+      ],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-7e29162640063da6e442",
+      "material": "CaH4",
+      "pressure": 50,
+      "value": [],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-7da2d7a42587c6de0d23",
+      "material": "CaH4",
+      "pressure": 150,
+      "value": [],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-e75115b3abb5c3148a46",
+      "material": "CaH4",
+      "pressure": 200,
+      "value": [],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-4e7c2d4c57cc9f17cdc9",
+      "material": "CaH6",
+      "pressure": 50,
+      "value": [
+        "笼型结构"
+      ],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-8b5aaca38b1a78a92639",
+      "material": "CaH6",
+      "pressure": 100,
+      "value": [
+        "笼型结构"
+      ],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-08ee0d2625c4b201cdf5",
+      "material": "CaH8",
+      "pressure": 50,
+      "value": [],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-634253fec8035211f5ef",
+      "material": "CaH8",
+      "pressure": 150,
+      "value": [],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-795d866f4b10574d70c3",
+      "material": "CaH10",
+      "pressure": 50,
+      "value": [],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-9658eb8c82f410b0f9e2",
+      "material": "CaH10",
+      "pressure": 200,
+      "value": [],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-78900c25be23a4e94b4c",
+      "material": "CaH12",
+      "pressure": 150,
+      "value": [],
+      "status": "waived",
+      "passed": true
+    },
+    {
+      "state_key": "state-3ea5a6daafd6575afaec",
+      "material": "CaH12",
+      "pressure": 200,
+      "value": [],
+      "status": "waived",
+      "passed": true
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/rag/evidence/summary",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/rag/evidence/open-workdraft",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/rag/evidence/draft",
+      "method": "PATCH",
+      "status": 200
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "9f83e72e27b815d2476b955011cb82e09df621939d0df37bde23fa83c6790465"
+    },
+    {
+      "path": "/api/rag/evidence/draft",
+      "method": "PATCH",
+      "status": 200
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "69e92cdef7d635425e834486003dfd1c03f6ec09b8ef379fb2aacde20937096a"
+    },
+    {
+      "path": "/api/rag/evidence/draft",
+      "method": "PATCH",
+      "status": 200
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "9fd2eee67ae9f757a93d0fdb448033a0782e5e0c4983619d814163056c98084c"
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "9c9569288670210530b602e6ec6d59e7a7fd714c29f8b456f3b86c07dcb4e2bd"
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "c0f0f1504fe32d33c5769e40d66a31f4fd2398e87e8c198741a19275a6bea9ae"
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "e16f4c962d3b54b871adcf772320567cdb757c7a1350e7e7ad58fb8898bf7032"
+    },
+    {
+      "path": "/api/rag/evidence/draft",
+      "method": "PATCH",
+      "status": 200
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "532b334ac89f7328c5e4e586a5bb75486cd30eae02ec3f017343ea139e1e8714"
+    },
+    {
+      "path": "/api/rag/evidence/draft",
+      "method": "PATCH",
+      "status": 200
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "a9663ed911cd46e973e8f63c4148769484616fb0476a39b38f293db5714afe68"
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "f9a729c61d1348f488fbdcd8e953a9771eca9a43234fd77426d3a88363e93c58"
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "dcc443056fa22a65082bfa97949b4a1cb0a27e60accc9e23d094c3266c8892d1"
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "47a54c0ac88499fa55262ffc7e00472bbc21d7582559688e3055bd063f34b202"
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "a48f64828a6852828fefc961bdef1bd6b79972520750c715a5271e522be8777c"
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "9a61e80b280ce293c9b8a65b1fb960723ac4adddd876f5f38b690debb511446d"
+    },
+    {
+      "path": "/api/rag/evidence/field-decision",
+      "method": "POST",
+      "status": 200,
+      "action": "approve_without_evidence",
+      "item_key": "bfc71f46fb3b1881a7e72632d7a39d8fe981ee1b347f6cad88dd0a4be681ea09"
+    }
+  ],
+  "failures": []
+}

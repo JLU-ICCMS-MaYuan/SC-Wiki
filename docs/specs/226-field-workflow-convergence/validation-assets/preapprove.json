@@ -1,0 +1,87 @@
+{
+  "field_count": 800,
+  "other_values_changed": [],
+  "blocking": [],
+  "waived": [
+    {
+      "field": "material_states[0].structure_families",
+      "value": [
+        "笼型结构"
+      ],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[1].structure_families",
+      "value": [
+        "笼型结构"
+      ],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[2].structure_families",
+      "value": [
+        "笼型结构"
+      ],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[3].structure_families",
+      "value": [],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[4].structure_families",
+      "value": [],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[5].structure_families",
+      "value": [],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[6].structure_families",
+      "value": [
+        "笼型结构"
+      ],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[7].structure_families",
+      "value": [
+        "笼型结构"
+      ],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[8].structure_families",
+      "value": [],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[9].structure_families",
+      "value": [],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[10].structure_families",
+      "value": [],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[11].structure_families",
+      "value": [],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[12].structure_families",
+      "value": [],
+      "status": "supported"
+    },
+    {
+      "field": "material_states[13].structure_families",
+      "value": [],
+      "status": "supported"
+    }
+  ]
+}

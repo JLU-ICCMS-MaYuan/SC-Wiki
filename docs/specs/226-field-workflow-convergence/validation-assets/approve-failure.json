@@ -1,0 +1,46 @@
+{
+  "phase": "approve",
+  "results": [
+    {
+      "status": 500,
+      "response": {
+        "detail": {
+          "code": "internal_error",
+          "message": "服务器内部错误，请稍后重试；如持续失败请联系管理员并提供操作时间"
+        }
+      }
+    }
+  ],
+  "requests": [
+    {
+      "path": "/api/rag/evidence/summary",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/rag/evidence/open-workdraft",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/rag/evidence/submit-check",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "path": "/api/rag/evidence/review-commit",
+      "method": "POST",
+      "status": 500,
+      "status_value": "approved"
+    }
+  ],
+  "failures": [
+    {
+      "path": "/api/rag/evidence/review-commit",
+      "status": 500,
+      "code": "internal_error",
+      "message": "服务器内部错误，请稍后重试；如持续失败请联系管理员并提供操作时间"
+    }
+  ],
+  "error": "{\"detail\":{\"code\":\"internal_error\",\"message\":\"服务器内部错误，请稍后重试；如持续失败请联系管理员并提供操作时间\"}}\n\n500 !== 200\n"
+}

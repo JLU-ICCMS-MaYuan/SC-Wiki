@@ -1,0 +1,87 @@
+{
+  "phase": "partial",
+  "formal_new_revision_approved": false,
+  "search_verified": false,
+  "model_jobs_in_family_phase": 0,
+  "families": 14,
+  "other_field_values_unchanged": 786,
+  "approved_revision_before": 1,
+  "pending": "本机#225数据库迁移授权，正式批准及搜索未完成",
+  "private_backup_created": false,
+  "files": {
+    "approve-failure.json": {
+      "bytes": 1201,
+      "sha256": "116092a189ef949c9ecf00a104430721a304704ddca631eca8341a93483a89c8"
+    },
+    "families.json": {
+      "bytes": 6750,
+      "sha256": "408d78abed4057e0f6d40cd5a856a6ee51520f9decc2bdf49f4255d7312efa9e"
+    },
+    "family-yellow.png": {
+      "bytes": 234215,
+      "sha256": "be29f7bee6d89946b51175bb86d15ad6c0d6165d42a0003a8dc2bad8c68ef1ef"
+    },
+    "live-link.json": {
+      "bytes": 202,
+      "sha256": "dd299ce22f22ee8df2746d0416b6b1fddd02b1cf0c8036d0b3fa25ad9a52bef0"
+    },
+    "migration225-rehearsal.json": {
+      "bytes": 646,
+      "sha256": "8630cc2e950fd5c99f7556e851fae7d5efa140ee258a0c7fad4b6595ae4423e4"
+    },
+    "preapprove.json": {
+      "bytes": 1869,
+      "sha256": "03c709b8ff9e55a89eea1eb6ec89c1ab5bd8c4d8ac12eff2ded8f3bdcea268c9"
+    },
+    "source-snapshot.json": {
+      "bytes": 5554,
+      "sha256": "c06c11f960e8d80d3d176f417aa078628d152ff6859e8946d6ecb41989b23d51"
+    }
+  },
+  "logs": {
+    "form-runtime24.log": {
+      "result": "16文件225项通过",
+      "sha256": "180bed4718c9b775b5304b90912cc403d274c451deeb28aa33f024836215a9b4"
+    },
+    "mutation-final.log": {
+      "result": "12项故障注入检出",
+      "sha256": "ce8862c6532cebe0548866a17624875ff939a59cd2da61d13adf565a06cd3f2f"
+    },
+    "backend-final.log": {
+      "result": "68项通过",
+      "sha256": "9ebf3f724eae49c07e04f3692a3d4da358b935cea6606824826ccd5368a81eba"
+    },
+    "mysql-publish.log": {
+      "result": "20项通过",
+      "sha256": "9a6d48bb9dbb156f0e383ac8d4ba8981fcda31a1ba672d88e79fb1d3731b9ae1"
+    },
+    "go-final.log": {
+      "result": "相关Go回归通过",
+      "sha256": "91752476623a29cf3159ae6630f56b9b785a97a32d0ebf9e9c9716890a9caeea"
+    },
+    "field-final.log": {
+      "result": "v1锁定通过",
+      "sha256": "dca5472aaa353c5a13006a4ec152bb3bda7425c62ba05cf9e9668c5d99a79188"
+    },
+    "scalar-before.log": {
+      "result": "新增四宿主4项改前失败",
+      "sha256": "17a504bb237f725f30e60303cdda363b274afe67cc6f68ae3ea7f15602c6b337"
+    },
+    "scalar-after.log": {
+      "result": "15项修复后通过",
+      "sha256": "734045a02fbb2842af1dac15d4fc3c416413effd6ce85410cb94f9bfbb5a1cbe"
+    },
+    "review-actions-baseline-node26.log": {
+      "result": "旧源码Node26同12项失败",
+      "sha256": "c3dd706d68f6bed881adf99d849b9f1e4cd447a1fcc8de85f1ff4a7e97f7a288"
+    },
+    "review-actions-runtime.log": {
+      "result": "Node24同12项通过",
+      "sha256": "e1f044cafd189e539185857d0f1f97f4115824aa48187e692e827d73f0396fdb"
+    },
+    "build-final.log": {
+      "result": "tsc/Vite通过",
+      "sha256": "845e62e1e7c5d3a69a89e4b0ca68461c841f5fc014a76a8243832ea361cda2c0"
+    }
+  }
+}

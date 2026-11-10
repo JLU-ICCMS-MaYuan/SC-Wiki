@@ -1,0 +1,23 @@
+{
+  "migration": "20261106_0225",
+  "source_sha256": "aa5ce76cd80fa6352cdefae7c83b40d6a680d83d9543b112727ebe92ffa947c4",
+  "base_versions": [
+    "20261102_0160",
+    "20261102_0204"
+  ],
+  "new_versions": [
+    "20261102_0160",
+    "20261106_0225"
+  ],
+  "changes": [
+    "paper_references.match_evidence JSON NULL",
+    "paper_reference_extractions.matching_snapshot JSON NULL",
+    "citation_match_cache 新表",
+    "match_method检查增加llm2"
+  ],
+  "synthetic_old_columns_unchanged": true,
+  "llm2_constraint_test": true,
+  "business_database_writes": 0,
+  "private_business_backup_created": false,
+  "isolated_database_removed": true
+}

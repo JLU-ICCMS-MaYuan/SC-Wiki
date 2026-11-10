@@ -1,0 +1,116 @@
+{
+  "date": "2026-11-10",
+  "branch": "mayuan",
+  "baseline_commit": "157c0de266fb34dacd5c669c87b89e3d8fdfe865",
+  "node": "24.19.0",
+  "results": {
+    "form": 233,
+    "manual_ui": 18,
+    "backend_passed": 83,
+    "backend_baseline_failures": 4,
+    "mutation_detected": 12,
+    "go_targeted": 2,
+    "field_contract": "通过",
+    "typescript_vite": "通过",
+    "real_model_rerun": false,
+    "mysql_rerun": false,
+    "publication_search_rerun": false
+  },
+  "logs": {
+    "backend": {
+      "sha256": "5cc7b7c066e84190eca8e31e65d42a1b9a85b2d8500d3064d711dc8ed0913a22",
+      "summary": [
+        "FAILED tests/01_decentralized_uploading/test_issue109_manual_evidence.py::test_transfer_rechecks_explanation_after_preflight",
+        "FAILED tests/01_decentralized_uploading/test_issue109_manual_evidence.py::test_pdf_is_validated_and_only_actual_review_marks_it_read",
+        "FAILED tests/01_decentralized_uploading/test_issue109_manual_evidence.py::test_reviewer_reason_does_not_overwrite_uploader_evidence",
+        "FAILED tests/01_decentralized_uploading/test_two_stage_review.py::test_patch_rejects_concurrent_change_without_overwriting",
+        "4 failed, 83 passed, 698 warnings in 3.63s"
+      ]
+    },
+    "baseline": {
+      "sha256": "a94edc6be529880a50710cde13afce8074801f7ed5f3ca91a034d49a6a3c69cf",
+      "summary": [
+        "FAILED tests/01_decentralized_uploading/test_issue109_manual_evidence.py::test_transfer_rechecks_explanation_after_preflight",
+        "FAILED tests/01_decentralized_uploading/test_issue109_manual_evidence.py::test_pdf_is_validated_and_only_actual_review_marks_it_read",
+        "FAILED tests/01_decentralized_uploading/test_issue109_manual_evidence.py::test_reviewer_reason_does_not_overwrite_uploader_evidence",
+        "FAILED tests/01_decentralized_uploading/test_two_stage_review.py::test_patch_rejects_concurrent_change_without_overwriting",
+        "4 failed, 26 passed, 535 warnings in 0.93s"
+      ]
+    },
+    "form": {
+      "sha256": "c45200e4d08edd18e642b00e711cf5dc297a6121a77c6b3e9a3970a896375a55",
+      "summary": [
+        " Test Files  16 passed (16)",
+        "      Tests  233 passed (233)"
+      ]
+    },
+    "manual_ui": {
+      "sha256": "1403000b4f64aeb4a593e6de364fb631c05cdd482e663467b5b00ec21eb6a4d7",
+      "summary": [
+        " Test Files  3 passed (3)",
+        "      Tests  18 passed (18)"
+      ]
+    },
+    "mutation": {
+      "sha256": "ce8862c6532cebe0548866a17624875ff939a59cd2da61d13adf565a06cd3f2f",
+      "summary": [
+        "通过：8 项完整宿主渲染回退、4 项原免审字段漏红回退均检出；工作树未修改。"
+      ]
+    },
+    "build": {
+      "sha256": "c2dee5fb78d8b0ccba3bb24cdb609635a8d64eb3a926643b13807f58d5082651",
+      "summary": [
+        "✓ built in 7.22s"
+      ]
+    }
+  },
+  "source": {
+    "backend/api/evidence.py": "19c9ea4ad13b25904cbc63ba6fd1c626cf4df8eea1b9e6641be5200ced1820e6",
+    "backend/api/upload_tasks.py": "c59cd48d1e94ab7d7e61d8cc0cd40e52b1bc148a213b0abdb245e498b4769f49",
+    "backend/ingest/field_decisions.py": "f7fbcc29cef5ed70ace0c35fd14db60d93770a5ac9281ab9fd7f270d277e9213",
+    "backend/ingest/field_drafts.py": "7cf526f374dfc71f644932f8ebd9443e134690d1963c4494a6ad0262ee0c177a",
+    "backend/ingest/field_input.py": "67c35a1f87d7e51702a07c9fb632833a0ed492fcdc8823bb9b3510ed0a4f4665",
+    "backend/ingest/field_review.py": "51ed87dfc75b16d25d1a6cab213311bdcdfc68d8c235c8d3d9a7fab89ed33127",
+    "backend/ingest/field_waiver.py": "3352523f48b081be53f44e09a8cab746f4d6928179e9679049b3325ebbf3c39e",
+    "backend/ingest/manual_evidence.py": "76c200a396c235c0b9ccd29894128296cfce8143bd0a8c31ddedaceea090e60d",
+    "backend/ingest/manual_links.py": "8a7b25ac3eb1fc7e7e9d84ee2443a78e318aadfe712fa12773931bd03e2e1a7d",
+    "backend/ingest/property_evidence.py": "66efd550f6528b4c22e2430f2b50eae1fbc17f50debf3c91c273a229ca86dd1b",
+    "backend/ingest/scientific_evidence.py": "1149e4b6c7cd155cb10196a17ad3e9419d6b350a6f017f45e45e786c5a997e45",
+    "backend/services/manuscript_handoffs.py": "f01f5540522483902d1bd474f2bfe3aae3301fb67eca51e7dd99d1ba0455e6eb",
+    "backend/services/workdrafts.py": "911cea219edce59778d68df6075b60e7a2cdf2d8ea76c0adf813a16ce7dea699",
+    "frontend/src/components/EvidenceFieldMarkers.tsx": "4bb2dea50db997c0327ff74bf8107b0e036f069541dddaa95ca6a41e8f80f1e4",
+    "frontend/src/components/EvidenceWorkflow.tsx": "60bbc1d0972a1ac776dd5704de1493e2a1edf2ddb2fd5393736318fa2d032bd6",
+    "frontend/src/components/FieldReviewFeedback.tsx": "4cb6dd2c27de249da2c08f55f901b9f7d9556b9affd635cf33f54e4724a745dd",
+    "frontend/src/components/ManualEvidenceSection.tsx": "2e057ddb8fa333b55bfaa3fbe583068e8d61bbbdaec52beeda6a3d1107972299",
+    "frontend/src/components/MaterialStatesEditor.tsx": "c9aadd45d5d9abb46ee91783dbb7b0e3e2d3f54dc38bb7d58bc79bceadadf262",
+    "frontend/src/components/ReviewFieldSettings.tsx": "7265516b94b64b27de619e21f9035a185315ae2718f333098d04f754dd47c9e3",
+    "frontend/src/components/UnifiedFieldSettings.tsx": "1acab86a1c2df48c07d3b3cf7ae4eb2e58ba2c9fdd9bbb49f972a5bd4bd57898",
+    "frontend/src/components/UploadTaskEditor.tsx": "215ff825ff4de9544528f3248b2ea6decda01433db1dd3b77a76df3d2b1404fa",
+    "frontend/src/i18n/en/evidence.ts": "395ce7702e92bb0a00d66701892f79696422b238f0bf436c49ac1920c027f87c",
+    "frontend/src/i18n/zh/evidence.ts": "5f23b722b2646cc313bdf34300b231d786eb66e0af5a0fc87f22a0a19d446838",
+    "frontend/src/lib/evidenceFields.ts": "6beb5bc5953acb477ee29dfad5192f9f00eb5fb8342529f9a5f79c8d6bcbd664",
+    "frontend/src/lib/evidenceProposals.ts": "ae45d98acb7ba9fc1697617b6daee5f0681ab8c7085e1f6e615f190c0506a587",
+    "frontend/src/lib/evidenceStatus.ts": "e0e7534dced72b10a73c5b5847da112ef2890f5ba47e53e2b4052c968cb13033",
+    "frontend/src/lib/manualEvidenceDrafts.ts": "c44f6d837ce35c99db934e30f40ed39d013f0598e4882c9c73a72625cfea197b",
+    "frontend/src/pages/AdminPaperEditPage.tsx": "27a13033d450428b5735b532eff140a19c2234c90fec11dfd031b6b9ae50eb9f",
+    "goserver/handlers/empty_field_decision_test.go": "b07bd8f9b07b899fb7dcba51f40da2c1882911e5d539d9c3308edac874341ce9",
+    "goserver/handlers/paper_evidence.go": "cc61f394e68e9e0c01da8f7e958c7beb1bbb3773e82f68e4bb942cb701963758",
+    "scripts/check-form-contract.mjs": "3ffcb82046cabdfb34525a5b6071f06d4e3d7584ecfdc070da1873329485ed94",
+    "tests/01_decentralized_uploading/empty-confirmation-hosts.test.tsx": "85cd7cb1d1e8faa4925853228aad538195ae99fec6bd62a76eb2a21fb7b1489e",
+    "tests/01_decentralized_uploading/field-workflow-226.test.tsx": "4683dde6a263b47547386b9b75183adcfd38d3b3417f7a7578b02f74e0d8720b",
+    "tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx": "e27e71a69f71f8ff94bbc6f6f87c9b0f985e8da4337e80c3f865e91f129e9136",
+    "tests/01_decentralized_uploading/manual-evidence-editor.test.tsx": "cdcaae9195aa9491c47700cdc86605a74547be51035602723d63e5dab0a1e592",
+    "tests/01_decentralized_uploading/manual-evidence-section.test.tsx": "54ec1c14f52ce43ed3e2cb903590500bd706785ab1618c4c432ce24498cba732",
+    "tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx": "521b429694609e62e8acf3fe43bf08ebace9f50c4745f1fbf594d244508eb029",
+    "tests/01_decentralized_uploading/test_226_concurrency_mysql.py": "032467daa922d922bc88316fb699ccb5ead07f1a60a17c4eddc94b84fbcbf679",
+    "tests/01_decentralized_uploading/test_226_sources.py": "0e83e8b30bd1d6d8eadbf63729e6df8df27b62ac24b9c1fe6c79967a6014a06d",
+    "tests/01_decentralized_uploading/test_226_waiver.py": "8ff065b7be10802b5a1d30059f208872d32276d9f109f9c87c512f9cc3b81495",
+    "tests/01_decentralized_uploading/test_empty_confirmation_mysql.py": "4c89a9778f049f2e8332b7bc9ea5a70401b1a042f0666656ccfd8e1b231354d7",
+    "tests/01_decentralized_uploading/test_empty_field_confirmation.py": "36d926ca0434325f926b7fe1962adf2d92f7dd4f297b17feea10be115a1d5fe7",
+    "tests/01_decentralized_uploading/test_issue109_manual_evidence.py": "10899026a76abcb7c9bda2a4e4353c313b54a8e0c84a7a490dd4b39fad973872",
+    "tests/01_decentralized_uploading/test_sidebar_pdf_evidence.py": "962a66b803a178ff781fa5f7557bac4c2569bd944a6d2c760d88942cd23c2d2e",
+    "tests/01_decentralized_uploading/test_two_stage_commit_mysql.py": "785cedc2f7e22720697c36329771be132a1417babe5123af332dcec4c16b326b",
+    "tests/01_decentralized_uploading/test_workdraft_concurrency_mysql.py": "50899b66764f717803cac1546509d303168659fb9951edbfd951ee2acfb23389",
+    "tests/TestForRealScenario/cah6-226-blackbox.mjs": "0a9373f70b9a1a47bb85f352c813b8065b0f62c22674d79c7875d7221d540496"
+  }
+}
