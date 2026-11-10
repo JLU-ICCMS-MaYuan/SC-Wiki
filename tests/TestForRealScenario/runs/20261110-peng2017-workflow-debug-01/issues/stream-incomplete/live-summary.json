@@ -1,0 +1,21 @@
+{
+  "model": "gpt-6.1-sol",
+  "provider": "server:LLM2",
+  "original_request_sha256": "5c8900181cdceb8591ddd828f22b50d06e258ef3e768856dd735390111b9197d",
+  "request_semantics": "与原失败相同的系统消息/输入/schema，不改变科学要求或补半截JSON",
+  "response_fields": [
+    "coverage_exclusions",
+    "extraction_version",
+    "key_findings",
+    "material_states",
+    "metadata",
+    "methodology",
+    "paper_type_evidence",
+    "referenced_materials",
+    "research_materials"
+  ],
+  "response_sha256": "ce796ffa4d2769dac9363d5b7ecd8f36655cd50a44f9d9a0c133dd85106adf5d",
+  "scope": "真实原失败窗口新模型调用及严格schema/JSON保存重读；无业务写入，不是整篇或五阶段通过",
+  "endpoint_verified": true,
+  "endpoint_hash": "8f11cc1d483994c69a25d434dbc98dc8be8e43bd63ef3a59af2f68795f62e5af"
+}

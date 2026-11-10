@@ -43,6 +43,11 @@ class ModelProgressTimeout(httpx.ReadTimeout):
     code = 'LLM_STREAM_IDLE_TIMEOUT'
 
 
+class ModelIncompleteStreamError(httpx.RemoteProtocolError):
+    """流在正常结束标记之前关闭；半截响应不能进入JSON或工具校验。"""
+    code = 'LLM_STREAM_INCOMPLETE'
+
+
 def set_call_observer(observer: Callable[[dict], None]):
     return _call_observer.set(observer)
 
@@ -177,6 +182,8 @@ def _stream_json(
             if callable(close):
                 close()
         _call_stats.set({**_call_stats.get(), "finish_reason": finish_reason})
+        if runtime and output_seen and finish_reason is None:
+            raise ModelIncompleteStreamError('模型流在正常完成标记前结束；已保留未完整响应，原请求将按传输故障处理')
         if runtime and not output_seen and finish_reason in (None, 'stop'):
             raise ModelNoOutputError('模型连接已结束，但未返回任何输出')
         if actions:
@@ -259,7 +266,7 @@ def _complete_json(
                  "error_type": type(exc).__name__, "elapsed_seconds": time.monotonic() - started}
         if isinstance(exc, APIStatusError):
             event["status_code"] = exc.status_code
-        if isinstance(exc, (UserCredentialError, ModelNoOutputError, ModelProgressTimeout)):
+        if isinstance(exc, (UserCredentialError, ModelNoOutputError, ModelProgressTimeout, ModelIncompleteStreamError)):
             event['error_code'] = exc.code
         if on_call:
             on_call(dict(event))

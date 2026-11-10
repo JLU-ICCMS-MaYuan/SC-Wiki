@@ -1,0 +1,5 @@
+# 原始模型流未完成故障
+
+来自Y-H本机任务d789acceee124022b3257f84780d1156，Job4fbb0c76-4fee-45a9-8936-5ac2d44eebba，SI第32—34页提取，26/29时失败。failure.json保留完整4367字符半截响应，末尾为未完成的row_index字段；运行回执finish_reason=None、JSONDecodeError。原始调用目录a841dc4b55a420d7ae0e53d82323bc6049c6cc08975c134bc7f63aac6826f6f7-0。
+
+没有生产原始HTTP/SSE逐帧抓包，不能据此断言具体哪层断开或是否发送过DONE；已证明SDK流结束时没有正常finish_reason且JSON未闭合。回归通过实际SDK模拟缺完成标记的HTTP流，并另外验证正常stop但非法JSON、额外字段、length和content_filter仍停止。不会补括号或把半截内容当结果。

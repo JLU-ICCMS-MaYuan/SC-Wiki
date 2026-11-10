@@ -1,0 +1,7 @@
+{
+  "directory": "/Users/mayuan/Codes/SC-Wiki/.data/review_artifacts/d789acceee124022b3257f84780d1156/model-runtime/ccaff15ce7571f2ce96e907a5152e8fd2340ee440552a040313a271016c5b5d3/calls/a841dc4b55a420d7ae0e53d82323bc6049c6cc08975c134bc7f63aac6826f6f7-0",
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "4fbb0c76-4fee-45a9-8936-5ac2d44eebba",
+  "completed_chunks": 26,
+  "scope": "实际SSE中途结束，finish_reason=None，半截响应4367字符；不改原始失败"
+}

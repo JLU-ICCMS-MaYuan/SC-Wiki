@@ -1,0 +1,10 @@
+{
+  "head": "fd38249d4ee9d6b29491a539bb602318ee38b515",
+  "returncode": 0,
+  "sources": {
+    "backend/rag/llm.py": "f3451418c352a0f970d678534262b2104d992a9fbcea8e7c147914b554f3de69",
+    "backend/ingest/model_runtime.py": "2ab01f7ea4ede22dce0024401bfb2f4a59537abac7b271f7224a7aa418f3babe"
+  },
+  "scope": "HEAD按3处EOF补丁和1处错误显示补丁重建，排除并行#233 Responses/能力接线及#232改动；初次混入依赖失败单列",
+  "before_returncode": 1
+}

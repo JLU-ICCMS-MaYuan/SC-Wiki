@@ -24,3 +24,5 @@ T007最终隔离复核已通过，证据：request-runtime-224/isolated-*.txt及
 - [x] T010 修订FR-002/SC-001：同一请求每轮最多5次；先建立真实HTTP/SSE失败回归，再实施自动暂停、历史留存、手动继续重计数及已完成响应复用，覆盖额度／鉴权／参数立即停止，同步Issue、Overview、README和验证记录；不把本项计作T008整篇科学验收。
 
 T010验证：隔离基线e521c526上旧运行器先检出5项失败；修订后80项后端、233项四宿主相关表单、12项变异、字段契约及4项动态UI通过。旧用量测试MemoryRedis缺lock在原始HEAD同样失败，独立记录，不计作通过。实际服务商故障和T008五阶段未重跑。详见validation.md与assets/retry-limit-20261110.json。
+
+- [x] T011 恢复FR-002/005的未完成流边界：原失败先检出，缺finish_reason不采用结果并按既有5次恢复；正常结束的格式/字段错误、length/content_filter仍拒绝。实际SDK回归、独立源码56、共享56及原失败窗口新模型/严格校验/保存重读通过；T008完整五阶段仍未完成，见stream-incomplete.md。

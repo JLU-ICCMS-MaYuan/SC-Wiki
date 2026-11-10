@@ -106,7 +106,7 @@ def error_detail(error, *, output_started=False):
     node = body.get("error", body) if isinstance(body, dict) else {}
     node = node if isinstance(node, dict) else {}
     code = str(node.get("code") or getattr(error, 'code', None) or type(error).__name__)
-    fallback = str(error) if type(error).__name__ in {"StructuredOutputError", "ContextBudgetError", "UserCredentialError", "ModelNoOutputError", "ModelProgressTimeout"} else None
+    fallback = str(error) if type(error).__name__ in {"StructuredOutputError", "ContextBudgetError", "UserCredentialError", "ModelNoOutputError", "ModelProgressTimeout", "ModelIncompleteStreamError"} else None
     message = redact(str(node.get("message") or fallback or {
         "APIConnectionError": "无法连接模型服务", "APITimeoutError": "等待模型响应超时",
     }.get(type(error).__name__, "模型请求未完成，请查看错误类型")))[:1000]

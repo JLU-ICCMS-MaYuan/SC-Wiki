@@ -45,3 +45,8 @@ FR-002/SC-001由model_runtime单点执行：每次未完成调用的新一轮计
 ## JSON请求条件与实际请求留证
 
 `complete_json`在交给运行器前加入幂等JSON输出指令；`_stream_json`再次幂等保障，模型预算/缓存/归档与实际发送语义一致。已有JSON提示保持原消息字节不变，不无故失效有效响应；普通JSON mode、原生工具和严格schema沿原调用方式，本地生成字段及工具参数校验不变。实际SDK序列化回归覆盖原结构提示没有JSON、原生工具/历史ID及额外字段拒绝；先证明请求缺陷可检出，再修复。原503输入仅增加该指令做真实模型单请求复验，不能替代完整结构读取或五阶段业务验收。
+
+
+## 无完成原因的流结束
+
+统一Chat Completions上传路径在关闭流后、JSON/原生工具解析前检查正常完成原因；已输出但finish_reason=None时抛出httpx.RemoteProtocolError的具名子类ModelIncompleteStreamError。既有运行器识别TransportError、原样保留部分响应、显示安全错误并按同一5次规则重发。非上传旧宿主兼容不变，明确结束原因及科学严格校验不变；不改并行#233新增的Responses适配。
