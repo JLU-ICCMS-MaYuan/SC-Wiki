@@ -32,7 +32,7 @@
   "started": "2026-11-10T06:21:03.520496+00:00",
   "source_commit": "2b06d1f18033f73bd40a6c54ac288fb52a776a15",
   "worktree_status": " M backend/rag/llm.py\n?? backend/tests/test_json_mode_request.py\n",
-  "status": "parsing_after_flash_delivery",
+  "status": "parsing_after_structure_budget_and_report_fix",
   "phases": [
     {
       "id": "1",
@@ -110,5 +110,8 @@
     "note": "仅测试辅助修改，服务器已验证同原文件哈希"
   },
   "latest_resume_commit": "3d0802112edd0e6b4476767f2b8e9432f00c8481",
-  "latest_verified_step": "Flash全38数据/原图像素参照/Sc后处理前置通过，MySQL79零skip和旧失败16通过；代码3d080211已提交，原gpt任务真实Safari18044续跑新Job29ef38d7…已越SI13预算拦截"
+  "latest_verified_step": "Flash全38数据/原图像素参照/Sc后处理前置通过，MySQL79零skip和旧失败16通过；代码3d080211已提交，原gpt任务真实Safari18044续跑新Job29ef38d7…已越SI13预算拦截",
+  "latest_source_commit": "214ee6ef",
+  "latest_job_id": "414a7e57-44b0-49d1-952d-026b9099d86a",
+  "latest_observation": "observe-20261110T173528305816Z.json"
 }
