@@ -1,0 +1,10 @@
+{
+  "replay": true,
+  "new_model_calls": 0,
+  "requests_equal": true,
+  "saved_reread_equal": true,
+  "valid": 32,
+  "blocked": 6,
+  "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+  "latest_guard_sha256": "a47cacfb9e1f0e805592c6ac56c1db37d270a0cc381ee505dd6b804a8b60ea97"
+}

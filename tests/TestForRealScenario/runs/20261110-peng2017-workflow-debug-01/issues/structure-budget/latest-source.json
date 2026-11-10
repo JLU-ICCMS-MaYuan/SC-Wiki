@@ -1,0 +1,8 @@
+{
+  "files": {
+    "backend/ingest/structure_reading.py": "a47cacfb9e1f0e805592c6ac56c1db37d270a0cc381ee505dd6b804a8b60ea97",
+    "backend/tests/test_structure_budget.py": "163ce310aeffe7718fdd2a1edf3135419dcca0d1bc5edad929db1a0209b1efb0",
+    "tests/TestForRealScenario/test_structure_request_redundancy.py": "b3bc5e4d911d277a58841d4e4973802c2dc96312dfdc45b46c98b717ba673a62"
+  },
+  "live_scope_note": "live-complete-report启动后仅加严同条件独立来源的覆盖检查；本轮普通唯一范围的请求不应改变，完成后固定重放核验全部请求和结果相等。实际模型与固定重放分别记录，不把旧AI答案记为新提取。"
+}

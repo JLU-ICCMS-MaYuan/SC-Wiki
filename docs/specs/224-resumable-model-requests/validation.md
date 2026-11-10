@@ -1,5 +1,7 @@
 # 验证记录（持续更新）
 
+当前结构请求预算与完整报告修复见[结构请求验证](structure-request-validation.md)。实际失败请求、原SI模型重跑、固定重放及未完成业务分别记录，不以局部验证代替SC-005。
+
 ## 源码与环境
 
 mayuan分支，本机原生实时开发，10个实际上传Worker；未推送、未发布到其他环境。源码快照、工作区差异及证据见tests/TestForRealScenario/runs/20261106-peng2017/request-runtime-224/，最终提交另记录。

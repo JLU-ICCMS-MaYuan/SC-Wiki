@@ -1,0 +1,12 @@
+{
+  "base": "0d919fcb2a0e0a7dd3bac7ee6a160f7a9bf7a797",
+  "overlays": {
+    "backend/ingest/structure_reading.py": "a47cacfb9e1f0e805592c6ac56c1db37d270a0cc381ee505dd6b804a8b60ea97",
+    "backend/tests/test_structure_budget.py": "163ce310aeffe7718fdd2a1edf3135419dcca0d1bc5edad929db1a0209b1efb0",
+    "backend/tests/fixtures/structure_budget/failed-request.json.gz": "d031f20dbf438c87fbe0d774e2f79cd53076630e0396a7210f161e19f26ed8fa",
+    "tests/TestForRealScenario/test_structure_request_redundancy.py": "b3bc5e4d911d277a58841d4e4973802c2dc96312dfdc45b46c98b717ba673a62"
+  },
+  "exit_code": 0,
+  "business_database_used": false,
+  "scope": "HEAD加本任务明确文件，SQLite内存配置，临时源码验证后移除"
+}

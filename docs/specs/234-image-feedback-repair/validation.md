@@ -1,5 +1,7 @@
 # 实施验证与当前边界
 
+原SI结构反馈38条被1条局部报告覆盖的故障、完整快照修复和当前验证边界见[#224结构请求验证](../224-resumable-model-requests/structure-request-validation.md)，不把预算恢复或局部结构结果计为本Feature整篇业务完成。
+
 本次采用后续实施授权；先前仅文档阶段的记录保留在Git历史、原始需求及history/。共享详细记录见[#232实施验收](../232-complete-pdf-regions/implementation-validation.md)。
 
 ## 成功标准逐项核对

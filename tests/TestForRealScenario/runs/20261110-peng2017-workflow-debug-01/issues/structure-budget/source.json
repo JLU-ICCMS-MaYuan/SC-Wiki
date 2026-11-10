@@ -1,0 +1,13 @@
+{
+  "base": "0d919fcb2a0e0a7dd3bac7ee6a160f7a9bf7a797",
+  "files": {
+    "backend/ingest/structure_reading.py": "70bfb8a92dac173a50751c3e01c99315c7eccd7b3d9f56058ac2b6ddd22b9b7b",
+    "backend/ingest/model_memory.py": "718cde9d896c168ec411da7395cfa28e2caa8ded568ed2dd01ebf8451df8f0e6",
+    "backend/ingest/review_tool_contract.py": "54c073a91d063f58d4e16ed195337b167bb99bb199a639abde1ac0d287acbda9"
+  },
+  "budget": 96000,
+  "replay_before": 112249,
+  "replay_after": 87621,
+  "images": 8,
+  "history_messages": 10
+}

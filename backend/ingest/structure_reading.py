@@ -31,6 +31,9 @@ context and actual geometry uniquely establish it, explain that inference in rea
 contains only UNRESOLVED missing choices or conflicts. Keep each geometry's uncertainty in that item;
 file-level uncertainties are only unresolved reading coverage. Normal coverage notes belong in reason.
 All read source text is in sources; source_index lists only unread rows. Tool receipts may reference source_ids whose full unchanged text is already in sources.
+For tools with a block_id argument, use the source_id alias listed in that tool's enum; the server
+restores its exact original PDF block identity. observation_location=tool_history means the unchanged
+current observation is in the native tool receipt with the given tool_call_id; read that receipt.
 All references must use actual source_ids, not invented quotes. Empty structures means no coordinate
 structure is reported in the fully read file; if coverage or interpretation remains incomplete, report
 it in uncertainties instead of pretending absence. Give short source-backed reasons, no deliberation.'''
@@ -320,7 +323,69 @@ def compact_model_context(request, history):
         compact = receipt(value)
         if compact != value:
             message['content'] = json.dumps(compact, ensure_ascii=False)
+    if messages and messages[-1].get('role') == 'tool' and messages[-1].get('tool_call_id'):
+        current = messages[-1]
+        try:
+            same = json.loads(current['content']) == payload.get('observation')
+        except (ValueError, TypeError, KeyError):
+            same = False
+        if same:
+            payload['observation'] = {'observation_location': 'tool_history',
+                                      'tool_call_id': current['tool_call_id']}
     return payload, messages
+
+
+def structure_tool_transport(definitions, catalog):
+    """工具枚举使用现成source_id；执行前精确还原原块，原IR和回执不改写。"""
+    aliases = {row['block_id']: key for key, row in catalog.items()}
+    projected, allowed = deepcopy(definitions), {}
+    for definition in projected:
+        function = definition['function']
+        block = function['parameters'].get('properties', {}).get('block_id')
+        if not isinstance(block, dict) or not block.get('enum'):
+            continue
+        original = block['enum']
+        if any(value not in aliases for value in original):
+            raise ValueError('结构工具包含目录外原文块，不能替换传输身份')
+        allowed[function['name']] = {aliases[value]: value for value in original}
+        block['enum'] = list(allowed[function['name']])
+
+    def restore(name, arguments):
+        if name not in allowed:
+            return deepcopy(arguments)
+        alias = arguments.get('block_id')
+        if alias not in allowed[name]:
+            raise ValueError('结构工具原文块别名不属于当前工具目录')
+        return {**arguments, 'block_id': allowed[name][alias]}
+    return projected, restore
+
+
+def _missing_structure_reports(previous, current):
+    """整份报告不得被局部修订替换；来源锚点允许同一原项纠正条件。"""
+    def anchors(item):
+        return frozenset([*item['source_ids'], *item['cell_source_ids'],
+                          *(atom['source_id'] for atom in item['atoms'])])
+    def scope(item):
+        return (item['material'], item['pressure_value_gpa'], item['space_group_symbol'],
+                frozenset(item['cell_source_ids']))
+    remaining = list(current)
+    missing = []
+    for item in previous:
+        unique_scope = (sum(scope(row) == scope(item) for row in previous) == 1
+                        and sum(scope(row) == scope(item) for row in current) == 1)
+        match = next((i for i, row in enumerate(remaining)
+            if (unique_scope and scope(item) == scope(row))
+            or (anchors(item) and anchors(item) == anchors(row))), None)
+        if match is None:
+            missing.append(item)
+        else:
+            remaining.pop(match)
+    return missing
+
+
+def _structure_inventory(items):
+    return [{key: deepcopy(item[key]) for key in ('material', 'pressure_value_gpa',
+        'space_group_symbol', 'source_ids', 'cell_source_ids')} for item in items]
 
 
 def extract_structure_candidates(markdown, *, source, material_state_ref=None, pdf_path=None,
@@ -348,6 +413,7 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
     manifest = [{**source, 'kind': 'pdf'}]
     schema = _schema(catalog)
     definitions = tool_definitions(tools.documents, manifest)
+    definitions, restore_arguments = structure_tool_transport(definitions, catalog)
     from .image_reading import ImageReadingTools, ACTIONS as IMAGE_ACTIONS
     image_tools = ImageReadingTools(tools.documents, {source['file_id']: path}, cancelled=cancelled)
     definitions.append({'type': 'function', 'function': {'name': 'report_structures',
@@ -359,7 +425,7 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
     page_images, imaged_pages, history = {}, set(), []
     from .image_feedback import FeedbackProgress
     feedback = FeedbackProgress()
-    observation = None
+    observation, complete_report = None, []
     for iteration in range(13):
         if cancelled(): raise InterruptedError('结构读取已取消')
         request = {'document': {'file_id': source['file_id'], 'role': source.get('role'),
@@ -398,25 +464,40 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
         action = answer.get('action') or {}
         name, arguments = action.get('name'), action.get('arguments') or {}
         native = answer.get('_tool_call')
+        arguments = restore_arguments(name, arguments)
         if name == 'report_structures' or 'structures' in answer:
             result = arguments if name == 'report_structures' else answer
             validate_output(result, schema)
             from .tc_material_scope import assert_allowed
             assert_allowed(result['structures'], material_scope)
-            candidates = _reading_result(result, catalog, read, imaged_pages, source)
+            missing = _missing_structure_reports(complete_report, result['structures'])
+            candidates = _reading_result(result, catalog, read, imaged_pages, source) if not missing else []
             issues = [{'candidate_id':c['candidate_id'],'source':c.get('sources'),
                 'reason_code':(c.get('validation') or {}).get('code'),
                 'reason':(c.get('validation') or {}).get('message')}
                 for c in candidates if c.get('status') == 'blocked']
-            if result['structures'] and issues and iteration < 12 and feedback.observe('structure_verification', source['sha256'], issues):
+            if missing:
+                issues = [{'reason_code': 'incomplete_structure_report',
+                    'missing_structures': _structure_inventory(missing)}]
+            else:
+                complete_report = deepcopy(result['structures'])
+            # 理由换一种说法不是新依据；来源或实际候选变化仍会形成新反馈。
+            progress = [{key: value for key, value in issue.items()
+                         if key not in {'reason', 'candidate_id'}} for issue in issues]
+            if (result['structures'] or missing) and issues and iteration < 12 and feedback.observe('structure_verification', source['sha256'], progress):
                 observation = {'verification_issues':issues,
-                    'required_next_step':'按具体来源补读原页/文字或调整区域，修订结构报告；真实缺失保留原原因。'}
+                    'required_report_inventory': _structure_inventory(complete_report),
+                    'required_next_step':'按具体来源补读原页/文字或调整区域，返回完整结构报告，保留全部无关结构，不能只回答待修项；真实缺失保留原原因。'}
+                if missing:
+                    observation['missing_structures'] = _structure_inventory(missing)
                 if native:
                     history.extend([{'role':'assistant','content':None,'tool_calls':[native]},
                         {'role':'tool','tool_call_id':native['id'],'content':json.dumps(observation,ensure_ascii=False)}])
                 if on_event: on_event({'iteration':iteration,'status':'verification',
                     'issues':issues,'feedback':feedback.state()})
                 continue
+            if missing:
+                raise ValueError('结构修订报告遗漏此前结构，已保留完整响应，未采用局部结果覆盖')
             # 已有完整坐标/Wyckoff解码能力继续保留，但不再挡在AI内容识别之前。
             from .structure_extractor import extract_structure_candidates as decode_geometry
             decoded = decode_geometry(markdown, source=source, material_state_ref=material_state_ref, pdf_path=path)

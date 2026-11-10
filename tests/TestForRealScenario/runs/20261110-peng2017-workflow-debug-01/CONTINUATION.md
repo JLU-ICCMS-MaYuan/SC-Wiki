@@ -1,3 +1,13 @@
+## 最新：结构预算与38→1覆盖故障已修复验证，待原任务网页继续
+
+本轮Task仍d789acceee124022b3257f84780d1156，业务Job29ef38d7-65c0-42b0-b4c3-04ad63549d45仍failed/structure_reading；尚未再次点击继续，无正式PaperID，阶段二至五全未执行。Safari18044与Chrome1758018018账号均重新核验；Safari任务页先前显示旧状态，普通刷新后正确显示失败及继续解析，未重复上传。
+
+新增修复：结构两个工具的长block_id枚举改现有source_id精确别名执行前还原，当前观察仅在与最近原生工具回执全值相等时引用。真实失败112249→87621估算token，96k/原文/8图/10历史保持。其后同GPT隔离真实SI发现38条被1条局部报告覆盖；已补完整报告覆盖检查、同条件独立来源一对一与无进展识别，原13动作/科学校验不变。第二轮同LLM2/gpt-6.1-sol 7次新模型，两份报告均38条，32有效/6真实疑点，JSON/CIF重读通过。最新加严覆盖源码逐次请求/历史/结果固定重放完全一致，不将重放当新模型。代码期间唯一额外差异是同条件来源检查加严，已如实披露，见issues/structure-budget/latest-source.json。
+
+共享和独立HEAD加本任务覆盖源码各118通过，四宿主Node22 233、12变异、字段契约通过；Node26 localStorage12环境失败、缺测试配置的初始2失败、首轮脚本tuple/JSON比较失败均保留。前置Flash/MySQL/旧七失败已有3d080211和0d919fcb，原79MySQL与16旧回归不冒充此次SQL重跑。未推送/部署/改模型/改业务草稿。详docs/specs/224-resumable-model-requests/structure-request-validation.md，证据issues/structure-budget/。
+
+接下来仅提交本任务明确文件，Safari18044核验账号、模型、Task身份后点击正常“继续解析”，记录新Job并核验Worker实际消费。之后坚持完整排障轮五阶段，再精确ID清理重测一轮无需debug五阶段，保留最终正式论文。不可把当前隔离成功算整篇或业务完成。
+
 ## 最新：Flash/MySQL/旧失败前置已完成提交，原gpt任务已真实网页续跑
 
 当前Task d789acceee124022b3257f84780d1156，新Job29ef38d7-65c0-42b0-b4c3-04ad63549d45。实际Safari新隔离窗口18044（17885现有同URL两个标签所以不用），account重核myth620137018@163.com用户、头部openAI/gpt-6.1-sol后正常继续；超管Chrome1758018018仍/account，使用前再核验。每次按实际URL与window重新枚举，不沿标签序号。当前真实Job已消费、SI13页请求已送模型并接收，暂无processing_error；29/29为前轮候选，当前前置图源仍进行，实际重提/复用待账本核验。没有重复上传或业务回填。
