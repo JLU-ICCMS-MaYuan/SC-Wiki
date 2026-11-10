@@ -2,6 +2,8 @@
 
 明确引用的原始备用块须随当前候选进入后续填写：form_sources仅在只读视图补入同文件/页/版本/引句一致的所引原块，保留原IR路由，排除派生读图事实。调用者从当前material_states传递引用；后续来源门和科学核对不变。实施及验证见[cited-original-handoff.md](cited-original-handoff.md)。
 
+适用条件补读只接受原始块，历史规划引用和旧恢复检查点中的chart_reading/chart_unresolved不能补回新提取。交接签名使用source-scope-handoff-v2，原页统一用现有600 DPI定位渲染；历史来源保留供调查，受影响窗口从原PDF新提取，不用同值换引用。见[旧图读回灌验证](retired-chart-scope.md)。
+
 **日期**：2026-10-14。**Issue**：[#136](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/136)。**基线**：[Spec](spec.md) 与已确认的 [四工具架构](four-tool-architecture.md)。
 
 ## 范围与技术上下文

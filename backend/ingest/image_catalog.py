@@ -4,11 +4,16 @@ from __future__ import annotations
 SOURCE_CONTEXT_VERSION = 'current-original-context-v2'
 
 
+def is_original_block(block):
+    """原始识别（含备用Marker）与程序生成的图读/未读回执按实际元数据区分。"""
+    return not {'chart_reading', 'chart_unresolved'} & set(block.metadata)
+
+
 def original_source_blocks(ir, *, page=None):
     return [block for block in ir.blocks
         if (page is None or block.pdf_page == page)
         and block.metadata.get('selected_for_reading') is not False
-        and 'chart_reading' not in block.metadata and 'chart_unresolved' not in block.metadata]
+        and is_original_block(block)]
 
 
 def visual_objects(ir):

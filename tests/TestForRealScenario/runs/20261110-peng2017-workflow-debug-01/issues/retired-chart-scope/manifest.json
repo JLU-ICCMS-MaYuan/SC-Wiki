@@ -1,0 +1,15 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "90a96895-4f0d-40a7-8cee-5f77beace08d",
+  "prefix_completed_groups": 4,
+  "prefix_completed_states": 8,
+  "source_commit": "74b56bae",
+  "files": {
+    "material_state_inventory_request.json": "5f2fb5e696572a7b668894b5a0c3ff6918cb47fa70299319a98c6ac1df8bce7c",
+    "material-stage.json": "d50bb6d3e2d927f68fcccd454f4ff3cb9b960c150e83ce59757bef01621b3f56",
+    "material_state_inventory.json": "3dabd145abd04241677e576b1b4939c3405cd2dd7244a995bc46fbf07d18d6ca",
+    "0004-filling.json": "d7cbf80aaaa7ba900ae65980d91e8cbecfb1737475eaa1d300138f6a91703ecd",
+    "311d9c17cfa04095bcd3cb613872f4ce.json": "f7ee0c1d43ba67720739448912b4a3e4d44be13b9aecd6354a1cb78edac29a7e",
+    "affected-chunk-before.json": "94e92657d65d5f88f68cab19b77ada3cd5c6cdbd82b0d5be246274aaefbf5073"
+  }
+}

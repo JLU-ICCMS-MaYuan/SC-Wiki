@@ -1,3 +1,17 @@
+## 最新：第5组旧图读回灌已修复，独立120/真实SI新提通过，待提交并原任务继续
+
+业务Task d789acceee124022b3257f84780d1156，Job90a96895-4f0d-40a7-8cee-5f77beace08d已failed/summarizing/material_filling，第5/27组“原候选来源未读取或不存在”；前4组8状态已持久保存，前8状态快照/阶段检查点和失败报告保留issues/retired-chart-scope/。新Job尚未点击继续，无正式PaperID，阶段二至五全未执行。observer最后observe-20261110T202353806180Z.json。
+
+不同于前次真实Marker原文：此次原候选CeH10@200 DOS引用旧v8 chart-reading-8787c5…（已selected_for_reading=false、superseded_by=v10），inventory_scope_sources的found及prepare_source_handoff旧scope_source_blocks恢复未过滤派生，重新把它交进新提取。当前共享is_original_block只按chart_reading/chart_unresolved区分原始识别/派生，Marker仍原文；补源发现/对齐/检查点恢复过滤派生，审计source-scope-handoff-v2失效旧请求，既有来源门不放宽。也将遗留1.4倍原页图片统一到现有pdf_regions 600DPI取源，记实际定位/DPI/hash，原图分片仍既有机制，96k/模型/10Worker不改。
+
+当前源码尚未提交仅本任务extraction_sources.py、image_catalog.py、scientific_form_filling.py（共用predicate）及test_extraction_source_handoff.py和136/233/Overview文档。共享/独立120通过、字段契约/12变异通过。四宿主初次232pass/1返修attention断言失败（未改FE，完整失败存档），不放宽断言，单例1pass（14筛选未运行）/完整233重跑pass。Bandit/pip_audit先前均缺，未新增依赖/改SQL。
+
+真实同原SI窗口最新代码隔离新模型已通过（issues/retired-chart-scope/verify_live.py）：LLM2/gpt-6.1-sol/同endpoint hash，tc_material_scope按真实业务完整传入，旧chunk种子只用于找回原依据，原页2/3/24/26/33全600dpi；旧v8从新适用条件与当前Ce引用排除，新DOS .0228、初始phase null，未借R-3m声子；正式normalize/定位/类型/保存JSON重读通过，无业务写入。source_files指纹与当前代码一致，不是旧AI重放。真实业务还须新填写/科学核对/保存，不能以隔离结果结束。
+
+接下来提交合理验证的本任务检查点（不含其他工作），Safari18044/account+Task按URL重新核验用户邮箱/模型/DOI/文件后正常继续，记录新Job。重点核验前8状态及有效审核结果/模型调用复用（前8快照persisted-prefix-before.json）；不要手动换旧引用编号或回填隔离答案，不清理重传。查看ScientificUploadDraft持久中间稿并展开tc_contexts，不能用Redis旧paper-only缓存验收中间保存，ready后普通网页读稿另核验。
+
+记录工具watch_current.py已编译运行过，只读跟踪每5秒、45秒心跳并写watch-progress.jsonl，无业务操作；当前session30661已在failed后正常退出。下一Job可重新启动，先active-task.json更新JobId。还有完整排障轮五阶段及精确ID留证清理后同源无debug完整复测，当前均不可称完成。
+
 ## 最新：90a96895原Job第1组真实填写/来源门/核对/持久在线保存重读通过，继续第2组
 
 当前Task仍d789acceee124022b3257f84780d1156，Job90a96895-4f0d-40a7-8cee-5f77beace08d，代码74b56bae，原LLM2/gpt-6.1-sol及原文件/哈希未改。第1/27组3次真实新填写、10原候选去向、原Marker2块已读和Claim来源门成功；9批107supported无review_error，material_batch.completed_states=2，已进入第2/27组，目前reviewing 4/9，无processing_error。须继续到所有27组、谱/引用和最终ready；阶段二至五仍全未执行，无正式PaperID。

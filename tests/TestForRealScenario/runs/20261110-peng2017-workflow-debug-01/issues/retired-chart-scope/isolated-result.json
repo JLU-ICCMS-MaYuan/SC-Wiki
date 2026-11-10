@@ -1,0 +1,12 @@
+{
+  "base": "6dadd777e64a672dd61e94028ce86e50740b00d4",
+  "overlays": {
+    "backend/ingest/extraction_sources.py": "dce2fe39b52fad9de7dd3b9f181b371472661ac286de736f19c8e2da558276bd",
+    "backend/ingest/image_catalog.py": "a5fff4f2536481c44f7373c77a14e0bad124f89dc50dd806f3ff8881a56c9739",
+    "backend/ingest/scientific_form_filling.py": "f58a42491ec536395ae5285bc9537de22d41d037745ed99961cd238f24b883af",
+    "backend/tests/test_extraction_source_handoff.py": "16dca5e3077551b44c85f163d0e2a89195f83cf6847d46ede81ae48c9d2de0d8"
+  },
+  "exit_code": 0,
+  "business_database_used": false,
+  "scope": "HEAD加本任务明确文件，SQLite内存配置；临时源码结束后移除"
+}

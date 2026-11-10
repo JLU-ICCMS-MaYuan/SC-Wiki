@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .complementary_ir import overlap
 from .document_ir import content_hash
+from .image_catalog import is_original_block
 
 
 def inventory_scope_sources(context, previous, ir, request, response):
@@ -72,7 +73,7 @@ def inventory_scope_sources(context, previous, ir, request, response):
         found = set()
         for sid in [*assignment.get('source_ids', []), *destination.get('source_ids', [])]:
             source = sources.get(sid, {}); block = originals.get(source.get('block_id'))
-            if (block and block.block_id not in present and source.get('file_id') == ir.source_file_id
+            if (block and is_original_block(block) and block.block_id not in present and source.get('file_id') == ir.source_file_id
                     and source.get('source_sha256') == ir.source_sha256
                     and source.get('content') == block.text):
                 found.add(block.block_id)
@@ -101,7 +102,7 @@ def prepare_source_handoff(context, previous, ir, pdf_path, *, scope_sources=Non
             raise ValueError('互补读取原块身份或内容不一致')
         for item in route.get('alternatives', []):
             other = originals.get(item.get('block_id'))
-            if (other is None or other.block_id in present or other.pdf_page != primary.pdf_page
+            if (other is None or not is_original_block(other) or other.block_id in present or other.pdf_page != primary.pdf_page
                     or other.block_type != primary.block_type or not other.text.strip()
                     or overlap(primary.bbox, other.bbox) < .6):
                 continue
@@ -119,7 +120,7 @@ def prepare_source_handoff(context, previous, ir, pdf_path, *, scope_sources=Non
     if scope_targets:
         for key in sorted(scope_blocks):
             other = originals.get(key)
-            if other and key not in present:
+            if other and is_original_block(other) and key not in present:
                 additions[key] = (sorted(scope_targets)[0], other, 'additional_scope_source')
                 resolved_targets.update(scope_targets)
     if not additions:
@@ -148,13 +149,18 @@ def prepare_source_handoff(context, previous, ir, pdf_path, *, scope_sources=Non
              'source_sha256': ir.source_sha256,
              'alternative_blocks': sorted(k for k,v in additions.items() if v[2] == 'aligned_alternative'), 'pages': []}
     if active_scope:
-        audit.update(version='source-scope-handoff-v1',
+        audit.update(version='source-scope-handoff-v2',
             scope_source_blocks=sorted(k for k,v in additions.items() if v[2] == 'additional_scope_source'))
     with pymupdf.open(path) as pdf:
         for number in sorted(pages):
-            image = pdf[number - 1].get_pixmap(matrix=pymupdf.Matrix(1.4, 1.4), alpha=False).tobytes('png')
+            from .pdf_regions import region_locator, render_region_image
+            locator = region_locator(path, ir.source_file_id, ir.source_sha256, number,
+                list(pdf[number - 1].rect), kind='page', dpi=600)
+            rendered = render_region_image(path, locator)
+            image = rendered['png']
             images.append('data:image/png;base64,' + base64.b64encode(image).decode())
-            audit['pages'].append({'pdf_page': number, 'image_sha256': hashlib.sha256(image).hexdigest()})
+            audit['pages'].append({'pdf_page': number, 'image_sha256': hashlib.sha256(image).hexdigest(),
+                'dpi': locator['dpi'], 'region_locator': locator})
     audit['context_hash'] = content_hash(augmented)
     return {'context': augmented, 'images': images, 'audit': audit}
 

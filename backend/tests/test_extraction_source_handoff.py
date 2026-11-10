@@ -45,6 +45,8 @@ def test_handoff_uses_actual_alternative_and_original_page_without_rewriting_ocr
     assert blocks[1]['text']=='LaH10 Tc = 200 K at 150 GPa'
     assert len(handoff['images'])==1 and handoff['images'][0].startswith('data:image/png;base64,')
     assert handoff['audit']['source_sha256']==ir.source_sha256
+    assert handoff['audit']['pages'][0]['dpi'] == 600
+    assert handoff['audit']['pages'][0]['region_locator']['source_sha256'] == ir.source_sha256
     assert ir.model_dump()==before and context['pages'][0]['blocks'][0]['block_id']=='ocr'
 
 
@@ -135,6 +137,9 @@ def test_phase_conflict_only_hands_back_original_sources_never_planner_answers(t
         current.content_hash=content_hash(current.text);current.metadata={'selected_for_reading':True}
         ir.blocks.append(current)
         context['pages'][0]['blocks']=[current.model_dump(mode='json')]
+        # 历史规划可能同时引用旧读图结果和真实结构表；旧结果只能帮助找页，不能重进新上下文。
+        response['states'][0]['source_ids'].append('old')
+        response['assignments'][0]['source_ids'].append('old')
     scope=inventory_scope_sources(context,previous,ir,request,response)
     assert scope['source_blocks']==['table-phase']
     assert scope['targets']==(['current-caption'] if retired_reading else ['ocr'])
@@ -145,6 +150,14 @@ def test_phase_conflict_only_hands_back_original_sources_never_planner_answers(t
     assert previous['material_states'][0]['reported_space_group_symbol']=='R-3m'
     saved={**previous,'_source_resolution':handoff['audit']}
     assert prepare_source_handoff(context,saved,ir,path)['audit']==handoff['audit']
+    if retired_reading:
+        stale = deepcopy(saved)
+        stale['_source_resolution']['version'] = 'source-scope-handoff-v1'
+        stale['_source_resolution']['scope_source_blocks'].append('ocr')
+        replayed = prepare_source_handoff(context, stale, ir, path)
+        assert 'LaH1O' not in json.dumps(replayed['context'])
+        assert replayed['audit']['scope_source_blocks'] == ['table-phase']
+        assert replayed['audit']['version'] != stale['_source_resolution']['version']
     response['states'][0]['values']['reported_space_group_symbol']='R-3m'
     assert inventory_scope_sources(context,previous,ir,request,response) is None
 

@@ -101,6 +101,7 @@ def candidates(states, *, state_offset=0):
 
 def _referenced_original_views(documents, references):
     """为当前明确引用补齐原始备用块；只改变请求视图，不改主备路由或原IR。"""
+    from .image_catalog import is_original_block
     included = {}
     def visit(value):
         if isinstance(value, list):
@@ -117,7 +118,7 @@ def _referenced_original_views(documents, references):
                 if (block and str(block.pdf_page) == str(page)
                         and value.get('source_version') in (None, ir.source_version)
                         and value.get('source_sha256') in (None, ir.source_sha256)
-                        and not {'chart_reading', 'chart_unresolved'} & set(block.metadata)
+                        and is_original_block(block)
                         and ' '.join(quote.split()) in ' '.join(block.text.split())):
                     included.setdefault(ir.source_file_id, set()).add(block_id)
             for item in value.values():
