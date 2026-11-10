@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1520" height="1640" viewBox="0 0 1520 1640" role="img" aria-labelledby="title description">
-<title id="title">CaH6 真实黑盒测试流程</title>
+<title id="title">文献上传黑盒测试流程</title>
 <desc id="description">五阶段完整业务流程。任意阶段遇错先留证、核对旧要求并修复，再回到原步骤。排障轮跑通后清理本轮数据并从原文件复测，直到一轮全程无需调试。</desc>
 <defs>
 <marker id="gray" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#64748b" stroke-width="1.5"/></marker>
@@ -8,24 +8,24 @@
 </defs>
 <rect width="1520" height="1640" fill="#ffffff"/>
 <g font-family="PingFang SC, Hiragino Sans GB, Microsoft YaHei, sans-serif" fill="#1e293b">
-<text x="60" y="65" text-anchor="start" font-size="34" font-weight="600" fill="#1e293b"><tspan x="60" dy="0">CaH6 真实黑盒测试流程</tspan></text>
-<text x="60" y="104" text-anchor="start" font-size="19" font-weight="400" fill="#64748b"><tspan x="60" dy="0">供审阅 · 本机原生实时开发 · 两个账号 · 尚未执行本次测试</tspan></text>
+<text x="60" y="65" text-anchor="start" font-size="34" font-weight="600" fill="#1e293b"><tspan x="60" dy="0">文献上传黑盒测试流程</tspan></text>
+<text x="60" y="104" text-anchor="start" font-size="19" font-weight="400" fill="#64748b"><tspan x="60" dy="0">通用流程 · 本机原生实时开发 · 上传者与超级管理员</tspan></text>
 <rect x="230" y="150" width="600" height="90" rx="14" fill="#f7f8fa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="530.0" y="182" text-anchor="middle" font-size="21" font-weight="600" fill="#1e293b"><tspan x="530.0" dy="0">开始前：保留已有失败证据</tspan></text>
-<text x="530.0" y="211" text-anchor="middle" font-size="18" font-weight="400" fill="#1e293b"><tspan x="530.0" dy="0">只清理本轮 CaH6 的旧未送审任务及草稿</tspan></text>
+<text x="530.0" y="211" text-anchor="middle" font-size="18" font-weight="400" fill="#1e293b"><tspan x="530.0" dy="0">只清理本轮文献的旧未送审任务及草稿</tspan></text>
 <rect x="230" y="280" width="600" height="85" rx="14" fill="#f7f8fa" stroke="#cbd5e1" stroke-width="1.5"/>
-<text x="530.0" y="312" text-anchor="middle" font-size="21" font-weight="600" fill="#1e293b"><tspan x="530.0" dy="0">上传同一正文和补充材料</tspan></text>
-<text x="530.0" y="341" text-anchor="middle" font-size="18" font-weight="400" fill="#1e293b"><tspan x="530.0" dy="0">核对角色与哈希；共同进入一个任务、一张表单</tspan></text>
+<text x="530.0" y="312" text-anchor="middle" font-size="21" font-weight="600" fill="#1e293b"><tspan x="530.0" dy="0">上传本轮指定原文件</tspan></text>
+<text x="530.0" y="341" text-anchor="middle" font-size="18" font-weight="400" fill="#1e293b"><tspan x="530.0" dy="0">核对角色与哈希；同篇文件共同进入一个任务和表单</tspan></text>
 <rect x="205" y="390" width="650" height="790" rx="22" fill="none" stroke="#cbd5e1" stroke-dasharray="6 5"/>
 <rect x="230" y="410" width="600" height="100" rx="14" fill="#f7f8fa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="530.0" y="442" text-anchor="middle" font-size="21" font-weight="600" fill="#1e293b"><tspan x="530.0" dy="0">阶段一｜用户解析、校对并送审</tspan></text>
 <text x="530.0" y="471" text-anchor="middle" font-size="18" font-weight="400" fill="#1e293b"><tspan x="530.0" dy="0">按原文检查科学内容与来源</tspan><tspan x="530.0" dy="26">保存、重读，完成必要审核后送审</tspan></text>
 <rect x="230" y="560" width="600" height="120" rx="14" fill="#f7f8fa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="530.0" y="592" text-anchor="middle" font-size="21" font-weight="600" fill="#1e293b"><tspan x="530.0" dy="0">阶段二｜超级管理员审核并退回</tspan></text>
-<text x="530.0" y="621" text-anchor="middle" font-size="18" font-weight="400" fill="#1e293b"><tspan x="530.0" dy="0">完成审核操作，记录两项具体修改意见</tspan><tspan x="530.0" dy="23">① 图谱标题过长　② 对应 CaH6 状态的结构家族</tspan><tspan x="530.0" dy="23">重新读取拒绝状态、意见和交接历史</tspan></text>
+<text x="530.0" y="621" text-anchor="middle" font-size="18" font-weight="400" fill="#1e293b"><tspan x="530.0" dy="0">完成审核操作，记录两项具体修改意见</tspan><tspan x="530.0" dy="23">① 论文级信息　② 材料状态中的现有字段</tspan><tspan x="530.0" dy="23">重新读取拒绝状态、意见和交接历史</tspan></text>
 <rect x="230" y="730" width="600" height="110" rx="14" fill="#f7f8fa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="530.0" y="762" text-anchor="middle" font-size="21" font-weight="600" fill="#1e293b"><tspan x="530.0" dy="0">阶段三｜用户返修并重新送审</tspan></text>
-<text x="530.0" y="791" text-anchor="middle" font-size="18" font-weight="400" fill="#1e293b"><tspan x="530.0" dy="0">缩短现有标题；对应结构家族改为“笼型结构”</tspan><tspan x="530.0" dy="26">按规则补理由和依据；保存、重读、核对、重提</tspan></text>
+<text x="530.0" y="791" text-anchor="middle" font-size="18" font-weight="400" fill="#1e293b"><tspan x="530.0" dy="0">按退回意见修改两项内容，保留原文依据</tspan><tspan x="530.0" dy="26">按规则补理由和依据；保存、重读、核对、重提</tspan></text>
 <rect x="230" y="890" width="600" height="100" rx="14" fill="#f7f8fa" stroke="#cbd5e1" stroke-width="1.5"/>
 <text x="530.0" y="922" text-anchor="middle" font-size="21" font-weight="600" fill="#1e293b"><tspan x="530.0" dy="0">阶段四｜超级管理员复核并批准</tspan></text>
 <text x="530.0" y="951" text-anchor="middle" font-size="18" font-weight="400" fill="#1e293b"><tspan x="530.0" dy="0">核查返修内容，填写真实通过日志</tspan><tspan x="530.0" dy="26">重新读取批准状态、审核人和正式内容</tspan></text>
@@ -45,7 +45,7 @@
 <text x="535" y="1353" text-anchor="start" font-size="17" font-weight="400" fill="#2563a6"><tspan x="535" dy="0">否：排障轮，或复测仍需调试</tspan></text>
 <rect x="230" y="1370" width="600" height="110" rx="14" fill="#edf5ff" stroke="#5b8fc7" stroke-width="1.5"/>
 <text x="530.0" y="1402" text-anchor="middle" font-size="21" font-weight="600" fill="#1e293b"><tspan x="530.0" dy="0">整轮留证后，清理本轮数据</tspan></text>
-<text x="530.0" y="1431" text-anchor="middle" font-size="18" font-weight="400" fill="#1e293b"><tspan x="530.0" dy="0">只清理该轮表单、入库论文和对应解析数据</tspan><tspan x="530.0" dy="26">保留证据和源 PDF，不影响其他论文及共享记录</tspan></text>
+<text x="530.0" y="1431" text-anchor="middle" font-size="18" font-weight="400" fill="#1e293b"><tspan x="530.0" dy="0">只清理该轮表单、入库论文和对应解析数据</tspan><tspan x="530.0" dy="26">保留证据和原文件，不影响其他论文及共享记录</tspan></text>
 <path d="M230 1425H125V322H230" fill="none" stroke="#2563a6" stroke-width="2" marker-end="url(#blue)"/>
 <text x="103" y="940" text-anchor="middle" font-size="18" font-weight="500" fill="#2563a6"><tspan x="103" dy="0">从</tspan><tspan x="103" dy="27">原</tspan><tspan x="103" dy="27">文</tspan><tspan x="103" dy="27">件</tspan><tspan x="103" dy="27">重</tspan><tspan x="103" dy="27">测</tspan></text>
 <path d="M830 1260H1010" fill="none" stroke="#2563a6" stroke-width="2" marker-end="url(#blue)"/>
