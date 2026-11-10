@@ -1,0 +1,161 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "90a96895-4f0d-40a7-8cee-5f77beace08d",
+  "source_commit": "74b56bae",
+  "storage": "ScientificUploadDraft; tc_contexts.map_draft展开共同参数",
+  "states": 54,
+  "completed_states_verified": 2,
+  "scientific_values_equal": true,
+  "all_other_fields_and_source_identifiers_quotes_equal": true,
+  "byte_equal_including_bbox": false,
+  "bbox_serialization_difference_note": "仅来源框浮点表示差异，未调整产品容差或契约",
+  "group0_review_counts": {
+    "supported": 107
+  },
+  "review_error_count": 0,
+  "scope": "真实新模型填写/原Claim/科学核对/正式持久草稿保存/展开重读；ready普通读稿/网页交接及完整五阶段仍未验证",
+  "summaries": [
+    {
+      "state_key": "state-54938bcd652b89fb860d",
+      "material": "YH10",
+      "pressure_gpa": 400,
+      "space_group": "Fm-3m",
+      "records": [
+        {
+          "record_key": "fill-2a3a6ad03a0d797d001db40ba7f5",
+          "property": "tc",
+          "value": 303,
+          "raw": "303",
+          "method_code": "unknown",
+          "method_raw": "Eliashberg equation",
+          "parameters": {
+            "lambda_ep": 2.41,
+            "mu_star": 0.1
+          },
+          "source_count": 11,
+          "cited_original_marker_blocks": [
+            "c56f4e7335173e3499ac13c95fc0c738257083b507dda6c63580bad26fd7330b",
+            "d4668b93e6215d4f55c524238044e34462fc9e6b1027dbc2412156472a43aeb5"
+          ]
+        },
+        {
+          "record_key": "fill-24b9d20484f470818e7efecb6630",
+          "property": "tc",
+          "value": 287,
+          "raw": "287",
+          "method_code": "unknown",
+          "method_raw": "Eliashberg equation",
+          "parameters": {
+            "lambda_ep": 2.41,
+            "mu_star": 0.13
+          },
+          "source_count": 8,
+          "cited_original_marker_blocks": [
+            "c56f4e7335173e3499ac13c95fc0c738257083b507dda6c63580bad26fd7330b",
+            "d4668b93e6215d4f55c524238044e34462fc9e6b1027dbc2412156472a43aeb5"
+          ]
+        },
+        {
+          "record_key": "fill-85bcbb7fd31398bc529dff2c8889",
+          "property": "dos_fermi",
+          "value": 0.0201,
+          "raw": "~0.0201 states/(eV Å³)",
+          "method_code": null,
+          "method_raw": null,
+          "parameters": null,
+          "source_count": 2,
+          "cited_original_marker_blocks": []
+        }
+      ]
+    },
+    {
+      "state_key": "state-39dba9b24f3c9aeccb05",
+      "material": "ScH6",
+      "pressure_gpa": 300,
+      "space_group": "Im-3m",
+      "records": [
+        {
+          "record_key": "fill-e84d7ad12b477839bdecb5ed2259",
+          "property": "dos_fermi",
+          "value": 0.0156,
+          "raw": "~0.0156 states/(eV Å³)",
+          "method_code": null,
+          "method_raw": null,
+          "parameters": null,
+          "source_count": 2,
+          "cited_original_marker_blocks": []
+        },
+        {
+          "record_key": "fill-63e6165089186b7c2c393b99063c",
+          "property": "tc",
+          "value": 99,
+          "raw": "~99",
+          "method_code": "unknown",
+          "method_raw": "Eliashberg equation",
+          "parameters": {
+            "lambda_ep": {
+              "reported": true,
+              "unit_raw": "dimensionless",
+              "evidences": [
+                {
+                  "quote": null,
+                  "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                  "block_id": "chart-reading-ecb5cb66cb096583473b8cebc96d71c05c9f830e",
+                  "pdf_page": 4,
+                  "quote_id": "chart-reading-ecb5cb66cb096583473b8cebc96d71c05c9f830e"
+                }
+              ],
+              "value_max": null,
+              "value_min": null,
+              "value_raw": "~1.32 dimensionless",
+              "value_kind": "number",
+              "value_text": null,
+              "value_number": 1.32,
+              "value_boolean": null
+            },
+            "mu_star": 0.1
+          },
+          "source_count": 7,
+          "cited_original_marker_blocks": [
+            "d4668b93e6215d4f55c524238044e34462fc9e6b1027dbc2412156472a43aeb5"
+          ]
+        },
+        {
+          "record_key": "fill-c95104246088a908b3eedc6c8f2c",
+          "property": "tc",
+          "value": 86,
+          "raw": "~86",
+          "method_code": "unknown",
+          "method_raw": "Eliashberg equation",
+          "parameters": {
+            "lambda_ep": {
+              "reported": true,
+              "unit_raw": "dimensionless",
+              "evidences": [
+                {
+                  "quote": null,
+                  "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                  "block_id": "chart-reading-ecb5cb66cb096583473b8cebc96d71c05c9f830e",
+                  "pdf_page": 4,
+                  "quote_id": "chart-reading-ecb5cb66cb096583473b8cebc96d71c05c9f830e"
+                }
+              ],
+              "value_max": null,
+              "value_min": null,
+              "value_raw": "~1.32 dimensionless",
+              "value_kind": "number",
+              "value_text": null,
+              "value_number": 1.32,
+              "value_boolean": null
+            },
+            "mu_star": 0.13
+          },
+          "source_count": 7,
+          "cited_original_marker_blocks": [
+            "d4668b93e6215d4f55c524238044e34462fc9e6b1027dbc2412156472a43aeb5"
+          ]
+        }
+      ]
+    }
+  ]
+}

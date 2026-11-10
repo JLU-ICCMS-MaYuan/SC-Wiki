@@ -1,3 +1,19 @@
+## 最新：90a96895原Job第1组真实填写/来源门/核对/持久在线保存重读通过，继续第2组
+
+当前Task仍d789acceee124022b3257f84780d1156，Job90a96895-4f0d-40a7-8cee-5f77beace08d，代码74b56bae，原LLM2/gpt-6.1-sol及原文件/哈希未改。第1/27组3次真实新填写、10原候选去向、原Marker2块已读和Claim来源门成功；9批107supported无review_error，material_batch.completed_states=2，已进入第2/27组，目前reviewing 4/9，无processing_error。须继续到所有27组、谱/引用和最终ready；阶段二至五仍全未执行，无正式PaperID。
+
+第一组保存核验曾读错对象：get_draft在无ScientificWorkDraft时读Redis旧paper-only缓存，得0材料。#230 plan明确组完成保存到ScientificUploadDraft，SQL中实际54个状态框架与前2个完整数据。只读从该正式持久表用tc_contexts.map_draft展开，共同参数/主要值及所有来源身份/引句等与检查点一致，仅source bbox JSON浮点表示差异，未加产品容差或改数据。ready后普通读稿与网页还需再核验，不把解析中缓存不同直接当新bug。见issues/cited-alternative-source/live-group-0000-persisted-reread.json。
+
+主要当前数据：YH10@400 Fm-3m Tc303/287 K、lambda2.41、mu .1/.13、DOS.0201；ScH6@300 Im-3m Tc约99/86 K、mu .1/.13、DOS.0156、GPT图读lambda约1.32（不是独立Flash1.30的同次精确值）。method_code unknown但method_raw Eliashberg equation完整，未擅自补未报告各向性。不要只看method_code或某空列断言方法丢失。
+
+新增源修复真实验证记录已写docs/specs/136-complementary-pdf-parsing/cited-original-handoff.md，整体Issue仍OPEN；136评论6776166237，210评论6776167118。当前未提交只本轮active/case/CONTINUATION及该验证文档；源码已74b56bae，不push/部署。Safari18044、Chrome1758018018每次按URL重枚举并核验邮箱/角色/Task/论文，不能沿旧tab号。旧Safari17885同URL重复不得用。后续读checkpoint只读material-stage.json；其draft与正式ScientificUploadDraft展开对照，不用旧Redis缓存验收组保存。
+
+## 最新：74b56bae已提交，原任务网页再次续跑到第1组新填写
+
+备用原文交接代码/测试/文档已提交74b56bae，随后工作区干净，未push/部署。Safari18044重新按URL核验myth620137018@163.com、gpt-6.1-sol及同Task/文件名后正常点击继续。新Job90a96895-4f0d-40a7-8cee-5f77beace08d，observe-20261110T184714227046Z.json已summarizing/scientific_form_filling requesting，29/29、coverage_checked、旧错误清空，前置同请求完整响应快速复用。本次字段新填写/核对/保存尚待验收，不以代码/固定源通过作完成。
+
+Task仍d789acceee124022b3257f84780d1156、原模型/输入/端点哈希相同。新Job必须跟踪material_batch index/total/completed_states与processing_error，不止看models活动；之前来源门失败时model_activity为completed但任务failed。阶段二至五仍全未执行，无正式PaperID。其余完整排障轮与最终无debug重测要求照旧。
+
 ## 最新阻塞及修复：第1/27组已引用Marker备用原文未交接，固定源与回归完成待网页续跑
 
 Task d789acceee124022b3257f84780d1156、Job414a7e57-44b0-49d1-952d-026b9099d86a已failed/summarizing，processing_error=第1/27组填写未完成：原候选来源未读取或不存在，0组完成，无正式PaperID。最后业务observe-20261110T181452845222Z.json。前面已完成29/29、54状态规划、结构分配；CeH10@200真实规划结果Fm-3m，13原来源独立保留S31 R-3m声子，证据issues/phase-handoff/business-*。

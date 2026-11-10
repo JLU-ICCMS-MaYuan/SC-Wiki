@@ -1,0 +1,11 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "90a96895-4f0d-40a7-8cee-5f77beace08d",
+  "source_commit": "74b56bae",
+  "report_sha256": "890dd8d313c8351813c7722cedcf43ff99d57a0e7bed1674e2534af14e1ff64f",
+  "actual_filling_completed": true,
+  "rounds": 3,
+  "required_original_blocks_read": 2,
+  "candidate_dispositions": 10,
+  "scope": "正常网页续跑的新模型填写、既有来源门及原Claim定位已通过；科学核对/组保存和重读尚未完成"
+}

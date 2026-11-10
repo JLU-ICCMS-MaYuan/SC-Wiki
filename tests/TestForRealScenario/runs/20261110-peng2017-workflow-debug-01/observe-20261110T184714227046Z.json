@@ -1,0 +1,1568 @@
+{
+  "at": "2026-11-10T18:47:14.221809+00:00",
+  "task": {
+    "task_id": "d789acceee124022b3257f84780d1156",
+    "status": "summarizing",
+    "stage": "summarizing",
+    "reading_state": "coverage_checked",
+    "completed_chunks": 29,
+    "total_chunks": 29,
+    "processing_error": null,
+    "error_code": null,
+    "job_id": "90a96895-4f0d-40a7-8cee-5f77beace08d",
+    "execution_model": {
+      "provider": "server:LLM2",
+      "model": "gpt-6.1-sol",
+      "catalog_id": "LLM2",
+      "input_hash": "ccaff15ce7571f2ce96e907a5152e8fd2340ee440552a040313a271016c5b5d3",
+      "endpoint_hash": "8f11cc1d483994c69a25d434dbc98dc8be8e43bd63ef3a59af2f68795f62e5af"
+    },
+    "model_activity": {
+      "status": "requesting",
+      "updated_at": 1794336429.973064,
+      "phase": "scientific_form_filling",
+      "filename": null,
+      "attempt": 1,
+      "pages": [],
+      "action": null,
+      "note": null,
+      "error": null,
+      "retry_at": null,
+      "started_at": 1794336429.96324,
+      "history": [
+        {
+          "status": "completed",
+          "updated_at": 1794333627.751478,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            31,
+            32,
+            33
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333627.297201
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333627.9489222,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            31,
+            32,
+            33
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333627.9458718
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333627.994282,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            31,
+            32,
+            33
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333627.991591
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794333632.682555,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            31,
+            32,
+            33
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333627.991591
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794333637.6454852,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            31,
+            32,
+            33
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333627.991591
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794333649.5499,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            31,
+            32,
+            33
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333627.991591
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333649.750713,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333649.746016
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333649.802839,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333649.7997
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794333659.549077,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333649.7997
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794333665.953233,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333649.7997
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333666.163523,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333666.1601
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333666.2145941,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333666.211898
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794333679.0072498,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333666.211898
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794333688.415481,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333666.211898
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333688.6322181,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333688.6293151
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333688.6730921,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333688.67023
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794333699.750571,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333688.67023
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794333707.819436,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333688.67023
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333708.024181,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333708.0203571
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333708.077474,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333708.0734751
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794333721.7171872,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333708.0734751
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794333727.6448472,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333708.0734751
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333727.884949,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333727.881804
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333727.93169,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333727.928535
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794333739.4541051,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333727.928535
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794333749.144897,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333727.928535
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333749.3748338,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333749.368897
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333749.427213,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333749.424173
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794333760.3652349,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333749.424173
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794333769.4899452,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333749.424173
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794333769.789173,
+          "phase": "chunk_extraction",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 1,
+          "pages": [
+            32,
+            33,
+            34
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333749.424173
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333770.0553138,
+          "phase": "claims_ready",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333770.052212
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333770.1031349,
+          "phase": "claims_ready",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333770.100205
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794333775.362515,
+          "phase": "claims_ready",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333770.100205
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794333776.370899,
+          "phase": "claims_ready",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333770.100205
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333776.444538,
+          "phase": "claims_ready",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333776.440945
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333776.560522,
+          "phase": "claims_ready",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333776.555516
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794333781.1898172,
+          "phase": "claims_ready",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333776.555516
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794333782.5817611,
+          "phase": "claims_ready",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333776.555516
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333782.801418,
+          "phase": "structure_optimization",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333782.7966342
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333782.8686662,
+          "phase": "structure_optimization",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333782.8649879
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794333801.693341,
+          "phase": "structure_optimization",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333782.8649879
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794333926.258125,
+          "phase": "structure_optimization",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333782.8649879
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333927.457512,
+          "phase": "material_state_inventory",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333927.4518862
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794333927.780413,
+          "phase": "material_state_inventory",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333927.774474
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794333954.870975,
+          "phase": "material_state_inventory",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333927.774474
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794334137.307819,
+          "phase": "material_state_inventory",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794333927.774474
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794334137.697508,
+          "phase": "structure_assignment",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334137.6876721
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794334138.000992,
+          "phase": "structure_assignment",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334137.9923232
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794334146.504828,
+          "phase": "structure_assignment",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334137.9923232
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794334147.191512,
+          "phase": "structure_assignment",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334137.9923232
+        },
+        {
+          "status": "processing",
+          "updated_at": 1794334147.3094,
+          "phase": "structure_assignment",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": "read_original_context",
+          "note": "已读取823条原文来源，其他页面仍可按需查阅",
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334137.9923232
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794334147.42887,
+          "phase": "structure_assignment",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334147.420068
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794334147.697664,
+          "phase": "structure_assignment",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334147.6896472
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794334163.5991108,
+          "phase": "structure_assignment",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334147.6896472
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794334296.3673239,
+          "phase": "structure_assignment",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334147.6896472
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794334297.6762052,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334297.665008
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794334297.841272,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334297.831617
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794334306.816885,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334297.831617
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794334307.5886562,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334297.831617
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794334307.81827,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334307.80866
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794334307.977351,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334307.967793
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794334326.8948338,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334307.967793
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794334375.517537,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334307.967793
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794334375.804432,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334375.794383
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794334375.9941618,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334375.984465
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794334384.563914,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334375.984465
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794334385.47746,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334375.984465
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794334385.774603,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.764989
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794334385.9782028,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794334401.0679302,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794334453.1138072,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "processing",
+          "updated_at": 1794336402.124933,
+          "phase": "extracting_sources",
+          "filename": "2017 YHn LaHn-彭枫.pdf",
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "processing",
+          "updated_at": 1794336402.338651,
+          "phase": "extracting_sources",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336402.898027,
+          "phase": "workflow_selection",
+          "filename": null,
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336402.917017,
+          "phase": "workflow_selection",
+          "filename": null,
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336402.933602,
+          "phase": "workflow_selection",
+          "filename": null,
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336402.949885,
+          "phase": "workflow_selection",
+          "filename": null,
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336403.12079,
+          "phase": "structure_reading",
+          "filename": "2017 YHn LaHn-彭枫.pdf",
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336404.093436,
+          "phase": "structure_reading",
+          "filename": "2017 YHn LaHn-彭枫.pdf",
+          "attempt": 0,
+          "pages": [
+            3
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336404.4582348,
+          "phase": "structure_reading",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336405.058094,
+          "phase": "structure_reading",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 0,
+          "pages": [
+            30
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336405.951345,
+          "phase": "structure_reading",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 0,
+          "pages": [
+            30,
+            31
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336407.053607,
+          "phase": "structure_reading",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 0,
+          "pages": [
+            30,
+            31,
+            32
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336408.409346,
+          "phase": "structure_reading",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 0,
+          "pages": [
+            30,
+            31,
+            32,
+            33
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336411.636529,
+          "phase": "structure_reading",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 0,
+          "pages": [
+            30,
+            31,
+            32,
+            33
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336412.4563122,
+          "phase": "structure_reading",
+          "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+          "attempt": 0,
+          "pages": [
+            30,
+            31,
+            32,
+            33
+          ],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336419.0185459,
+          "phase": "claims_ready",
+          "filename": null,
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336419.131946,
+          "phase": "claims_ready",
+          "filename": null,
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336419.396487,
+          "phase": "structure_optimization",
+          "filename": null,
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336420.606088,
+          "phase": "material_state_inventory",
+          "filename": null,
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336420.970479,
+          "phase": "structure_assignment",
+          "filename": null,
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "processing",
+          "updated_at": 1794336421.086307,
+          "phase": "structure_assignment",
+          "filename": null,
+          "attempt": 0,
+          "pages": [],
+          "action": "read_original_context",
+          "note": "已读取823条原文来源，其他页面仍可按需查阅",
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "reused",
+          "updated_at": 1794336421.2050261,
+          "phase": "structure_assignment",
+          "filename": null,
+          "attempt": 0,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794334385.967223
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794336422.617573,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794336422.6064441
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794336422.94221,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794336422.9328132
+        },
+        {
+          "status": "receiving",
+          "updated_at": 1794336428.445447,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794336422.9328132
+        },
+        {
+          "status": "completed",
+          "updated_at": 1794336429.528099,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794336422.9328132
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794336429.785043,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794336429.774702
+        },
+        {
+          "status": "requesting",
+          "updated_at": 1794336429.973064,
+          "phase": "scientific_form_filling",
+          "filename": null,
+          "attempt": 1,
+          "pages": [],
+          "action": null,
+          "note": null,
+          "error": null,
+          "retry_at": null,
+          "started_at": 1794336429.96324
+        }
+      ]
+    },
+    "revision": 41
+  },
+  "queue_count": 0,
+  "workers": [
+    {
+      "name": "36f87c31cda6467aa44a250427f080de",
+      "state": "busy",
+      "job_id": "90a96895-4f0d-40a7-8cee-5f77beace08d",
+      "last_heartbeat": "2026-11-10 18:47:10.618543+00:00"
+    },
+    {
+      "name": "bdcd9a4da9cb446ba97a56ab3437a999",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-10 18:42:11.747129+00:00"
+    },
+    {
+      "name": "b39ffcd9bb3e40a4b4501c907e3bd3c2",
+      "state": "?",
+      "job_id": null,
+      "last_heartbeat": "2026-11-10 18:45:15.221356+00:00"
+    },
+    {
+      "name": "400becc033274cb28ed7cd49b42cde15",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-10 18:42:11.751208+00:00"
+    },
+    {
+      "name": "f0075aa86e884763ba5b439d7d5a964e",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-10 18:47:04.054412+00:00"
+    },
+    {
+      "name": "61b98c32d4a44f0d9e997bdb7da1544c",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-10 18:42:11.750278+00:00"
+    },
+    {
+      "name": "9ef96f0e9c9f4f30b41229e1b7a29435",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-10 18:42:11.743143+00:00"
+    },
+    {
+      "name": "67915764a36742a59a8de659bd9c8394",
+      "state": "?",
+      "job_id": null,
+      "last_heartbeat": "2026-11-10 18:45:15.221412+00:00"
+    },
+    {
+      "name": "fffcfb6bae8a4e61b3046e5bd76bb2b0",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-10 18:42:11.750116+00:00"
+    },
+    {
+      "name": "a588a1f776554f98a5938d692b5f4776",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-10 18:42:11.743651+00:00"
+    },
+    {
+      "name": "94015dd853554f9ab12c3173282c76a7",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-10 18:42:11.747558+00:00"
+    },
+    {
+      "name": "cdbf35525e274d98bb72d129f7477d52",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-10 18:42:11.739021+00:00"
+    },
+    {
+      "name": "9f6ef3459c5f402dbe68e1c14fcd46c6",
+      "state": "idle",
+      "job_id": null,
+      "last_heartbeat": "2026-11-10 18:42:11.743021+00:00"
+    }
+  ]
+}
