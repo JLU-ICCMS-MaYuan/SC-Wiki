@@ -1,0 +1,83 @@
+[
+  {
+    "run": "before-flash-schema-400",
+    "status": "incomplete",
+    "model": "deepseek-flash",
+    "calls": 1,
+    "error_type": "BadRequestError",
+    "status_code": 400,
+    "boundary": "保留真实失败；没有改模型或业务数据"
+  },
+  {
+    "run": "before-feedback-progress",
+    "status": "incomplete",
+    "model": "gpt-6.1-sol",
+    "calls": 17,
+    "error_type": "KeyboardInterrupt",
+    "status_code": null,
+    "boundary": "保留真实失败；没有改模型或业务数据"
+  },
+  {
+    "run": "yh-LLM1",
+    "status": "incomplete",
+    "model": "deepseek-flash",
+    "calls": 2,
+    "error_type": "StructuredOutputError",
+    "status_code": null,
+    "boundary": "保留真实失败；没有改模型或业务数据"
+  },
+  {
+    "run": "yh-LLM1-serial-tools",
+    "status": "incomplete",
+    "model": "deepseek-flash",
+    "calls": 14,
+    "error_type": "ValueError",
+    "status_code": null,
+    "boundary": "保留真实失败；没有改模型或业务数据"
+  },
+  {
+    "run": "yh-LLM1-bounded-tools",
+    "status": "incomplete",
+    "model": "deepseek-flash",
+    "calls": 3,
+    "error_type": "ChartReadingError",
+    "status_code": null,
+    "boundary": "保留真实失败；没有改模型或业务数据"
+  },
+  {
+    "run": "yh-LLM1-panel-feedback",
+    "status": "incomplete",
+    "model": "deepseek-flash",
+    "calls": 6,
+    "error_type": "StructuredOutputError",
+    "status_code": null,
+    "boundary": "保留真实失败；没有改模型或业务数据"
+  },
+  {
+    "run": "yh-LLM1-required-report",
+    "status": "incomplete",
+    "model": "deepseek-flash",
+    "calls": 14,
+    "error_type": "ValueError",
+    "status_code": null,
+    "boundary": "保留真实失败；没有改模型或业务数据"
+  },
+  {
+    "run": "yh-LLM1-final-evidence",
+    "status": "incomplete",
+    "model": "deepseek-flash",
+    "calls": 11,
+    "error_type": "AssertionError",
+    "status_code": null,
+    "boundary": "保留真实失败；没有改模型或业务数据"
+  },
+  {
+    "run": "yh-LLM2",
+    "status": "incomplete",
+    "model": "gpt-6.1-sol",
+    "calls": 8,
+    "error_type": "APITimeoutError",
+    "status_code": null,
+    "boundary": "保留真实失败；没有改模型或业务数据"
+  }
+]

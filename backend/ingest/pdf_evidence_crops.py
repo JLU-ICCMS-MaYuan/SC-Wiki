@@ -1,4 +1,4 @@
-"""从原 PDF 渲染可核验的 300 DPI 局部证据，不持久化图片。"""
+"""从原 PDF 渲染可核验的600 DPI局部证据，不保存永久截图。"""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import math
 import pymupdf
 
 
-DPI = 300
+DPI = 600
 CONTEXT_LINES = 3
 MAX_CROP_PIXELS = 8_000_000
 

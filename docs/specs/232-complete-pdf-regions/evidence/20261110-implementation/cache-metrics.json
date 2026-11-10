@@ -1,0 +1,18 @@
+{
+  "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+  "pdf_bytes": 3476148,
+  "locator_json_bytes": 626,
+  "cache_bytes": 29797,
+  "png_bytes": 29293,
+  "render_seconds": 0.042553584033157676,
+  "cache_hit_seconds": 0.0025143749662674963,
+  "rebuild_seconds": 0.025835499982349575,
+  "same_pixels": true,
+  "cache_hit": true,
+  "removed_derived_files": [
+    "pdf-image-a3b04531d9322a94b900d7da10fc98962bcec54a30a90dde308adf85a8bb4822.png",
+    "pdf-image-a3b04531d9322a94b900d7da10fc98962bcec54a30a90dde308adf85a8bb4822.json"
+  ],
+  "model_calls": 0,
+  "note": "仅隔离缓存；重建不使用模型，命中仍检查原件摘要。"
+}

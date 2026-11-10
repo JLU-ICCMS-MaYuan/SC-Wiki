@@ -1,0 +1,24 @@
+{
+  "action": {
+    "name": "adjust_image_region",
+    "arguments": {
+      "bbox_page": [
+        57.156,
+        129.768,
+        292.296,
+        211.584
+      ],
+      "dpi": 600,
+      "reason": "Restore the complete selected bottom panel so all target bars and the full Tc axis can be calibrated in one current crop; PrH9 inset inspection showed no distinguishable colored bars.",
+      "region_id": "pdf-region-0750b7295406149154fe6b4be3935347c71777e02518516cccea99c786776fa8"
+    }
+  },
+  "_tool_call": {
+    "id": "call_31bbb90503e2415faf0620753ea7c9d3",
+    "type": "function",
+    "function": {
+      "name": "adjust_image_region",
+      "arguments": "{\"bbox_page\":[57.156,129.768,292.296,211.584],\"dpi\":600,\"reason\":\"Restore the complete selected bottom panel so all target bars and the full Tc axis can be calibrated in one current crop; PrH9 inset inspection showed no distinguishable colored bars.\",\"region_id\":\"pdf-region-0750b7295406149154fe6b4be3935347c71777e02518516cccea99c786776fa8\"}"
+    }
+  }
+}

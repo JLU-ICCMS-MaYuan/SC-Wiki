@@ -1,0 +1,1771 @@
+{
+  "material_states": [
+    {
+      "material": "ScH6",
+      "material_name": null,
+      "state_kind": "theoretical",
+      "structure_optimization": "unknown",
+      "pressure_value_gpa": 300.0,
+      "reported_space_group_symbol": null,
+      "reported_space_group_number": null,
+      "material_dimensionality": "unknown",
+      "material_family": null,
+      "structure_families": [
+        {
+          "name": "clathrate",
+          "page": 4,
+          "quote": "Tc\n(bottom panel) of various clathrate structures at high pressures.",
+          "scope": "current_paper"
+        }
+      ],
+      "basis_kind": "paper_quote",
+      "evidences": [
+        {
+          "file_id": "main",
+          "pdf_page": 4,
+          "block_id": "original-4-5",
+          "quote": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n"
+        }
+      ],
+      "property_modules": [
+        {
+          "module_code": "electronic_properties",
+          "records": [
+            {
+              "record_key": "fill-08db0490dc2fffe75a63a6bb4524",
+              "module_code": "electronic_properties",
+              "record_type": "property",
+              "property_code": "dos_fermi",
+              "custom_property_key": null,
+              "definition_key": "record.electronic_properties.dos_fermi",
+              "definition_version": 1,
+              "name_raw": "Hydrogen electronic density of states at the Fermi level per unit volume, N_Ef",
+              "value_kind": "number",
+              "value_raw": "~0.0156 states/(eV Å³)",
+              "value_number": 0.0156,
+              "value_min": null,
+              "value_max": null,
+              "value_text": null,
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "states/(eV Å³)",
+              "canonical_unit": "states/(eV Å³)",
+              "method_code": null,
+              "method_raw": null,
+              "criterion_code": null,
+              "criterion_raw": null,
+              "structure_key": null,
+              "payload": {
+                "method_variant_status": null
+              },
+              "evidences": [
+                {
+                  "file_id": "main",
+                  "source_version": 1,
+                  "block_id": "chart-reading-09cfbf0aa0fc1dcaded2330c881fd014727704b0",
+                  "pdf_page": 4,
+                  "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"top\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Hydrogen electronic density of states at the Fermi level per unit volume, N_Ef\", \"unit\": \"states/(eV Å³)\", \"value_number\": 0.0156, \"value_raw\": \"~0.0156 states/(eV Å³)\", \"reading_precision\": 0.0008, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"H-derived DOS at EF per volume\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"conditions\": [], \"reason\": \"First red bar; shared material label ScH6 and caption pressure 300 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition."
+                },
+                {
+                  "file_id": "main",
+                  "source_version": 1,
+                  "block_id": "original-4-5",
+                  "pdf_page": 4,
+                  "quote": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n"
+                }
+              ],
+              "is_representative": false,
+              "basis_kind": "paper_quote"
+            }
+          ],
+          "module_key": "module-electronic_properties",
+          "definition_key": "module.electronic_properties",
+          "definition_version": 1
+        },
+        {
+          "module_code": "superconductive_properties",
+          "records": [
+            {
+              "record_key": "fill-4cd34f1fab87cc7cc387d8e7c113",
+              "module_code": "superconductive_properties",
+              "record_type": "predicted_tc",
+              "property_code": "tc",
+              "custom_property_key": null,
+              "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+              "definition_version": 1,
+              "name_raw": "Superconducting critical temperature",
+              "value_kind": "number",
+              "value_raw": "~100",
+              "value_number": 100,
+              "value_min": null,
+              "value_max": null,
+              "value_text": null,
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "K",
+              "canonical_unit": "K",
+              "method_code": "unknown",
+              "method_raw": "Eliashberg equation",
+              "criterion_code": null,
+              "criterion_raw": null,
+              "structure_key": null,
+              "payload": {
+                "calculation_conditions": {
+                  "calculation_code": null,
+                  "electronic_method": null,
+                  "epw": null,
+                  "exchange_correlation_functional": null,
+                  "phonon_method": "linear response theory",
+                  "qe": null,
+                  "sscha": null,
+                  "vibrational_treatment": null
+                },
+                "method_variant_status": null,
+                "parameters": {
+                  "lambda_ep": {
+                    "evidences": [
+                      {
+                        "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                      }
+                    ],
+                    "reported": true,
+                    "unit_raw": "dimensionless",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 1.32,
+                    "value_raw": "~1.32 dimensionless",
+                    "value_text": null
+                  },
+                  "mu_star": 0.1
+                },
+                "tc_group": {
+                  "version": 1,
+                  "group_key": "fill-9404d3b7beef3ff7e1a7cd8d",
+                  "method_key": "fill-c6c952e1bca1ea8b464b26bf",
+                  "point_key": "b8e3e05c518182223fb2181d"
+                }
+              },
+              "evidences": [
+                {
+                  "file_id": "main",
+                  "source_version": 1,
+                  "block_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f",
+                  "pdf_page": 4,
+                  "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting critical temperature\", \"unit\": \"K\", \"value_number\": 100.0, \"value_raw\": \"~100 K\", \"reading_precision\": 7.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [], \"reason\": \"Green left bar, μ*=0.1; pressure mapped by caption to ScH6.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition."
+                },
+                {
+                  "file_id": "main",
+                  "source_version": 1,
+                  "block_id": "original-4-5",
+                  "pdf_page": 4,
+                  "quote": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n"
+                },
+                {
+                  "file_id": "main",
+                  "source_version": 1,
+                  "block_id": "original-4-2",
+                  "pdf_page": 4,
+                  "quote": "point (Fig. S14 [38]), the large λ values are mainly associated\nwith in-plane stretching, in-plane rocking, and out-of-plane\nrocking vibrations of H clathrate cages (Fig. S15 [38]).\nThe Eliashberg equation [37] gives a better description of\nsystems with strong electron-phonon coupling for λ > 1.5.\nWe have therefore used the Eliashberg equation to predict\nsuperconductivity in the clathrate structures using the\ncalculated logarithmic average frequency (ωlog) and typical\nCoulomb pseudopotential parameters (μ\u0001) from 0.1 to 0.13.\nThe resulting Tc values are 276 K (253 K for μ\u0001 ¼ 0.13)\nand 303 K (287 K for μ\u0001 ¼ 0.13) using μ\u0001 ¼ 0.1 for YH9 at\n150 GPa and YH10 at 400 GPa, respectively. The calculated\nTc of LaH10 reaches 288 K using μ\u0001 ¼ 0.1 at 200 GPa. We\nalso investigated potential superconductivity in other clath-\nrate structures (Fig. 4) and predicted Tc values for ScH6 and\nScH9 as high as ∼150 K, although for LaH9, CeH9, CeH10,\nand PrH9 they are much lower at <56 K (Fig. 4) due to the\nintroduction of much heavier elements which reduce BCS\nsuperconductivity.\n"
+                },
+                {
+                  "file_id": "main",
+                  "source_version": 1,
+                  "block_id": "original-4-1",
+                  "pdf_page": 4,
+                  "quote": "The H clathrate structures of REH6, REH9, and REH10\nare metallic as seen from the calculated electronic band\nstructures and densities of states (Figs. S13 and S14 [38]).\nThe electronic density of states at the Fermi level is\ntypically large and is dominated by the contribution from\nH atoms. To examine potential superconductivity in the\nclathrate structures, lattice phonons and electron-phonon\ncoupling (EPC) calculations were carried out using linear\nresponse theory [68]. Encouragingly, the resulting EPC\nparameters, λ, of YH9 and YH10 are quite large and reach\nvalues of 4.42 and 2.41 at 150 and 400 GPa, respectively.\nBesides the H-derived high density of states at the Fermi\nlevel that is associated with a van Hove singularity at the Γ\n"
+                },
+                {
+                  "file_id": "main",
+                  "source_version": 1,
+                  "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                  "pdf_page": 4,
+                  "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"middle\", \"quantity\": \"lambda_ep\", \"quantity_name\": \"Electron–phonon coupling parameter λ\", \"unit\": \"dimensionless\", \"value_number\": 1.32, \"value_raw\": \"~1.32 dimensionless\", \"reading_precision\": 0.08, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"λ\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": \"linear response theory\", \"conditions\": [], \"reason\": \"First blue EPC bar; shared material label ScH6 and caption pressure 300 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition."
+                }
+              ],
+              "is_representative": false,
+              "basis_kind": "paper_quote"
+            },
+            {
+              "record_key": "fill-a7bc0c52453e724f05a6157cd5fe",
+              "module_code": "superconductive_properties",
+              "record_type": "predicted_tc",
+              "property_code": "tc",
+              "custom_property_key": null,
+              "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+              "definition_version": 1,
+              "name_raw": "Superconducting critical temperature",
+              "value_kind": "number",
+              "value_raw": "~86",
+              "value_number": 86,
+              "value_min": null,
+              "value_max": null,
+              "value_text": null,
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "K",
+              "canonical_unit": "K",
+              "method_code": "unknown",
+              "method_raw": "Eliashberg equation",
+              "criterion_code": null,
+              "criterion_raw": null,
+              "structure_key": null,
+              "payload": {
+                "calculation_conditions": {
+                  "calculation_code": null,
+                  "electronic_method": null,
+                  "epw": null,
+                  "exchange_correlation_functional": null,
+                  "phonon_method": "linear response theory",
+                  "qe": null,
+                  "sscha": null,
+                  "vibrational_treatment": null
+                },
+                "method_variant_status": null,
+                "parameters": {
+                  "lambda_ep": {
+                    "evidences": [
+                      {
+                        "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                      }
+                    ],
+                    "reported": true,
+                    "unit_raw": "dimensionless",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 1.32,
+                    "value_raw": "~1.32 dimensionless",
+                    "value_text": null
+                  },
+                  "mu_star": 0.13
+                },
+                "tc_group": {
+                  "version": 1,
+                  "group_key": "fill-9404d3b7beef3ff7e1a7cd8d",
+                  "method_key": "fill-c6c952e1bca1ea8b464b26bf",
+                  "point_key": "889f2941e5a278ae994e9b7b"
+                }
+              },
+              "evidences": [
+                {
+                  "file_id": "main",
+                  "source_version": 1,
+                  "block_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7",
+                  "pdf_page": 4,
+                  "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting critical temperature\", \"unit\": \"K\", \"value_number\": 86.0, \"value_raw\": \"~86 K\", \"reading_precision\": 9.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"μ*=0.13\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": 0.13, \"method_raw\": \"Eliashberg equation\", \"conditions\": [], \"reason\": \"Dark-blue right bar, μ*=0.13; caption pressure mapping.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition."
+                },
+                {
+                  "file_id": "main",
+                  "source_version": 1,
+                  "block_id": "original-4-5",
+                  "pdf_page": 4,
+                  "quote": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n"
+                },
+                {
+                  "file_id": "main",
+                  "source_version": 1,
+                  "block_id": "original-4-2",
+                  "pdf_page": 4,
+                  "quote": "point (Fig. S14 [38]), the large λ values are mainly associated\nwith in-plane stretching, in-plane rocking, and out-of-plane\nrocking vibrations of H clathrate cages (Fig. S15 [38]).\nThe Eliashberg equation [37] gives a better description of\nsystems with strong electron-phonon coupling for λ > 1.5.\nWe have therefore used the Eliashberg equation to predict\nsuperconductivity in the clathrate structures using the\ncalculated logarithmic average frequency (ωlog) and typical\nCoulomb pseudopotential parameters (μ\u0001) from 0.1 to 0.13.\nThe resulting Tc values are 276 K (253 K for μ\u0001 ¼ 0.13)\nand 303 K (287 K for μ\u0001 ¼ 0.13) using μ\u0001 ¼ 0.1 for YH9 at\n150 GPa and YH10 at 400 GPa, respectively. The calculated\nTc of LaH10 reaches 288 K using μ\u0001 ¼ 0.1 at 200 GPa. We\nalso investigated potential superconductivity in other clath-\nrate structures (Fig. 4) and predicted Tc values for ScH6 and\nScH9 as high as ∼150 K, although for LaH9, CeH9, CeH10,\nand PrH9 they are much lower at <56 K (Fig. 4) due to the\nintroduction of much heavier elements which reduce BCS\nsuperconductivity.\n"
+                },
+                {
+                  "file_id": "main",
+                  "source_version": 1,
+                  "block_id": "original-4-1",
+                  "pdf_page": 4,
+                  "quote": "The H clathrate structures of REH6, REH9, and REH10\nare metallic as seen from the calculated electronic band\nstructures and densities of states (Figs. S13 and S14 [38]).\nThe electronic density of states at the Fermi level is\ntypically large and is dominated by the contribution from\nH atoms. To examine potential superconductivity in the\nclathrate structures, lattice phonons and electron-phonon\ncoupling (EPC) calculations were carried out using linear\nresponse theory [68]. Encouragingly, the resulting EPC\nparameters, λ, of YH9 and YH10 are quite large and reach\nvalues of 4.42 and 2.41 at 150 and 400 GPa, respectively.\nBesides the H-derived high density of states at the Fermi\nlevel that is associated with a van Hove singularity at the Γ\n"
+                },
+                {
+                  "file_id": "main",
+                  "source_version": 1,
+                  "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                  "pdf_page": 4,
+                  "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"middle\", \"quantity\": \"lambda_ep\", \"quantity_name\": \"Electron–phonon coupling parameter λ\", \"unit\": \"dimensionless\", \"value_number\": 1.32, \"value_raw\": \"~1.32 dimensionless\", \"reading_precision\": 0.08, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"λ\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": \"linear response theory\", \"conditions\": [], \"reason\": \"First blue EPC bar; shared material label ScH6 and caption pressure 300 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition."
+                }
+              ],
+              "is_representative": false,
+              "basis_kind": "paper_quote"
+            }
+          ],
+          "module_key": "module-superconductive_properties",
+          "definition_key": "module.superconductive_properties",
+          "definition_version": 1
+        }
+      ],
+      "schema_version": 2
+    }
+  ],
+  "report": {
+    "version": "scientific-form-filling-v7-fixed-method-fields",
+    "status": "completed",
+    "input_hash": "b40b471b02b1711f89009151ca1968a25fbd99f7eb7259e5ef9470d45455b1d7",
+    "source_hash": "9640e8dccb7a06ca9cdcf812508a1ab3200b8d044d9ca6efe09bca52e6f18069",
+    "attempts": [
+      {
+        "round": 1,
+        "read_source_ids": [
+          "source-1",
+          "source-2",
+          "source-5",
+          "source-8",
+          "source-9",
+          "source-10",
+          "source-11"
+        ],
+        "input_chars": 15773,
+        "input": {
+          "states": [
+            {
+              "material": "ScH6",
+              "material_name": null,
+              "state_kind": "theoretical",
+              "structure_optimization": "unknown",
+              "pressure_value_gpa": 300.0,
+              "reported_space_group_symbol": null,
+              "reported_space_group_number": null,
+              "material_dimensionality": "unknown",
+              "material_family": null,
+              "structure_families": [
+                {
+                  "name": "clathrate",
+                  "page": 4,
+                  "quote": "Tc\n(bottom panel) of various clathrate structures at high pressures.",
+                  "scope": "current_paper"
+                }
+              ],
+              "basis_kind": "paper_quote",
+              "schema_version": 2
+            }
+          ],
+          "candidates": [
+            {
+              "candidate_id": "s0:m0:r0",
+              "state_index": 0,
+              "record": {
+                "record_key": "assembled-0-electronic_properties-0",
+                "module_code": "electronic_properties",
+                "record_type": "property",
+                "property_code": "dos_fermi",
+                "custom_property_key": null,
+                "definition_key": "record.electronic_properties.dos_fermi",
+                "definition_version": 1,
+                "name_raw": "Hydrogen electronic density of states at the Fermi level per unit volume, N_Ef",
+                "value_kind": "number",
+                "value_raw": "~0.0156 states/(eV Å³)",
+                "value_number": 0.0156,
+                "value_min": null,
+                "value_max": null,
+                "value_text": null,
+                "value_boolean": null,
+                "uncertainty": null,
+                "unit_raw": "states/(eV Å³)",
+                "canonical_unit": "states/(eV Å³)",
+                "method_code": null,
+                "method_raw": null,
+                "criterion_code": null,
+                "criterion_raw": null,
+                "structure_key": null,
+                "payload": {
+                  "method_variant_status": null
+                },
+                "evidence": null,
+                "evidences": [
+                  {
+                    "evidence_id": "evidence-0"
+                  },
+                  {
+                    "evidence_id": "evidence-1"
+                  }
+                ],
+                "is_representative": false,
+                "basis_kind": "paper_quote"
+              }
+            },
+            {
+              "candidate_id": "s0:m1:r0",
+              "state_index": 0,
+              "record": {
+                "record_key": "assembled-0-superconductive_properties-0",
+                "module_code": "superconductive_properties",
+                "record_type": "predicted_tc",
+                "property_code": "tc",
+                "custom_property_key": null,
+                "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+                "definition_version": 1,
+                "name_raw": "Superconducting critical temperature",
+                "value_kind": "number",
+                "value_raw": "~100 K",
+                "value_number": 100.0,
+                "value_min": null,
+                "value_max": null,
+                "value_text": null,
+                "value_boolean": null,
+                "uncertainty": null,
+                "unit_raw": "K",
+                "canonical_unit": "K",
+                "method_code": "unknown",
+                "method_raw": "Eliashberg equation",
+                "criterion_code": null,
+                "criterion_raw": null,
+                "structure_key": null,
+                "payload": {
+                  "calculation_conditions": {
+                    "calculation_code": null,
+                    "electronic_method": null,
+                    "epw": null,
+                    "exchange_correlation_functional": null,
+                    "phonon_method": "linear response theory",
+                    "qe": null,
+                    "sscha": null,
+                    "vibrational_treatment": null
+                  },
+                  "method_variant_status": null,
+                  "parameters": {
+                    "lambda_ep": {
+                      "evidences": [
+                        {
+                          "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                          "file_id": "main",
+                          "pdf_page": 4,
+                          "quote": null,
+                          "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                        }
+                      ],
+                      "reported": true,
+                      "unit_raw": "dimensionless",
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 1.32,
+                      "value_raw": "~1.32 dimensionless",
+                      "value_text": null
+                    },
+                    "mu_star": {
+                      "evidences": [
+                        {
+                          "block_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f",
+                          "file_id": "main",
+                          "pdf_page": 4,
+                          "quote": null,
+                          "quote_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f"
+                        }
+                      ],
+                      "reported": true,
+                      "unit_raw": null,
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 0.1,
+                      "value_raw": "0.1",
+                      "value_text": null
+                    }
+                  }
+                },
+                "evidence": null,
+                "evidences": [
+                  {
+                    "evidence_id": "evidence-2"
+                  },
+                  {
+                    "evidence_id": "evidence-1"
+                  },
+                  {
+                    "evidence_id": "evidence-3"
+                  },
+                  {
+                    "evidence_id": "evidence-4"
+                  },
+                  {
+                    "evidence_id": "evidence-5"
+                  }
+                ],
+                "is_representative": false,
+                "basis_kind": "paper_quote"
+              }
+            },
+            {
+              "candidate_id": "s0:m1:r1",
+              "state_index": 0,
+              "record": {
+                "record_key": "assembled-0-superconductive_properties-1",
+                "module_code": "superconductive_properties",
+                "record_type": "predicted_tc",
+                "property_code": "tc",
+                "custom_property_key": null,
+                "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+                "definition_version": 1,
+                "name_raw": "Superconducting critical temperature",
+                "value_kind": "number",
+                "value_raw": "~86 K",
+                "value_number": 86.0,
+                "value_min": null,
+                "value_max": null,
+                "value_text": null,
+                "value_boolean": null,
+                "uncertainty": null,
+                "unit_raw": "K",
+                "canonical_unit": "K",
+                "method_code": "unknown",
+                "method_raw": "Eliashberg equation",
+                "criterion_code": null,
+                "criterion_raw": null,
+                "structure_key": null,
+                "payload": {
+                  "calculation_conditions": {
+                    "calculation_code": null,
+                    "electronic_method": null,
+                    "epw": null,
+                    "exchange_correlation_functional": null,
+                    "phonon_method": "linear response theory",
+                    "qe": null,
+                    "sscha": null,
+                    "vibrational_treatment": null
+                  },
+                  "method_variant_status": null,
+                  "parameters": {
+                    "lambda_ep": {
+                      "evidences": [
+                        {
+                          "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                          "file_id": "main",
+                          "pdf_page": 4,
+                          "quote": null,
+                          "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                        }
+                      ],
+                      "reported": true,
+                      "unit_raw": "dimensionless",
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 1.32,
+                      "value_raw": "~1.32 dimensionless",
+                      "value_text": null
+                    },
+                    "mu_star": {
+                      "evidences": [
+                        {
+                          "block_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7",
+                          "file_id": "main",
+                          "pdf_page": 4,
+                          "quote": null,
+                          "quote_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7"
+                        }
+                      ],
+                      "reported": true,
+                      "unit_raw": null,
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 0.13,
+                      "value_raw": "0.13",
+                      "value_text": null
+                    }
+                  }
+                },
+                "evidence": null,
+                "evidences": [
+                  {
+                    "evidence_id": "evidence-6"
+                  },
+                  {
+                    "evidence_id": "evidence-1"
+                  },
+                  {
+                    "evidence_id": "evidence-3"
+                  },
+                  {
+                    "evidence_id": "evidence-4"
+                  },
+                  {
+                    "evidence_id": "evidence-5"
+                  }
+                ],
+                "is_representative": false,
+                "basis_kind": "paper_quote"
+              }
+            }
+          ],
+          "candidate_evidences": {
+            "evidence-0": {
+              "source_id": "source-8",
+              "quote_span": [
+                0,
+                916
+              ]
+            },
+            "evidence-1": {
+              "source_id": "source-5",
+              "quote_span": [
+                0,
+                410
+              ]
+            },
+            "evidence-2": {
+              "source_id": "source-10",
+              "quote_span": [
+                0,
+                817
+              ]
+            },
+            "evidence-3": {
+              "source_id": "source-2",
+              "quote_span": [
+                0,
+                1070
+              ]
+            },
+            "evidence-4": {
+              "source_id": "source-1",
+              "quote_span": [
+                0,
+                743
+              ]
+            },
+            "evidence-5": {
+              "source_id": "source-9",
+              "quote_span": [
+                0,
+                865
+              ]
+            },
+            "evidence-6": {
+              "source_id": "source-11",
+              "quote_span": [
+                0,
+                813
+              ]
+            }
+          },
+          "source_index": [
+            {
+              "source_id": "source-0",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "original-4-0",
+              "preview": "as an example and present data in Fig. 3(d) for the enthalpies\nΔH, the internal energies ΔU, and the pressure-volume term\nΔPV. We see that ΔU increases with increasing H content\nun"
+            },
+            {
+              "source_id": "source-3",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "original-4-3",
+              "preview": "Our extensive structure searches for RE (RE ¼ Sc, Y, La,\nCe, and Pr) hydrides have revealed the appearance of\nstable clathrate structures in REH6, REH9, and REH10.\nThese structures"
+            },
+            {
+              "source_id": "source-4",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "original-4-4",
+              "preview": "In conclusion, we have used extensive first-principles\nstructure searches to establish the pressure-induced for-\nmation of H clathrate structures that contain H24, H29, and\nH32 cag"
+            },
+            {
+              "source_id": "source-6",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "original-4-6",
+              "preview": "PRL 119, 107001 (2017)\nP H Y S I C A L\nR E V I E W\nL E T T E R S\nweek ending\n8 SEPTEMBER 2017\n"
+            },
+            {
+              "source_id": "source-7",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "original-4-7",
+              "preview": "107001-4\n"
+            },
+            {
+              "source_id": "source-12",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "chart-unresolved-bb5ef5ffcacfd8020a61355d34022a4dbbbcb3ea",
+              "preview": "ORIGINAL FIGURE READING UNRESOLVED: {\"page\": 4, \"region_id\": \"chart-page-4-figure-2\", \"figure\": \"Figure 4\", \"panel\": \"bottom\", \"crop_bbox\": [57.156, 129.768, 292.296, 211.584], \"ca"
+            },
+            {
+              "source_id": "source-13",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "chart-unresolved-8b1811faf77ab0de371ba2c174a13dbc41132b68",
+              "preview": "ORIGINAL FIGURE READING UNRESOLVED: {\"page\": 4, \"region_id\": \"chart-page-4-figure-2\", \"figure\": \"Figure 4\", \"panel\": \"bottom\", \"crop_bbox\": [57.156, 129.768, 292.296, 211.584], \"ca"
+            },
+            {
+              "source_id": "source-14",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "chart-unresolved-12bc24a1f0bd17bd12b2330026fba6312897e208",
+              "preview": "ORIGINAL FIGURE READING UNRESOLVED: {\"page\": 4, \"region_id\": \"chart-page-4-figure-2\", \"crop_bbox\": [57.156, 129.768, 292.296, 211.584], \"reason\": \"PrH9 has no distinguishishable gr"
+            }
+          ],
+          "source_gaps": [],
+          "sources": [
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "original-4-1",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "The H clathrate structures of REH6, REH9, and REH10\nare metallic as seen from the calculated electronic band\nstructures and densities of states (Figs. S13 and S14 [38]).\nThe electronic density of states at the Fermi level is\ntypically large and is dominated by the contribution from\nH atoms. To examine potential superconductivity in the\nclathrate structures, lattice phonons and electron-phonon\ncoupling (EPC) calculations were carried out using linear\nresponse theory [68]. Encouragingly, the resulting EPC\nparameters, λ, of YH9 and YH10 are quite large and reach\nvalues of 4.42 and 2.41 at 150 and 400 GPa, respectively.\nBesides the H-derived high density of states at the Fermi\nlevel that is associated with a van Hove singularity at the Γ\n",
+              "source_id": "source-1"
+            },
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "original-4-2",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "point (Fig. S14 [38]), the large λ values are mainly associated\nwith in-plane stretching, in-plane rocking, and out-of-plane\nrocking vibrations of H clathrate cages (Fig. S15 [38]).\nThe Eliashberg equation [37] gives a better description of\nsystems with strong electron-phonon coupling for λ > 1.5.\nWe have therefore used the Eliashberg equation to predict\nsuperconductivity in the clathrate structures using the\ncalculated logarithmic average frequency (ωlog) and typical\nCoulomb pseudopotential parameters (μ\u0001) from 0.1 to 0.13.\nThe resulting Tc values are 276 K (253 K for μ\u0001 ¼ 0.13)\nand 303 K (287 K for μ\u0001 ¼ 0.13) using μ\u0001 ¼ 0.1 for YH9 at\n150 GPa and YH10 at 400 GPa, respectively. The calculated\nTc of LaH10 reaches 288 K using μ\u0001 ¼ 0.1 at 200 GPa. We\nalso investigated potential superconductivity in other clath-\nrate structures (Fig. 4) and predicted Tc values for ScH6 and\nScH9 as high as ∼150 K, although for LaH9, CeH9, CeH10,\nand PrH9 they are much lower at <56 K (Fig. 4) due to the\nintroduction of much heavier elements which reduce BCS\nsuperconductivity.\n",
+              "source_id": "source-2"
+            },
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "original-4-5",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n",
+              "source_id": "source-5"
+            },
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "chart-reading-09cfbf0aa0fc1dcaded2330c881fd014727704b0",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"top\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Hydrogen electronic density of states at the Fermi level per unit volume, N_Ef\", \"unit\": \"states/(eV Å³)\", \"value_number\": 0.0156, \"value_raw\": \"~0.0156 states/(eV Å³)\", \"reading_precision\": 0.0008, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"H-derived DOS at EF per volume\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"conditions\": [], \"reason\": \"First red bar; shared material label ScH6 and caption pressure 300 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "source_id": "source-8"
+            },
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"middle\", \"quantity\": \"lambda_ep\", \"quantity_name\": \"Electron–phonon coupling parameter λ\", \"unit\": \"dimensionless\", \"value_number\": 1.32, \"value_raw\": \"~1.32 dimensionless\", \"reading_precision\": 0.08, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"λ\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": \"linear response theory\", \"conditions\": [], \"reason\": \"First blue EPC bar; shared material label ScH6 and caption pressure 300 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "source_id": "source-9"
+            },
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting critical temperature\", \"unit\": \"K\", \"value_number\": 100.0, \"value_raw\": \"~100 K\", \"reading_precision\": 7.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [], \"reason\": \"Green left bar, μ*=0.1; pressure mapped by caption to ScH6.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "source_id": "source-10"
+            },
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting critical temperature\", \"unit\": \"K\", \"value_number\": 86.0, \"value_raw\": \"~86 K\", \"reading_precision\": 9.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"μ*=0.13\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": 0.13, \"method_raw\": \"Eliashberg equation\", \"conditions\": [], \"reason\": \"Dark-blue right bar, μ*=0.13; caption pressure mapping.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "source_id": "source-11"
+            }
+          ],
+          "previous_error": null,
+          "must_finalize": false,
+          "remaining_rounds": 4
+        },
+        "response": {
+          "done": false,
+          "excluded": [],
+          "read_source_ids": [],
+          "records": [],
+          "search": [
+            "computational methods Quantum ESPRESSO Eliashberg ScH6 supplementary",
+            "plane wave cutoff k mesh phonon logarithmic frequency ScH6"
+          ],
+          "unresolved": []
+        },
+        "error": "没有新的来源可读；所有命中内容已在 sources 中。停止重复查找，请根据已读来源返回 done=true 的整理结果；确实仍不明的候选列入 unresolved。"
+      },
+      {
+        "round": 2,
+        "read_source_ids": [
+          "source-1",
+          "source-2",
+          "source-5",
+          "source-8",
+          "source-9",
+          "source-10",
+          "source-11"
+        ],
+        "input_chars": 15853,
+        "input": {
+          "states": [
+            {
+              "material": "ScH6",
+              "material_name": null,
+              "state_kind": "theoretical",
+              "structure_optimization": "unknown",
+              "pressure_value_gpa": 300.0,
+              "reported_space_group_symbol": null,
+              "reported_space_group_number": null,
+              "material_dimensionality": "unknown",
+              "material_family": null,
+              "structure_families": [
+                {
+                  "name": "clathrate",
+                  "page": 4,
+                  "quote": "Tc\n(bottom panel) of various clathrate structures at high pressures.",
+                  "scope": "current_paper"
+                }
+              ],
+              "basis_kind": "paper_quote",
+              "schema_version": 2
+            }
+          ],
+          "candidates": [
+            {
+              "candidate_id": "s0:m0:r0",
+              "state_index": 0,
+              "record": {
+                "record_key": "assembled-0-electronic_properties-0",
+                "module_code": "electronic_properties",
+                "record_type": "property",
+                "property_code": "dos_fermi",
+                "custom_property_key": null,
+                "definition_key": "record.electronic_properties.dos_fermi",
+                "definition_version": 1,
+                "name_raw": "Hydrogen electronic density of states at the Fermi level per unit volume, N_Ef",
+                "value_kind": "number",
+                "value_raw": "~0.0156 states/(eV Å³)",
+                "value_number": 0.0156,
+                "value_min": null,
+                "value_max": null,
+                "value_text": null,
+                "value_boolean": null,
+                "uncertainty": null,
+                "unit_raw": "states/(eV Å³)",
+                "canonical_unit": "states/(eV Å³)",
+                "method_code": null,
+                "method_raw": null,
+                "criterion_code": null,
+                "criterion_raw": null,
+                "structure_key": null,
+                "payload": {
+                  "method_variant_status": null
+                },
+                "evidence": null,
+                "evidences": [
+                  {
+                    "evidence_id": "evidence-0"
+                  },
+                  {
+                    "evidence_id": "evidence-1"
+                  }
+                ],
+                "is_representative": false,
+                "basis_kind": "paper_quote"
+              }
+            },
+            {
+              "candidate_id": "s0:m1:r0",
+              "state_index": 0,
+              "record": {
+                "record_key": "assembled-0-superconductive_properties-0",
+                "module_code": "superconductive_properties",
+                "record_type": "predicted_tc",
+                "property_code": "tc",
+                "custom_property_key": null,
+                "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+                "definition_version": 1,
+                "name_raw": "Superconducting critical temperature",
+                "value_kind": "number",
+                "value_raw": "~100 K",
+                "value_number": 100.0,
+                "value_min": null,
+                "value_max": null,
+                "value_text": null,
+                "value_boolean": null,
+                "uncertainty": null,
+                "unit_raw": "K",
+                "canonical_unit": "K",
+                "method_code": "unknown",
+                "method_raw": "Eliashberg equation",
+                "criterion_code": null,
+                "criterion_raw": null,
+                "structure_key": null,
+                "payload": {
+                  "calculation_conditions": {
+                    "calculation_code": null,
+                    "electronic_method": null,
+                    "epw": null,
+                    "exchange_correlation_functional": null,
+                    "phonon_method": "linear response theory",
+                    "qe": null,
+                    "sscha": null,
+                    "vibrational_treatment": null
+                  },
+                  "method_variant_status": null,
+                  "parameters": {
+                    "lambda_ep": {
+                      "evidences": [
+                        {
+                          "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                          "file_id": "main",
+                          "pdf_page": 4,
+                          "quote": null,
+                          "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                        }
+                      ],
+                      "reported": true,
+                      "unit_raw": "dimensionless",
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 1.32,
+                      "value_raw": "~1.32 dimensionless",
+                      "value_text": null
+                    },
+                    "mu_star": {
+                      "evidences": [
+                        {
+                          "block_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f",
+                          "file_id": "main",
+                          "pdf_page": 4,
+                          "quote": null,
+                          "quote_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f"
+                        }
+                      ],
+                      "reported": true,
+                      "unit_raw": null,
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 0.1,
+                      "value_raw": "0.1",
+                      "value_text": null
+                    }
+                  }
+                },
+                "evidence": null,
+                "evidences": [
+                  {
+                    "evidence_id": "evidence-2"
+                  },
+                  {
+                    "evidence_id": "evidence-1"
+                  },
+                  {
+                    "evidence_id": "evidence-3"
+                  },
+                  {
+                    "evidence_id": "evidence-4"
+                  },
+                  {
+                    "evidence_id": "evidence-5"
+                  }
+                ],
+                "is_representative": false,
+                "basis_kind": "paper_quote"
+              }
+            },
+            {
+              "candidate_id": "s0:m1:r1",
+              "state_index": 0,
+              "record": {
+                "record_key": "assembled-0-superconductive_properties-1",
+                "module_code": "superconductive_properties",
+                "record_type": "predicted_tc",
+                "property_code": "tc",
+                "custom_property_key": null,
+                "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+                "definition_version": 1,
+                "name_raw": "Superconducting critical temperature",
+                "value_kind": "number",
+                "value_raw": "~86 K",
+                "value_number": 86.0,
+                "value_min": null,
+                "value_max": null,
+                "value_text": null,
+                "value_boolean": null,
+                "uncertainty": null,
+                "unit_raw": "K",
+                "canonical_unit": "K",
+                "method_code": "unknown",
+                "method_raw": "Eliashberg equation",
+                "criterion_code": null,
+                "criterion_raw": null,
+                "structure_key": null,
+                "payload": {
+                  "calculation_conditions": {
+                    "calculation_code": null,
+                    "electronic_method": null,
+                    "epw": null,
+                    "exchange_correlation_functional": null,
+                    "phonon_method": "linear response theory",
+                    "qe": null,
+                    "sscha": null,
+                    "vibrational_treatment": null
+                  },
+                  "method_variant_status": null,
+                  "parameters": {
+                    "lambda_ep": {
+                      "evidences": [
+                        {
+                          "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                          "file_id": "main",
+                          "pdf_page": 4,
+                          "quote": null,
+                          "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                        }
+                      ],
+                      "reported": true,
+                      "unit_raw": "dimensionless",
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 1.32,
+                      "value_raw": "~1.32 dimensionless",
+                      "value_text": null
+                    },
+                    "mu_star": {
+                      "evidences": [
+                        {
+                          "block_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7",
+                          "file_id": "main",
+                          "pdf_page": 4,
+                          "quote": null,
+                          "quote_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7"
+                        }
+                      ],
+                      "reported": true,
+                      "unit_raw": null,
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 0.13,
+                      "value_raw": "0.13",
+                      "value_text": null
+                    }
+                  }
+                },
+                "evidence": null,
+                "evidences": [
+                  {
+                    "evidence_id": "evidence-6"
+                  },
+                  {
+                    "evidence_id": "evidence-1"
+                  },
+                  {
+                    "evidence_id": "evidence-3"
+                  },
+                  {
+                    "evidence_id": "evidence-4"
+                  },
+                  {
+                    "evidence_id": "evidence-5"
+                  }
+                ],
+                "is_representative": false,
+                "basis_kind": "paper_quote"
+              }
+            }
+          ],
+          "candidate_evidences": {
+            "evidence-0": {
+              "source_id": "source-8",
+              "quote_span": [
+                0,
+                916
+              ]
+            },
+            "evidence-1": {
+              "source_id": "source-5",
+              "quote_span": [
+                0,
+                410
+              ]
+            },
+            "evidence-2": {
+              "source_id": "source-10",
+              "quote_span": [
+                0,
+                817
+              ]
+            },
+            "evidence-3": {
+              "source_id": "source-2",
+              "quote_span": [
+                0,
+                1070
+              ]
+            },
+            "evidence-4": {
+              "source_id": "source-1",
+              "quote_span": [
+                0,
+                743
+              ]
+            },
+            "evidence-5": {
+              "source_id": "source-9",
+              "quote_span": [
+                0,
+                865
+              ]
+            },
+            "evidence-6": {
+              "source_id": "source-11",
+              "quote_span": [
+                0,
+                813
+              ]
+            }
+          },
+          "source_index": [
+            {
+              "source_id": "source-0",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "original-4-0",
+              "preview": "as an example and present data in Fig. 3(d) for the enthalpies\nΔH, the internal energies ΔU, and the pressure-volume term\nΔPV. We see that ΔU increases with increasing H content\nun"
+            },
+            {
+              "source_id": "source-3",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "original-4-3",
+              "preview": "Our extensive structure searches for RE (RE ¼ Sc, Y, La,\nCe, and Pr) hydrides have revealed the appearance of\nstable clathrate structures in REH6, REH9, and REH10.\nThese structures"
+            },
+            {
+              "source_id": "source-4",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "original-4-4",
+              "preview": "In conclusion, we have used extensive first-principles\nstructure searches to establish the pressure-induced for-\nmation of H clathrate structures that contain H24, H29, and\nH32 cag"
+            },
+            {
+              "source_id": "source-6",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "original-4-6",
+              "preview": "PRL 119, 107001 (2017)\nP H Y S I C A L\nR E V I E W\nL E T T E R S\nweek ending\n8 SEPTEMBER 2017\n"
+            },
+            {
+              "source_id": "source-7",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "original-4-7",
+              "preview": "107001-4\n"
+            },
+            {
+              "source_id": "source-12",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "chart-unresolved-bb5ef5ffcacfd8020a61355d34022a4dbbbcb3ea",
+              "preview": "ORIGINAL FIGURE READING UNRESOLVED: {\"page\": 4, \"region_id\": \"chart-page-4-figure-2\", \"figure\": \"Figure 4\", \"panel\": \"bottom\", \"crop_bbox\": [57.156, 129.768, 292.296, 211.584], \"ca"
+            },
+            {
+              "source_id": "source-13",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "chart-unresolved-8b1811faf77ab0de371ba2c174a13dbc41132b68",
+              "preview": "ORIGINAL FIGURE READING UNRESOLVED: {\"page\": 4, \"region_id\": \"chart-page-4-figure-2\", \"figure\": \"Figure 4\", \"panel\": \"bottom\", \"crop_bbox\": [57.156, 129.768, 292.296, 211.584], \"ca"
+            },
+            {
+              "source_id": "source-14",
+              "file_id": "main",
+              "page_start": 4,
+              "block_id": "chart-unresolved-12bc24a1f0bd17bd12b2330026fba6312897e208",
+              "preview": "ORIGINAL FIGURE READING UNRESOLVED: {\"page\": 4, \"region_id\": \"chart-page-4-figure-2\", \"crop_bbox\": [57.156, 129.768, 292.296, 211.584], \"reason\": \"PrH9 has no distinguishishable gr"
+            }
+          ],
+          "source_gaps": [],
+          "sources": [
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "original-4-1",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "The H clathrate structures of REH6, REH9, and REH10\nare metallic as seen from the calculated electronic band\nstructures and densities of states (Figs. S13 and S14 [38]).\nThe electronic density of states at the Fermi level is\ntypically large and is dominated by the contribution from\nH atoms. To examine potential superconductivity in the\nclathrate structures, lattice phonons and electron-phonon\ncoupling (EPC) calculations were carried out using linear\nresponse theory [68]. Encouragingly, the resulting EPC\nparameters, λ, of YH9 and YH10 are quite large and reach\nvalues of 4.42 and 2.41 at 150 and 400 GPa, respectively.\nBesides the H-derived high density of states at the Fermi\nlevel that is associated with a van Hove singularity at the Γ\n",
+              "source_id": "source-1"
+            },
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "original-4-2",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "point (Fig. S14 [38]), the large λ values are mainly associated\nwith in-plane stretching, in-plane rocking, and out-of-plane\nrocking vibrations of H clathrate cages (Fig. S15 [38]).\nThe Eliashberg equation [37] gives a better description of\nsystems with strong electron-phonon coupling for λ > 1.5.\nWe have therefore used the Eliashberg equation to predict\nsuperconductivity in the clathrate structures using the\ncalculated logarithmic average frequency (ωlog) and typical\nCoulomb pseudopotential parameters (μ\u0001) from 0.1 to 0.13.\nThe resulting Tc values are 276 K (253 K for μ\u0001 ¼ 0.13)\nand 303 K (287 K for μ\u0001 ¼ 0.13) using μ\u0001 ¼ 0.1 for YH9 at\n150 GPa and YH10 at 400 GPa, respectively. The calculated\nTc of LaH10 reaches 288 K using μ\u0001 ¼ 0.1 at 200 GPa. We\nalso investigated potential superconductivity in other clath-\nrate structures (Fig. 4) and predicted Tc values for ScH6 and\nScH9 as high as ∼150 K, although for LaH9, CeH9, CeH10,\nand PrH9 they are much lower at <56 K (Fig. 4) due to the\nintroduction of much heavier elements which reduce BCS\nsuperconductivity.\n",
+              "source_id": "source-2"
+            },
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "original-4-5",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n",
+              "source_id": "source-5"
+            },
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "chart-reading-09cfbf0aa0fc1dcaded2330c881fd014727704b0",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"top\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Hydrogen electronic density of states at the Fermi level per unit volume, N_Ef\", \"unit\": \"states/(eV Å³)\", \"value_number\": 0.0156, \"value_raw\": \"~0.0156 states/(eV Å³)\", \"reading_precision\": 0.0008, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"H-derived DOS at EF per volume\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"conditions\": [], \"reason\": \"First red bar; shared material label ScH6 and caption pressure 300 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "source_id": "source-8"
+            },
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"middle\", \"quantity\": \"lambda_ep\", \"quantity_name\": \"Electron–phonon coupling parameter λ\", \"unit\": \"dimensionless\", \"value_number\": 1.32, \"value_raw\": \"~1.32 dimensionless\", \"reading_precision\": 0.08, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"λ\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": \"linear response theory\", \"conditions\": [], \"reason\": \"First blue EPC bar; shared material label ScH6 and caption pressure 300 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "source_id": "source-9"
+            },
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting critical temperature\", \"unit\": \"K\", \"value_number\": 100.0, \"value_raw\": \"~100 K\", \"reading_precision\": 7.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [], \"reason\": \"Green left bar, μ*=0.1; pressure mapped by caption to ScH6.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "source_id": "source-10"
+            },
+            {
+              "file_id": "main",
+              "file_role": "main",
+              "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+              "source_version": 1,
+              "block_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7",
+              "page_start": 4,
+              "page_end": 4,
+              "content": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting critical temperature\", \"unit\": \"K\", \"value_number\": 86.0, \"value_raw\": \"~86 K\", \"reading_precision\": 9.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"μ*=0.13\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": 0.13, \"method_raw\": \"Eliashberg equation\", \"conditions\": [], \"reason\": \"Dark-blue right bar, μ*=0.13; caption pressure mapping.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "source_id": "source-11"
+            }
+          ],
+          "previous_error": "没有新的来源可读；所有命中内容已在 sources 中。停止重复查找，请根据已读来源返回 done=true 的整理结果；确实仍不明的候选列入 unresolved。",
+          "must_finalize": true,
+          "remaining_rounds": 3
+        },
+        "response": {
+          "done": true,
+          "excluded": [],
+          "read_source_ids": [],
+          "records": [
+            {
+              "candidate_ids": [
+                "s0:m0:r0"
+              ],
+              "group": "ScH6-300GPa-H-derived-DOS",
+              "method": "figure4-H-derived-DOS",
+              "reason": "The calibrated Figure 4 top-panel reading gives the H-derived DOS per unit volume for ScH6; the caption establishes 300 GPa. Preserve the approximate graph reading and its DOS definition. Graph-reading resolution is not a physical uncertainty.",
+              "source_ids": [
+                "source-8",
+                "source-5"
+              ],
+              "values": {
+                "canonical_unit": "states/(eV Å³)",
+                "method_code": null,
+                "method_raw": null,
+                "uncertainty": null,
+                "unit_raw": "states/(eV Å³)",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 0.0156,
+                "value_raw": "~0.0156 states/(eV Å³)",
+                "value_text": null
+              }
+            },
+            {
+              "candidate_ids": [
+                "s0:m1:r0"
+              ],
+              "group": "ScH6-300GPa-figure4-EPC",
+              "method": "ScH6-figure4-Eliashberg-equation",
+              "reason": "The calibrated Figure 4 reading establishes approximately 100 K at μ*=0.1 for ScH6 at 300 GPa. Source-2 identifies the reported method as “Eliashberg equation” but does not establish an isotropic or anisotropic variant, so the method code remains unknown. Both plotted μ* points use this same reported method and share the Figure 4 λ reading and reported linear-response phonon calculation conditions. The body statement that ScH6 and ScH9 reach temperatures as high as approximately 150 K is not a replacement for the material-specific calibrated reading. No numerical omega_log or further applicable software settings are established by the supplied sources.",
+              "source_ids": [
+                "source-10",
+                "source-5",
+                "source-2",
+                "source-1",
+                "source-9"
+              ],
+              "values": {
+                "calculation_conditions": {
+                  "calculation_code": null,
+                  "electronic_method": null,
+                  "epw": null,
+                  "exchange_correlation_functional": null,
+                  "phonon_method": "linear response theory",
+                  "qe": null,
+                  "sscha": null,
+                  "vibrational_treatment": null
+                },
+                "canonical_unit": "K",
+                "method_code": "unknown",
+                "method_raw": "Eliashberg equation",
+                "parameters": {
+                  "extensions": [],
+                  "lambda_ep": {
+                    "evidences": [
+                      {
+                        "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                      }
+                    ],
+                    "reported": true,
+                    "unit_raw": "dimensionless",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 1.32,
+                    "value_raw": "~1.32 dimensionless",
+                    "value_text": null
+                  },
+                  "mu_star": 0.1,
+                  "omega_log": null
+                },
+                "uncertainty": null,
+                "unit_raw": "K",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 100,
+                "value_raw": "~100 K",
+                "value_text": null
+              }
+            },
+            {
+              "candidate_ids": [
+                "s0:m1:r1"
+              ],
+              "group": "ScH6-300GPa-figure4-EPC",
+              "method": "ScH6-figure4-Eliashberg-equation",
+              "reason": "The calibrated Figure 4 reading establishes approximately 86 K at μ*=0.13 for ScH6 at 300 GPa. Source-2 reports “Eliashberg equation” without specifying its variant. This point therefore retains method code unknown and shares the exact group and method with the μ*=0.1 point: only μ* and Tc differ, while the λ reading and reported calculation conditions agree. Preserve the approximate Tc and λ qualifiers; graph-reading resolutions are not physical uncertainties. The body maximum of approximately 150 K for ScH6 and ScH9 does not override this material-specific plotted value.",
+              "source_ids": [
+                "source-11",
+                "source-5",
+                "source-2",
+                "source-1",
+                "source-9"
+              ],
+              "values": {
+                "calculation_conditions": {
+                  "calculation_code": null,
+                  "electronic_method": null,
+                  "epw": null,
+                  "exchange_correlation_functional": null,
+                  "phonon_method": "linear response theory",
+                  "qe": null,
+                  "sscha": null,
+                  "vibrational_treatment": null
+                },
+                "canonical_unit": "K",
+                "method_code": "unknown",
+                "method_raw": "Eliashberg equation",
+                "parameters": {
+                  "extensions": [],
+                  "lambda_ep": {
+                    "evidences": [
+                      {
+                        "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                      }
+                    ],
+                    "reported": true,
+                    "unit_raw": "dimensionless",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 1.32,
+                    "value_raw": "~1.32 dimensionless",
+                    "value_text": null
+                  },
+                  "mu_star": 0.13,
+                  "omega_log": null
+                },
+                "uncertainty": null,
+                "unit_raw": "K",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 86,
+                "value_raw": "~86 K",
+                "value_text": null
+              }
+            }
+          ],
+          "search": [],
+          "unresolved": []
+        }
+      }
+    ],
+    "issues": [],
+    "original_input_chars": 15853,
+    "input_chars": 15853,
+    "candidate_dispositions": {
+      "s0:m0:r0": {
+        "action": "mapped",
+        "records": [
+          "fill-08db0490dc2fffe75a63a6bb4524"
+        ],
+        "reasons": [
+          "The calibrated Figure 4 top-panel reading gives the H-derived DOS per unit volume for ScH6; the caption establishes 300 GPa. Preserve the approximate graph reading and its DOS definition. Graph-reading resolution is not a physical uncertainty."
+        ],
+        "original_record": {
+          "record_key": "assembled-0-electronic_properties-0",
+          "module_code": "electronic_properties",
+          "record_type": "property",
+          "property_code": "dos_fermi",
+          "custom_property_key": null,
+          "definition_key": "record.electronic_properties.dos_fermi",
+          "definition_version": 1,
+          "name_raw": "Hydrogen electronic density of states at the Fermi level per unit volume, N_Ef",
+          "value_kind": "number",
+          "value_raw": "~0.0156 states/(eV Å³)",
+          "value_number": 0.0156,
+          "value_min": null,
+          "value_max": null,
+          "value_text": null,
+          "value_boolean": null,
+          "uncertainty": null,
+          "unit_raw": "states/(eV Å³)",
+          "canonical_unit": "states/(eV Å³)",
+          "method_code": null,
+          "method_raw": null,
+          "criterion_code": null,
+          "criterion_raw": null,
+          "structure_key": null,
+          "payload": {
+            "method_variant_status": null
+          },
+          "evidence": null,
+          "evidences": [
+            {
+              "file_id": "main",
+              "pdf_page": 4,
+              "block_id": "chart-reading-09cfbf0aa0fc1dcaded2330c881fd014727704b0",
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"top\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Hydrogen electronic density of states at the Fermi level per unit volume, N_Ef\", \"unit\": \"states/(eV Å³)\", \"value_number\": 0.0156, \"value_raw\": \"~0.0156 states/(eV Å³)\", \"reading_precision\": 0.0008, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"H-derived DOS at EF per volume\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"conditions\": [], \"reason\": \"First red bar; shared material label ScH6 and caption pressure 300 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition."
+            },
+            {
+              "file_id": "main",
+              "pdf_page": 4,
+              "block_id": "original-4-5",
+              "quote": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n"
+            }
+          ],
+          "is_representative": false,
+          "basis_kind": "paper_quote"
+        },
+        "state_index": 0,
+        "module_index": 0
+      },
+      "s0:m1:r0": {
+        "action": "mapped",
+        "records": [
+          "fill-4cd34f1fab87cc7cc387d8e7c113"
+        ],
+        "reasons": [
+          "The calibrated Figure 4 reading establishes approximately 100 K at μ*=0.1 for ScH6 at 300 GPa. Source-2 identifies the reported method as “Eliashberg equation” but does not establish an isotropic or anisotropic variant, so the method code remains unknown. Both plotted μ* points use this same reported method and share the Figure 4 λ reading and reported linear-response phonon calculation conditions. The body statement that ScH6 and ScH9 reach temperatures as high as approximately 150 K is not a replacement for the material-specific calibrated reading. No numerical omega_log or further applicable software settings are established by the supplied sources."
+        ],
+        "original_record": {
+          "record_key": "assembled-0-superconductive_properties-0",
+          "module_code": "superconductive_properties",
+          "record_type": "predicted_tc",
+          "property_code": "tc",
+          "custom_property_key": null,
+          "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+          "definition_version": 1,
+          "name_raw": "Superconducting critical temperature",
+          "value_kind": "number",
+          "value_raw": "~100 K",
+          "value_number": 100.0,
+          "value_min": null,
+          "value_max": null,
+          "value_text": null,
+          "value_boolean": null,
+          "uncertainty": null,
+          "unit_raw": "K",
+          "canonical_unit": "K",
+          "method_code": "unknown",
+          "method_raw": "Eliashberg equation",
+          "criterion_code": null,
+          "criterion_raw": null,
+          "structure_key": null,
+          "payload": {
+            "calculation_conditions": {
+              "calculation_code": null,
+              "electronic_method": null,
+              "epw": null,
+              "exchange_correlation_functional": null,
+              "phonon_method": "linear response theory",
+              "qe": null,
+              "sscha": null,
+              "vibrational_treatment": null
+            },
+            "method_variant_status": null,
+            "parameters": {
+              "lambda_ep": {
+                "evidences": [
+                  {
+                    "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                    "file_id": "main",
+                    "pdf_page": 4,
+                    "quote": null,
+                    "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                  }
+                ],
+                "reported": true,
+                "unit_raw": "dimensionless",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 1.32,
+                "value_raw": "~1.32 dimensionless",
+                "value_text": null
+              },
+              "mu_star": {
+                "evidences": [
+                  {
+                    "block_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f",
+                    "file_id": "main",
+                    "pdf_page": 4,
+                    "quote": null,
+                    "quote_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f"
+                  }
+                ],
+                "reported": true,
+                "unit_raw": null,
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 0.1,
+                "value_raw": "0.1",
+                "value_text": null
+              }
+            }
+          },
+          "evidence": null,
+          "evidences": [
+            {
+              "file_id": "main",
+              "pdf_page": 4,
+              "block_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f",
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting critical temperature\", \"unit\": \"K\", \"value_number\": 100.0, \"value_raw\": \"~100 K\", \"reading_precision\": 7.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [], \"reason\": \"Green left bar, μ*=0.1; pressure mapped by caption to ScH6.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition."
+            },
+            {
+              "file_id": "main",
+              "pdf_page": 4,
+              "block_id": "original-4-5",
+              "quote": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n"
+            },
+            {
+              "file_id": "main",
+              "pdf_page": 4,
+              "block_id": "original-4-2",
+              "quote": "point (Fig. S14 [38]), the large λ values are mainly associated\nwith in-plane stretching, in-plane rocking, and out-of-plane\nrocking vibrations of H clathrate cages (Fig. S15 [38]).\nThe Eliashberg equation [37] gives a better description of\nsystems with strong electron-phonon coupling for λ > 1.5.\nWe have therefore used the Eliashberg equation to predict\nsuperconductivity in the clathrate structures using the\ncalculated logarithmic average frequency (ωlog) and typical\nCoulomb pseudopotential parameters (μ\u0001) from 0.1 to 0.13.\nThe resulting Tc values are 276 K (253 K for μ\u0001 ¼ 0.13)\nand 303 K (287 K for μ\u0001 ¼ 0.13) using μ\u0001 ¼ 0.1 for YH9 at\n150 GPa and YH10 at 400 GPa, respectively. The calculated\nTc of LaH10 reaches 288 K using μ\u0001 ¼ 0.1 at 200 GPa. We\nalso investigated potential superconductivity in other clath-\nrate structures (Fig. 4) and predicted Tc values for ScH6 and\nScH9 as high as ∼150 K, although for LaH9, CeH9, CeH10,\nand PrH9 they are much lower at <56 K (Fig. 4) due to the\nintroduction of much heavier elements which reduce BCS\nsuperconductivity.\n"
+            },
+            {
+              "file_id": "main",
+              "pdf_page": 4,
+              "block_id": "original-4-1",
+              "quote": "The H clathrate structures of REH6, REH9, and REH10\nare metallic as seen from the calculated electronic band\nstructures and densities of states (Figs. S13 and S14 [38]).\nThe electronic density of states at the Fermi level is\ntypically large and is dominated by the contribution from\nH atoms. To examine potential superconductivity in the\nclathrate structures, lattice phonons and electron-phonon\ncoupling (EPC) calculations were carried out using linear\nresponse theory [68]. Encouragingly, the resulting EPC\nparameters, λ, of YH9 and YH10 are quite large and reach\nvalues of 4.42 and 2.41 at 150 and 400 GPa, respectively.\nBesides the H-derived high density of states at the Fermi\nlevel that is associated with a van Hove singularity at the Γ\n"
+            },
+            {
+              "file_id": "main",
+              "pdf_page": 4,
+              "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"middle\", \"quantity\": \"lambda_ep\", \"quantity_name\": \"Electron–phonon coupling parameter λ\", \"unit\": \"dimensionless\", \"value_number\": 1.32, \"value_raw\": \"~1.32 dimensionless\", \"reading_precision\": 0.08, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"λ\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": \"linear response theory\", \"conditions\": [], \"reason\": \"First blue EPC bar; shared material label ScH6 and caption pressure 300 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition."
+            }
+          ],
+          "is_representative": false,
+          "basis_kind": "paper_quote"
+        },
+        "state_index": 0,
+        "module_index": 1
+      },
+      "s0:m1:r1": {
+        "action": "mapped",
+        "records": [
+          "fill-a7bc0c52453e724f05a6157cd5fe"
+        ],
+        "reasons": [
+          "The calibrated Figure 4 reading establishes approximately 86 K at μ*=0.13 for ScH6 at 300 GPa. Source-2 reports “Eliashberg equation” without specifying its variant. This point therefore retains method code unknown and shares the exact group and method with the μ*=0.1 point: only μ* and Tc differ, while the λ reading and reported calculation conditions agree. Preserve the approximate Tc and λ qualifiers; graph-reading resolutions are not physical uncertainties. The body maximum of approximately 150 K for ScH6 and ScH9 does not override this material-specific plotted value."
+        ],
+        "original_record": {
+          "record_key": "assembled-0-superconductive_properties-1",
+          "module_code": "superconductive_properties",
+          "record_type": "predicted_tc",
+          "property_code": "tc",
+          "custom_property_key": null,
+          "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+          "definition_version": 1,
+          "name_raw": "Superconducting critical temperature",
+          "value_kind": "number",
+          "value_raw": "~86 K",
+          "value_number": 86.0,
+          "value_min": null,
+          "value_max": null,
+          "value_text": null,
+          "value_boolean": null,
+          "uncertainty": null,
+          "unit_raw": "K",
+          "canonical_unit": "K",
+          "method_code": "unknown",
+          "method_raw": "Eliashberg equation",
+          "criterion_code": null,
+          "criterion_raw": null,
+          "structure_key": null,
+          "payload": {
+            "calculation_conditions": {
+              "calculation_code": null,
+              "electronic_method": null,
+              "epw": null,
+              "exchange_correlation_functional": null,
+              "phonon_method": "linear response theory",
+              "qe": null,
+              "sscha": null,
+              "vibrational_treatment": null
+            },
+            "method_variant_status": null,
+            "parameters": {
+              "lambda_ep": {
+                "evidences": [
+                  {
+                    "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                    "file_id": "main",
+                    "pdf_page": 4,
+                    "quote": null,
+                    "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                  }
+                ],
+                "reported": true,
+                "unit_raw": "dimensionless",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 1.32,
+                "value_raw": "~1.32 dimensionless",
+                "value_text": null
+              },
+              "mu_star": {
+                "evidences": [
+                  {
+                    "block_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7",
+                    "file_id": "main",
+                    "pdf_page": 4,
+                    "quote": null,
+                    "quote_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7"
+                  }
+                ],
+                "reported": true,
+                "unit_raw": null,
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 0.13,
+                "value_raw": "0.13",
+                "value_text": null
+              }
+            }
+          },
+          "evidence": null,
+          "evidences": [
+            {
+              "file_id": "main",
+              "pdf_page": 4,
+              "block_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7",
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting critical temperature\", \"unit\": \"K\", \"value_number\": 86.0, \"value_raw\": \"~86 K\", \"reading_precision\": 9.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"μ*=0.13\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": 0.13, \"method_raw\": \"Eliashberg equation\", \"conditions\": [], \"reason\": \"Dark-blue right bar, μ*=0.13; caption pressure mapping.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition."
+            },
+            {
+              "file_id": "main",
+              "pdf_page": 4,
+              "block_id": "original-4-5",
+              "quote": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n"
+            },
+            {
+              "file_id": "main",
+              "pdf_page": 4,
+              "block_id": "original-4-2",
+              "quote": "point (Fig. S14 [38]), the large λ values are mainly associated\nwith in-plane stretching, in-plane rocking, and out-of-plane\nrocking vibrations of H clathrate cages (Fig. S15 [38]).\nThe Eliashberg equation [37] gives a better description of\nsystems with strong electron-phonon coupling for λ > 1.5.\nWe have therefore used the Eliashberg equation to predict\nsuperconductivity in the clathrate structures using the\ncalculated logarithmic average frequency (ωlog) and typical\nCoulomb pseudopotential parameters (μ\u0001) from 0.1 to 0.13.\nThe resulting Tc values are 276 K (253 K for μ\u0001 ¼ 0.13)\nand 303 K (287 K for μ\u0001 ¼ 0.13) using μ\u0001 ¼ 0.1 for YH9 at\n150 GPa and YH10 at 400 GPa, respectively. The calculated\nTc of LaH10 reaches 288 K using μ\u0001 ¼ 0.1 at 200 GPa. We\nalso investigated potential superconductivity in other clath-\nrate structures (Fig. 4) and predicted Tc values for ScH6 and\nScH9 as high as ∼150 K, although for LaH9, CeH9, CeH10,\nand PrH9 they are much lower at <56 K (Fig. 4) due to the\nintroduction of much heavier elements which reduce BCS\nsuperconductivity.\n"
+            },
+            {
+              "file_id": "main",
+              "pdf_page": 4,
+              "block_id": "original-4-1",
+              "quote": "The H clathrate structures of REH6, REH9, and REH10\nare metallic as seen from the calculated electronic band\nstructures and densities of states (Figs. S13 and S14 [38]).\nThe electronic density of states at the Fermi level is\ntypically large and is dominated by the contribution from\nH atoms. To examine potential superconductivity in the\nclathrate structures, lattice phonons and electron-phonon\ncoupling (EPC) calculations were carried out using linear\nresponse theory [68]. Encouragingly, the resulting EPC\nparameters, λ, of YH9 and YH10 are quite large and reach\nvalues of 4.42 and 2.41 at 150 and 400 GPa, respectively.\nBesides the H-derived high density of states at the Fermi\nlevel that is associated with a van Hove singularity at the Γ\n"
+            },
+            {
+              "file_id": "main",
+              "pdf_page": 4,
+              "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"middle\", \"quantity\": \"lambda_ep\", \"quantity_name\": \"Electron–phonon coupling parameter λ\", \"unit\": \"dimensionless\", \"value_number\": 1.32, \"value_raw\": \"~1.32 dimensionless\", \"reading_precision\": 0.08, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"ScH6\", \"category\": \"ScH6\", \"series\": \"λ\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": \"linear response theory\", \"conditions\": [], \"reason\": \"First blue EPC bar; shared material label ScH6 and caption pressure 300 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition."
+            }
+          ],
+          "is_representative": false,
+          "basis_kind": "paper_quote"
+        },
+        "state_index": 0,
+        "module_index": 1
+      }
+    }
+  }
+}

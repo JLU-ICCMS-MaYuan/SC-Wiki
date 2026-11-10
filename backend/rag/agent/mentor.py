@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
@@ -61,8 +61,24 @@ def mentor_node(state: AgentState, tools: list | None = None) -> dict:
     llm = _build_llm()
     if selected_tools:
         llm = llm.bind_tools(selected_tools)
-    response = llm.invoke(state["messages"])
+    response = llm.invoke(image_tool_messages(state['messages']))
     return {"messages": [response]}
+
+
+def image_tool_messages(messages):
+    """Chat兼容接口图片放user消息；保留工具编号/文字回执，不改原历史。"""
+    output=[]
+    for message in messages:
+        content=getattr(message,'content',None)
+        if isinstance(message,ToolMessage) and isinstance(content,list):
+            images=[b for b in content if isinstance(b,dict) and b.get('type')=='image_url']
+            if images:
+                text=[b for b in content if b not in images]
+                output.append(message.model_copy(update={'content':text}))
+                output.append(HumanMessage(content=[{'type':'text','text':'以下实际图片对应上一工具回执的来源，请结合位置、条件和既有结果核查。'},*images]))
+                continue
+        output.append(message)
+    return output
 
 
 # ═══════════════════════════════════════════════

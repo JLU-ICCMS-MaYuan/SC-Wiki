@@ -1,0 +1,26 @@
+{
+  "thinking": "disabled",
+  "output_started": true,
+  "api_protocol": "chat_completions",
+  "usage": {
+    "completion_tokens": 6429,
+    "prompt_tokens": 22554,
+    "total_tokens": 28983,
+    "completion_tokens_details": null,
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cache_write_tokens": null,
+      "cached_tokens": 10752
+    },
+    "prompt_cache_hit_tokens": 10752,
+    "prompt_cache_miss_tokens": 11802
+  },
+  "finish_reason": "tool_calls",
+  "tool_call_count": 1,
+  "tool_names": [
+    "report_chart_reading"
+  ],
+  "attempt": 1,
+  "status": "completed",
+  "elapsed_seconds": 19.638729416998103
+}

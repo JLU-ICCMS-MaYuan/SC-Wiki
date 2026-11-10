@@ -148,6 +148,45 @@ query_properties = StructuredTool.from_function(
 )
 
 
+async def _visual_source_catalog(paper_id:int) -> str:
+    from backend.rag.database import async_session_factory
+    from backend.rag.visual_sources import visual_catalog
+    async with async_session_factory() as session:
+        rows=await session.run_sync(lambda s:visual_catalog(s,paper_id))
+    return json.dumps({'paper_id':paper_id,'sources':rows},ensure_ascii=False)
+
+
+async def _visual_source_image(paper_id:int,source_id:str):
+    import base64
+    from backend.rag.database import async_session_factory
+    from backend.rag.visual_sources import read_visual_source
+    from backend.rag.config import settings
+    async with async_session_factory() as session:
+        result=await session.run_sync(lambda s:read_visual_source(s,paper_id,source_id,
+            cache_dir=settings.sc_wiki_data_dir/'visual_region_cache'))
+    image=result['image']
+    metadata={'source':result['source'],'image':{k:v for k,v in image.items() if k!='png'}}
+    return [{'type':'text','text':json.dumps(metadata,ensure_ascii=False)},
+        {'type':'image_url','image_url':{'url':'data:image/png;base64,'+base64.b64encode(image['png']).decode()}}],metadata
+
+
+def _sync_catalog(paper_id:int):
+    import asyncio
+    return asyncio.run(_visual_source_catalog(paper_id))
+
+
+def _sync_image(paper_id:int,source_id:str):
+    import asyncio
+    return asyncio.run(_visual_source_image(paper_id,source_id))
+
+
+visual_source_catalog=StructuredTool.from_function(func=_sync_catalog,coroutine=_visual_source_catalog,
+    name='visual_source_catalog',description='取得已批准论文的图/表/公式及采用读数来源目录；先复用已有值和文字，需要图像时再取图。')
+visual_source_image=StructuredTool.from_function(func=_sync_image,coroutine=_visual_source_image,
+    name='visual_source_image',description='按已批准论文目录返回的source_id读取实际原图区域；程序按定位重建，不重新找位置。',
+    response_format='content_and_artifact')
+
+
 # 所有可用 tool 列表
 ALL_TOOLS = [
     search_papers,
@@ -157,4 +196,6 @@ ALL_TOOLS = [
     paper_path,
     search_literature,
     query_properties,
+    visual_source_catalog,
+    visual_source_image,
 ]

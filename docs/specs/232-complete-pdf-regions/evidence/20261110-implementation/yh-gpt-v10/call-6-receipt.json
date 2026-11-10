@@ -1,0 +1,20 @@
+{
+  "thinking": "provider_default",
+  "output_started": true,
+  "api_protocol": "chat_completions",
+  "usage": {
+    "completion_tokens": 113,
+    "prompt_tokens": 14274,
+    "total_tokens": 14387,
+    "completion_tokens_details": null,
+    "prompt_tokens_details": null
+  },
+  "finish_reason": "tool_calls",
+  "tool_call_count": 1,
+  "tool_names": [
+    "adjust_image_region"
+  ],
+  "attempt": 1,
+  "status": "completed",
+  "elapsed_seconds": 8.06256404198939
+}

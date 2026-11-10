@@ -91,3 +91,5 @@ flowchart LR
 本目录只记录当前代码、配置和测试文件能够支持的已落地事实。未来方案位于 `future-plan/`，不作为当前能力依据。无法从当前实现确认的内容在相应文档中标记为“待核验”。
 
 按用户要求，[部署技术分析](00_deploy_technical/README.md) 同时讨论后续部署建议；其中建议与当前事实分开标明，不作为已实现能力或任务完成状态。
+
+高清整图含完整图注、同一主模型工具反馈和采用定位的快照重建见[解析管线](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md#高清区域与同一主模型反馈232234)；RAG按批准来源按需取图见[混合检索](05_Retrieval-Augmented_AI_Question_Answering/hybrid-retrieval.md#可重建的图片来源235)。

@@ -1,0 +1,25 @@
+{
+  "thinking": "provider_default",
+  "output_started": true,
+  "api_protocol": "chat_completions",
+  "usage": {
+    "completion_tokens": 317,
+    "prompt_tokens": 12269,
+    "total_tokens": 12586,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": null,
+      "reasoning_tokens": 101,
+      "rejected_prediction_tokens": null
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cache_write_tokens": null,
+      "cached_tokens": 10368
+    }
+  },
+  "finish_reason": "stop",
+  "attempt": 1,
+  "status": "completed",
+  "elapsed_seconds": 15.286022957996465
+}

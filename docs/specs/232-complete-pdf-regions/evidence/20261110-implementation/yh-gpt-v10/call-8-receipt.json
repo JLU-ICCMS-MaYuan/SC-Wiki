@@ -1,0 +1,21 @@
+{
+  "thinking": "provider_default",
+  "output_started": true,
+  "api_protocol": "chat_completions",
+  "usage": {
+    "completion_tokens": 3898,
+    "prompt_tokens": 11996,
+    "total_tokens": 15894,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": null,
+      "reasoning_tokens": 62,
+      "rejected_prediction_tokens": null
+    },
+    "prompt_tokens_details": null
+  },
+  "finish_reason": "stop",
+  "attempt": 1,
+  "status": "completed",
+  "elapsed_seconds": 84.88255604199367
+}

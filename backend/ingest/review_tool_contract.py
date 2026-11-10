@@ -33,4 +33,23 @@ def tool_definitions(documents, manifest, *, bibliography=False):
             {"file_id": {"type": "string", "enum": pdf_ids}, "page": {"type": "integer", "minimum": 1}})
     if bibliography:
         add("lookup_bibliography", "按已知DOI读取正式题录。", {"doi": text})
+    # #233：只有真实授权PDF和带定位来源时才暴露图像操作，不接受路径或任意动作名。
+    pdf_documents = {key: ir for key, ir in documents.items() if key in pdf_ids}
+    visual_blocks = [b.block_id for ir in pdf_documents.values() for b in ir.blocks if b.bbox]
+    if visual_blocks:
+        file = {'type': 'string', 'enum': list(pdf_documents)}
+        region = {'type': 'string', 'minLength': 1}
+        add('read_complete_object', '取得完整图和完整图注，或表格/公式/文字上下文及真实图片。',
+            {'file_id': file, 'block_id': {'type': 'string', 'enum': visual_blocks}})
+        add('read_image_context', '补读已取得区域所在页的原文上下文，保留同一来源。', {'region_id': region})
+        add('recognize_image_text', '读取区域真实文字层/既有OCR文字及位置，同时返回图片供原模型核查。', {'region_id': region})
+        add('adjust_image_region', '按具体疑点从原PDF调整精读裁剪，返回新图和父区域关联。',
+            {'region_id': region, 'bbox_page': {'type': 'array', 'items': {'type': 'number'}, 'minItems': 4, 'maxItems': 4},
+             'reason': {'type': 'string', 'minLength': 1}, 'dpi': {'type': 'integer', 'minimum': 600}})
+        from .chart_reading import reading_schema
+        panel = reading_schema()['properties']['panels']['items']
+        add('digitize_image_elements', '程序根据当前区域中识别的轴、点/柱/色标标定标量，不直接保存科学字段。',
+            {'region_id': region, 'panel': panel})
+        add('verify_image_reading', '复算当前回执的几何、刻度和读数，返回具体元素未读原因。',
+            {'region_id': region, 'panel': panel})
     return definitions

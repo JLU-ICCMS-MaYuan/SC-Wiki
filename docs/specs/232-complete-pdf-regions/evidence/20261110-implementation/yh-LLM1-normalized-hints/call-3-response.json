@@ -1,0 +1,17 @@
+{
+  "action": {
+    "name": "read_complete_object",
+    "arguments": {
+      "file_id": "main",
+      "block_id": "native-4-8"
+    }
+  },
+  "_tool_call": {
+    "id": "call_00_6fYkLrNG6jRrakXnReCm2029",
+    "type": "function",
+    "function": {
+      "name": "read_complete_object",
+      "arguments": "{\"file_id\": \"main\", \"block_id\": \"native-4-8\"}"
+    }
+  }
+}

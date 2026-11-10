@@ -1,0 +1,42 @@
+{
+  "pages": [
+    {
+      "figures": [
+        {
+          "bbox": [
+            112,
+            59,
+            457,
+            124
+          ],
+          "label": "Figure 4, top panel",
+          "reason": "Bar chart of hydrogen electronic density of states at the Fermi level per unit volume for clathrate hydrides; supported dos_fermi quantity. Material labels are shared with the bottom panel.",
+          "target": true
+        },
+        {
+          "bbox": [
+            113,
+            121,
+            457,
+            180
+          ],
+          "label": "Figure 4, middle panel",
+          "reason": "Bar chart of electron–phonon coupling parameter λ for clathrate hydrides; supported lambda_ep quantity. Material labels are shared with the bottom panel.",
+          "target": true
+        },
+        {
+          "bbox": [
+            113,
+            179,
+            458,
+            252
+          ],
+          "label": "Figure 4, bottom panel",
+          "reason": "Grouped bar chart of superconducting Tc for clathrate hydrides at two Coulomb pseudopotentials, with readable axes, material labels, and legend; supported tc quantity.",
+          "target": true
+        }
+      ],
+      "page": 4
+    }
+  ]
+}

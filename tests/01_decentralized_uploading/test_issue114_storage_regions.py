@@ -97,10 +97,10 @@ def test_legacy_pdf_uses_unique_text_layer_quote_without_inventing_coordinates(t
     corrected = render_region(None, path, ir.source_sha256, quote="Tc = 200 K at 150 GPa.", pdf_page=2)
     assert corrected["status"] == "located"
     assert corrected["pdf_page"] == 1
-    assert corrected["dpi"] == 300
+    assert corrected["dpi"] == 600
     crop = corrected["crops"][0]
-    assert crop["width"] == pytest.approx((crop["clip_bbox_pdf"][2] - crop["clip_bbox_pdf"][0]) * 300 / 72, abs=3)
-    assert crop["height"] == pytest.approx((crop["clip_bbox_pdf"][3] - crop["clip_bbox_pdf"][1]) * 300 / 72, abs=3)
+    assert crop["width"] == pytest.approx((crop["clip_bbox_pdf"][2] - crop["clip_bbox_pdf"][0]) * 600 / 72, abs=3)
+    assert crop["height"] == pytest.approx((crop["clip_bbox_pdf"][3] - crop["clip_bbox_pdf"][1]) * 600 / 72, abs=3)
 
 
 def test_crop_contains_quote_and_three_adjacent_lines_not_full_page(tmp_path):
@@ -125,7 +125,7 @@ def test_crop_contains_quote_and_three_adjacent_lines_not_full_page(tmp_path):
         assert crop["clip_bbox_pdf"][3] >= eighth.y1
         assert crop["clip_bbox_pdf"][1] > first.y1
         assert crop["clip_bbox_pdf"][3] < ninth.y0
-        assert crop["height"] < page.rect.height * 300 / 72 / 2
+        assert crop["height"] < page.rect.height * 600 / 72 / 2
 
 
 def test_two_column_crop_does_not_include_neighbor_column(tmp_path):
@@ -211,8 +211,9 @@ def test_image_evidence_requires_a_real_figure_block(tmp_path):
     located = render_region(ir, path, ir.source_sha256, quote="", pdf_page=1,
                             block_id=block.block_id)
     assert located["status"] == "located"
-    assert located["dpi"] == 300
-    assert located["crops"][0]["clip_bbox_pdf"][3] < ir.pages[0].height
+    assert located["dpi"] == 600
+    assert located["region_locator"]["caption_status"] == "unlocated"
+    assert located["crops"][0]["clip_bbox_pdf"] == [0, 0, ir.pages[0].width, ir.pages[0].height]
     block.block_type = "text"
     assert render_region(ir, path, ir.source_sha256, quote="", pdf_page=1,
                          block_id=block.block_id)["status"] == "unlocated"
@@ -233,7 +234,7 @@ def test_trusted_figure_crop_includes_nearby_caption(tmp_path):
     found = render_region(ir, path, ir.source_sha256, quote="", pdf_page=1,
                           block_id=ir.blocks[0].block_id)
     assert found["status"] == "located"
-    assert found["dpi"] == 300
+    assert found["dpi"] == 600
     assert len(found["crops"]) == 1
     assert found["crops"][0]["clip_bbox_pdf"][3] > ir.blocks[1].bbox[3]
 

@@ -1,0 +1,165 @@
+{
+  "done": true,
+  "excluded": [],
+  "read_source_ids": [],
+  "records": [
+    {
+      "candidate_ids": [
+        "s0:m0:r0"
+      ],
+      "group": "ScH6-300GPa-H-derived-DOS",
+      "method": "DOS-figure4",
+      "reason": "The calibrated top-panel reading gives the H-derived DOS per volume for ScH6; the caption establishes 300 GPa. This is not the total electronic DOS. The approximate qualifier is retained, and graph-reading precision is not treated as physical uncertainty.",
+      "source_ids": [
+        "source-8",
+        "source-5"
+      ],
+      "values": {
+        "calculation_conditions": null,
+        "canonical_unit": "states/eV/Å³",
+        "method_code": null,
+        "method_raw": null,
+        "parameters": null,
+        "uncertainty": null,
+        "unit_raw": "states/eV/Å³",
+        "value_boolean": null,
+        "value_kind": "number",
+        "value_max": null,
+        "value_min": null,
+        "value_number": 0.0156,
+        "value_raw": "~0.0156 states/eV/Å³",
+        "value_text": null
+      }
+    },
+    {
+      "candidate_ids": [
+        "s0:m1:r0"
+      ],
+      "group": "ScH6-300GPa-clathrate-EPC",
+      "method": "ScH6-Eliashberg-equation",
+      "reason": "The calibrated green-bar reading establishes ~100 K at μ*=0.1 for ScH6 at 300 GPa. Both Tc points use the same reported Eliashberg equation and shared figure-panel EPC value, so they share a common-parameter group and method. The text does not establish an isotropic or anisotropic variant; the method code therefore remains unknown. The body statement 'as high as ∼150 K' jointly discusses ScH6 and ScH9 and does not replace this material-specific calibrated reading. No numerical ωlog or additional software settings are established in the supplied sources.",
+      "source_ids": [
+        "source-10",
+        "source-5",
+        "source-2",
+        "source-1",
+        "source-9"
+      ],
+      "values": {
+        "calculation_conditions": {
+          "calculation_code": null,
+          "electronic_method": null,
+          "epw": null,
+          "exchange_correlation_functional": null,
+          "phonon_method": "linear response theory",
+          "qe": null,
+          "sscha": null,
+          "vibrational_treatment": null
+        },
+        "canonical_unit": "K",
+        "method_code": "unknown",
+        "method_raw": "Eliashberg equation",
+        "parameters": {
+          "extensions": [],
+          "lambda_ep": {
+            "evidences": [
+              {
+                "block_id": "chart-reading-1cdeb905264f546bb2e8bcf11480f0c72d7c9653",
+                "file_id": "main",
+                "pdf_page": 4,
+                "quote": null,
+                "quote_id": "chart-reading-1cdeb905264f546bb2e8bcf11480f0c72d7c9653"
+              }
+            ],
+            "reported": true,
+            "unit_raw": "dimensionless",
+            "value_boolean": null,
+            "value_kind": "number",
+            "value_max": null,
+            "value_min": null,
+            "value_number": 1.32,
+            "value_raw": "~1.32 dimensionless",
+            "value_text": null
+          },
+          "mu_star": 0.1,
+          "omega_log": null
+        },
+        "uncertainty": null,
+        "unit_raw": "K",
+        "value_boolean": null,
+        "value_kind": "number",
+        "value_max": null,
+        "value_min": null,
+        "value_number": 100,
+        "value_raw": "~100 K",
+        "value_text": null
+      }
+    },
+    {
+      "candidate_ids": [
+        "s0:m1:r1"
+      ],
+      "group": "ScH6-300GPa-clathrate-EPC",
+      "method": "ScH6-Eliashberg-equation",
+      "reason": "The calibrated dark-blue-bar reading establishes ~86 K at μ*=0.13 for ScH6 at 300 GPa. This differs from the μ*=0.1 point only in Coulomb pseudopotential and Tc; the reported Eliashberg equation, EPC value, and established calculation conditions are shared. The Eliashberg variant is not specified, so unknown is retained rather than guessing a variant. The collective body maximum of ∼150 K for ScH6 and ScH9 is not assigned to this bar. Approximate graph values are preserved without assigning physical uncertainty.",
+      "source_ids": [
+        "source-11",
+        "source-5",
+        "source-2",
+        "source-1",
+        "source-9"
+      ],
+      "values": {
+        "calculation_conditions": {
+          "calculation_code": null,
+          "electronic_method": null,
+          "epw": null,
+          "exchange_correlation_functional": null,
+          "phonon_method": "linear response theory",
+          "qe": null,
+          "sscha": null,
+          "vibrational_treatment": null
+        },
+        "canonical_unit": "K",
+        "method_code": "unknown",
+        "method_raw": "Eliashberg equation",
+        "parameters": {
+          "extensions": [],
+          "lambda_ep": {
+            "evidences": [
+              {
+                "block_id": "chart-reading-1cdeb905264f546bb2e8bcf11480f0c72d7c9653",
+                "file_id": "main",
+                "pdf_page": 4,
+                "quote": null,
+                "quote_id": "chart-reading-1cdeb905264f546bb2e8bcf11480f0c72d7c9653"
+              }
+            ],
+            "reported": true,
+            "unit_raw": "dimensionless",
+            "value_boolean": null,
+            "value_kind": "number",
+            "value_max": null,
+            "value_min": null,
+            "value_number": 1.32,
+            "value_raw": "~1.32 dimensionless",
+            "value_text": null
+          },
+          "mu_star": 0.13,
+          "omega_log": null
+        },
+        "uncertainty": null,
+        "unit_raw": "K",
+        "value_boolean": null,
+        "value_kind": "number",
+        "value_max": null,
+        "value_min": null,
+        "value_number": 86,
+        "value_raw": "~86 K",
+        "value_text": null
+      }
+    }
+  ],
+  "search": [],
+  "unresolved": []
+}

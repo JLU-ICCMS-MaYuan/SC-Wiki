@@ -58,6 +58,9 @@ def dispatch(job, user_id):
 
 
 def store_figure(figure, file_id, source_name):
+    if figure.get('region_locator'):
+        return {**{k:v for k,v in figure.items() if k not in {'image','text','context_image','document_ir','_pdf_path'}},
+                'file_id':str(file_id),'source_name':source_name}
     from backend.storage import create_storage
     ref = create_storage().put("spectra/images/" + figure["image_sha256"] + ".png",
                                io.BytesIO(figure["image"]), "image/png")
@@ -65,10 +68,22 @@ def store_figure(figure, file_id, source_name):
             "file_id": str(file_id), "source_name": source_name, "image": asdict(ref)}
 
 
-def read_image(source):
+def read_image_bytes(source, *, files=()):
+    if source.get('region_locator'):
+        from backend.ingest.pdf_regions import render_region_image
+        from backend.storage.paths import resolve_file
+        from backend.rag.config import settings
+        file=next((f for f in files if f.get('sha256')==source['source_sha256']),None)
+        if file is None:raise ValueError('谱原PDF引用缺失，未改用其他版本')
+        path=resolve_file(file['stored_path'],size=int(file.get('size') or 0),sha256=file['sha256'],media_type='application/pdf')
+        return render_region_image(path,source['region_locator'],cache_dir=settings.sc_wiki_data_dir/'visual_region_cache')['png']
     from backend.storage import FileRef, create_storage
     with create_storage().open(FileRef(**source["image"])) as image:
-        return np.asarray(Image.open(image).convert("RGB"))
+        return image.read()
+
+
+def read_image(source, *, files=()):
+    return np.asarray(Image.open(io.BytesIO(read_image_bytes(source,files=files))).convert('RGB'))
 
 
 def run_job(run_id, target, target_id, user_id, expected_version):
@@ -95,7 +110,7 @@ def run_job(run_id, target, target_id, user_id, expected_version):
             from .engine import extract_panel
             from .context import references_for, primitive_for, composition_for
             state = next((s for s in ctx["states"] if s["state_key"] == calibration.get("state_key")), None)
-            result = extract_panel(read_image(source), calibration, references=references_for(state),
+            result = extract_panel(read_image(source,files=ctx.get('files',())), calibration, references=references_for(state),
                                    primitive=primitive_for(state, ctx["draft"]), composition=composition_for(state))
         with SessionLocal.begin() as session:
             ctx_now = service.context(session, target, target_id, session.get(models.User, user_id), write=True)
@@ -128,10 +143,7 @@ def discover(ctx, user_id, version):
     from .engine import extract_panel
     from .context import references_for, primitive_for, composition_for
     states = {s["state_key"]: s for s in ctx["states"]}
-    try:
-        supported = verify_image_capability()
-    except Exception:
-        supported = False
+    supported = verify_image_capability()  # 服务故障继续上抛，不冒充不支持图片。
     count, extracted, curve_count, issues, technical_errors, skipped = 0, 0, 0, [], [], []
     for source in ctx["files"]:
         path = resolve_file(source["stored_path"], size=int(source.get("size") or 0),
@@ -161,7 +173,8 @@ def discover(ctx, user_id, version):
                     ir = parser.document_json
         for figure in pdf_figures(path, ir=ir):
             source_info = store_figure(figure, source["file_id"], source.get("original_filename") or "")
-            source_key = fingerprint([source_info["source_sha256"], source_info["pdf_page"], source_info["bbox_pdf_pt"]])
+            source_key = fingerprint([source_info["source_sha256"], source_info["pdf_page"], source_info["bbox_pdf_pt"],
+                                      (source_info.get('region_locator') or {}).get('region_id')])
             panels, panel_issues = [], []
             if supported:
                 try:

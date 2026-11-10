@@ -9,7 +9,7 @@ import pymupdf
 from PIL import Image
 from .contracts import PanelCalibration
 
-RENDER_DPI = 160
+RENDER_DPI = 600
 SPECTRAL_WORDS = re.compile(r"phonon\s+(?:density|dos)|phdos|eliashberg|spectral\s+function|α\s*[²2]\s*f|alpha\s*\^?2\s*f", re.I)
 
 CALIBRATION_PROMPT = """你为科学谱图生成图像数字化标定，不生成曲线数值，不根据论文 λ/ωlog 目标调坐标。
@@ -120,12 +120,31 @@ def pdf_figures(path: Path, *, ir: dict | None = None):
                     candidates.append((list(clip), pix.tobytes("png"), "rendered", (pix.width, pix.height)))
             seen = set()
             for i, (box, image, mode, size) in enumerate(candidates):
+                from backend.ingest.pdf_regions import region_locator, render_region_image, complete_figure
+                from backend.ingest.document_ir import DocumentIR, DocumentBlock, PageGeometry, content_hash
+                source_id = str((ir or {}).get('source_file_id') or digest)
+                locator=region_locator(path,source_id,digest,page_no,box)
+                rendered=render_region_image(path,locator)
+                image,size=rendered['png'],[rendered['width'],rendered['height']]
+                if mode=='native_embedded':mode='rendered'
+                context_ir=DocumentIR(document_id=digest,source_file_id=source_id,source_sha256=digest,
+                    parse_profile='complementary',pages=[PageGeometry(pdf_page=page_no,width=page.rect.width,height=page.rect.height)],
+                    blocks=[DocumentBlock(block_id='spectrum-caption-'+str(j),block_type='caption',pdf_page=page_no,
+                        reading_order=j,text=t,bbox=tuple(r),content_hash=content_hash(t)) for j,(r,t) in enumerate(captions)])
+                label=min(captions,key=lambda c:abs(c[0].y0-box[3]))[1] if captions else ''
+                context_ir.blocks.append(DocumentBlock(block_id='spectrum-figure-'+str(i),
+                    block_type='figure',pdf_page=page_no,reading_order=len(context_ir.blocks),
+                    bbox=tuple(box),text=label,content_hash=content_hash(box,label)))
+                complete_locator=complete_figure(context_ir,path,{'page':page_no,'bbox':box,'label':label})
+                complete_png=render_region_image(path,complete_locator)['png']
                 image_hash = hashlib.sha256(image).hexdigest()
                 if (image_hash, tuple(box)) in seen:
                     continue
                 seen.add((image_hash, tuple(box)))
                 yield dict(source_sha256=digest, pdf_page=page_no, bbox_pdf_pt=box, image=image,
                            image_sha256=image_hash, size_px=list(size), source_mode=mode,
+                           region_locator=locator,complete_figure=complete_locator,context_image=complete_png,
+                           document_ir=context_ir.model_dump(mode='json'),_pdf_path=str(path),
                            render_dpi=RENDER_DPI if mode != "native_embedded" else None,
                            native_fragment_boxes_pdf_pt=fragments.get(tuple(box)),
                            pixel_to_pdf=dict(scale_x=(box[2]-box[0])/size[0], scale_y=(box[3]-box[1])/size[1],
@@ -140,9 +159,16 @@ def calibrate(figure: dict, states: list[dict], *, complete=None):
         complete = complete_image_json
     hints = [{k: s.get(k) for k in ("state_key", "material", "material_name", "pressure_value_gpa",
               "reported_space_group_symbol", "reported_space_group_number", "temperature_value_k")} for s in states]
-    response = complete(CALIBRATION_PROMPT,
-        json.dumps(dict(size_px=figure["size_px"], caption_context=figure["text"], material_states=hints), ensure_ascii=False),
-        images=["data:image/png;base64," + base64.b64encode(figure["image"]).decode()], read_timeout=180)
+    images=["data:image/png;base64,"+base64.b64encode(figure["image"]).decode()]
+    if figure.get('context_image'):
+        images.insert(0,"data:image/png;base64,"+base64.b64encode(figure['context_image']).decode())
+    prompt=CALIBRATION_PROMPT+'\n若有两张图片，第1张为整图及完整图注，第2张为标定目标；所有像素坐标按标定目标。'
+    payload=dict(size_px=figure['size_px'],caption_context=figure['text'],material_states=hints)
+    if figure.get('document_ir') and figure.get('_pdf_path'):
+        from backend.ingest.image_feedback import read_spectrum
+        response=read_spectrum(complete,prompt,payload,figure,states,images)
+    else:
+        response=complete(prompt,json.dumps(payload,ensure_ascii=False),images=images,read_timeout=180)
     if not isinstance(response.get("panels"), list):
         raise ValueError("读图模型未返回谱面板列表")
     panels, issues = [], list(response.get("issues") or [])

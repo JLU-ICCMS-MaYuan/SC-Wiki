@@ -102,7 +102,7 @@ def editor_document(row, run, curve):
         points.append(dict(id=p.get("id") or f"{curve['id']}:p{i}", x=x, y=y, segment=str(segment),
                            breakBefore=interrupted, status=p.get("status", "observed"), manual=bool(p.get("manual"))))
         interrupted = False
-    image_hash = (source.get("image") or {}).get("sha256") or source.get("source_sha256") or row.source_key
+    image_hash = (source.get("image") or {}).get("sha256") or source.get('image_sha256') or source.get("source_sha256") or row.source_key
     reference = dict(sourceId=row.id, sourceSha256=image_hash, direction=direction,
                      frequencyUnit=spec.get("frequency_unit", "THz"), frequencyTicks=spec.get("frequency_ticks", []), lambdaTicks=[])
     # 未确认幅值不能把旧标定候选直接画成 α²F 幅值或擅自认定为 λ。

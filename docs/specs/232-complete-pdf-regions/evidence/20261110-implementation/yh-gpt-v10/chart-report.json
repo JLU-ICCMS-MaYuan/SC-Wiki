@@ -1,0 +1,226 @@
+{
+  "version": "scientific-chart-reading-v10",
+  "status": "completed",
+  "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+  "regions": [
+    {
+      "region_id": "chart-region-0",
+      "block_id": "native-4-8",
+      "page": 4,
+      "bbox": [
+        69.052001953125,
+        47.05598449707031,
+        280.010986328125,
+        198.614990234375
+      ]
+    },
+    {
+      "region_id": "chart-hint-a1566d7c86aed88570d7d9e4",
+      "block_id": null,
+      "page": 4,
+      "bbox": [
+        312.26019287109375,
+        145.26800537109375,
+        562.8311767578125,
+        195.9854736328125
+      ],
+      "method": "pdf_vector_cluster"
+    },
+    {
+      "region_id": "chart-hint-d0847a6a9212f788f7a5a946",
+      "block_id": null,
+      "page": 4,
+      "bbox": [
+        166.60330200195312,
+        254.523193359375,
+        214.8406982421875,
+        277.534423828125
+      ],
+      "method": "pdf_vector_cluster"
+    },
+    {
+      "region_id": "chart-hint-393e7e500f54604f386773e5",
+      "block_id": null,
+      "page": 4,
+      "bbox": [
+        127.36895751953125,
+        329.62939453125,
+        299.8934326171875,
+        343.18487548828125
+      ],
+      "method": "pdf_vector_cluster"
+    },
+    {
+      "region_id": "chart-hint-e4e138995afd6e6849f32df4",
+      "block_id": null,
+      "page": 4,
+      "bbox": [
+        49.26240158081055,
+        341.8200378417969,
+        113.95403289794922,
+        353.62188720703125
+      ],
+      "method": "pdf_vector_cluster"
+    },
+    {
+      "region_id": "chart-hint-7e640f7b4786043d24e5e2d1",
+      "block_id": null,
+      "page": 4,
+      "bbox": [
+        49.26179885864258,
+        365.91558837890625,
+        299.89471435546875,
+        440.7098083496094
+      ],
+      "method": "pdf_vector_cluster"
+    },
+    {
+      "region_id": "chart-hint-605074763f03520d67459abc",
+      "block_id": null,
+      "page": 4,
+      "bbox": [
+        49.26240158081055,
+        524.1460571289062,
+        299.8248291015625,
+        561.572509765625
+      ],
+      "method": "pdf_vector_cluster"
+    },
+    {
+      "region_id": "chart-hint-9f2793c1790f281625c2e6cc",
+      "block_id": null,
+      "page": 4,
+      "bbox": [
+        49.262298583984375,
+        658.164794921875,
+        299.8587951660156,
+        694.12060546875
+      ],
+      "method": "pdf_vector_cluster"
+    }
+  ],
+  "scanned_pages": [
+    4
+  ],
+  "targets": [
+    {
+      "region_id": "chart-page-4-figure-0",
+      "page": 4,
+      "block_id": null,
+      "label": "Figure 4, top panel",
+      "reason": "Bar chart of hydrogen electronic density of states at the Fermi level per unit volume for clathrate hydrides; supported dos_fermi quantity. Material labels are shared with the bottom panel.",
+      "bbox": [
+        68.544,
+        46.728,
+        279.684,
+        98.208
+      ]
+    },
+    {
+      "region_id": "chart-page-4-figure-1",
+      "page": 4,
+      "block_id": null,
+      "label": "Figure 4, middle panel",
+      "reason": "Bar chart of electron–phonon coupling parameter λ for clathrate hydrides; supported lambda_ep quantity. Material labels are shared with the bottom panel.",
+      "bbox": [
+        69.156,
+        95.832,
+        279.684,
+        142.56
+      ]
+    },
+    {
+      "region_id": "chart-page-4-figure-2",
+      "page": 4,
+      "block_id": null,
+      "label": "Figure 4, bottom panel",
+      "reason": "Grouped bar chart of superconducting Tc for clathrate hydrides at two Coulomb pseudopotentials, with readable axes, material labels, and legend; supported tc quantity.",
+      "bbox": [
+        69.156,
+        141.768,
+        280.296,
+        199.584
+      ]
+    }
+  ],
+  "excluded": [],
+  "readings": 38,
+  "unresolved": [
+    {
+      "page": 4,
+      "region_id": "chart-page-4-figure-2",
+      "figure": "Figure 4",
+      "panel": "bottom",
+      "crop_bbox": [
+        57.156,
+        129.768,
+        292.296,
+        211.584
+      ],
+      "category": "PrH9",
+      "reason": "No distinguishable green bar above baseline; cannot resolve Tc or infer zero. Caption maps PrH9 to 100 GPa.",
+      "series": "μ*=0.1"
+    },
+    {
+      "page": 4,
+      "region_id": "chart-page-4-figure-2",
+      "figure": "Figure 4",
+      "panel": "bottom",
+      "crop_bbox": [
+        57.156,
+        129.768,
+        292.296,
+        211.584
+      ],
+      "category": "PrH9",
+      "reason": "No distinguishable dark-blue bar above baseline; cannot resolve Tc or infer zero. Caption maps PrH9 to 100 GPa.",
+      "series": "μ*=0.13"
+    },
+    {
+      "page": 4,
+      "region_id": "chart-page-4-figure-2",
+      "crop_bbox": [
+        57.156,
+        129.768,
+        292.296,
+        211.584
+      ],
+      "reason": "PrH9 has no distinguishishable green or dark-blue bar above the baseline; neither value is inferred to be zero."
+    }
+  ],
+  "context_notes": [
+    {
+      "page": 4,
+      "region_id": "chart-page-4-figure-0",
+      "crop_bbox": [
+        56.544,
+        34.728,
+        291.684,
+        110.208
+      ],
+      "reason": "Only Figure 4 top panel is the requested target. Shared material labels and the pressure-to-material mapping are taken from the complete figure and caption; the middle and bottom panels are context only."
+    },
+    {
+      "page": 4,
+      "region_id": "chart-page-4-figure-1",
+      "crop_bbox": [
+        57.156000000000006,
+        83.832,
+        291.684,
+        154.56
+      ],
+      "reason": "Only the middle λ panel is selected. The full figure supplies shared material labels and caption pressure mapping; neighboring DOS and Tc panels are excluded."
+    },
+    {
+      "page": 4,
+      "region_id": "chart-page-4-figure-2",
+      "crop_bbox": [
+        57.156,
+        129.768,
+        292.296,
+        211.584
+      ],
+      "reason": "Only Figure 4 bottom Tc panel is selected; the cropped EPC panel above is context and is excluded."
+    }
+  ]
+}

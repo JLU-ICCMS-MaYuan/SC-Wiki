@@ -1,0 +1,8 @@
+{
+  "status": "incomplete",
+  "model": "deepseek-flash",
+  "calls": 7,
+  "error_type": "AssertionError",
+  "status_code": null,
+  "boundary": "保留真实失败；没有改模型或业务数据"
+}

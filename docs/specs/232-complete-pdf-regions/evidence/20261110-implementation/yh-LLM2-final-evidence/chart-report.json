@@ -1,0 +1,142 @@
+{
+  "version": "scientific-chart-reading-v9",
+  "status": "completed",
+  "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+  "regions": [
+    {
+      "region_id": "chart-region-0",
+      "block_id": "native-4-8",
+      "page": 4,
+      "bbox": [
+        69.052001953125,
+        47.05598449707031,
+        280.010986328125,
+        198.614990234375
+      ]
+    }
+  ],
+  "scanned_pages": [
+    4
+  ],
+  "targets": [
+    {
+      "region_id": "chart-page-4-figure-0",
+      "page": 4,
+      "block_id": null,
+      "label": "Fig. 4 (top panel)",
+      "reason": "Bar chart of hydrogen electronic density of states at the Fermi level per unit volume for the clathrate hydrides; supports dos_fermi. Material categories are shared with the bottom panel.",
+      "bbox": [
+        68.544,
+        47.52,
+        280.296,
+        97.416
+      ]
+    },
+    {
+      "region_id": "chart-page-4-figure-1",
+      "page": 4,
+      "block_id": null,
+      "label": "Fig. 4 (middle panel)",
+      "reason": "Bar chart of electron–phonon coupling parameter lambda for the clathrate hydrides; supports lambda_ep. Material categories are shared with the bottom panel.",
+      "bbox": [
+        69.156,
+        95.832,
+        280.296,
+        142.56
+      ]
+    },
+    {
+      "region_id": "chart-page-4-figure-2",
+      "page": 4,
+      "block_id": null,
+      "label": "Fig. 4 (bottom panel)",
+      "reason": "Grouped bars of superconducting transition temperature for the clathrate hydrides at two Coulomb pseudopotentials; supports tc. Includes material labels and series legend; pressure context is in the shared caption.",
+      "bbox": [
+        69.156,
+        141.768,
+        280.296,
+        199.584
+      ]
+    }
+  ],
+  "excluded": [],
+  "readings": 38,
+  "unresolved": [
+    {
+      "page": 4,
+      "region_id": "chart-page-4-figure-2",
+      "figure": "Fig. 4",
+      "panel": "bottom",
+      "crop_bbox": [
+        57.156,
+        139,
+        292.296,
+        201
+      ],
+      "category": "PrH9",
+      "reason": "No discernible green bar above baseline; cannot infer Tc or zero. Caption pressure is 100 GPa.",
+      "series": "μ*=0.1"
+    },
+    {
+      "page": 4,
+      "region_id": "chart-page-4-figure-2",
+      "figure": "Fig. 4",
+      "panel": "bottom",
+      "crop_bbox": [
+        57.156,
+        139,
+        292.296,
+        201
+      ],
+      "category": "PrH9",
+      "reason": "No discernible dark blue bar above baseline; cannot infer Tc or zero. Caption pressure is 100 GPa.",
+      "series": "μ*=0.13"
+    },
+    {
+      "page": 4,
+      "region_id": "chart-page-4-figure-2",
+      "crop_bbox": [
+        57.156,
+        139,
+        292.296,
+        201
+      ],
+      "reason": "PrH9 has no discernible colored bar above the baseline in either series; absence is not a numerical zero."
+    }
+  ],
+  "context_notes": [
+    {
+      "page": 4,
+      "region_id": "chart-page-4-figure-0",
+      "crop_bbox": [
+        56.544,
+        35.52,
+        292.296,
+        109.416
+      ],
+      "reason": "Only Fig. 4 top panel is targeted. Shared material labels and pressure mappings are read from the complete figure and caption; the neighboring EPC and Tc panels are excluded."
+    },
+    {
+      "page": 4,
+      "region_id": "chart-page-4-figure-1",
+      "crop_bbox": [
+        57.156000000000006,
+        83.832,
+        292.296,
+        154.56
+      ],
+      "reason": "Only the middle λ panel is targeted. Material order and pressure mapping are taken from the complete figure and caption; adjacent DOS and Tc panels are context only."
+    },
+    {
+      "page": 4,
+      "region_id": "chart-page-4-figure-2",
+      "crop_bbox": [
+        57.156,
+        139,
+        292.296,
+        201
+      ],
+      "reason": "Only the bottom Tc panel is selected; neighboring EPC bars are excluded. Caption supplies material-specific pressures; body identifies Eliashberg-equation calculations. Plotted heights are retained independently of textual summaries."
+    }
+  ]
+}

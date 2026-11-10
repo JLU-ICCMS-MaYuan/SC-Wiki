@@ -187,12 +187,17 @@ def image(collection_id: str, target: Literal["upload", "paper", "revision"], ta
     from backend.storage.files import FileIntegrityError, FileStorageUnavailable
     item = visible_item(session, target, target_id, collection_id, user)
     try:
+        if item['source'].get('region_locator'):
+            from backend.spectra.jobs import read_image_bytes
+            ctx=service.context(session,target,target_id,user)
+            return Response(read_image_bytes(item['source'],files=ctx['files']),media_type='image/png',
+                headers={'Cache-Control':'private, no-store'})
         storage = create_storage()
         ref = FileRef(**item["source"]["image"])
         storage.head(ref)
         with storage.open(ref) as source:
             return Response(source.read(), media_type="image/png", headers={"Cache-Control": "private, no-store"})
-    except (FileIntegrityError, FileStorageUnavailable, FileNotFoundError):
+    except (FileIntegrityError, FileStorageUnavailable, FileNotFoundError, ValueError):
         service.fail("spectra_image_unavailable", "谱原图暂不可读取；数值结果已保留，请检查文件存储", 503)
 
 

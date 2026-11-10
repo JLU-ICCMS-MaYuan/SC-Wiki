@@ -22,7 +22,8 @@ def test_partial_panel_cannot_expand_to_whole_embedded_figure(tmp_path):
     assert origin['image_kind'] == 'original_page_region'
     assert Image.open(io.BytesIO(png)).width > Image.open(io.BytesIO(png)).height * 3
     actual, _, origin = _chart_image(pdf, page, [{'bbox': [20, 20, 180, 180]}], [10, 10, 190, 190])
-    assert actual == [20, 20, 180, 180] and origin['image_kind'] == 'original_embedded_image'
+    assert actual == [10, 10, 190, 190] and origin['image_kind'] == 'original_page_region'
+    assert origin['render_dpi'] == 600 and origin['native_sha256']
     pdf.close()
 
 

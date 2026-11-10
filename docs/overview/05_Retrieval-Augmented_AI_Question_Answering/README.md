@@ -41,3 +41,5 @@ flowchart LR
 
 结构化物性统一来自当前已批准版本的 `property_records`；AI 工具、材料详情、检索与统计共用读取规则。
 普通问答的流式和非流式接口共用 Mentor，详见[混合检索](hybrid-retrieval.md)与[流式问答](streaming-qa-and-evidence.md)。
+
+按需复用批准快照的实际图片来源见[混合检索](hybrid-retrieval.md#可重建的图片来源235)；缓存命中仍检查权限。

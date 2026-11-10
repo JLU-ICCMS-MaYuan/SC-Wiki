@@ -1,0 +1,910 @@
+{
+  "status": "completed",
+  "model": "gpt-6.1-sol",
+  "calls": 10,
+  "readings": 38,
+  "unresolved": 3,
+  "sc_readings": [
+    {
+      "version": "scientific-chart-reading-v10",
+      "source_file_id": "main",
+      "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "pdf_page": 4,
+      "figure": "Figure 4",
+      "panel": "top",
+      "kind": "bar",
+      "quantity": "dos_fermi",
+      "quantity_name": "Hydrogen electronic density of states at the Fermi level per unit volume, N_Ef",
+      "unit": "states/(eV Å³)",
+      "crop_bbox": [
+        56.544,
+        34.728,
+        291.684,
+        110.208
+      ],
+      "image_size": [
+        1960,
+        630
+      ],
+      "point": {
+        "category": "ScH6",
+        "conditions": [],
+        "label_text": null,
+        "label_value": null,
+        "material": "ScH6",
+        "method_raw": null,
+        "mu_star": null,
+        "pixel_error": 3,
+        "pressure_value_gpa": 300,
+        "reading": "position",
+        "reason": "First red bar; shared material label ScH6 and caption pressure 300 GPa.",
+        "series": "H-derived DOS at EF per volume",
+        "space_group_symbol": null,
+        "x": 247,
+        "y": 587
+      },
+      "axis": {
+        "bounds": [
+          207,
+          809
+        ],
+        "scale": "linear",
+        "ticks": [
+          {
+            "position": 243,
+            "value": 0.04
+          },
+          {
+            "position": 525,
+            "value": 0.02
+          },
+          {
+            "position": 809,
+            "value": 0
+          }
+        ]
+      },
+      "colorbar": null,
+      "axis_alignment": {
+        "ticks_aligned": false,
+        "axis_spine_pixel": 410,
+        "tick_positions": []
+      },
+      "calibrated_axis": {
+        "bounds": [
+          207,
+          809
+        ],
+        "scale": "linear",
+        "ticks": [
+          {
+            "position": 243,
+            "value": 0.04
+          },
+          {
+            "position": 525,
+            "value": 0.02
+          },
+          {
+            "position": 809,
+            "value": 0
+          }
+        ]
+      },
+      "bar_rgb": [
+        255.0,
+        0.0,
+        0.0
+      ],
+      "background_rgb": [
+        255.0,
+        255.0,
+        255.0
+      ],
+      "bar_pixel_span": [
+        371,
+        504
+      ],
+      "bar_edge_error": 3.179650238473768,
+      "bar_edge_interval": [
+        371,
+        369
+      ],
+      "initial_model_y": 587,
+      "snapped_y": 588.2352941176471,
+      "calculated_value": 0.015578207276384481,
+      "calibration": {
+        "slope": -7.067108395624884e-05,
+        "intercept": 0.05714943313300145,
+        "residual": 4.711405597080873e-05,
+        "scale": "linear"
+      },
+      "value_number": 0.0156,
+      "value_raw": "~0.0156 states/(eV Å³)",
+      "reading_precision": 0.0008,
+      "precision_kind": "graph_reading_resolution",
+      "image_origin": {
+        "image_kind": "original_page_region",
+        "render_dpi": 600
+      },
+      "complete_figure": {
+        "version": "pdf-region-v2",
+        "file_id": "main",
+        "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "pdf_page": 4,
+        "kind": "figure",
+        "bbox_page": [
+          50.04410171508789,
+          44.72800064086914,
+          299.0453186035156,
+          290.4796447753906
+        ],
+        "page_size": [
+          612.0,
+          792.0
+        ],
+        "cropbox": [
+          0.0,
+          0.0,
+          612.0,
+          792.0
+        ],
+        "rotation": 0,
+        "dpi": 600,
+        "renderer": "pymupdf-1.28.2",
+        "parent_region_id": null,
+        "caption_boxes": [
+          [
+            52.04410171508789,
+            210.27096557617188,
+            297.0453186035156,
+            288.4796447753906
+          ]
+        ],
+        "caption_text": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n",
+        "caption_status": "located",
+        "related_regions": [],
+        "region_id": "pdf-region-f72a6b43c3072a6c31dea06d2dc5aee471997dad2d87446e347c516e620008cd"
+      },
+      "feedback": {
+        "history": []
+      },
+      "region_locator": {
+        "version": "pdf-region-v2",
+        "file_id": "main",
+        "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "pdf_page": 4,
+        "kind": "figure",
+        "bbox_page": [
+          56.544,
+          34.728,
+          291.684,
+          110.208
+        ],
+        "page_size": [
+          612.0,
+          792.0
+        ],
+        "cropbox": [
+          0.0,
+          0.0,
+          612.0,
+          792.0
+        ],
+        "rotation": 0,
+        "dpi": 600,
+        "renderer": "pymupdf-1.28.2",
+        "parent_region_id": "pdf-region-f72a6b43c3072a6c31dea06d2dc5aee471997dad2d87446e347c516e620008cd",
+        "caption_boxes": [],
+        "caption_text": "",
+        "caption_status": "not_requested",
+        "related_regions": [],
+        "region_id": "pdf-region-f47f5ac3bdc6b4654fcc8e5cb62c8ae3d16a736786508604eff9492a3ec11a52"
+      }
+    },
+    {
+      "version": "scientific-chart-reading-v10",
+      "source_file_id": "main",
+      "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "pdf_page": 4,
+      "figure": "Figure 4",
+      "panel": "middle",
+      "kind": "bar",
+      "quantity": "lambda_ep",
+      "quantity_name": "Electron–phonon coupling parameter λ",
+      "unit": "dimensionless",
+      "crop_bbox": [
+        57.156000000000006,
+        83.832,
+        291.684,
+        154.56
+      ],
+      "image_size": [
+        1955,
+        590
+      ],
+      "point": {
+        "category": "ScH6",
+        "conditions": [],
+        "label_text": null,
+        "label_value": null,
+        "material": "ScH6",
+        "method_raw": "linear response theory",
+        "mu_star": null,
+        "pixel_error": 2,
+        "pressure_value_gpa": 300,
+        "reading": "position",
+        "reason": "First blue EPC bar; shared material label ScH6 and caption pressure 300 GPa.",
+        "series": "λ",
+        "space_group_symbol": null,
+        "x": 245,
+        "y": 642.4
+      },
+      "axis": {
+        "bounds": [
+          170.3,
+          814.4
+        ],
+        "scale": "linear",
+        "ticks": [
+          {
+            "position": 813.6,
+            "value": 0
+          },
+          {
+            "position": 555.9,
+            "value": 2
+          },
+          {
+            "position": 298.3,
+            "value": 4
+          }
+        ]
+      },
+      "colorbar": null,
+      "axis_alignment": {
+        "ticks_aligned": false,
+        "axis_spine_pixel": 405,
+        "tick_positions": []
+      },
+      "calibrated_axis": {
+        "bounds": [
+          170.3,
+          814.4
+        ],
+        "scale": "linear",
+        "ticks": [
+          {
+            "position": 813.6,
+            "value": 0
+          },
+          {
+            "position": 555.9,
+            "value": 2
+          },
+          {
+            "position": 298.3,
+            "value": 4
+          }
+        ]
+      },
+      "bar_rgb": [
+        0.0,
+        0.0,
+        255.0
+      ],
+      "background_rgb": [
+        255.0,
+        255.0,
+        255.0
+      ],
+      "bar_pixel_span": [
+        380,
+        475
+      ],
+      "bar_edge_error": 3.395585738539898,
+      "bar_edge_interval": [
+        380,
+        378
+      ],
+      "initial_model_y": 642.4,
+      "snapped_y": 643.4634974533107,
+      "calculated_value": 1.3205498698142142,
+      "calibration": {
+        "slope": -0.00776246836752714,
+        "intercept": 6.3154149144539184,
+        "residual": 0.00025874894558164385,
+        "scale": "linear"
+      },
+      "value_number": 1.32,
+      "value_raw": "~1.32 dimensionless",
+      "reading_precision": 0.08,
+      "precision_kind": "graph_reading_resolution",
+      "image_origin": {
+        "image_kind": "original_page_region",
+        "render_dpi": 600
+      },
+      "complete_figure": {
+        "version": "pdf-region-v2",
+        "file_id": "main",
+        "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "pdf_page": 4,
+        "kind": "figure",
+        "bbox_page": [
+          50.04410171508789,
+          44.72800064086914,
+          299.0453186035156,
+          290.4796447753906
+        ],
+        "page_size": [
+          612.0,
+          792.0
+        ],
+        "cropbox": [
+          0.0,
+          0.0,
+          612.0,
+          792.0
+        ],
+        "rotation": 0,
+        "dpi": 600,
+        "renderer": "pymupdf-1.28.2",
+        "parent_region_id": null,
+        "caption_boxes": [
+          [
+            52.04410171508789,
+            210.27096557617188,
+            297.0453186035156,
+            288.4796447753906
+          ]
+        ],
+        "caption_text": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n",
+        "caption_status": "located",
+        "related_regions": [],
+        "region_id": "pdf-region-f72a6b43c3072a6c31dea06d2dc5aee471997dad2d87446e347c516e620008cd"
+      },
+      "feedback": {
+        "history": []
+      },
+      "region_locator": {
+        "version": "pdf-region-v2",
+        "file_id": "main",
+        "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "pdf_page": 4,
+        "kind": "figure",
+        "bbox_page": [
+          57.156000000000006,
+          83.832,
+          291.684,
+          154.56
+        ],
+        "page_size": [
+          612.0,
+          792.0
+        ],
+        "cropbox": [
+          0.0,
+          0.0,
+          612.0,
+          792.0
+        ],
+        "rotation": 0,
+        "dpi": 600,
+        "renderer": "pymupdf-1.28.2",
+        "parent_region_id": "pdf-region-f72a6b43c3072a6c31dea06d2dc5aee471997dad2d87446e347c516e620008cd",
+        "caption_boxes": [],
+        "caption_text": "",
+        "caption_status": "not_requested",
+        "related_regions": [],
+        "region_id": "pdf-region-94b8b4f7ce47d7788d5d1af86f328400b6bd0f39d5b0dff0eb6dc9dfcc829288"
+      }
+    },
+    {
+      "version": "scientific-chart-reading-v10",
+      "source_file_id": "main",
+      "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "pdf_page": 4,
+      "figure": "Figure 4",
+      "panel": "bottom",
+      "kind": "bar",
+      "quantity": "tc",
+      "quantity_name": "Superconducting critical temperature",
+      "unit": "K",
+      "crop_bbox": [
+        57.156,
+        129.768,
+        292.296,
+        211.584
+      ],
+      "image_size": [
+        1960,
+        683
+      ],
+      "point": {
+        "category": "ScH6",
+        "conditions": [],
+        "label_text": null,
+        "label_value": null,
+        "material": "ScH6",
+        "method_raw": "Eliashberg equation",
+        "mu_star": 0.1,
+        "pixel_error": 3,
+        "pressure_value_gpa": 300,
+        "reading": "position",
+        "reason": "Green left bar, μ*=0.1; pressure mapped by caption to ScH6.",
+        "series": "μ*=0.1",
+        "space_group_symbol": null,
+        "x": 239,
+        "y": 547
+      },
+      "axis": {
+        "bounds": [
+          142,
+          698
+        ],
+        "scale": "linear",
+        "ticks": [
+          {
+            "position": 698,
+            "value": 0
+          },
+          {
+            "position": 547,
+            "value": 100
+          },
+          {
+            "position": 398,
+            "value": 200
+          },
+          {
+            "position": 249,
+            "value": 300
+          }
+        ]
+      },
+      "colorbar": null,
+      "axis_alignment": {
+        "ticks_aligned": false,
+        "axis_spine_pixel": 405,
+        "tick_positions": []
+      },
+      "calibrated_axis": {
+        "bounds": [
+          142,
+          698
+        ],
+        "scale": "linear",
+        "ticks": [
+          {
+            "position": 698,
+            "value": 0
+          },
+          {
+            "position": 547,
+            "value": 100
+          },
+          {
+            "position": 398,
+            "value": 200
+          },
+          {
+            "position": 249,
+            "value": 300
+          }
+        ]
+      },
+      "bar_rgb": [
+        0.0,
+        255.0,
+        0.0
+      ],
+      "background_rgb": [
+        255.0,
+        255.0,
+        255.0
+      ],
+      "bar_pixel_span": [
+        375,
+        472
+      ],
+      "bar_edge_error": 2.932551319648094,
+      "bar_edge_interval": [
+        375,
+        373
+      ],
+      "initial_model_y": 547,
+      "snapped_y": 548.3870967741935,
+      "calculated_value": 99.6080960241132,
+      "calibration": {
+        "slope": -0.668442029633072,
+        "intercept": 466.173080016443,
+        "residual": 0.5352898071526511,
+        "scale": "linear"
+      },
+      "value_number": 100.0,
+      "value_raw": "~100 K",
+      "reading_precision": 7.0,
+      "precision_kind": "graph_reading_resolution",
+      "image_origin": {
+        "image_kind": "original_page_region",
+        "render_dpi": 600
+      },
+      "complete_figure": {
+        "version": "pdf-region-v2",
+        "file_id": "main",
+        "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "pdf_page": 4,
+        "kind": "figure",
+        "bbox_page": [
+          50.04410171508789,
+          44.72800064086914,
+          299.0453186035156,
+          290.4796447753906
+        ],
+        "page_size": [
+          612.0,
+          792.0
+        ],
+        "cropbox": [
+          0.0,
+          0.0,
+          612.0,
+          792.0
+        ],
+        "rotation": 0,
+        "dpi": 600,
+        "renderer": "pymupdf-1.28.2",
+        "parent_region_id": null,
+        "caption_boxes": [
+          [
+            52.04410171508789,
+            210.27096557617188,
+            297.0453186035156,
+            288.4796447753906
+          ]
+        ],
+        "caption_text": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n",
+        "caption_status": "located",
+        "related_regions": [],
+        "region_id": "pdf-region-f72a6b43c3072a6c31dea06d2dc5aee471997dad2d87446e347c516e620008cd"
+      },
+      "feedback": {
+        "history": [
+          {
+            "action_identity": "e559ef656ac78a06466ff66daeead995d2e542ab50394a617489910e1e04ecb2",
+            "evidence_identity": "67191f459744488048212ce9e7840d102ced3147facbf11c804051064d2d6a8d",
+            "action": "program_verification",
+            "arguments": "chart-page-4-figure-2",
+            "progress": "new_evidence"
+          },
+          {
+            "action_identity": "8a78093126e170c0876ccdeeda2fadcecf4b0392dfc0f014ea51fa312457c492",
+            "evidence_identity": "1c9b3547e14d08bb06cc80e95e35d7358e47f25c8b24261bfe09faa19bf6b829",
+            "action": "adjust_image_region",
+            "arguments": {
+              "bbox_page": [
+                263,
+                179,
+                281,
+                191
+              ],
+              "dpi": 1200,
+              "region_id": "pdf-region-0750b7295406149154fe6b4be3935347c71777e02518516cccea99c786776fa8"
+            },
+            "progress": "new_evidence"
+          },
+          {
+            "action_identity": "af70264f9e33e2ebf760d0bbc577c8f46256a8c87709fae1f86e1116100c90d2",
+            "evidence_identity": "edd3bb2ee8b095c9b077abf66dc052a6042127e70059e56a53890debea972e1f",
+            "action": "adjust_image_region",
+            "arguments": {
+              "bbox_page": [
+                57.156,
+                129.768,
+                292.296,
+                211.584
+              ],
+              "dpi": 600,
+              "region_id": "pdf-region-0750b7295406149154fe6b4be3935347c71777e02518516cccea99c786776fa8"
+            },
+            "progress": "new_evidence"
+          },
+          {
+            "action_identity": "e559ef656ac78a06466ff66daeead995d2e542ab50394a617489910e1e04ecb2",
+            "evidence_identity": "67191f459744488048212ce9e7840d102ced3147facbf11c804051064d2d6a8d",
+            "action": "program_verification",
+            "arguments": "chart-page-4-figure-2",
+            "progress": "no_new_evidence"
+          }
+        ]
+      },
+      "region_locator": {
+        "version": "pdf-region-v2",
+        "file_id": "main",
+        "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "pdf_page": 4,
+        "kind": "figure",
+        "bbox_page": [
+          57.156,
+          129.768,
+          292.296,
+          211.584
+        ],
+        "page_size": [
+          612.0,
+          792.0
+        ],
+        "cropbox": [
+          0.0,
+          0.0,
+          612.0,
+          792.0
+        ],
+        "rotation": 0,
+        "dpi": 600,
+        "renderer": "pymupdf-1.28.2",
+        "parent_region_id": "pdf-region-f72a6b43c3072a6c31dea06d2dc5aee471997dad2d87446e347c516e620008cd",
+        "caption_boxes": [],
+        "caption_text": "",
+        "caption_status": "not_requested",
+        "related_regions": [],
+        "region_id": "pdf-region-0e003b3b6429c3efe6ae05ff4d133eb462d4fc1a960f56e6ae397f8608166370"
+      }
+    },
+    {
+      "version": "scientific-chart-reading-v10",
+      "source_file_id": "main",
+      "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "pdf_page": 4,
+      "figure": "Figure 4",
+      "panel": "bottom",
+      "kind": "bar",
+      "quantity": "tc",
+      "quantity_name": "Superconducting critical temperature",
+      "unit": "K",
+      "crop_bbox": [
+        57.156,
+        129.768,
+        292.296,
+        211.584
+      ],
+      "image_size": [
+        1960,
+        683
+      ],
+      "point": {
+        "category": "ScH6",
+        "conditions": [],
+        "label_text": null,
+        "label_value": null,
+        "material": "ScH6",
+        "method_raw": "Eliashberg equation",
+        "mu_star": 0.13,
+        "pixel_error": 3,
+        "pressure_value_gpa": 300,
+        "reading": "position",
+        "reason": "Dark-blue right bar, μ*=0.13; caption pressure mapping.",
+        "series": "μ*=0.13",
+        "space_group_symbol": null,
+        "x": 250,
+        "y": 567
+      },
+      "axis": {
+        "bounds": [
+          142,
+          698
+        ],
+        "scale": "linear",
+        "ticks": [
+          {
+            "position": 698,
+            "value": 0
+          },
+          {
+            "position": 547,
+            "value": 100
+          },
+          {
+            "position": 398,
+            "value": 200
+          },
+          {
+            "position": 249,
+            "value": 300
+          }
+        ]
+      },
+      "colorbar": null,
+      "axis_alignment": {
+        "ticks_aligned": false,
+        "axis_spine_pixel": 405,
+        "tick_positions": []
+      },
+      "calibrated_axis": {
+        "bounds": [
+          142,
+          698
+        ],
+        "scale": "linear",
+        "ticks": [
+          {
+            "position": 698,
+            "value": 0
+          },
+          {
+            "position": 547,
+            "value": 100
+          },
+          {
+            "position": 398,
+            "value": 200
+          },
+          {
+            "position": 249,
+            "value": 300
+          }
+        ]
+      },
+      "bar_rgb": [
+        0.0,
+        0.0,
+        128.0
+      ],
+      "background_rgb": [
+        255.0,
+        255.0,
+        255.0
+      ],
+      "bar_pixel_span": [
+        391,
+        472
+      ],
+      "bar_edge_error": 5.865102639296188,
+      "bar_edge_interval": [
+        391,
+        385
+      ],
+      "initial_model_y": 567,
+      "snapped_y": 568.9149560117302,
+      "calculated_value": 85.88641213135224,
+      "calibration": {
+        "slope": -0.668442029633072,
+        "intercept": 466.173080016443,
+        "residual": 0.5352898071526511,
+        "scale": "linear"
+      },
+      "value_number": 86.0,
+      "value_raw": "~86 K",
+      "reading_precision": 9.0,
+      "precision_kind": "graph_reading_resolution",
+      "image_origin": {
+        "image_kind": "original_page_region",
+        "render_dpi": 600
+      },
+      "complete_figure": {
+        "version": "pdf-region-v2",
+        "file_id": "main",
+        "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "pdf_page": 4,
+        "kind": "figure",
+        "bbox_page": [
+          50.04410171508789,
+          44.72800064086914,
+          299.0453186035156,
+          290.4796447753906
+        ],
+        "page_size": [
+          612.0,
+          792.0
+        ],
+        "cropbox": [
+          0.0,
+          0.0,
+          612.0,
+          792.0
+        ],
+        "rotation": 0,
+        "dpi": 600,
+        "renderer": "pymupdf-1.28.2",
+        "parent_region_id": null,
+        "caption_boxes": [
+          [
+            52.04410171508789,
+            210.27096557617188,
+            297.0453186035156,
+            288.4796447753906
+          ]
+        ],
+        "caption_text": "FIG. 4.\nCalculated electronic DOS of H at the Fermi level (NEf)\nper Å3 (top panel), the EPC parameter λ (middle panel), and Tc\n(bottom panel) of various clathrate structures at high pressures.\nThe pressure values chosen within their stable pressure ranges of\nthe phases are 300, 400, 120, 150, 400, 100, 50, 100, 200, and\n100 GPa for ScH6, ScH9, YH6, YH9, YH10, LaH6, LaH9, CeH9,\nCeH10, and PrH9, respectively.\n",
+        "caption_status": "located",
+        "related_regions": [],
+        "region_id": "pdf-region-f72a6b43c3072a6c31dea06d2dc5aee471997dad2d87446e347c516e620008cd"
+      },
+      "feedback": {
+        "history": [
+          {
+            "action_identity": "e559ef656ac78a06466ff66daeead995d2e542ab50394a617489910e1e04ecb2",
+            "evidence_identity": "67191f459744488048212ce9e7840d102ced3147facbf11c804051064d2d6a8d",
+            "action": "program_verification",
+            "arguments": "chart-page-4-figure-2",
+            "progress": "new_evidence"
+          },
+          {
+            "action_identity": "8a78093126e170c0876ccdeeda2fadcecf4b0392dfc0f014ea51fa312457c492",
+            "evidence_identity": "1c9b3547e14d08bb06cc80e95e35d7358e47f25c8b24261bfe09faa19bf6b829",
+            "action": "adjust_image_region",
+            "arguments": {
+              "bbox_page": [
+                263,
+                179,
+                281,
+                191
+              ],
+              "dpi": 1200,
+              "region_id": "pdf-region-0750b7295406149154fe6b4be3935347c71777e02518516cccea99c786776fa8"
+            },
+            "progress": "new_evidence"
+          },
+          {
+            "action_identity": "af70264f9e33e2ebf760d0bbc577c8f46256a8c87709fae1f86e1116100c90d2",
+            "evidence_identity": "edd3bb2ee8b095c9b077abf66dc052a6042127e70059e56a53890debea972e1f",
+            "action": "adjust_image_region",
+            "arguments": {
+              "bbox_page": [
+                57.156,
+                129.768,
+                292.296,
+                211.584
+              ],
+              "dpi": 600,
+              "region_id": "pdf-region-0750b7295406149154fe6b4be3935347c71777e02518516cccea99c786776fa8"
+            },
+            "progress": "new_evidence"
+          },
+          {
+            "action_identity": "e559ef656ac78a06466ff66daeead995d2e542ab50394a617489910e1e04ecb2",
+            "evidence_identity": "67191f459744488048212ce9e7840d102ced3147facbf11c804051064d2d6a8d",
+            "action": "program_verification",
+            "arguments": "chart-page-4-figure-2",
+            "progress": "no_new_evidence"
+          }
+        ]
+      },
+      "region_locator": {
+        "version": "pdf-region-v2",
+        "file_id": "main",
+        "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "pdf_page": 4,
+        "kind": "figure",
+        "bbox_page": [
+          57.156,
+          129.768,
+          292.296,
+          211.584
+        ],
+        "page_size": [
+          612.0,
+          792.0
+        ],
+        "cropbox": [
+          0.0,
+          0.0,
+          612.0,
+          792.0
+        ],
+        "rotation": 0,
+        "dpi": 600,
+        "renderer": "pymupdf-1.28.2",
+        "parent_region_id": "pdf-region-f72a6b43c3072a6c31dea06d2dc5aee471997dad2d87446e347c516e620008cd",
+        "caption_boxes": [],
+        "caption_text": "",
+        "caption_status": "not_requested",
+        "related_regions": [],
+        "region_id": "pdf-region-0e003b3b6429c3efe6ae05ff4d133eb462d4fc1a960f56e6ae397f8608166370"
+      }
+    }
+  ],
+  "filling_status": "completed",
+  "ir_reread": true,
+  "form_reread": true
+}

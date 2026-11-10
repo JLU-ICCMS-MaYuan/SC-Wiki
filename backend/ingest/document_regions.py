@@ -199,20 +199,31 @@ def render_region(ir: DocumentIR | None, path: Path | None, expected_hash, *, qu
                     cx0 + (point['x'] + radius) / 1000 * (cx1 - cx0),
                     cy0 + (point['y'] + radius) / 1000 * (cy1 - cy0)) & page.rect]
             visual = block.block_type in {"figure", "table", "table_cell"}
-            if visual:
-                captions = []
-                for candidate in ir.blocks:
-                    if candidate.pdf_page != block.pdf_page or candidate.bbox is None or candidate.block_id == block.block_id:
-                        continue
-                    if candidate.block_type != "caption" and not re.match(r"^(?:fig\.?|figure|table)\s*\d", candidate.text.strip(), re.IGNORECASE):
-                        continue
-                    area = pymupdf.Rect(candidate.bbox)
-                    overlap = max(0, min(area.x1, boxes[0].x1) - max(area.x0, boxes[0].x0))
-                    gap = max(0, area.y0 - boxes[0].y1, boxes[0].y0 - area.y1)
-                    if overlap >= 0.3 * min(area.width, boxes[0].width) and gap <= 50:
-                        captions.append((gap, area))
-                if captions:
-                    boxes.append(min(captions, key=lambda item: item[0])[1])
+            if visual or block.block_type == 'formula':
+                from .pdf_regions import object_region, render_region_image
+                from backend.rag.config import settings
+                import base64
+                locator = reading.get('complete_figure') or block.metadata.get('region_locator') or object_region(ir,path,block.block_id)
+                rendered = render_region_image(path,locator,cache_dir=settings.sc_wiki_data_dir/'visual_region_cache')
+                # 跨页上下文为有序分片；标记只映射原目标所在页，不能套用单页比例。
+                transform = rendered.get('pixel_to_page')
+                offset = [0,0]
+                if transform is None:
+                    part = next(p for p in rendered['parts'] if p['pdf_page']==block.pdf_page)
+                    transform=part['pixel_to_page'];offset=part['bbox_pixels'][:2]
+                sx,sy,ox,oy=transform
+                highlights=[]
+                for box in boxes:
+                    highlights.append([(offset[0]+(box.x0-ox)/sx)/rendered['width'],
+                        (offset[1]+(box.y0-oy)/sy)/rendered['height'],
+                        box.width/sx/rendered['width'],box.height/sy/rendered['height']])
+                crop={'image':'data:image/png;base64,'+base64.b64encode(rendered['png']).decode(),
+                    'highlights':highlights,'width':rendered['width'],'height':rendered['height'],
+                    'pdf_page':block.pdf_page,'source_raster_dpi':rendered['source_raster_dpi'],
+                    'clip_bbox_pdf':locator['bbox_page']}
+                result.update(status='located',image=crop['image'],region=highlights[0],regions=highlights,
+                    crops=[crop],dpi=rendered['dpi'],region_locator=locator,cache_hit=rendered['cache_hit'])
+                return result
             crops = render_evidence_crops(page, boxes, keep_together=visual,
                                           context_lines=0 if visual else 3, context_boxes=context_boxes)
             first = crops[0]

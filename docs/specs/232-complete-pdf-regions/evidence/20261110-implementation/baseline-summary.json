@@ -1,0 +1,14 @@
+{
+  "property_field_review": {
+    "base": "9619fd054cbe875800fe599c1489ca82d4427f4c",
+    "result": "6 failed, 12 passed",
+    "reason": "旧契约/夹具失败，在独立原HEAD同样复现；未改测试或科学键"
+  },
+  "structure_request_redundancy": {
+    "base": "2637ecb08f79810943e0a310ce8e324b99fcea7a",
+    "result": "1 failed, 1 passed",
+    "reason": "旧测试要求发送block_id和重复blocks，与HEAD已有compact_model_context投影不符；该函数本任务未改"
+  },
+  "mysql": "6 skipped；未启用隔离MySQL及行锁竞争验证，不以SQLite代替",
+  "environment": "llm_context直接在仓库目录运行会读本地.env目录，与测试server-default夹具冲突；改在无.env的临时cwd并设置PYTHONPATH运行，不改应用或测试断言"
+}

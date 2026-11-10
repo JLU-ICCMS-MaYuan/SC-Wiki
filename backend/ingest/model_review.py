@@ -315,10 +315,14 @@ def _read_original_page(arguments, manifest, tools, *, retry=False):
                         media_type='application/pdf')
     import pymupdf
     import base64
+    from .pdf_regions import region_locator, render_region_image
+    from .image_reading import image_receipt
     with pymupdf.open(path) as pdf:
-        if page > len(pdf):
-            raise ValueError('PDF没有该页')
-        image = pdf[page - 1].get_pixmap(matrix=pymupdf.Matrix(1.4, 1.4), alpha=False).tobytes('png')
+        if page > len(pdf): raise ValueError('PDF没有该页')
+        bbox = list(pdf[page - 1].rect)
+    locator = region_locator(path, file_id, entry['sha256'], page, bbox, kind='page', dpi=600)
+    rendered = render_region_image(path, locator)
+    image = rendered['png']
     document = tools.documents.get(file_id)
     if document is not None and page in {p.pdf_page for p in document.pages}:
         result = tools.call('read_page', {'file_id': file_id, 'page': page})
@@ -326,6 +330,7 @@ def _read_original_page(arguments, manifest, tools, *, retry=False):
         # PDF原页确实存在但没有文本块时仍可看图；不伪造文字或来源编号。
         result = {'file_id': file_id, 'blocks': [], 'truncated': False}
     result['original_page'] = {'file_id': file_id, 'page': page, 'source_sha256': entry['sha256']}
+    result['image_receipt'] = image_receipt(locator, rendered, action='read_original_page')
     tools.audit.append({'tool': 'read_original_page', 'file_id': file_id,
                         'arguments': {'page': page}, 'status': 'completed', 'image_rendered': True,
                         'source_sha256': entry['sha256'], 'action': tools.budget.actions})
@@ -438,6 +443,8 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
     from .scientific_evidence import BIBLIOGRAPHY_FIELDS
     definitions = tool_definitions(tools.documents, manifest, bibliography=any(
         r['field'].startswith('paper.') and r['field'].split('.')[-1] in BIBLIOGRAPHY_FIELDS for r in records))
+    from .image_reading import ACTIONS as IMAGE_ACTIONS, manifest_tools
+    image_tools = manifest_tools(tools.documents, manifest, cancelled=cancelled)
     allowed_tools = [item['function']['name'] for item in definitions]
     for _ in range(max_rounds):
         if cancelled():
@@ -515,7 +522,7 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                             point = raw.get('point_binding') or {}
                             if point.get('verdict') != 'match' or not isinstance(point.get('source_pair'), dict):
                                 raise ValueError('配对判断与通过结论不完整或不一致，请模型重新查证并给出明确结果')
-                        evs = _evidences(raw.get('source_ids', []), catalog, read)
+                        evs = image_tools.bind_evidences(_evidences(raw.get('source_ids', []), catalog, read))
                         provided = human_context.get(row['key'], {}).get('items', [])
                         supplemental = []
                         for reference in raw.get('supplemental_evidences') or []:
@@ -632,6 +639,11 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
             elif name == 'read_original_page':
                 observation, image = _read_original_page(arguments, manifest, tools, retry=bool(tool_failures.get(name)))
                 images = [image]
+            elif name in IMAGE_ACTIONS:
+                tools.budget.consume(name, retry=bool(tool_failures.get(name)))
+                observation, images = image_tools.call(name, arguments)
+                tools.audit.append({'tool': name, 'file_id': observation['file_id'],
+                    'receipt_id': observation['receipt_id'], 'image_rendered': True, 'status': 'completed'})
             else:
                 observation = tools.call(name, arguments, retry=bool(tool_failures.get(name)))
             details = {'tool': name}

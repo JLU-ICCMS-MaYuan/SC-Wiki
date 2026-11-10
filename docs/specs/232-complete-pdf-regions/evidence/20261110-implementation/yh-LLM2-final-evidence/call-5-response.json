@@ -1,0 +1,24 @@
+{
+  "action": {
+    "name": "adjust_image_region",
+    "arguments": {
+      "bbox_page": [
+        260,
+        178,
+        280,
+        188
+      ],
+      "dpi": 1200,
+      "reason": "Inspect PrH9 category immediately above the Tc baseline for extremely short green or dark blue bars; distinguish genuinely readable marks from absent bars without assuming zero.",
+      "region_id": "pdf-region-85b6ba18e1c520eac1e03ef8ad1f8411fa466aa99ac3b14fbb9461d920a9bbf4"
+    }
+  },
+  "_tool_call": {
+    "id": "call_538c803f8c0346b1acfea82b3933ff15",
+    "type": "function",
+    "function": {
+      "name": "adjust_image_region",
+      "arguments": "{\"bbox_page\":[260,178,280,188],\"dpi\":1200,\"reason\":\"Inspect PrH9 category immediately above the Tc baseline for extremely short green or dark blue bars; distinguish genuinely readable marks from absent bars without assuming zero.\",\"region_id\":\"pdf-region-85b6ba18e1c520eac1e03ef8ad1f8411fa466aa99ac3b14fbb9461d920a9bbf4\"}"
+    }
+  }
+}

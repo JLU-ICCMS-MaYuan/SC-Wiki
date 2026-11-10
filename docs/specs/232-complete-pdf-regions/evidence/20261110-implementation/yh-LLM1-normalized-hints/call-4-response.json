@@ -1,0 +1,16 @@
+{
+  "action": {
+    "name": "recognize_image_text",
+    "arguments": {
+      "region_id": "pdf-region-b303153c16bc2070047a2351c02ddfa4c3649a1eb5d6eb05a1aa0399bf439cdd"
+    }
+  },
+  "_tool_call": {
+    "id": "call_00_iHvQMFKTtOBPXolHg16h9580",
+    "type": "function",
+    "function": {
+      "name": "recognize_image_text",
+      "arguments": "{\"region_id\": \"pdf-region-b303153c16bc2070047a2351c02ddfa4c3649a1eb5d6eb05a1aa0399bf439cdd\"}"
+    }
+  }
+}

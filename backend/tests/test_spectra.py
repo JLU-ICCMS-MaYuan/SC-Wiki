@@ -111,7 +111,7 @@ def test_independent_vector_pdf_discovery_has_coordinate_transform(tmp_path):
     path=tmp_path/"known-spectrum.pdf";doc.save(path);doc.close()
     figures=list(pdf_figures(path))
     assert figures and figures[0]["source_mode"]=="rendered"
-    f=figures[0];assert f["render_dpi"]==160
+    f=figures[0];assert f["render_dpi"]==600
     assert f["pixel_to_pdf"]["scale_x"]==pytest.approx(400/f["size_px"][0])
 
 
@@ -333,7 +333,7 @@ def test_split_native_figure_is_composed_and_text_only_methods_skipped(tmp_path)
     assert figure["source_mode"] == "rendered_composite"
     assert len(figure["native_fragment_boxes_pdf_pt"]) == 2
     assert figure["bbox_pdf_pt"] == pytest.approx([40,50,220,290])
-    assert figure["render_dpi"] == 160
+    assert figure["render_dpi"] == 600
     assert figure["pixel_to_pdf"]["scale_y"] == pytest.approx(240/figure["size_px"][1])
 
 

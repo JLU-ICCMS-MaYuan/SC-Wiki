@@ -2,7 +2,7 @@
 from typing import Literal
 
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -12,6 +12,20 @@ from backend.security import get_current_user
 from backend.services import manuscript_handoffs as h
 
 router=APIRouter(prefix='/api/rag/handoffs', tags=['manuscript-handoffs'])
+
+
+@router.get('/{paper_id}/snapshots/{snapshot_id}/visual-sources/{source_id}/image')
+def read_visual_image(paper_id:int,snapshot_id:str,source_id:str,
+        user=Depends(get_current_user),session:Session=Depends(get_db,use_cache=False)):
+    from backend.rag.visual_sources import read_snapshot_visual_source
+    from backend.rag.config import settings
+    paper=session.get(models.Paper,paper_id)
+    try:
+        result=read_snapshot_visual_source(session,paper,user,snapshot_id,source_id,
+            cache_dir=settings.sc_wiki_data_dir/'visual_region_cache')
+    except ValueError as exc:
+        h.error('snapshot_visual_source_missing',str(exc),404)
+    return Response(result['image']['png'],media_type='image/png',headers={'Cache-Control':'private, no-cache'})
 
 
 def resolve(session, target, target_id, user):

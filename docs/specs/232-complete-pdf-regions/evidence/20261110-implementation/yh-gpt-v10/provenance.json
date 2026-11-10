@@ -1,0 +1,15 @@
+{
+  "model": "gpt-6.1-sol",
+  "provider": "server:LLM2",
+  "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+  "pdf_page": 4,
+  "reused": "同一原PDF与未改变的文字层；不复用旧读图/科学提取/填写回答",
+  "boundary": "原PDF局部新提取与正式后处理隔离验证；不写业务任务/草稿，不代表五阶段通过",
+  "code_sha256": {
+    "backend/ingest/chart_reading.py": "da3780cd02eef1a93f9dc9d55024e484f3998ad8ff6773253814a069464333e9",
+    "backend/ingest/pdf_regions.py": "e984c1e13f0377516654f3308fa674ebfb1fc0b4f54fd2c7daff7701c02ec764",
+    "backend/ingest/image_reading.py": "f1b80e2b9cd240155fe7ed01e06d77d4d2869b25b129bd4b1cd3fdbc12eab74b",
+    "backend/ingest/image_feedback.py": "23431fbbc71acabe693f6f6d03a981469ab5d0819d030cfc8a5e72cdd16af8e6",
+    "backend/rag/llm.py": "df9df2e0942d56eabee7baf64c43a79a50e6e5590db20bfd5ee36df864194e5c"
+  }
+}

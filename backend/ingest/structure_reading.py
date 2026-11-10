@@ -348,6 +348,8 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
     manifest = [{**source, 'kind': 'pdf'}]
     schema = _schema(catalog)
     definitions = tool_definitions(tools.documents, manifest)
+    from .image_reading import ImageReadingTools, ACTIONS as IMAGE_ACTIONS
+    image_tools = ImageReadingTools(tools.documents, {source['file_id']: path}, cancelled=cancelled)
     definitions.append({'type': 'function', 'function': {'name': 'report_structures',
         'description': '返回本文全部报告结构或明确的不确定原因；不改变业务数据。', 'strict': True, 'parameters': schema}})
     read, size = {}, 0
@@ -355,6 +357,8 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
         if size + len(row['content']) <= 120000:
             read[key] = row; size += len(row['content'])
     page_images, imaged_pages, history = {}, set(), []
+    from .image_feedback import FeedbackProgress
+    feedback = FeedbackProgress()
     observation = None
     for iteration in range(13):
         if cancelled(): raise InterruptedError('结构读取已取消')
@@ -400,6 +404,19 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
             from .tc_material_scope import assert_allowed
             assert_allowed(result['structures'], material_scope)
             candidates = _reading_result(result, catalog, read, imaged_pages, source)
+            issues = [{'candidate_id':c['candidate_id'],'source':c.get('sources'),
+                'reason_code':(c.get('validation') or {}).get('code'),
+                'reason':(c.get('validation') or {}).get('message')}
+                for c in candidates if c.get('status') == 'blocked']
+            if result['structures'] and issues and iteration < 12 and feedback.observe('structure_verification', source['sha256'], issues):
+                observation = {'verification_issues':issues,
+                    'required_next_step':'按具体来源补读原页/文字或调整区域，修订结构报告；真实缺失保留原原因。'}
+                if native:
+                    history.extend([{'role':'assistant','content':None,'tool_calls':[native]},
+                        {'role':'tool','tool_call_id':native['id'],'content':json.dumps(observation,ensure_ascii=False)}])
+                if on_event: on_event({'iteration':iteration,'status':'verification',
+                    'issues':issues,'feedback':feedback.state()})
+                continue
             # 已有完整坐标/Wyckoff解码能力继续保留，但不再挡在AI内容识别之前。
             from .structure_extractor import extract_structure_candidates as decode_geometry
             decoded = decode_geometry(markdown, source=source, material_state_ref=material_state_ref, pdf_path=path)
@@ -427,11 +444,32 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
             observation = tools.call('read_page', arguments)
             import pymupdf
             import base64
+            from .pdf_regions import region_locator, render_region_image
+            from .image_reading import image_receipt
             with pymupdf.open(path) as pdf:
-                pixels = pdf[page-1].get_pixmap(dpi=160, alpha=False).tobytes('png')
+                locator=region_locator(path,source['file_id'],source['sha256'],page,
+                    list(pdf[page-1].rect),kind='page',dpi=600)
+            rendered=render_region_image(path,locator)
+            pixels=rendered['png']
+            observation['image_receipt']=image_receipt(locator,rendered,action=name)
+            image_tools.regions[locator['region_id']]=locator
             page_images[page] = 'data:image/png;base64,' + base64.b64encode(pixels).decode()
             tools.audit.append({'tool': name, 'file_id': source['file_id'], 'page': page,
                 'source_sha256': source['sha256'], 'image_rendered': True, 'status': 'completed'})
+        elif name in IMAGE_ACTIONS:
+            tools.budget.consume(name)
+            try:
+                observation, attached_images = image_tools.call(name, arguments)
+                # 所有图仍来自同一原页，后续原模型请求附带本次实际精读像素。
+                page_images[observation['pdf_page']] = attached_images[0]
+                if observation.get('reused'):
+                    observation['previous_error']='相同操作没有新依据，请换另一动作或明确保留未读。'
+                    definitions=[d for d in definitions if d['function']['name']!=name]
+                tools.audit.append({'tool': name, 'receipt_id': observation['receipt_id'],
+                                    'file_id': source['file_id'], 'status': 'completed', 'image_rendered': True})
+            except ValueError as error:
+                observation={'tool_error':name,'reason':str(error),'available_regions':list(image_tools.regions)}
+                tools.audit.append({'tool':name,'status':'failed','file_id':source['file_id']})
         else:
             observation = tools.call(name, arguments)
         for block in observation.get('blocks', []):

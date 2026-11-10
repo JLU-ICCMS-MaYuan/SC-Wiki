@@ -1,0 +1,246 @@
+{
+  "action": {
+    "name": "report_chart_reading",
+    "arguments": {
+      "notes": [
+        {
+          "reason": "Only Fig. 4 top panel is targeted. Shared material labels and pressure mappings are read from the complete figure and caption; the neighboring EPC and Tc panels are excluded.",
+          "scope": "context"
+        }
+      ],
+      "panels": [
+        {
+          "axis": {
+            "bounds": [
+              200,
+              816.6
+            ],
+            "scale": "linear",
+            "ticks": [
+              {
+                "position": 237,
+                "value": 0.04
+              },
+              {
+                "position": 527.6,
+                "value": 0.02
+              },
+              {
+                "position": 816.6,
+                "value": 0
+              }
+            ]
+          },
+          "categories": [
+            "ScH6",
+            "ScH9",
+            "YH6",
+            "YH9",
+            "YH10",
+            "LaH6",
+            "LaH9",
+            "CeH9",
+            "CeH10",
+            "PrH9"
+          ],
+          "colorbar": null,
+          "figure": "Fig. 4",
+          "kind": "bar",
+          "layout": "matrix",
+          "panel": "top",
+          "points": [
+            {
+              "category": "ScH6",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "ScH6",
+              "method_raw": null,
+              "mu_star": null,
+              "pixel_error": 2,
+              "pressure_value_gpa": 300,
+              "reading": "position",
+              "reason": "First red bar; shared category ScH6, with 300 GPa assigned explicitly by the caption.",
+              "series": "H-derived DOS at EF per volume",
+              "space_group_symbol": null,
+              "x": 246.3,
+              "y": 589.3
+            },
+            {
+              "category": "ScH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "ScH9",
+              "method_raw": null,
+              "mu_star": null,
+              "pixel_error": 2,
+              "pressure_value_gpa": 400,
+              "reading": "position",
+              "reason": "Second red bar; shared category ScH9, at caption pressure 400 GPa.",
+              "series": "H-derived DOS at EF per volume",
+              "space_group_symbol": null,
+              "x": 318.6,
+              "y": 587.7
+            },
+            {
+              "category": "YH6",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "YH6",
+              "method_raw": null,
+              "mu_star": null,
+              "pixel_error": 2,
+              "pressure_value_gpa": 120,
+              "reading": "position",
+              "reason": "Third red bar; shared category YH6, at caption pressure 120 GPa.",
+              "series": "H-derived DOS at EF per volume",
+              "space_group_symbol": null,
+              "x": 391.3,
+              "y": 566.6
+            },
+            {
+              "category": "YH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "YH9",
+              "method_raw": null,
+              "mu_star": null,
+              "pixel_error": 2,
+              "pressure_value_gpa": 150,
+              "reading": "position",
+              "reason": "Fourth red bar; shared category YH9, at caption pressure 150 GPa.",
+              "series": "H-derived DOS at EF per volume",
+              "space_group_symbol": null,
+              "x": 463.6,
+              "y": 594.2
+            },
+            {
+              "category": "YH10",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "YH10",
+              "method_raw": null,
+              "mu_star": null,
+              "pixel_error": 2,
+              "pressure_value_gpa": 400,
+              "reading": "position",
+              "reason": "Fifth red bar; shared category YH10, at caption pressure 400 GPa.",
+              "series": "H-derived DOS at EF per volume",
+              "space_group_symbol": null,
+              "x": 536.4,
+              "y": 524.4
+            },
+            {
+              "category": "LaH6",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "LaH6",
+              "method_raw": null,
+              "mu_star": null,
+              "pixel_error": 2,
+              "pressure_value_gpa": 100,
+              "reading": "position",
+              "reason": "Sixth red bar; shared category LaH6, at caption pressure 100 GPa.",
+              "series": "H-derived DOS at EF per volume",
+              "space_group_symbol": null,
+              "x": 608.7,
+              "y": 542.2
+            },
+            {
+              "category": "LaH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "LaH9",
+              "method_raw": null,
+              "mu_star": null,
+              "pixel_error": 2,
+              "pressure_value_gpa": 50,
+              "reading": "position",
+              "reason": "Seventh red bar; shared category LaH9, at caption pressure 50 GPa.",
+              "series": "H-derived DOS at EF per volume",
+              "space_group_symbol": null,
+              "x": 681,
+              "y": 737
+            },
+            {
+              "category": "CeH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "CeH9",
+              "method_raw": null,
+              "mu_star": null,
+              "pixel_error": 2,
+              "pressure_value_gpa": 100,
+              "reading": "position",
+              "reason": "Eighth red bar; shared category CeH9, at caption pressure 100 GPa.",
+              "series": "H-derived DOS at EF per volume",
+              "space_group_symbol": null,
+              "x": 753.2,
+              "y": 482.1
+            },
+            {
+              "category": "CeH10",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "CeH10",
+              "method_raw": null,
+              "mu_star": null,
+              "pixel_error": 2,
+              "pressure_value_gpa": 200,
+              "reading": "position",
+              "reason": "Ninth red bar; shared category CeH10, at caption pressure 200 GPa.",
+              "series": "H-derived DOS at EF per volume",
+              "space_group_symbol": null,
+              "x": 825.4,
+              "y": 483.8
+            },
+            {
+              "category": "PrH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "PrH9",
+              "method_raw": null,
+              "mu_star": null,
+              "pixel_error": 2,
+              "pressure_value_gpa": 100,
+              "reading": "position",
+              "reason": "Tenth red bar; shared category PrH9, at caption pressure 100 GPa.",
+              "series": "H-derived DOS at EF per volume",
+              "space_group_symbol": null,
+              "x": 897.7,
+              "y": 272.7
+            }
+          ],
+          "quantity": "dos_fermi",
+          "quantity_name": "Hydrogen electronic density of states at the Fermi level per unit volume, N_Ef",
+          "reason": "Red bar heights give the H contribution to electronic DOS at EF per volume for the ten clathrate hydrides. Units are copied from the vertical axis. Material order and point-specific pressures follow the shared labels and caption. No space-group assignment or specific computational method is established by this figure.",
+          "series": [
+            "H-derived DOS at EF per volume"
+          ],
+          "unit": "states/eV/Å³",
+          "unresolved": [],
+          "x_axis": null,
+          "x_quantity": null,
+          "x_unit": null
+        }
+      ]
+    }
+  },
+  "_tool_call": {
+    "id": "call_884e4a84d3664c3c804220546caedcba",
+    "type": "function",
+    "function": {
+      "name": "report_chart_reading",
+      "arguments": "{\"notes\":[{\"reason\":\"Only Fig. 4 top panel is targeted. Shared material labels and pressure mappings are read from the complete figure and caption; the neighboring EPC and Tc panels are excluded.\",\"scope\":\"context\"}],\"panels\":[{\"axis\":{\"bounds\":[200,816.6],\"scale\":\"linear\",\"ticks\":[{\"position\":237,\"value\":0.04},{\"position\":527.6,\"value\":0.02},{\"position\":816.6,\"value\":0}]},\"categories\":[\"ScH6\",\"ScH9\",\"YH6\",\"YH9\",\"YH10\",\"LaH6\",\"LaH9\",\"CeH9\",\"CeH10\",\"PrH9\"],\"colorbar\":null,\"figure\":\"Fig. 4\",\"kind\":\"bar\",\"layout\":\"matrix\",\"panel\":\"top\",\"points\":[{\"category\":\"ScH6\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"ScH6\",\"method_raw\":null,\"mu_star\":null,\"pixel_error\":2,\"pressure_value_gpa\":300,\"reading\":\"position\",\"reason\":\"First red bar; shared category ScH6, with 300 GPa assigned explicitly by the caption.\",\"series\":\"H-derived DOS at EF per volume\",\"space_group_symbol\":null,\"x\":246.3,\"y\":589.3},{\"category\":\"ScH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"ScH9\",\"method_raw\":null,\"mu_star\":null,\"pixel_error\":2,\"pressure_value_gpa\":400,\"reading\":\"position\",\"reason\":\"Second red bar; shared category ScH9, at caption pressure 400 GPa.\",\"series\":\"H-derived DOS at EF per volume\",\"space_group_symbol\":null,\"x\":318.6,\"y\":587.7},{\"category\":\"YH6\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"YH6\",\"method_raw\":null,\"mu_star\":null,\"pixel_error\":2,\"pressure_value_gpa\":120,\"reading\":\"position\",\"reason\":\"Third red bar; shared category YH6, at caption pressure 120 GPa.\",\"series\":\"H-derived DOS at EF per volume\",\"space_group_symbol\":null,\"x\":391.3,\"y\":566.6},{\"category\":\"YH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"YH9\",\"method_raw\":null,\"mu_star\":null,\"pixel_error\":2,\"pressure_value_gpa\":150,\"reading\":\"position\",\"reason\":\"Fourth red bar; shared category YH9, at caption pressure 150 GPa.\",\"series\":\"H-derived DOS at EF per volume\",\"space_group_symbol\":null,\"x\":463.6,\"y\":594.2},{\"category\":\"YH10\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"YH10\",\"method_raw\":null,\"mu_star\":null,\"pixel_error\":2,\"pressure_value_gpa\":400,\"reading\":\"position\",\"reason\":\"Fifth red bar; shared category YH10, at caption pressure 400 GPa.\",\"series\":\"H-derived DOS at EF per volume\",\"space_group_symbol\":null,\"x\":536.4,\"y\":524.4},{\"category\":\"LaH6\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"LaH6\",\"method_raw\":null,\"mu_star\":null,\"pixel_error\":2,\"pressure_value_gpa\":100,\"reading\":\"position\",\"reason\":\"Sixth red bar; shared category LaH6, at caption pressure 100 GPa.\",\"series\":\"H-derived DOS at EF per volume\",\"space_group_symbol\":null,\"x\":608.7,\"y\":542.2},{\"category\":\"LaH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"LaH9\",\"method_raw\":null,\"mu_star\":null,\"pixel_error\":2,\"pressure_value_gpa\":50,\"reading\":\"position\",\"reason\":\"Seventh red bar; shared category LaH9, at caption pressure 50 GPa.\",\"series\":\"H-derived DOS at EF per volume\",\"space_group_symbol\":null,\"x\":681,\"y\":737},{\"category\":\"CeH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"CeH9\",\"method_raw\":null,\"mu_star\":null,\"pixel_error\":2,\"pressure_value_gpa\":100,\"reading\":\"position\",\"reason\":\"Eighth red bar; shared category CeH9, at caption pressure 100 GPa.\",\"series\":\"H-derived DOS at EF per volume\",\"space_group_symbol\":null,\"x\":753.2,\"y\":482.1},{\"category\":\"CeH10\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"CeH10\",\"method_raw\":null,\"mu_star\":null,\"pixel_error\":2,\"pressure_value_gpa\":200,\"reading\":\"position\",\"reason\":\"Ninth red bar; shared category CeH10, at caption pressure 200 GPa.\",\"series\":\"H-derived DOS at EF per volume\",\"space_group_symbol\":null,\"x\":825.4,\"y\":483.8},{\"category\":\"PrH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"PrH9\",\"method_raw\":null,\"mu_star\":null,\"pixel_error\":2,\"pressure_value_gpa\":100,\"reading\":\"position\",\"reason\":\"Tenth red bar; shared category PrH9, at caption pressure 100 GPa.\",\"series\":\"H-derived DOS at EF per volume\",\"space_group_symbol\":null,\"x\":897.7,\"y\":272.7}],\"quantity\":\"dos_fermi\",\"quantity_name\":\"Hydrogen electronic density of states at the Fermi level per unit volume, N_Ef\",\"reason\":\"Red bar heights give the H contribution to electronic DOS at EF per volume for the ten clathrate hydrides. Units are copied from the vertical axis. Material order and point-specific pressures follow the shared labels and caption. No space-group assignment or specific computational method is established by this figure.\",\"series\":[\"H-derived DOS at EF per volume\"],\"unit\":\"states/eV/Å³\",\"unresolved\":[],\"x_axis\":null,\"x_quantity\":null,\"x_unit\":null}]}"
+    }
+  }
+}

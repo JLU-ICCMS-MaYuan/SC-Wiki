@@ -158,6 +158,10 @@ def record_handoff(session, paper, user, *, action, draft, records, operation_id
     from backend.ingest.tc_contexts import map_draft
     content = current_content({'draft': map_draft(draft,compact=True), 'records': records, 'manual': list(manual),
         'files': [{k: v for k, v in f.items() if k != 'stored_path'} for f in files], 'spectra':spectra})
+    from backend.rag.visual_sources import capture_visual_sources
+    visual_sources = capture_visual_sources(session, paper, files, records=records)
+    if visual_sources:
+        content['visual_sources'] = visual_sources
     fingerprint = content_hash(content)
     reused = bool(previous and previous['content_hash'] == fingerprint)
     snapshot_id = previous['snapshot_id'] if reused else uuid.uuid4().hex
@@ -181,7 +185,7 @@ def record_handoff(session, paper, user, *, action, draft, records, operation_id
     if not reused:
         from backend.ingest.field_sources import compact_contexts
         payload['manuscript_snapshot'] = compact_contexts(session,
-            {**content, 'files': _freeze_files(files)}, keys={'legacy_evidences','legacy_source_history','sources'})
+            {**content, 'files': _freeze_files(files)}, keys={'legacy_evidences','legacy_source_history','sources','visual_sources'})
     event = models.PaperHistoryEvent(paper_id=paper.id, paper_revision=paper.content_revision,
         event_type='uploaded' if action == 'submit' and initial else 'reviewed',
         review_status=None if action == 'submit' and initial else

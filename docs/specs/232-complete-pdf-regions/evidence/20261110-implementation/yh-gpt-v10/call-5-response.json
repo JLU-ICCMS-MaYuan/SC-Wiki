@@ -1,0 +1,24 @@
+{
+  "action": {
+    "name": "adjust_image_region",
+    "arguments": {
+      "bbox_page": [
+        263,
+        179,
+        281,
+        191
+      ],
+      "dpi": 1200,
+      "reason": "Inspect PrH9 at the Tc baseline to determine whether either series has a distinguishable nonzero bar; preserve unresolved readings if only the baseline is visible.",
+      "region_id": "pdf-region-0750b7295406149154fe6b4be3935347c71777e02518516cccea99c786776fa8"
+    }
+  },
+  "_tool_call": {
+    "id": "call_c1cb5283cfc74ef1a1e90ba6169454ed",
+    "type": "function",
+    "function": {
+      "name": "adjust_image_region",
+      "arguments": "{\"bbox_page\":[263,179,281,191],\"dpi\":1200,\"reason\":\"Inspect PrH9 at the Tc baseline to determine whether either series has a distinguishable nonzero bar; preserve unresolved readings if only the baseline is visible.\",\"region_id\":\"pdf-region-0750b7295406149154fe6b4be3935347c71777e02518516cccea99c786776fa8\"}"
+    }
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "done": true,
+  "excluded": [],
+  "read_source_ids": [],
+  "records": [
+    {
+      "candidate_ids": [
+        "s0:m0:r0"
+      ],
+      "group": "ScH6-300GPa-H-derived-DOS",
+      "method": "figure4-H-derived-DOS",
+      "reason": "The calibrated Figure 4 top-panel reading gives the H-derived DOS per unit volume for ScH6; the caption establishes 300 GPa. Preserve the approximate graph reading and its DOS definition. Graph-reading resolution is not a physical uncertainty.",
+      "source_ids": [
+        "source-8",
+        "source-5"
+      ],
+      "values": {
+        "calculation_conditions": null,
+        "canonical_unit": "states/(eV Å³)",
+        "method_code": null,
+        "method_raw": null,
+        "parameters": null,
+        "uncertainty": null,
+        "unit_raw": "states/(eV Å³)",
+        "value_boolean": null,
+        "value_kind": "number",
+        "value_max": null,
+        "value_min": null,
+        "value_number": 0.0156,
+        "value_raw": "~0.0156 states/(eV Å³)",
+        "value_text": null
+      }
+    },
+    {
+      "candidate_ids": [
+        "s0:m1:r0"
+      ],
+      "group": "ScH6-300GPa-figure4-EPC",
+      "method": "ScH6-figure4-Eliashberg-equation",
+      "reason": "The calibrated Figure 4 reading establishes approximately 100 K at μ*=0.1 for ScH6 at 300 GPa. Source-2 identifies the reported method as “Eliashberg equation” but does not establish an isotropic or anisotropic variant, so the method code remains unknown. Both plotted μ* points use this same reported method and share the Figure 4 λ reading and reported linear-response phonon calculation conditions. The body statement that ScH6 and ScH9 reach temperatures as high as approximately 150 K is not a replacement for the material-specific calibrated reading. No numerical omega_log or further applicable software settings are established by the supplied sources.",
+      "source_ids": [
+        "source-10",
+        "source-5",
+        "source-2",
+        "source-1",
+        "source-9"
+      ],
+      "values": {
+        "calculation_conditions": {
+          "calculation_code": null,
+          "electronic_method": null,
+          "epw": null,
+          "exchange_correlation_functional": null,
+          "phonon_method": "linear response theory",
+          "qe": null,
+          "sscha": null,
+          "vibrational_treatment": null
+        },
+        "canonical_unit": "K",
+        "method_code": "unknown",
+        "method_raw": "Eliashberg equation",
+        "parameters": {
+          "extensions": [],
+          "lambda_ep": {
+            "evidences": [
+              {
+                "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                "file_id": "main",
+                "pdf_page": 4,
+                "quote": null,
+                "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+              }
+            ],
+            "reported": true,
+            "unit_raw": "dimensionless",
+            "value_boolean": null,
+            "value_kind": "number",
+            "value_max": null,
+            "value_min": null,
+            "value_number": 1.32,
+            "value_raw": "~1.32 dimensionless",
+            "value_text": null
+          },
+          "mu_star": 0.1,
+          "omega_log": null
+        },
+        "uncertainty": null,
+        "unit_raw": "K",
+        "value_boolean": null,
+        "value_kind": "number",
+        "value_max": null,
+        "value_min": null,
+        "value_number": 100,
+        "value_raw": "~100 K",
+        "value_text": null
+      }
+    },
+    {
+      "candidate_ids": [
+        "s0:m1:r1"
+      ],
+      "group": "ScH6-300GPa-figure4-EPC",
+      "method": "ScH6-figure4-Eliashberg-equation",
+      "reason": "The calibrated Figure 4 reading establishes approximately 86 K at μ*=0.13 for ScH6 at 300 GPa. Source-2 reports “Eliashberg equation” without specifying its variant. This point therefore retains method code unknown and shares the exact group and method with the μ*=0.1 point: only μ* and Tc differ, while the λ reading and reported calculation conditions agree. Preserve the approximate Tc and λ qualifiers; graph-reading resolutions are not physical uncertainties. The body maximum of approximately 150 K for ScH6 and ScH9 does not override this material-specific plotted value.",
+      "source_ids": [
+        "source-11",
+        "source-5",
+        "source-2",
+        "source-1",
+        "source-9"
+      ],
+      "values": {
+        "calculation_conditions": {
+          "calculation_code": null,
+          "electronic_method": null,
+          "epw": null,
+          "exchange_correlation_functional": null,
+          "phonon_method": "linear response theory",
+          "qe": null,
+          "sscha": null,
+          "vibrational_treatment": null
+        },
+        "canonical_unit": "K",
+        "method_code": "unknown",
+        "method_raw": "Eliashberg equation",
+        "parameters": {
+          "extensions": [],
+          "lambda_ep": {
+            "evidences": [
+              {
+                "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                "file_id": "main",
+                "pdf_page": 4,
+                "quote": null,
+                "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+              }
+            ],
+            "reported": true,
+            "unit_raw": "dimensionless",
+            "value_boolean": null,
+            "value_kind": "number",
+            "value_max": null,
+            "value_min": null,
+            "value_number": 1.32,
+            "value_raw": "~1.32 dimensionless",
+            "value_text": null
+          },
+          "mu_star": 0.13,
+          "omega_log": null
+        },
+        "uncertainty": null,
+        "unit_raw": "K",
+        "value_boolean": null,
+        "value_kind": "number",
+        "value_max": null,
+        "value_min": null,
+        "value_number": 86,
+        "value_raw": "~86 K",
+        "value_text": null
+      }
+    }
+  ],
+  "search": [],
+  "unresolved": []
+}

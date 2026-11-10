@@ -1,0 +1,20 @@
+{
+  "pages": [
+    {
+      "page": 4,
+      "figures": [
+        {
+          "bbox": [
+            112,
+            59,
+            458,
+            251
+          ],
+          "label": "Fig. 4",
+          "target": true,
+          "reason": "Multi-panel figure with three stacked panels: top N_Ef DOS at Fermi level, middle EPC parameter lambda, bottom Tc for various clathrate structures. Contains supported scalar quantities (tc, lambda_ep, dos_fermi); treated as one figure with all panels."
+        }
+      ]
+    }
+  ]
+}

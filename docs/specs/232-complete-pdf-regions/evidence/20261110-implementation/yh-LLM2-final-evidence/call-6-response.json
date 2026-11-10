@@ -1,0 +1,24 @@
+{
+  "action": {
+    "name": "adjust_image_region",
+    "arguments": {
+      "bbox_page": [
+        57.156,
+        139,
+        292.296,
+        201
+      ],
+      "dpi": 600,
+      "reason": "Restore entire selected bottom Tc panel including y ticks, material categories and legend so all target bars can be calibrated; prior PrH9 close-up shows no resolvable colored bars.",
+      "region_id": "pdf-region-85b6ba18e1c520eac1e03ef8ad1f8411fa466aa99ac3b14fbb9461d920a9bbf4"
+    }
+  },
+  "_tool_call": {
+    "id": "call_fc3972157fb44e77989d7c7a41dc5ac0",
+    "type": "function",
+    "function": {
+      "name": "adjust_image_region",
+      "arguments": "{\"bbox_page\":[57.156,139,292.296,201],\"dpi\":600,\"reason\":\"Restore entire selected bottom Tc panel including y ticks, material categories and legend so all target bars can be calibrated; prior PrH9 close-up shows no resolvable colored bars.\",\"region_id\":\"pdf-region-85b6ba18e1c520eac1e03ef8ad1f8411fa466aa99ac3b14fbb9461d920a9bbf4\"}"
+    }
+  }
+}

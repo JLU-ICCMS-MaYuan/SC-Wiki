@@ -103,6 +103,8 @@ def _stream_json(
     deepseek = config.model.startswith("deepseek")
     _call_stats.set({"thinking": "disabled" if deepseek else "provider_default", "output_started": False})
     messages = [{"role": "system", "content": _json_output_prompt(system_prompt)}, {"role": "user", "content": user_content}]
+    if tool_definitions:
+        messages[0]['content'] += '\nCall exactly ONE registered function per response. Wait for its result before choosing the next action. Never emit parallel or repeated calls in one response.'
     if tool_history:
         messages.extend(tool_history)
     client = _client(read_timeout)
@@ -111,6 +113,20 @@ def _stream_json(
     if runtime:
         runtime.check()
         runtime.register_client(client)
+    from .responses_json import protocol_for, call as responses_call
+    protocol = protocol_for(config)
+    _call_stats.set({**_call_stats.get(), 'api_protocol': protocol})
+    if protocol == 'responses':
+        with token_request() as receive_usage:
+            def usage(value):
+                receive_usage(value)
+                _call_stats.set({**_call_stats.get(),'usage':value})
+            result = responses_call(client, config, system_prompt, user_prompt, images=images,
+                definitions=tool_definitions, history=tool_history, response_format=response_format,
+                on_partial=on_partial,on_usage=usage,
+                on_started=lambda: _call_stats.set({**_call_stats.get(),'output_started':True}))
+            _call_stats.set({**_call_stats.get(),'finish_reason':'stop'})
+            return result
     with token_request() as receive_usage:
         stream = client.chat.completions.create(
             model=config.model,
@@ -122,6 +138,9 @@ def _stream_json(
             stream_options={"include_usage": True},
             stream=True,
             **({"tools": tool_definitions, "parallel_tool_calls": False} if tool_definitions else {}),
+            **({'tool_choice':{'type':'function','function':{'name':'report_structured_output'}}}
+               if tool_definitions and len(tool_definitions)==1 and tool_definitions[0]['function']['name']=='report_structured_output'
+               else {'tool_choice':'required'} if any(d['function']['name'].startswith('report_') for d in tool_definitions or []) else {}),
         )
         accumulated: list[str] = []
         actions: dict[int, dict] = {}
@@ -188,6 +207,8 @@ def _stream_json(
             raise ModelNoOutputError('模型连接已结束，但未返回任何输出')
         if actions:
             from .structured_output import StructuredOutputError, validate_tool_action
+            _call_stats.set({**_call_stats.get(), 'tool_call_count': len(actions),
+                'tool_names': [action['name'] for action in actions.values()]})
             if len(actions) != 1 or finish_reason != "tool_calls" or not tool_definitions:
                 raise StructuredOutputError("只接受一次完整的已登记工具调用")
             index, action = next(iter(actions.items()))
@@ -251,7 +272,16 @@ def _complete_json(
 ) -> dict[str, Any]:
     """流式请求并校验JSON；明确未输出的可重试503最多额外两次，其余沿原预算。"""
     from .structured_output import StructuredOutputError, output_format, validate_output
+    from urllib.parse import urlparse
+    config = get_llm_config()
+    schema_tool = (response_schema is not None and not tool_definitions
+        and urlparse(getattr(config,'base_url','')).hostname=='api.deepseek.com')
+    if schema_tool:
+        tool_definitions = [{'type':'function','function':{'name':'report_structured_output',
+            'description':'Return the complete requested JSON using exactly this strict schema.',
+            'strict':True,'parameters':response_schema}}]
     format_options = {"response_format": output_format(response_schema)} if response_schema is not None else {}
+    if schema_tool:format_options['response_format']={'type':'json_object'}
     if tool_definitions:
         for definition in tool_definitions:
             if definition.get("type") != "function" or definition["function"].get("strict") is not True:
@@ -286,6 +316,11 @@ def _complete_json(
                 images=images, on_partial=on_partial, read_timeout=read_timeout,
                 **format_options,
             )
+            if schema_tool:
+                if not result.get('_tool_call') or (result.get('action') or {}).get('name')!='report_structured_output':
+                    raise StructuredOutputError('当前接口未返回登记的严格结构工具回执，未降级采用自由文本')
+                result=result['action']['arguments']
+                _call_stats.set({**_call_stats.get(),'schema_transport':'strict_function'})
             if response_schema is not None:
                 validate_output(result, response_schema)
             if on_call:
@@ -337,6 +372,14 @@ def _complete_json(
 def complete_json(system_prompt: str, user_prompt: str, **options) -> dict[str, Any]:
     """上传执行使用持久运行器；其他宿主保留原有调用契约。"""
     system_prompt = _json_output_prompt(system_prompt)
+    from urllib.parse import urlparse
+    config = get_llm_config()
+    if (options.get('response_schema') is not None and not options.get('tool_definitions')
+            and urlparse(getattr(config,'base_url','')).hostname=='api.deepseek.com'):
+        system_prompt += '\nSchema transport strict-function-v1: use the registered report_structured_output function for the complete JSON response.'
+    if options.get('images') and get_llm_config().model in {'deepseek-v4-pro'}:
+        raise UserCredentialError('所选模型不支持图片输入；请在起始模型选择中使用视觉模型，未自动切换。',
+            code='LLM_IMAGE_UNSUPPORTED')
     from .image_inputs import prepare_image_inputs
     system_prompt, options = prepare_image_inputs(system_prompt, options)
     from backend.ingest.model_runtime import current_execution

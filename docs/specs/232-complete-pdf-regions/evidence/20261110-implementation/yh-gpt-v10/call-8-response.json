@@ -1,0 +1,462 @@
+{
+  "coverage_exclusions": [
+    {
+      "block_id": "original-4-0",
+      "category": "out_of_model_scope",
+      "file_id": "main",
+      "pdf_page": null,
+      "reason": "Structural distances, volumes and thermodynamic discussion do not provide a pressure-resolved ScH6 result supported by the requested scientific form.",
+      "row_index": null,
+      "table_id": null
+    },
+    {
+      "block_id": "original-4-2",
+      "category": "out_of_model_scope",
+      "file_id": "main",
+      "pdf_page": null,
+      "reason": "The shared statement that ScH6 and ScH9 reach approximately 150 K does not uniquely specify a ScH6 pressure or series. The detailed ScH6 Figure 4 results are retained separately; other materials are outside this extraction.",
+      "row_index": null,
+      "table_id": null
+    },
+    {
+      "block_id": "original-4-3",
+      "category": "out_of_model_scope",
+      "file_id": "main",
+      "pdf_page": null,
+      "reason": "General structure-search conclusions and other-material discussion supply no additional pressure-resolved ScH6 numeric result.",
+      "row_index": null,
+      "table_id": null
+    },
+    {
+      "block_id": "original-4-4",
+      "category": "out_of_model_scope",
+      "file_id": "main",
+      "pdf_page": null,
+      "reason": "General clathrate stabilization discussion supplies no additional ScH6 numeric result.",
+      "row_index": null,
+      "table_id": null
+    },
+    {
+      "block_id": "original-4-6",
+      "category": "non_result_content",
+      "file_id": "main",
+      "pdf_page": null,
+      "reason": "Journal and publication header.",
+      "row_index": null,
+      "table_id": null
+    },
+    {
+      "block_id": "original-4-7",
+      "category": "non_result_content",
+      "file_id": "main",
+      "pdf_page": null,
+      "reason": "Page footer.",
+      "row_index": null,
+      "table_id": null
+    },
+    {
+      "block_id": "chart-unresolved-bb5ef5ffcacfd8020a61355d34022a4dbbbcb3ea",
+      "category": "out_of_model_scope",
+      "file_id": "main",
+      "pdf_page": null,
+      "reason": "Unresolved PrH9 series is outside the ScH6-only extraction; no zero temperature is inferred.",
+      "row_index": null,
+      "table_id": null
+    },
+    {
+      "block_id": "chart-unresolved-8b1811faf77ab0de371ba2c174a13dbc41132b68",
+      "category": "out_of_model_scope",
+      "file_id": "main",
+      "pdf_page": null,
+      "reason": "Unresolved PrH9 series is outside the ScH6-only extraction; no zero temperature is inferred.",
+      "row_index": null,
+      "table_id": null
+    },
+    {
+      "block_id": "chart-unresolved-12bc24a1f0bd17bd12b2330026fba6312897e208",
+      "category": "out_of_model_scope",
+      "file_id": "main",
+      "pdf_page": null,
+      "reason": "Unresolved PrH9 figure reading is outside the ScH6-only extraction.",
+      "row_index": null,
+      "table_id": null
+    }
+  ],
+  "extraction_version": "1",
+  "key_findings": [],
+  "material_states": [
+    {
+      "basis_kind": "paper_quote",
+      "evidences": [
+        {
+          "block_id": "original-4-5",
+          "file_id": "main",
+          "pdf_page": 4,
+          "quote": null,
+          "quote_id": "original-4-5"
+        }
+      ],
+      "material": "ScH6",
+      "material_dimensionality": "unknown",
+      "material_family": null,
+      "material_name": null,
+      "pressure_value_gpa": 300,
+      "property_modules": [
+        {
+          "module_code": "electronic_properties",
+          "records": [
+            {
+              "basis_kind": "paper_quote",
+              "canonical_unit": "states/(eV Å³)",
+              "criterion_code": null,
+              "criterion_raw": null,
+              "evidences": [
+                {
+                  "block_id": "chart-reading-09cfbf0aa0fc1dcaded2330c881fd014727704b0",
+                  "file_id": "main",
+                  "pdf_page": 4,
+                  "quote": null,
+                  "quote_id": "chart-reading-09cfbf0aa0fc1dcaded2330c881fd014727704b0"
+                },
+                {
+                  "block_id": "original-4-5",
+                  "file_id": "main",
+                  "pdf_page": 4,
+                  "quote": null,
+                  "quote_id": "original-4-5"
+                }
+              ],
+              "is_representative": false,
+              "method_code": null,
+              "method_raw": null,
+              "module_code": "electronic_properties",
+              "name_raw": "Hydrogen electronic density of states at the Fermi level per unit volume, N_Ef",
+              "payload": {
+                "calculation_conditions": null,
+                "method_variant_status": null,
+                "parameters": null,
+                "table_row_ref": null,
+                "thermodynamic_stability": null
+              },
+              "property_code": "dos_fermi",
+              "record_type": "property",
+              "uncertainty": null,
+              "unit_raw": "states/(eV Å³)",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 0.0156,
+              "value_raw": "~0.0156 states/(eV Å³)",
+              "value_text": null
+            }
+          ]
+        },
+        {
+          "module_code": "superconductive_properties",
+          "records": [
+            {
+              "basis_kind": "paper_quote",
+              "canonical_unit": "K",
+              "criterion_code": null,
+              "criterion_raw": null,
+              "evidences": [
+                {
+                  "block_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f",
+                  "file_id": "main",
+                  "pdf_page": 4,
+                  "quote": null,
+                  "quote_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f"
+                },
+                {
+                  "block_id": "original-4-5",
+                  "file_id": "main",
+                  "pdf_page": 4,
+                  "quote": null,
+                  "quote_id": "original-4-5"
+                },
+                {
+                  "block_id": "original-4-2",
+                  "file_id": "main",
+                  "pdf_page": 4,
+                  "quote": null,
+                  "quote_id": "original-4-2"
+                },
+                {
+                  "block_id": "original-4-1",
+                  "file_id": "main",
+                  "pdf_page": 4,
+                  "quote": null,
+                  "quote_id": "original-4-1"
+                },
+                {
+                  "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                  "file_id": "main",
+                  "pdf_page": 4,
+                  "quote": null,
+                  "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                }
+              ],
+              "is_representative": false,
+              "method_code": "unknown",
+              "method_raw": "Eliashberg equation",
+              "module_code": "superconductive_properties",
+              "name_raw": "Superconducting critical temperature",
+              "payload": {
+                "calculation_conditions": {
+                  "calculation_code": null,
+                  "electronic_method": null,
+                  "epw": null,
+                  "exchange_correlation_functional": null,
+                  "phonon_method": "linear response theory",
+                  "qe": null,
+                  "sscha": null,
+                  "vibrational_treatment": null
+                },
+                "method_variant_status": null,
+                "parameters": {
+                  "extensions": [],
+                  "lambda_ep": {
+                    "evidences": [
+                      {
+                        "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                      }
+                    ],
+                    "reported": true,
+                    "unit_raw": "dimensionless",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 1.32,
+                    "value_raw": "~1.32 dimensionless",
+                    "value_text": null
+                  },
+                  "mu_star": {
+                    "evidences": [
+                      {
+                        "block_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-a809e6c556e5a85e26120438ae6291c7bb8dc79f"
+                      }
+                    ],
+                    "reported": true,
+                    "unit_raw": null,
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 0.1,
+                    "value_raw": "0.1",
+                    "value_text": null
+                  },
+                  "omega_log": null
+                },
+                "table_row_ref": null,
+                "thermodynamic_stability": null
+              },
+              "property_code": "tc",
+              "record_type": "predicted_tc",
+              "uncertainty": null,
+              "unit_raw": "K",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 100,
+              "value_raw": "~100 K",
+              "value_text": null
+            },
+            {
+              "basis_kind": "paper_quote",
+              "canonical_unit": "K",
+              "criterion_code": null,
+              "criterion_raw": null,
+              "evidences": [
+                {
+                  "block_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7",
+                  "file_id": "main",
+                  "pdf_page": 4,
+                  "quote": null,
+                  "quote_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7"
+                },
+                {
+                  "block_id": "original-4-5",
+                  "file_id": "main",
+                  "pdf_page": 4,
+                  "quote": null,
+                  "quote_id": "original-4-5"
+                },
+                {
+                  "block_id": "original-4-2",
+                  "file_id": "main",
+                  "pdf_page": 4,
+                  "quote": null,
+                  "quote_id": "original-4-2"
+                },
+                {
+                  "block_id": "original-4-1",
+                  "file_id": "main",
+                  "pdf_page": 4,
+                  "quote": null,
+                  "quote_id": "original-4-1"
+                },
+                {
+                  "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                  "file_id": "main",
+                  "pdf_page": 4,
+                  "quote": null,
+                  "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                }
+              ],
+              "is_representative": false,
+              "method_code": "unknown",
+              "method_raw": "Eliashberg equation",
+              "module_code": "superconductive_properties",
+              "name_raw": "Superconducting critical temperature",
+              "payload": {
+                "calculation_conditions": {
+                  "calculation_code": null,
+                  "electronic_method": null,
+                  "epw": null,
+                  "exchange_correlation_functional": null,
+                  "phonon_method": "linear response theory",
+                  "qe": null,
+                  "sscha": null,
+                  "vibrational_treatment": null
+                },
+                "method_variant_status": null,
+                "parameters": {
+                  "extensions": [],
+                  "lambda_ep": {
+                    "evidences": [
+                      {
+                        "block_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-e6507e9a65984a29f944da803ba0c659e32063e4"
+                      }
+                    ],
+                    "reported": true,
+                    "unit_raw": "dimensionless",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 1.32,
+                    "value_raw": "~1.32 dimensionless",
+                    "value_text": null
+                  },
+                  "mu_star": {
+                    "evidences": [
+                      {
+                        "block_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-c24c375fcbedda18d5cd8b39572aa2dd30f6bde7"
+                      }
+                    ],
+                    "reported": true,
+                    "unit_raw": null,
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 0.13,
+                    "value_raw": "0.13",
+                    "value_text": null
+                  },
+                  "omega_log": null
+                },
+                "table_row_ref": null,
+                "thermodynamic_stability": null
+              },
+              "property_code": "tc",
+              "record_type": "predicted_tc",
+              "uncertainty": null,
+              "unit_raw": "K",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 86,
+              "value_raw": "~86 K",
+              "value_text": null
+            }
+          ]
+        }
+      ],
+      "reported_space_group_number": null,
+      "reported_space_group_symbol": null,
+      "scope": "current_paper",
+      "state_kind": "theoretical",
+      "structure_families": [
+        {
+          "name": "clathrate",
+          "page": 4,
+          "quote": "Tc\n(bottom panel) of various clathrate structures at high pressures.",
+          "scope": "current_paper"
+        }
+      ],
+      "structure_optimization": "unknown"
+    }
+  ],
+  "metadata": {
+    "abstract": null,
+    "authors": null,
+    "co_first_authors": null,
+    "corresponding_authors": null,
+    "doi": null,
+    "issue_number": null,
+    "journal": "PHYSICAL REVIEW LETTERS",
+    "key_finding": null,
+    "keywords_tags": null,
+    "knowledge_graph_title": null,
+    "material_families": null,
+    "methodology": null,
+    "pages": "107001",
+    "paper_type": "theoretical",
+    "research_motivation": null,
+    "summary": null,
+    "superconductor_kind": "conventional",
+    "theoretical_subtype": "calculation",
+    "volume": "119",
+    "year": 2017
+  },
+  "methodology": [],
+  "paper_type_evidence": [
+    {
+      "block_id": "original-4-2",
+      "candidate": "theoretical",
+      "file_id": "main",
+      "pdf_page": 4,
+      "quote": null,
+      "quote_id": "original-4-2",
+      "scope": "current_paper"
+    }
+  ],
+  "referenced_materials": [],
+  "research_materials": [
+    {
+      "evidences": [
+        {
+          "block_id": "original-4-5",
+          "file_id": "main",
+          "pdf_page": 4,
+          "quote": null,
+          "quote_id": "original-4-5"
+        }
+      ],
+      "scope": "current_paper",
+      "value": "ScH6"
+    }
+  ]
+}

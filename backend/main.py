@@ -69,6 +69,8 @@ app.include_router(evidence.router)
 app.include_router(paper_revisions.router)
 from backend.api import manuscript_handoffs
 app.include_router(manuscript_handoffs.router)
+from backend.api import visual_sources
+app.include_router(visual_sources.router)
 app.include_router(upload_tasks.router)
 app.include_router(kg.router)
 app.include_router(kg_live_router)

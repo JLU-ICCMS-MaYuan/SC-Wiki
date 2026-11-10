@@ -1,0 +1,299 @@
+{
+  "action": {
+    "name": "digitize_image_elements",
+    "arguments": {
+      "region_id": "pdf-region-b303153c16bc2070047a2351c02ddfa4c3649a1eb5d6eb05a1aa0399bf439cdd",
+      "panel": {
+        "figure": "Fig. 4",
+        "panel": "top",
+        "kind": "bar",
+        "quantity": "dos_fermi",
+        "quantity_name": "N_Ef (DOS of H at Fermi level)",
+        "unit": "states/eV/Å^3",
+        "layout": "matrix",
+        "categories": [
+          "ScH6",
+          "ScH9",
+          "YH6",
+          "YH9",
+          "YH10",
+          "LaH6",
+          "LaH9",
+          "CeH9",
+          "CeH10",
+          "PrH9"
+        ],
+        "series": [
+          "N_Ef"
+        ],
+        "axis": {
+          "scale": "linear",
+          "bounds": [
+            130,
+            490
+          ],
+          "ticks": [
+            {
+              "position": 490,
+              "value": 0.0
+            },
+            {
+              "position": 310,
+              "value": 0.02
+            },
+            {
+              "position": 130,
+              "value": 0.04
+            }
+          ]
+        },
+        "x_axis": null,
+        "x_quantity": null,
+        "x_unit": null,
+        "colorbar": null,
+        "points": [
+          {
+            "category": "ScH6",
+            "series": "N_Ef",
+            "material": "ScH6",
+            "pressure_value_gpa": 300,
+            "space_group_symbol": null,
+            "mu_star": null,
+            "method_raw": null,
+            "reading": "position",
+            "x": 262,
+            "y": 235,
+            "label_value": null,
+            "label_text": null,
+            "pixel_error": 6,
+            "conditions": [
+              {
+                "label": "pressure",
+                "value": "300",
+                "unit": "GPa"
+              }
+            ],
+            "reason": "Red bar height in top panel for ScH6 at 300 GPa."
+          },
+          {
+            "category": "ScH9",
+            "series": "N_Ef",
+            "material": "ScH9",
+            "pressure_value_gpa": 400,
+            "space_group_symbol": null,
+            "mu_star": null,
+            "method_raw": null,
+            "reading": "position",
+            "x": 330,
+            "y": 238,
+            "label_value": null,
+            "label_text": null,
+            "pixel_error": 6,
+            "conditions": [
+              {
+                "label": "pressure",
+                "value": "400",
+                "unit": "GPa"
+              }
+            ],
+            "reason": "Red bar height for ScH9 at 400 GPa."
+          },
+          {
+            "category": "YH6",
+            "series": "N_Ef",
+            "material": "YH6",
+            "pressure_value_gpa": 120,
+            "space_group_symbol": null,
+            "mu_star": null,
+            "method_raw": null,
+            "reading": "position",
+            "x": 400,
+            "y": 225,
+            "label_value": null,
+            "label_text": null,
+            "pixel_error": 6,
+            "conditions": [
+              {
+                "label": "pressure",
+                "value": "120",
+                "unit": "GPa"
+              }
+            ],
+            "reason": "Red bar height for YH6 at 120 GPa."
+          },
+          {
+            "category": "YH9",
+            "series": "N_Ef",
+            "material": "YH9",
+            "pressure_value_gpa": 150,
+            "space_group_symbol": null,
+            "mu_star": null,
+            "method_raw": null,
+            "reading": "position",
+            "x": 470,
+            "y": 240,
+            "label_value": null,
+            "label_text": null,
+            "pixel_error": 6,
+            "conditions": [
+              {
+                "label": "pressure",
+                "value": "150",
+                "unit": "GPa"
+              }
+            ],
+            "reason": "Red bar height for YH9 at 150 GPa."
+          },
+          {
+            "category": "YH10",
+            "series": "N_Ef",
+            "material": "YH10",
+            "pressure_value_gpa": 400,
+            "space_group_symbol": null,
+            "mu_star": null,
+            "method_raw": null,
+            "reading": "position",
+            "x": 540,
+            "y": 205,
+            "label_value": null,
+            "label_text": null,
+            "pixel_error": 6,
+            "conditions": [
+              {
+                "label": "pressure",
+                "value": "400",
+                "unit": "GPa"
+              }
+            ],
+            "reason": "Red bar height for YH10 at 400 GPa."
+          },
+          {
+            "category": "LaH6",
+            "series": "N_Ef",
+            "material": "LaH6",
+            "pressure_value_gpa": 100,
+            "space_group_symbol": null,
+            "mu_star": null,
+            "method_raw": null,
+            "reading": "position",
+            "x": 610,
+            "y": 212,
+            "label_value": null,
+            "label_text": null,
+            "pixel_error": 6,
+            "conditions": [
+              {
+                "label": "pressure",
+                "value": "100",
+                "unit": "GPa"
+              }
+            ],
+            "reason": "Red bar height for LaH6 at 100 GPa."
+          },
+          {
+            "category": "LaH9",
+            "series": "N_Ef",
+            "material": "LaH9",
+            "pressure_value_gpa": 50,
+            "space_group_symbol": null,
+            "mu_star": null,
+            "method_raw": null,
+            "reading": "position",
+            "x": 680,
+            "y": 425,
+            "label_value": null,
+            "label_text": null,
+            "pixel_error": 6,
+            "conditions": [
+              {
+                "label": "pressure",
+                "value": "50",
+                "unit": "GPa"
+              }
+            ],
+            "reason": "Red bar height for LaH9 at 50 GPa."
+          },
+          {
+            "category": "CeH9",
+            "series": "N_Ef",
+            "material": "CeH9",
+            "pressure_value_gpa": 100,
+            "space_group_symbol": null,
+            "mu_star": null,
+            "method_raw": null,
+            "reading": "position",
+            "x": 750,
+            "y": 185,
+            "label_value": null,
+            "label_text": null,
+            "pixel_error": 6,
+            "conditions": [
+              {
+                "label": "pressure",
+                "value": "100",
+                "unit": "GPa"
+              }
+            ],
+            "reason": "Red bar height for CeH9 at 100 GPa."
+          },
+          {
+            "category": "CeH10",
+            "series": "N_Ef",
+            "material": "CeH10",
+            "pressure_value_gpa": 200,
+            "space_group_symbol": null,
+            "mu_star": null,
+            "method_raw": null,
+            "reading": "position",
+            "x": 820,
+            "y": 188,
+            "label_value": null,
+            "label_text": null,
+            "pixel_error": 6,
+            "conditions": [
+              {
+                "label": "pressure",
+                "value": "200",
+                "unit": "GPa"
+              }
+            ],
+            "reason": "Red bar height for CeH10 at 200 GPa."
+          },
+          {
+            "category": "PrH9",
+            "series": "N_Ef",
+            "material": "PrH9",
+            "pressure_value_gpa": 100,
+            "space_group_symbol": null,
+            "mu_star": null,
+            "method_raw": null,
+            "reading": "position",
+            "x": 890,
+            "y": 140,
+            "label_value": null,
+            "label_text": null,
+            "pixel_error": 6,
+            "conditions": [
+              {
+                "label": "pressure",
+                "value": "100",
+                "unit": "GPa"
+              }
+            ],
+            "reason": "Red bar height for PrH9 at 100 GPa."
+          }
+        ],
+        "unresolved": [],
+        "reason": "Top panel: DOS of H at Fermi level per Å^3 for ten clathrate structures; pressures from caption."
+      }
+    }
+  },
+  "_tool_call": {
+    "id": "call_00_7ZuW77U4XzrKPOY7oKXN4126",
+    "type": "function",
+    "function": {
+      "name": "digitize_image_elements",
+      "arguments": "{\"region_id\": \"pdf-region-b303153c16bc2070047a2351c02ddfa4c3649a1eb5d6eb05a1aa0399bf439cdd\", \"panel\": {\"figure\": \"Fig. 4\", \"panel\": \"top\", \"kind\": \"bar\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"N_Ef (DOS of H at Fermi level)\", \"unit\": \"states/eV/Å^3\", \"layout\": \"matrix\", \"categories\": [\"ScH6\", \"ScH9\", \"YH6\", \"YH9\", \"YH10\", \"LaH6\", \"LaH9\", \"CeH9\", \"CeH10\", \"PrH9\"], \"series\": [\"N_Ef\"], \"axis\": {\"scale\": \"linear\", \"bounds\": [130, 490], \"ticks\": [{\"position\": 490, \"value\": 0.0}, {\"position\": 310, \"value\": 0.02}, {\"position\": 130, \"value\": 0.04}]}, \"x_axis\": null, \"x_quantity\": null, \"x_unit\": null, \"colorbar\": null, \"points\": [{\"category\": \"ScH6\", \"series\": \"N_Ef\", \"material\": \"ScH6\", \"pressure_value_gpa\": 300, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"reading\": \"position\", \"x\": 262, \"y\": 235, \"label_value\": null, \"label_text\": null, \"pixel_error\": 6, \"conditions\": [{\"label\": \"pressure\", \"value\": \"300\", \"unit\": \"GPa\"}], \"reason\": \"Red bar height in top panel for ScH6 at 300 GPa.\"}, {\"category\": \"ScH9\", \"series\": \"N_Ef\", \"material\": \"ScH9\", \"pressure_value_gpa\": 400, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"reading\": \"position\", \"x\": 330, \"y\": 238, \"label_value\": null, \"label_text\": null, \"pixel_error\": 6, \"conditions\": [{\"label\": \"pressure\", \"value\": \"400\", \"unit\": \"GPa\"}], \"reason\": \"Red bar height for ScH9 at 400 GPa.\"}, {\"category\": \"YH6\", \"series\": \"N_Ef\", \"material\": \"YH6\", \"pressure_value_gpa\": 120, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"reading\": \"position\", \"x\": 400, \"y\": 225, \"label_value\": null, \"label_text\": null, \"pixel_error\": 6, \"conditions\": [{\"label\": \"pressure\", \"value\": \"120\", \"unit\": \"GPa\"}], \"reason\": \"Red bar height for YH6 at 120 GPa.\"}, {\"category\": \"YH9\", \"series\": \"N_Ef\", \"material\": \"YH9\", \"pressure_value_gpa\": 150, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"reading\": \"position\", \"x\": 470, \"y\": 240, \"label_value\": null, \"label_text\": null, \"pixel_error\": 6, \"conditions\": [{\"label\": \"pressure\", \"value\": \"150\", \"unit\": \"GPa\"}], \"reason\": \"Red bar height for YH9 at 150 GPa.\"}, {\"category\": \"YH10\", \"series\": \"N_Ef\", \"material\": \"YH10\", \"pressure_value_gpa\": 400, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"reading\": \"position\", \"x\": 540, \"y\": 205, \"label_value\": null, \"label_text\": null, \"pixel_error\": 6, \"conditions\": [{\"label\": \"pressure\", \"value\": \"400\", \"unit\": \"GPa\"}], \"reason\": \"Red bar height for YH10 at 400 GPa.\"}, {\"category\": \"LaH6\", \"series\": \"N_Ef\", \"material\": \"LaH6\", \"pressure_value_gpa\": 100, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"reading\": \"position\", \"x\": 610, \"y\": 212, \"label_value\": null, \"label_text\": null, \"pixel_error\": 6, \"conditions\": [{\"label\": \"pressure\", \"value\": \"100\", \"unit\": \"GPa\"}], \"reason\": \"Red bar height for LaH6 at 100 GPa.\"}, {\"category\": \"LaH9\", \"series\": \"N_Ef\", \"material\": \"LaH9\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"reading\": \"position\", \"x\": 680, \"y\": 425, \"label_value\": null, \"label_text\": null, \"pixel_error\": 6, \"conditions\": [{\"label\": \"pressure\", \"value\": \"50\", \"unit\": \"GPa\"}], \"reason\": \"Red bar height for LaH9 at 50 GPa.\"}, {\"category\": \"CeH9\", \"series\": \"N_Ef\", \"material\": \"CeH9\", \"pressure_value_gpa\": 100, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"reading\": \"position\", \"x\": 750, \"y\": 185, \"label_value\": null, \"label_text\": null, \"pixel_error\": 6, \"conditions\": [{\"label\": \"pressure\", \"value\": \"100\", \"unit\": \"GPa\"}], \"reason\": \"Red bar height for CeH9 at 100 GPa.\"}, {\"category\": \"CeH10\", \"series\": \"N_Ef\", \"material\": \"CeH10\", \"pressure_value_gpa\": 200, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"reading\": \"position\", \"x\": 820, \"y\": 188, \"label_value\": null, \"label_text\": null, \"pixel_error\": 6, \"conditions\": [{\"label\": \"pressure\", \"value\": \"200\", \"unit\": \"GPa\"}], \"reason\": \"Red bar height for CeH10 at 200 GPa.\"}, {\"category\": \"PrH9\", \"series\": \"N_Ef\", \"material\": \"PrH9\", \"pressure_value_gpa\": 100, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"reading\": \"position\", \"x\": 890, \"y\": 140, \"label_value\": null, \"label_text\": null, \"pixel_error\": 6, \"conditions\": [{\"label\": \"pressure\", \"value\": \"100\", \"unit\": \"GPa\"}], \"reason\": \"Red bar height for PrH9 at 100 GPa.\"}], \"unresolved\": [], \"reason\": \"Top panel: DOS of H at Fermi level per Å^3 for ten clathrate structures; pressures from caption.\"}}"
+    }
+  }
+}

@@ -27,6 +27,7 @@ def get_langchain_llm(*, read_timeout: float | None = None, max_retries: int = 2
     if not config.api_key:
         raise RuntimeError("LLM API key 未配置")
     base_url = validate_base_url(config.base_url)
+    from .responses_json import protocol_for
     return ChatOpenAI(
         model=config.model,
         api_key=config.api_key,
@@ -35,4 +36,5 @@ def get_langchain_llm(*, read_timeout: float | None = None, max_retries: int = 2
         max_tokens=2000,
         timeout=read_timeout,
         max_retries=max_retries,
+        **({'use_responses_api': True} if protocol_for(config)=='responses' else {}),
     )

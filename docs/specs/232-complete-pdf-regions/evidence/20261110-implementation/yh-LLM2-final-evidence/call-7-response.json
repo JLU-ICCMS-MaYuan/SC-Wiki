@@ -1,0 +1,402 @@
+{
+  "action": {
+    "name": "report_chart_reading",
+    "arguments": {
+      "notes": [
+        {
+          "reason": "PrH9 has no discernible colored bar above the baseline in either series; absence is not a numerical zero.",
+          "scope": "target"
+        },
+        {
+          "reason": "Only the bottom Tc panel is selected; neighboring EPC bars are excluded. Caption supplies material-specific pressures; body identifies Eliashberg-equation calculations. Plotted heights are retained independently of textual summaries.",
+          "scope": "context"
+        }
+      ],
+      "panels": [
+        {
+          "axis": {
+            "bounds": [
+              39,
+              773
+            ],
+            "scale": "linear",
+            "ticks": [
+              {
+                "position": 773,
+                "value": 0
+              },
+              {
+                "position": 574,
+                "value": 100
+              },
+              {
+                "position": 378,
+                "value": 200
+              },
+              {
+                "position": 180,
+                "value": 300
+              }
+            ]
+          },
+          "categories": [
+            "ScH6",
+            "ScH9",
+            "YH6",
+            "YH9",
+            "YH10",
+            "LaH6",
+            "LaH9",
+            "CeH9",
+            "CeH10",
+            "PrH9"
+          ],
+          "colorbar": null,
+          "figure": "Fig. 4",
+          "kind": "bar",
+          "layout": "matrix",
+          "panel": "bottom",
+          "points": [
+            {
+              "category": "ScH6",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "ScH6",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.1,
+              "pixel_error": 3,
+              "pressure_value_gpa": 300,
+              "reading": "position",
+              "reason": "Green bar; caption maps ScH6 to 300 GPa.",
+              "series": "μ*=0.1",
+              "space_group_symbol": null,
+              "x": 239,
+              "y": 574
+            },
+            {
+              "category": "ScH6",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "ScH6",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.13,
+              "pixel_error": 3,
+              "pressure_value_gpa": 300,
+              "reading": "position",
+              "reason": "Dark blue bar; caption maps ScH6 to 300 GPa.",
+              "series": "μ*=0.13",
+              "space_group_symbol": null,
+              "x": 250,
+              "y": 600
+            },
+            {
+              "category": "ScH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "ScH9",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.1,
+              "pixel_error": 3,
+              "pressure_value_gpa": 400,
+              "reading": "position",
+              "reason": "Green bar; caption maps ScH9 to 400 GPa.",
+              "series": "μ*=0.1",
+              "space_group_symbol": null,
+              "x": 312,
+              "y": 414
+            },
+            {
+              "category": "ScH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "ScH9",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.13,
+              "pixel_error": 3,
+              "pressure_value_gpa": 400,
+              "reading": "position",
+              "reason": "Dark blue bar; caption maps ScH9 to 400 GPa.",
+              "series": "μ*=0.13",
+              "space_group_symbol": null,
+              "x": 323,
+              "y": 442
+            },
+            {
+              "category": "YH6",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "YH6",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.1,
+              "pixel_error": 3,
+              "pressure_value_gpa": 120,
+              "reading": "position",
+              "reason": "Green bar; caption maps YH6 to 120 GPa.",
+              "series": "μ*=0.1",
+              "space_group_symbol": null,
+              "x": 384,
+              "y": 250
+            },
+            {
+              "category": "YH6",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "YH6",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.13,
+              "pixel_error": 3,
+              "pressure_value_gpa": 120,
+              "reading": "position",
+              "reason": "Dark blue bar; caption maps YH6 to 120 GPa.",
+              "series": "μ*=0.13",
+              "space_group_symbol": null,
+              "x": 395,
+              "y": 275
+            },
+            {
+              "category": "YH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "YH9",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.1,
+              "pixel_error": 3,
+              "pressure_value_gpa": 150,
+              "reading": "position",
+              "reason": "Green bar; caption maps YH9 to 150 GPa.",
+              "series": "μ*=0.1",
+              "space_group_symbol": null,
+              "x": 457,
+              "y": 244
+            },
+            {
+              "category": "YH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "YH9",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.13,
+              "pixel_error": 3,
+              "pressure_value_gpa": 150,
+              "reading": "position",
+              "reason": "Dark blue bar; caption maps YH9 to 150 GPa.",
+              "series": "μ*=0.13",
+              "space_group_symbol": null,
+              "x": 468,
+              "y": 272
+            },
+            {
+              "category": "YH10",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "YH10",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.1,
+              "pixel_error": 3,
+              "pressure_value_gpa": 400,
+              "reading": "position",
+              "reason": "Green bar; caption maps YH10 to 400 GPa.",
+              "series": "μ*=0.1",
+              "space_group_symbol": null,
+              "x": 530,
+              "y": 161
+            },
+            {
+              "category": "YH10",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "YH10",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.13,
+              "pixel_error": 3,
+              "pressure_value_gpa": 400,
+              "reading": "position",
+              "reason": "Dark blue bar; caption maps YH10 to 400 GPa.",
+              "series": "μ*=0.13",
+              "space_group_symbol": null,
+              "x": 541,
+              "y": 205
+            },
+            {
+              "category": "LaH6",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "LaH6",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.1,
+              "pixel_error": 3,
+              "pressure_value_gpa": 100,
+              "reading": "position",
+              "reason": "Green bar; caption maps LaH6 to 100 GPa.",
+              "series": "μ*=0.1",
+              "space_group_symbol": null,
+              "x": 602,
+              "y": 433
+            },
+            {
+              "category": "LaH6",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "LaH6",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.13,
+              "pixel_error": 3,
+              "pressure_value_gpa": 100,
+              "reading": "position",
+              "reason": "Dark blue bar; caption maps LaH6 to 100 GPa.",
+              "series": "μ*=0.13",
+              "space_group_symbol": null,
+              "x": 613,
+              "y": 466
+            },
+            {
+              "category": "LaH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "LaH9",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.1,
+              "pixel_error": 3,
+              "pressure_value_gpa": 50,
+              "reading": "position",
+              "reason": "Green bar; caption maps LaH9 to 50 GPa.",
+              "series": "μ*=0.1",
+              "space_group_symbol": null,
+              "x": 675,
+              "y": 719
+            },
+            {
+              "category": "LaH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "LaH9",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.13,
+              "pixel_error": 3,
+              "pressure_value_gpa": 50,
+              "reading": "position",
+              "reason": "Dark blue bar; caption maps LaH9 to 50 GPa.",
+              "series": "μ*=0.13",
+              "space_group_symbol": null,
+              "x": 686,
+              "y": 731
+            },
+            {
+              "category": "CeH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "CeH9",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.1,
+              "pixel_error": 3,
+              "pressure_value_gpa": 100,
+              "reading": "position",
+              "reason": "Green bar; caption maps CeH9 to 100 GPa.",
+              "series": "μ*=0.1",
+              "space_group_symbol": null,
+              "x": 747,
+              "y": 668
+            },
+            {
+              "category": "CeH9",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "CeH9",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.13,
+              "pixel_error": 3,
+              "pressure_value_gpa": 100,
+              "reading": "position",
+              "reason": "Dark blue bar; caption maps CeH9 to 100 GPa.",
+              "series": "μ*=0.13",
+              "space_group_symbol": null,
+              "x": 758,
+              "y": 679
+            },
+            {
+              "category": "CeH10",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "CeH10",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.1,
+              "pixel_error": 3,
+              "pressure_value_gpa": 200,
+              "reading": "position",
+              "reason": "Green bar; caption maps CeH10 to 200 GPa.",
+              "series": "μ*=0.1",
+              "space_group_symbol": null,
+              "x": 820,
+              "y": 656
+            },
+            {
+              "category": "CeH10",
+              "conditions": [],
+              "label_text": null,
+              "label_value": null,
+              "material": "CeH10",
+              "method_raw": "Eliashberg equation",
+              "mu_star": 0.13,
+              "pixel_error": 3,
+              "pressure_value_gpa": 200,
+              "reading": "position",
+              "reason": "Dark blue bar; caption maps CeH10 to 200 GPa.",
+              "series": "μ*=0.13",
+              "space_group_symbol": null,
+              "x": 831,
+              "y": 675
+            }
+          ],
+          "quantity": "tc",
+          "quantity_name": "Superconducting transition temperature",
+          "reason": "Bottom panel: grouped green and dark blue bars for Coulomb pseudopotentials 0.1 and 0.13. Material-specific stable-range pressures are given in the shared caption. Body describes Eliashberg-equation Tc calculations; no variant or space-group mapping is specified here.",
+          "series": [
+            "μ*=0.1",
+            "μ*=0.13"
+          ],
+          "unit": "K",
+          "unresolved": [
+            {
+              "category": "PrH9",
+              "reason": "No discernible green bar above baseline; cannot infer Tc or zero. Caption pressure is 100 GPa.",
+              "series": "μ*=0.1"
+            },
+            {
+              "category": "PrH9",
+              "reason": "No discernible dark blue bar above baseline; cannot infer Tc or zero. Caption pressure is 100 GPa.",
+              "series": "μ*=0.13"
+            }
+          ],
+          "x_axis": null,
+          "x_quantity": null,
+          "x_unit": null
+        }
+      ]
+    }
+  },
+  "_tool_call": {
+    "id": "call_e802dcc30e4045279e157bde83f1b799",
+    "type": "function",
+    "function": {
+      "name": "report_chart_reading",
+      "arguments": "{\"notes\":[{\"reason\":\"PrH9 has no discernible colored bar above the baseline in either series; absence is not a numerical zero.\",\"scope\":\"target\"},{\"reason\":\"Only the bottom Tc panel is selected; neighboring EPC bars are excluded. Caption supplies material-specific pressures; body identifies Eliashberg-equation calculations. Plotted heights are retained independently of textual summaries.\",\"scope\":\"context\"}],\"panels\":[{\"axis\":{\"bounds\":[39,773],\"scale\":\"linear\",\"ticks\":[{\"position\":773,\"value\":0},{\"position\":574,\"value\":100},{\"position\":378,\"value\":200},{\"position\":180,\"value\":300}]},\"categories\":[\"ScH6\",\"ScH9\",\"YH6\",\"YH9\",\"YH10\",\"LaH6\",\"LaH9\",\"CeH9\",\"CeH10\",\"PrH9\"],\"colorbar\":null,\"figure\":\"Fig. 4\",\"kind\":\"bar\",\"layout\":\"matrix\",\"panel\":\"bottom\",\"points\":[{\"category\":\"ScH6\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"ScH6\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.1,\"pixel_error\":3,\"pressure_value_gpa\":300,\"reading\":\"position\",\"reason\":\"Green bar; caption maps ScH6 to 300 GPa.\",\"series\":\"μ*=0.1\",\"space_group_symbol\":null,\"x\":239,\"y\":574},{\"category\":\"ScH6\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"ScH6\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.13,\"pixel_error\":3,\"pressure_value_gpa\":300,\"reading\":\"position\",\"reason\":\"Dark blue bar; caption maps ScH6 to 300 GPa.\",\"series\":\"μ*=0.13\",\"space_group_symbol\":null,\"x\":250,\"y\":600},{\"category\":\"ScH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"ScH9\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.1,\"pixel_error\":3,\"pressure_value_gpa\":400,\"reading\":\"position\",\"reason\":\"Green bar; caption maps ScH9 to 400 GPa.\",\"series\":\"μ*=0.1\",\"space_group_symbol\":null,\"x\":312,\"y\":414},{\"category\":\"ScH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"ScH9\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.13,\"pixel_error\":3,\"pressure_value_gpa\":400,\"reading\":\"position\",\"reason\":\"Dark blue bar; caption maps ScH9 to 400 GPa.\",\"series\":\"μ*=0.13\",\"space_group_symbol\":null,\"x\":323,\"y\":442},{\"category\":\"YH6\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"YH6\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.1,\"pixel_error\":3,\"pressure_value_gpa\":120,\"reading\":\"position\",\"reason\":\"Green bar; caption maps YH6 to 120 GPa.\",\"series\":\"μ*=0.1\",\"space_group_symbol\":null,\"x\":384,\"y\":250},{\"category\":\"YH6\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"YH6\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.13,\"pixel_error\":3,\"pressure_value_gpa\":120,\"reading\":\"position\",\"reason\":\"Dark blue bar; caption maps YH6 to 120 GPa.\",\"series\":\"μ*=0.13\",\"space_group_symbol\":null,\"x\":395,\"y\":275},{\"category\":\"YH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"YH9\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.1,\"pixel_error\":3,\"pressure_value_gpa\":150,\"reading\":\"position\",\"reason\":\"Green bar; caption maps YH9 to 150 GPa.\",\"series\":\"μ*=0.1\",\"space_group_symbol\":null,\"x\":457,\"y\":244},{\"category\":\"YH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"YH9\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.13,\"pixel_error\":3,\"pressure_value_gpa\":150,\"reading\":\"position\",\"reason\":\"Dark blue bar; caption maps YH9 to 150 GPa.\",\"series\":\"μ*=0.13\",\"space_group_symbol\":null,\"x\":468,\"y\":272},{\"category\":\"YH10\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"YH10\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.1,\"pixel_error\":3,\"pressure_value_gpa\":400,\"reading\":\"position\",\"reason\":\"Green bar; caption maps YH10 to 400 GPa.\",\"series\":\"μ*=0.1\",\"space_group_symbol\":null,\"x\":530,\"y\":161},{\"category\":\"YH10\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"YH10\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.13,\"pixel_error\":3,\"pressure_value_gpa\":400,\"reading\":\"position\",\"reason\":\"Dark blue bar; caption maps YH10 to 400 GPa.\",\"series\":\"μ*=0.13\",\"space_group_symbol\":null,\"x\":541,\"y\":205},{\"category\":\"LaH6\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"LaH6\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.1,\"pixel_error\":3,\"pressure_value_gpa\":100,\"reading\":\"position\",\"reason\":\"Green bar; caption maps LaH6 to 100 GPa.\",\"series\":\"μ*=0.1\",\"space_group_symbol\":null,\"x\":602,\"y\":433},{\"category\":\"LaH6\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"LaH6\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.13,\"pixel_error\":3,\"pressure_value_gpa\":100,\"reading\":\"position\",\"reason\":\"Dark blue bar; caption maps LaH6 to 100 GPa.\",\"series\":\"μ*=0.13\",\"space_group_symbol\":null,\"x\":613,\"y\":466},{\"category\":\"LaH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"LaH9\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.1,\"pixel_error\":3,\"pressure_value_gpa\":50,\"reading\":\"position\",\"reason\":\"Green bar; caption maps LaH9 to 50 GPa.\",\"series\":\"μ*=0.1\",\"space_group_symbol\":null,\"x\":675,\"y\":719},{\"category\":\"LaH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"LaH9\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.13,\"pixel_error\":3,\"pressure_value_gpa\":50,\"reading\":\"position\",\"reason\":\"Dark blue bar; caption maps LaH9 to 50 GPa.\",\"series\":\"μ*=0.13\",\"space_group_symbol\":null,\"x\":686,\"y\":731},{\"category\":\"CeH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"CeH9\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.1,\"pixel_error\":3,\"pressure_value_gpa\":100,\"reading\":\"position\",\"reason\":\"Green bar; caption maps CeH9 to 100 GPa.\",\"series\":\"μ*=0.1\",\"space_group_symbol\":null,\"x\":747,\"y\":668},{\"category\":\"CeH9\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"CeH9\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.13,\"pixel_error\":3,\"pressure_value_gpa\":100,\"reading\":\"position\",\"reason\":\"Dark blue bar; caption maps CeH9 to 100 GPa.\",\"series\":\"μ*=0.13\",\"space_group_symbol\":null,\"x\":758,\"y\":679},{\"category\":\"CeH10\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"CeH10\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.1,\"pixel_error\":3,\"pressure_value_gpa\":200,\"reading\":\"position\",\"reason\":\"Green bar; caption maps CeH10 to 200 GPa.\",\"series\":\"μ*=0.1\",\"space_group_symbol\":null,\"x\":820,\"y\":656},{\"category\":\"CeH10\",\"conditions\":[],\"label_text\":null,\"label_value\":null,\"material\":\"CeH10\",\"method_raw\":\"Eliashberg equation\",\"mu_star\":0.13,\"pixel_error\":3,\"pressure_value_gpa\":200,\"reading\":\"position\",\"reason\":\"Dark blue bar; caption maps CeH10 to 200 GPa.\",\"series\":\"μ*=0.13\",\"space_group_symbol\":null,\"x\":831,\"y\":675}],\"quantity\":\"tc\",\"quantity_name\":\"Superconducting transition temperature\",\"reason\":\"Bottom panel: grouped green and dark blue bars for Coulomb pseudopotentials 0.1 and 0.13. Material-specific stable-range pressures are given in the shared caption. Body describes Eliashberg-equation Tc calculations; no variant or space-group mapping is specified here.\",\"series\":[\"μ*=0.1\",\"μ*=0.13\"],\"unit\":\"K\",\"unresolved\":[{\"category\":\"PrH9\",\"reason\":\"No discernible green bar above baseline; cannot infer Tc or zero. Caption pressure is 100 GPa.\",\"series\":\"μ*=0.1\"},{\"category\":\"PrH9\",\"reason\":\"No discernible dark blue bar above baseline; cannot infer Tc or zero. Caption pressure is 100 GPa.\",\"series\":\"μ*=0.13\"}],\"x_axis\":null,\"x_quantity\":null,\"x_unit\":null}]}"
+    }
+  }
+}
