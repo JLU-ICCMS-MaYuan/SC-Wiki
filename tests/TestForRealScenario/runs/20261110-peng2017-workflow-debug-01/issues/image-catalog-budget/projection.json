@@ -1,0 +1,12 @@
+{
+  "head": "71b02686917f10a768eaa90ad7ef29a0db2b7cd4",
+  "returncode": 0,
+  "files": {
+    "backend/ingest/image_catalog.py": "26f45b9dfe936e56fe9737adb5829ae2caeaa353ff417d8bcbbbe3baf492b2a4",
+    "backend/ingest/image_feedback.py": "3f5a2a0b8ccf7ff12e07b7aa6f11f4dcbaee9b5383b03db967f0059a254039d2",
+    "backend/ingest/image_reading.py": "254da63e99607b9a067cc90ab3105761ba6a110f6d5f46c6b34e6f30d76eb1ef",
+    "backend/ingest/review_tool_contract.py": "54c073a91d063f58d4e16ed195337b167bb99bb199a639abde1ac0d287acbda9",
+    "backend/tests/test_image_catalog_budget.py": "d4f406d7ae520f5aa799af07ccdcc70094489f93ece2eec6e21f41e0ce3d7e8c"
+  },
+  "scope": "HEAD+本次5个源/测试文件及真实目录夹具，显式隔离数据库/认证/数据缓存目录，不含他人MySQL测试调整"
+}

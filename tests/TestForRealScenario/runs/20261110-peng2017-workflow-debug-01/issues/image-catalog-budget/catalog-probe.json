@@ -1,0 +1,16 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "2a43b499-c176-4a94-8dfd-11a291d32160",
+  "failed_call": "/Users/mayuan/Codes/SC-Wiki/.data/review_artifacts/d789acceee124022b3257f84780d1156/model-runtime/ccaff15ce7571f2ce96e907a5152e8fd2340ee440552a040313a271016c5b5d3/calls/adb5c95ec83d23800525fc8baa04fff9327bacce18615324e12aff7fd8b83333-0",
+  "original_estimate": 225154,
+  "available_objects_before": 1308,
+  "catalog_after": 215,
+  "collapsed_cells_with_complete_parent": 805,
+  "unparented_cells_kept": 0,
+  "after_raw_estimate": 70814,
+  "after_prepared_estimate": 70814,
+  "fits_96000": true,
+  "source_pages_byte_semantics_unchanged": true,
+  "images_unchanged": true,
+  "scope": "仅离线预算/对象能力投影探针；未改业务/代码，未发模型"
+}

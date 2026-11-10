@@ -25,3 +25,10 @@
 六类注册名：read_image_context、read_complete_object、adjust_image_region、recognize_image_text、digitize_image_elements、verify_image_reading。标量提取/验证接受封闭panel协议；谱线用独立report_spectrum_calibration及原谱engine，结构仍用report_structures。文字识别当前只声明原PDF文字层/已登记OCR，不冒称新部署OCR服务。
 
 公开来源接口为GET /api/rag/visual-sources/{paper_id}及/{source_id}/image；历史来源按既有交接权限读取，不能用公开路径访问私有快照。模型图像、来源和实际用量分别留证。
+
+
+### 原始图片对象目录与上下文版本
+
+visual_objects依据当前选择、原始块类型及完整父表包含关系建立图片入口；不删除IR中的单元格或派生事实。原始文字/OCR选择集中在original_source_blocks；科学候选和已有文字工具继续按原职责读取。
+
+回执格式仍为image-reading-v1，reader.source_context_version=current-original-context-v2说明原文上下文选择算法。动作缓存身份包含此版本，旧动作回执继续留存，当前调用不复用旧原文上下文。定位及图像摘要、稳定文件/块身份保持。

@@ -1,0 +1,20 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "2a43b499-c176-4a94-8dfd-11a291d32160",
+  "status": "failed",
+  "stage": "extracting",
+  "completed_chunks": 29,
+  "total_chunks": 29,
+  "processing_error": "当前必要原文、图片和字段契约超过请求预算；未删除或摘要替代科学依据",
+  "error_code": "paper_processing_failed",
+  "execution_model": {
+    "provider": "server:LLM2",
+    "model": "gpt-6.1-sol",
+    "catalog_id": "LLM2",
+    "input_hash": "ccaff15ce7571f2ce96e907a5152e8fd2340ee440552a040313a271016c5b5d3",
+    "endpoint_hash": "8f11cc1d483994c69a25d434dbc98dc8be8e43bd63ef3a59af2f68795f62e5af"
+  },
+  "rq_job_status": "JobStatus.FAILED",
+  "queue_count": 0,
+  "source_commit": "71b02686917f10a768eaa90ad7ef29a0db2b7cd4"
+}

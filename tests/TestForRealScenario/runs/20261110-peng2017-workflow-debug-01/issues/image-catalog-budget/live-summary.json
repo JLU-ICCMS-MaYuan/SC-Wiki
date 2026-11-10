@@ -1,0 +1,195 @@
+{
+  "model": "gpt-6.1-sol",
+  "provider": "server:LLM2",
+  "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+  "unresolved": [],
+  "notes": [
+    {
+      "reason": "Only Fig. S14 top panel (YH6) is reported. Shared energy labels are visible on the complete figure's bottom axis; their alignment calibrates the top panel. Other materials and the lower-panel crop padding are excluded.",
+      "scope": "context"
+    }
+  ],
+  "scope": "原失败区域同源新模型、正式反馈/标定/IR保存重读；未改全文或图像、未写业务，非整篇/角色验收",
+  "readings": [
+    {
+      "point": {
+        "category": "YH6",
+        "conditions": [
+          {
+            "label": "E-EF",
+            "unit": "eV",
+            "value": "0"
+          },
+          {
+            "label": "orbital projection",
+            "unit": null,
+            "value": "Y-s"
+          }
+        ],
+        "label_text": null,
+        "label_value": null,
+        "material": "YH6",
+        "method_raw": null,
+        "mu_star": null,
+        "pixel_error": 3,
+        "pressure_value_gpa": null,
+        "reading": "position",
+        "reason": "Magenta Y-s curve at the vertical dashed Fermi reference; small positive contribution near the baseline.",
+        "series": "Y-s",
+        "space_group_symbol": null,
+        "x": 675.1,
+        "y": 883.4
+      },
+      "quantity": "dos_fermi",
+      "value_number": 0.01,
+      "value_raw": "~0.01 state/eV",
+      "reading_precision": 0.02,
+      "source_file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "pdf_page": 13
+    },
+    {
+      "point": {
+        "category": "YH6",
+        "conditions": [
+          {
+            "label": "E-EF",
+            "unit": "eV",
+            "value": "0"
+          },
+          {
+            "label": "orbital projection",
+            "unit": null,
+            "value": "Y-p"
+          }
+        ],
+        "label_text": null,
+        "label_value": null,
+        "material": "YH6",
+        "method_raw": null,
+        "mu_star": null,
+        "pixel_error": 3,
+        "pressure_value_gpa": null,
+        "reading": "position",
+        "reason": "Red Y-p curve intersects the dashed Fermi reference slightly above the magenta curve.",
+        "series": "Y-p",
+        "space_group_symbol": null,
+        "x": 675.1,
+        "y": 877.2
+      },
+      "quantity": "dos_fermi",
+      "value_number": 0.03,
+      "value_raw": "~0.03 state/eV",
+      "reading_precision": 0.02,
+      "source_file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "pdf_page": 13
+    },
+    {
+      "point": {
+        "category": "YH6",
+        "conditions": [
+          {
+            "label": "E-EF",
+            "unit": "eV",
+            "value": "0"
+          },
+          {
+            "label": "orbital projection",
+            "unit": null,
+            "value": "Y-d"
+          }
+        ],
+        "label_text": null,
+        "label_value": null,
+        "material": "YH6",
+        "method_raw": null,
+        "mu_star": null,
+        "pixel_error": 3,
+        "pressure_value_gpa": null,
+        "reading": "position",
+        "reason": "Green Y-d projected DOS at the dashed Fermi reference, identified by the top-panel legend.",
+        "series": "Y-d",
+        "space_group_symbol": null,
+        "x": 675.1,
+        "y": 754.5
+      },
+      "quantity": "dos_fermi",
+      "value_number": 0.38,
+      "value_raw": "~0.38 state/eV",
+      "reading_precision": 0.02,
+      "source_file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "pdf_page": 13
+    },
+    {
+      "point": {
+        "category": "YH6",
+        "conditions": [
+          {
+            "label": "E-EF",
+            "unit": "eV",
+            "value": "0"
+          },
+          {
+            "label": "orbital projection",
+            "unit": null,
+            "value": "H-s"
+          }
+        ],
+        "label_text": null,
+        "label_value": null,
+        "material": "YH6",
+        "method_raw": null,
+        "mu_star": null,
+        "pixel_error": 3,
+        "pressure_value_gpa": null,
+        "reading": "position",
+        "reason": "Blue H-s projected DOS at the dashed Fermi reference, not the nearby circled peak.",
+        "series": "H-s",
+        "space_group_symbol": null,
+        "x": 675.1,
+        "y": 794.6
+      },
+      "quantity": "dos_fermi",
+      "value_number": 0.26,
+      "value_raw": "~0.26 state/eV",
+      "reading_precision": 0.03,
+      "source_file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "pdf_page": 13
+    },
+    {
+      "point": {
+        "category": "YH6",
+        "conditions": [
+          {
+            "label": "E-EF",
+            "unit": "eV",
+            "value": "0"
+          }
+        ],
+        "label_text": null,
+        "label_value": null,
+        "material": "YH6",
+        "method_raw": null,
+        "mu_star": null,
+        "pixel_error": 3,
+        "pressure_value_gpa": null,
+        "reading": "position",
+        "reason": "Black total DOS at the dashed Fermi reference. The red circled feature to its right is not the Fermi-level reading. No pressure or phase is assigned by this caption.",
+        "series": "Total",
+        "space_group_symbol": null,
+        "x": 675.1,
+        "y": 645.1
+      },
+      "quantity": "dos_fermi",
+      "value_number": 0.69,
+      "value_raw": "~0.69 state/eV",
+      "reading_precision": 0.03,
+      "source_file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "pdf_page": 13
+    }
+  ]
+}

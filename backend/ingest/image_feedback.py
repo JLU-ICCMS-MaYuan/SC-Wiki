@@ -45,6 +45,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
     from .chart_reading import reading_schema, calibrate_panel
     from .chart_calibration import ChartReadingError
     from .image_reading import ImageReadingTools, ACTIONS
+    from .image_catalog import visual_objects
     from .review_tool_contract import tool_definitions
     from .pdf_regions import region_locator, render_region_image
     from backend.rag.structured_output import validate_output
@@ -69,6 +70,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
         'available_actions': [t['function']['name'] for t in definitions]}
     current_crop = list(crop)
     answer = None
+    objects = visual_objects(ir)
     for iteration in range(13):  # 复用文档工具已有动作预算，不另设无限循环。
         if cancelled(): raise InterruptedError('图像反馈已取消')
         available = deepcopy([d for d in definitions if d['function']['name'] not in exhausted
@@ -79,7 +81,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
                 properties['region_id'] = {'type':'string','enum':list(local.regions)}
         payload['available_regions'] = list(local.regions.values())
         payload['available_objects'] = [{'block_id':b.block_id,'kind':str(b.block_type),
-            'pdf_page':b.pdf_page,'bbox':b.bbox,'text':b.text[:200]} for b in ir.blocks if b.bbox]
+            'pdf_page':b.pdf_page,'bbox':b.bbox,'text':b.text[:200]} for b in objects]
         payload['available_actions'] = [d['function']['name'] for d in available]
         options = {'images': images, 'tool_definitions': available}
         if history: options['tool_history'] = history

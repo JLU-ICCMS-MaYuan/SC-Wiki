@@ -1,0 +1,6 @@
+{
+  "failed_request_sha256": "2c7231b681ee0a6d77c6247191b977ba0f5ec1ca747c2411602b0f63bf16c8ce",
+  "archive": "failed-request.json.gz",
+  "scope": "完整原始请求本地归档，含本轮图像字节，不提交大请求；轻量失败/预算及父表映射随提交",
+  "original_source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846"
+}

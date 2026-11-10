@@ -35,7 +35,8 @@ def tool_definitions(documents, manifest, *, bibliography=False):
         add("lookup_bibliography", "按已知DOI读取正式题录。", {"doi": text})
     # #233：只有真实授权PDF和带定位来源时才暴露图像操作，不接受路径或任意动作名。
     pdf_documents = {key: ir for key, ir in documents.items() if key in pdf_ids}
-    visual_blocks = [b.block_id for ir in pdf_documents.values() for b in ir.blocks if b.bbox]
+    from .image_catalog import visual_objects
+    visual_blocks = [b.block_id for ir in pdf_documents.values() for b in visual_objects(ir)]
     if visual_blocks:
         file = {'type': 'string', 'enum': list(pdf_documents)}
         region = {'type': 'string', 'minLength': 1}

@@ -11,6 +11,7 @@ import pymupdf
 
 from .document_ir import content_hash
 from .pdf_regions import complete_figure, object_region, region_locator, render_region_image
+from .image_catalog import original_source_blocks, SOURCE_CONTEXT_VERSION
 
 VERSION = 'image-reading-v1'
 ACTIONS = frozenset({'read_image_context', 'read_complete_object', 'adjust_image_region',
@@ -23,7 +24,8 @@ def image_receipt(locator, rendered, *, action, observations=(), parent_receipt_
     result = {'version': VERSION, 'action': action, 'file_id': locator['file_id'],
         'source_sha256': locator['source_sha256'], 'pdf_page': locator['pdf_page'],
         'locator': deepcopy(locator), 'images': [metadata], 'text_observations': list(observations),
-        'parent_receipt_id': parent_receipt_id, 'reader': {'method': 'pdf_text_and_registered_ocr', 'version': VERSION}}
+        'parent_receipt_id': parent_receipt_id, 'reader': {'method': 'pdf_text_and_registered_ocr', 'version': VERSION,
+            'source_context_version': SOURCE_CONTEXT_VERSION}}
     result['receipt_id'] = 'image-receipt-' + content_hash(result)
     return result
 
@@ -69,7 +71,7 @@ class ImageReadingTools:
                 if area.contains(rect):
                     observations.append({'text': word[4], 'bbox_page': list(rect), 'method': 'pdf_text_layer'})
         # OCR块仍声明自身来源，不伪造逐字坐标或新OCR置信度。
-        for b in ir.blocks:
+        for b in original_source_blocks(ir, page=locator['pdf_page']):
             if (b.pdf_page == locator['pdf_page'] and b.bbox and b.text.strip()
                     and b.metadata.get('source_kind') in {'ocr', 'vision'}
                     and area.contains(pymupdf.Rect(b.bbox))):
@@ -85,7 +87,7 @@ class ImageReadingTools:
             'adjust_image_region': {'region_id', 'bbox_page', 'reason', 'dpi'},
             'digitize_image_elements': {'region_id', 'panel'}, 'verify_image_reading': {'region_id', 'panel'}}[name]
         if set(arguments) != fields: raise ValueError('图片工具参数不完整或含未知字段')
-        identity = content_hash(name, arguments)
+        identity = content_hash(SOURCE_CONTEXT_VERSION, name, arguments)
         if identity in self.actions:
             receipt = deepcopy(self.receipts[self.actions[identity]])
             locator, ir, path = self._locate(receipt['locator']['region_id'])
@@ -113,10 +115,10 @@ class ImageReadingTools:
         receipt = image_receipt(locator, rendered, action=name,
             observations=self._observations(ir, path, locator), parent_receipt_id=parent_receipt)
         if name == 'read_image_context':
+            context_blocks = original_source_blocks(ir, page=locator['pdf_page'])
             receipt['context'] = [{'block_id': b.block_id, 'pdf_page': b.pdf_page, 'text': b.text}
-                for b in ir.blocks if b.pdf_page == locator['pdf_page'] and b.text.strip()]
-            receipt['blocks'] = [b.model_dump(mode='json') for b in ir.blocks
-                if b.pdf_page == locator['pdf_page'] and b.text.strip()]
+                for b in context_blocks if b.text.strip()]
+            receipt['blocks'] = [b.model_dump(mode='json') for b in context_blocks if b.text.strip()]
         if name in {'digitize_image_elements', 'verify_image_reading'}:
             from .chart_reading import calibrate_panel
             from .chart_reading import reading_schema
