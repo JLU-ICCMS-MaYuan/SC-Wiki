@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-10T11:18:20.023116+00:00",
+  "target": {
+    "host": "127.0.0.1",
+    "port": 3307,
+    "database": "scwiki"
+  },
+  "doi": "10.1103/PhysRevLett.119.107001",
+  "paper": null
+}

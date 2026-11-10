@@ -1,0 +1,14 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "4fbb0c76-4fee-45a9-8936-5ac2d44eebba",
+  "source_commit": "4adc30d1f8894af3292adc6008741549f253c0ee",
+  "files": {
+    "backend/ingest/chart_calibration.py": "236a73b09588cbdc43fef20169d562d9951d3dd6694793a18408396e133f07d7",
+    "backend/ingest/chart_reading.py": "d8c896bdf382841d05456dd9740dea530acd2e9b3f0c390eed61c6436e013f24",
+    "backend/ingest/pdf_regions.py": "30c3d359e59f627d646b9382d018c4029d1367f25105e7bc41fc87ab49b3cc64",
+    "backend/rag/image_inputs.py": "27539840b98c308657f086c067a71811db922d20d0681bc7c50d7bf2685f4bee",
+    "backend/rag/llm.py": "20e5d7ec814be025aba1d64bb20b4176f226f91f235711c85776c33cbb0f54ef"
+  },
+  "worktree": " M backend/ingest/chart_reading.py\n M backend/tests/test_chart_cache_recovery.py\n M tests/TestForRealScenario/runs/20261110-peng2017-workflow-debug-01/CONTINUATION.md\n M tests/TestForRealScenario/runs/20261110-peng2017-workflow-debug-01/active-task.json\n M tests/TestForRealScenario/runs/20261110-peng2017-workflow-debug-01/case.json\n?? backend/ingest/pdf_regions.py\n?? backend/tests/test_pdf_regions.py\n?? docs/specs/232-complete-pdf-regions/\n?? docs/specs/233-unified-image-tool/\n?? docs/specs/234-image-feedback-repair/\n?? docs/specs/235-rebuildable-visual-sources/\n",
+  "operation": "正常Safari继续，原任务、原文件、原模型不变"
+}

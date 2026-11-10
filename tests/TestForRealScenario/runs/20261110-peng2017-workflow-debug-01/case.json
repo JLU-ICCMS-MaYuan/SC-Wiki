@@ -97,16 +97,18 @@
     "CeH10_200GPa_Tc_DOS": "用户已明确确认Fm-3m，R-3m声子依据独立保留"
   },
   "browser_windows": {
-    "user_safari": 17122,
+    "user_safari": 17885,
     "superadmin_chrome": 1758018018
   },
   "pre_upload_note": "旧选择状态已空且未发任务；新建隔离Safari17122，角色邮箱核验后重新装入原文件",
   "source_commit_at_upload": "9e58ca05fe3a1d235064d85c91ddc82209c06519",
   "task_id": "d789acceee124022b3257f84780d1156",
-  "job_id": "a90b6d55-4966-4377-b8fc-8326ec8af960",
+  "job_id": "4fbb0c76-4fee-45a9-8936-5ac2d44eebba",
   "upload_helper": {
     "method": "正常拖放入口",
     "sha256": "4faa51d1225cccdda7c6ea7e286784db4bb2b5bcc87d08c87acbbd00b1817e27",
     "note": "仅测试辅助修改，服务器已验证同原文件哈希"
-  }
+  },
+  "latest_resume_commit": "4adc30d1f8894af3292adc6008741549f253c0ee",
+  "latest_verified_step": "v7正文三个新请求全部完成/零失败，38条当前来源，YH10 mu=.13约287K精度8K；继续SI，尚无正式论文"
 }
