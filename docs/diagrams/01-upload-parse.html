@@ -60,14 +60,14 @@
     {
       "id": "model-runtime",
       "title": "管理可恢复模型执行",
-      "summary": "通用读取前建立执行代次、检查点与公开动态",
+      "summary": "通用读取前建立执行代次、检查点与公开动态；连续临时失败第 5 次自动暂停",
       "owner": "上传 Worker / ModelRuntime / LangMem",
-      "description": "process_upload_task 先以 start_runtime 原子领取 queued 任务，递增 execution_generation，绑定用户、文件角色与 SHA、解析方案、模型及 endpoint 摘要，再在 execution_context 中运行谱续跑判断或通用管线。ModelRuntime.call 以身份、阶段和完整请求生成确定性目录及 occurrence；request、attempt、failure、prepared-request 和完整 result 分文件原子落盘，已完成 result.json 在后续执行直接复用，不拼接半截输出。",
+      "description": "process_upload_task 先以 start_runtime 原子领取 queued 任务，递增 execution_generation，绑定用户、文件角色与 SHA、解析方案、模型及 endpoint 摘要，再在 execution_context 中运行谱续跑判断或通用管线。ModelRuntime.call 以身份、阶段和完整请求生成确定性目录及 occurrence；request、attempt、failure、prepared-request 和完整 result 分文件原子落盘，已完成 result.json 在后续执行直接复用，不拼接半截输出。同一请求的每组连续临时失败最多 5 次（含首次），第 5 次后自动暂停；一次上下文溢出可触发额外压缩重试并重置连续失败计数，因此单轮总尝试数可超过 5。人工 resume 后重新累计连续失败。",
       "notes": [
         "检查点写入和事件更新前重新检查执行代次；旧代次、pausing、paused、cancelling、cancelled 或 submitted 均阻止继续写回。",
         "公开动态只含脱敏阶段、文件、页、动作、请求计时与错误；events.jsonl 可分页读取，任务状态默认只带最近 100 条，不公开内部思维链或密钥。",
         "prepare_request 先做可完整还原的传输去重；需要压缩时仅由 LangMem 摘要旧过程，当前原文、图片、科学值、来源和近期完整工具交互保持，压缩无效或必要内容仍超限则明确停止。",
-        "临时传输错误原地等待并占用当前 Worker；本机既有 Worker 数量不因等待而释放或增加。"
+        "前 4 次连续临时传输错误可退避重发并占用当前 Worker；第 5 次后活动任务先写 pausing，再由 process_upload_task 收敛为 paused，不在该组连续失败中发送第 6 次。固定鉴权、额度、参数、严格协议错误和科学结论不进入临时重试。"
       ],
       "code": "backend/ingest/upload_jobs.py::process_upload_task；backend/ingest/model_runtime.py::start_runtime / ModelRuntime.call；backend/ingest/model_memory.py::prepare_fixed_request / prepare_request / compact_history",
       "links": [
@@ -77,7 +77,7 @@
         },
         {
           "href": "#model-retry",
-          "label": "查看持续退避与固定错误边界"
+          "label": "查看有界退避、自动暂停与固定错误边界"
         },
         {
           "href": "#model-paused",
@@ -141,15 +141,16 @@
     {
       "id": "chart-reading",
       "title": "逐页盘点并精读科学图表",
-      "summary": "正文/SI图像盘点 → 目标面板精读标定 → 写回 Document IR",
-      "owner": "科学图表读取模型 / 图像标定程序",
-      "description": "论文级核对保存后，enrich_document 校验原 PDF 与 Document IR 的 SHA-256，对全部页面分批执行图像盘点，再对目标图和面板分别精读、标定并把读数与未解决项写回 IR。六页一批只是传输预算，不是文献页数上限；后续适用性判断与科学提取共同使用有效图源。",
+      "summary": "至少 300 DPI 逐页盘点 → 至少 600 DPI 完整图与目标区域精读 → 写回 Document IR",
+      "owner": "科学图表读取模型 / 统一图像工具 / 图像标定程序",
+      "description": "论文级核对保存后，enrich_document 校验原 PDF 与 Document IR 的 SHA-256，对全部页面分批执行真实图像盘点；图区解析只作提示，全部页面和图区均保留盘点去向。仅对盘点判定为目标的图以 pdf-region-v2 建立不可变定位，首次完整 Fig 读取整图、全部相关面板并尝试关联完整图注，再对当前目标面板独立精读、标定，把读数、真实未读项与来源写回 IR；排除项保留盘点身份和排除理由。六页一批只是传输预算，不是文献页数上限；后续适用性判断与科学提取共同使用有效图源。",
       "notes": [
-        "旧版本读数在新版本成功前不被替换；无法解决的图像问题保留为未解决项，不伪造读数。",
-        "图表读数进入适用性判断、科学提取及核对来源；它不改变论文级字段所有权。",
-        "只有存在对应 Document IR 的 main/supplementary PDF 进入此循环，原文件与 IR 哈希不一致时停止。"
+        "定位记录原件 SHA、PDF 页、页尺寸、CropBox、rotation、DPI、渲染器、父区域及有序跨页 related_regions；原件或页面几何不匹配时拒绝沿用旧区域。",
+        "同页不同图不能合并成一次目标读取；相邻面板只作上下文，不能冒充目标已读。图注不能唯一定位时保留歧义或未定位，不随意配对。",
+        "旧版本读数在新版本成功前不被替换；无法解决的图像问题保留为未解决项，不伪造读数。Tc、lambda_ep、omega_log、dos_fermi 的标定、像素追踪、积分和几何校验由程序完成，不用正文目标值反推图高或曲线。",
+        "图表读数进入适用性判断、科学提取及核对来源；它不改变论文级字段所有权。只有存在对应 Document IR 的 main/supplementary PDF 进入此循环。"
       ],
-      "code": "backend/ingest/chart_reading.py::enrich_document / calibrate_panel；backend/ingest/upload_jobs.py::_process_upload_task",
+      "code": "backend/ingest/chart_reading.py::enrich_document / calibrate_panel；backend/ingest/pdf_regions.py；backend/ingest/image_reading.py；backend/ingest/image_feedback.py；backend/ingest/discovery_feedback.py；backend/ingest/upload_jobs.py::_process_upload_task",
       "links": [
         {
           "href": "01-upload-parse.html#chart-reading",
@@ -192,8 +193,9 @@
       "notes": [
         "每个 PDF 分别读取并保存 structure_reading 事件；13 次是模型迭代上限，DocumentTools 的 ActionBudget 另设 max_actions=12，工具行动耗尽或 13 次迭代耗尽都不能冒充无结构。",
         "tc_material_scope 的排除只覆盖整篇正文/SI仅有范围或单侧界限且无具体 Tc 的材料；任一有效来源的具体 Tc 均保留材料，未报告 Tc 不等于仅范围。",
-        "read_original_page 对坐标表及续页渲染指定真实 PDF 页的 PNG，并在下一轮模型请求中携带图像；其内部 read_page 文字读取与图像渲染算同一次行动，文本定位不能替代视觉核对。",
+        "read_original_page 以至少 600 DPI 渲染坐标表及续页的真实 PNG，并在下一轮模型请求中携带图像；其内部 read_page 文字读取与图像渲染算同一次行动，文本定位不能替代视觉核对。结构读取也可使用统一六类图像动作。",
         "report_structures 经严格结构与原文行数值校验后，仍调用既有完整坐标/Wyckoff 几何解码；有效结果按结构哈希及材料、压力、空间群、优化范围合并，重复项补充来源，不同几何继续分别保留。",
+        "修订报告不得遗漏此前完整报告中的结构；漏项在同一有界预算内由原模型结合真实新证据补全，仍不完整则失败并保留完整响应，不能用局部结果覆盖完整结果。",
         "未读覆盖或解释疑点写入 uncertainties / blocked 候选；技术失败或预算耗尽不得用空 structures 冒充整份文件没有结构。"
       ],
       "code": "backend/ingest/structure_reading.py::extract_structure_candidates / _reading_result；backend/ingest/tc_material_scope.py::scope_prompt / assert_allowed / is_excluded；backend/ingest/document_agent.py::ActionBudget；backend/ingest/upload_jobs.py::_extract_pdf_structure_candidates / _process_conventional_upload_task",
@@ -329,9 +331,10 @@
         "任一分段失败会停止尚未开始的任务并传播异常，不把乱序或部分结果当作整段成功；材料表单阶段另按小组串行，不与本步并发混同。",
         "只有整篇正文/SI均为范围或单侧界限且无具体 Tc 时才排除；任一有效来源的具体 Tc 保留材料，未报告 Tc 不等于仅范围。",
         "模型只填写程序登记字段，身份由程序生成；严格结构化协议不允许自行创建科学键或冒充人工扩展。",
+        "当前分段存在不可读 OCR、缺失原文或适用范围依据缺口时，程序可从明确引用中找回备用原块；须核对文件、块、页、来源版本、SHA 和真实引句。规划答案本身不能成为科学值或证据，找不到合法来源时保留未知或失败。",
         "不确定值可保留候选或留空，须有理由并等待人工审核。"
       ],
-      "code": "backend/ingest/domain_extraction.py::structured_chunks；backend/ingest/parallel_extraction.py::ordered_extract；backend/ingest/upload_jobs.py::_read_chunk / _process_conventional_upload_task；backend/ingest/tc_material_scope.py::scope_prompt / assert_allowed；backend/ingest/scientific_output_schema.py",
+      "code": "backend/ingest/domain_extraction.py::structured_chunks；backend/ingest/parallel_extraction.py::ordered_extract；backend/ingest/extraction_sources.py；backend/ingest/upload_jobs.py::_read_chunk / _process_conventional_upload_task；backend/ingest/tc_material_scope.py::scope_prompt / assert_allowed；backend/ingest/scientific_output_schema.py",
       "links": [
         {
           "href": "01-upload-parse.html#read",
@@ -449,7 +452,7 @@
       "id": "form-fill",
       "title": "按材料小组整理并保存固定表单",
       "summary": "每2个材料状态一组；填写 → 来源门 → 本组核对 → 保存 → 检查点",
-      "description": "process_material_groups 以 material-groups-v1 每两个材料状态一组串行执行。本组填写后定位并校验 Claim 来源，只核对本组 state_keys 对应字段，随后正式保存当前草稿；核对成功才写入 material-stage.json 完成检查点并启动下一组。前端显示当前组/总组数、填写/核对/保存动作及已保存材料数。",
+      "description": "process_material_groups 以 material-groups-v1 每两个材料状态一组串行执行。本组填写使用只读 IR 视图，把当前明确引用的备用原块补入 selected_for_reading；不修改原 IR、不改变主备路由，也不把规划答案直接写入科学字段。填写后定位并校验 Claim 来源，只核对本组 state_keys 对应字段，随后正式保存当前草稿；核对成功才写入 material-stage.json 完成检查点并启动下一组。前端显示当前组/总组数、填写/核对/保存动作及已保存材料数。",
       "code": "backend/ingest/material_batches.py::process_material_groups；backend/ingest/scientific_form_filling.py::fill_scientific_forms；backend/ingest/upload_jobs.py::_process_conventional_upload_task；frontend/src/components/UploadParsingDetail.tsx",
       "owner": "固定表单整理模型 / 共享核对程序 / 草稿存储",
       "notes": [
@@ -560,13 +563,14 @@
       "id": "automatic-spectra",
       "title": "完成本轮自动谱处理",
       "summary": "α²F、phDOS 及附属累计 λ",
-      "description": "非影子任务同步执行 run_upload，完成目标谱发现、原图标定、像素数字化与存储，再读取本次谱运行终态。电子 DOS、能带等非目标只留后台跳过诊断。",
-      "code": "backend/ingest/upload_jobs.py::complete_parsing_state；backend/spectra/jobs.py::run_upload / discover",
+      "description": "非影子任务同步执行 run_upload，完成目标谱发现、原图标定、像素数字化与存储，再读取本次谱运行终态。谱图疑点由同一主模型按谱专用动作定向反馈；真实重裁、文字补读或像素重取后仍由原谱 engine 计算。电子 DOS、能带等非目标只留后台跳过诊断。",
+      "code": "backend/ingest/upload_jobs.py::complete_parsing_state；backend/spectra/jobs.py::run_upload / discover；backend/ingest/image_feedback.py::read_spectrum",
       "owner": "谱处理程序 / 读图模型",
       "notes": [
         "自动谱属于本轮上传：run_upload 创建或复用运行后，在当前 Worker 中同步调用 run_job，并读取终态；完成前不会发布 ready。",
         "手动谱重提走 enqueue → dispatch → upload_queue().enqueue(run_job) 的独立 RQ 路径，不能据此把自动谱也画成异步后台任务。",
-        "黑灰曲线可保留原图轨迹锚点；交叉、遮挡和裁边保留限制，不用论文目标值修曲线。",
+        "谱专用路径只开放部分取源动作，不无差别开放通用六类动作；像素坐标始终属于原目标图或明确声明的 crop 坐标系。",
+        "黑灰曲线可保留原图轨迹锚点；交叉、遮挡和裁边保留限制，不用论文目标 Tc 等数值修曲线。重复动作无新证据时停止，真实不可读保留待审核或未读状态。",
         "已知材料归属与曲线标定分开；目标谱标定失败保留目标身份、原因及待审核状态。影子任务不运行此自动谱步骤。"
       ],
       "links": [
@@ -655,9 +659,10 @@
       "title": "用户校对并正式送审",
       "summary": "校验流程绑定、来源版本与当前草稿",
       "owner": "上传者 / Python 提交事务",
-      "description": "上传者在 ready 后完成逐字段处理并保存工作稿，明确提交后由 _submit_upload_draft_locked 再次调用 require_task_workflow，检查当前来源、证据版本与草稿。有效 without_evidence 黄色人工决定可复用并通过该字段提交门，不表示 AI 支持；其他未通过或失效字段仍阻断。首次送审在事务中创建 pending 论文并冻结正式整稿交接快照，holder 转为 review；草稿含 citation_extraction 时，同一正式转接调用 persist_reference_extraction，按论文版本持久化 GROBID 提取、原始引文及匹配快照并执行论文引用匹配。交出后旧写凭证失效。",
+      "description": "上传者在 ready 后完成逐字段处理并保存工作稿，明确提交后由 _submit_upload_draft_locked 再次调用 require_task_workflow，检查当前来源、证据版本与草稿。有效 without_evidence 黄色人工决定可复用并通过该字段提交门，不表示 AI 支持；其他未通过或失效字段仍阻断。首次送审在事务中创建 pending 论文并冻结正式整稿交接快照，holder 转为 review；快照由 capture_visual_sources 保存当时实际采用视觉来源的冻结原件引用、来源版本、pdf-region-v2 定位及结果，不重复保存裁剪 PNG 字节或 base64。草稿含 citation_extraction 时，同一正式转接调用 persist_reference_extraction，按论文版本持久化 GROBID 提取、原始引文及匹配快照并执行论文引用匹配。交出后旧写凭证失效。",
       "notes": [
         "论文批准并进入 publish_approved_paper 后，reconcile_after_paper_approval 只在 approved_revision=content_revision 时重新协调本论文及受影响下游引用关系；协调异常不会回滚已提交的审核状态，可在后续审核时重试。",
+        "视觉 PNG 后续按原定位重建并缓存，不调用模型重新找位置；内容和采用依据未变时可复用旧快照，但交接事件仍新增。",
         "正式送审不是 ready 的自动后续；保存、AI 核对、人工确认、提交和整篇批准分别生效。",
         "needs_workflow 或草稿流程绑定不一致会阻止送审，手工填写也不能删除 _parsing_workflow 或伪造其他流程。",
         "后续审核与公开修订见 02；本静态图不实际送审任何用户草稿。"
@@ -705,15 +710,15 @@
       "kind": "wait",
       "label": "临时传输故障",
       "returnTo": "model-runtime",
-      "returnLabel": "退避后重发未完成请求",
-      "title": "持续退避，直到成功或人工停止",
-      "summary": "临时错误没有两次封顶；固定错误明确停止",
+      "returnLabel": "前 4 次连续临时失败退避后重发未完成请求",
+      "title": "有界退避：连续临时失败第 5 次自动暂停",
+      "summary": "含首次；同组不发送第 6 次；压缩重试另重置连续失败计数",
       "owner": "ModelRuntime / 当前上传 Worker",
-      "description": "APIConnectionError、APITimeoutError、httpx.TransportError、可恢复 DNS、无任何有效输出就结束，以及 HTTP 408 / 429 / 500 / 502 / 503 / 504 归入临时错误。每次先保存脱敏 failure、output_started 与已有半截响应，再按 Retry-After 或 retry_after_seconds 等待；没有服务端时间时使用最高 60 秒的递增退避加随机抖动，然后重发整个未完成请求。",
+      "description": "APIConnectionError、APITimeoutError、httpx.TransportError、可恢复 DNS、无任何有效输出就结束，以及 HTTP 408 / 429 / 500 / 502 / 503 / 504 归入临时错误。每次先保存脱敏 failure、output_started 与已有半截响应；前 4 次连续临时失败可按 Retry-After 或 retry_after_seconds 等待，没有服务端时间时使用最高 60 秒的递增退避加随机抖动，然后重发整个未完成请求。连续第 5 次临时失败时活动任务先写 pausing 并抛 ExecutionStopped，再由 process_upload_task 收敛为 paused，不在该组连续失败中发送第 6 次。一次上下文溢出可触发额外压缩重试并重置连续失败计数，因此单轮总尝试数可超过 5。",
       "notes": [
-        "retry_wait 期间每 0.2 秒检查停止/代次并维持心跳，等待继续占用当前 Worker；不存在两次后自动 failed 的限制。",
-        "明确 retryable=false、配额/计费、固定配置、非空非法 JSON、严格 Schema、明确拒绝或截断不沿临时传输循环；科学审核结论也不因传输成功而改变。",
-        "已输出后持续空白/读取超时保存 partial_response 并整体重发；完整响应成功后才原子写 result.json，不把多次半截输出拼成科学结果。"
+        "retry_wait 期间每 0.2 秒检查停止/代次并维持心跳，等待继续占用当前 Worker；自动暂停保存最后错误、请求 ID、已有完整结果及恢复检查点，不把任务伪写成科学处理 failed。",
+        "明确 retryable=false、配额/计费、固定配置、非空非法 JSON、严格 Schema、length、content_filter 等不沿临时传输循环；科学审核结论也不因传输成功而改变。",
+        "已输出但没有正常 finish_reason 的 ModelIncompleteStreamError 按具名断流错误处理；即使半截内容碰巧可解析为 JSON，也不能进入正式结果。完整响应成功后才原子写 result.json，不拼接多次半截输出。"
       ],
       "code": "backend/ingest/model_runtime.py::transient / retry_delay / error_detail / ModelRuntime.call / wait",
       "links": [
@@ -732,13 +737,13 @@
       "attachTo": "model-runtime",
       "side": "right",
       "kind": "wait",
-      "label": "人工停止",
-      "title": "停止并保留进度：pausing → paused",
-      "summary": "旧执行失效，暂停任务与草稿保留到主动清理",
-      "owner": "上传者 / 上传 API / RQ Worker",
-      "description": "POST /pause 仅所有者可调用。queued 且尚未领取的任务直接写 paused；extracting / reading / summarizing 先写 pausing、递增 execution_generation、保存当前草稿摘要并 persist 草稿，再定向停止本任务已开始 RQ 作业。ModelRuntime.check 抛出 ExecutionStopped，或 reconcile_execution 依据 RQ stopped / failed / canceled / finished 实际状态收敛为 paused。重复停止 pausing / paused 幂等返回。",
+      "label": "人工停止或连续第 5 次临时失败",
+      "title": "人工或自动暂停并保留进度：pausing / paused",
+      "summary": "旧执行失效；同组连续失败不发送第 6 次，也不伪写 failed",
+      "owner": "上传者 / 上传 API / ModelRuntime / RQ Worker",
+      "description": "人工 POST /pause 仅所有者可调用。queued 且尚未领取的任务直接写 paused；extracting / reading / summarizing 先写 pausing、递增 execution_generation、保存当前草稿摘要并 persist 草稿，再定向停止本任务已开始 RQ 作业。ModelRuntime.check 抛出 ExecutionStopped，或 reconcile_execution 依据 RQ stopped / failed / canceled / finished 实际状态收敛为 paused。另一入口是同一请求连续第 5 次临时失败：活动任务先由 _pause_task_state 写 pausing 并抛 ExecutionStopped，再由 process_upload_task 收敛为 paused。两种暂停都保留草稿、检查点和完整响应；重复停止 pausing / paused 幂等返回。",
       "notes": [
-        "停止立即阻止新模型请求和旧代次写回，并关闭已登记客户端；原生 PDF 或第三方 HTTP 阻塞需由定向 RQ 停止配合，不能只用 PID 或超时宣称已停。",
+        "人工停止立即阻止新模型请求和旧代次写回，并关闭已登记客户端；原生 PDF 或第三方 HTTP 阻塞需由定向 RQ 停止配合，不能只用 PID 或超时宣称已停。",
         "暂停保留到用户主动清理，计入既有 100 个活动任务上限；delete 接受 paused，但不接受仍在 pausing 的任务。",
         "刷新页面不停止；关闭本地连接不保证上游模型已经停止计算或不再计费。已送审或有正式论文的任务不能走此入口。",
         "paused 是模型执行暂停；needs_workflow 是适用性未匹配/存疑/失败后等待新流程，二者不是同一状态。"
@@ -773,7 +778,7 @@
       "description": "POST /resume 仅所有者可调用；接受 paused 或无 paper_id 的 failed，拒绝其他状态。任务锁内核对 execution_input_hash 与当前用户/文件角色/SHA/解析方案、execution_draft_hash 与当前草稿，以及 provider、model、catalog_id 和 endpoint 摘要；一致后写 queued、resume=true，failed 还会标记 retry=true，并设置 execution_resume_requested 与受控重跑草稿哈希，再入队。",
       "notes": [
         "若已经是带 execution_resume_requested 的 queued，重复继续幂等返回，不重复领取；入队失败回到 paused 并保留可重试提示。",
-        "继续不重复上传、不创建新任务、不自动提交。通用文本在哈希一致时复用；模型调用按确定性目录复用已保存完整 result.json，只有缺失完整结果的请求才实际执行。",
+        "继续不重复上传、不创建新任务、不自动提交。通用文本在哈希一致时复用；模型调用按确定性目录复用已保存完整 result.json，只有缺失完整结果的请求才实际执行。未完成的同一请求重新累计连续临时失败，每组最多 5 次；历史失败仍保留，上下文溢出压缩重试仍按运行器规则另计。",
         "任何输入、草稿、模型或服务地址不一致都返回 409 RESUME_NOT_ALLOWED，不拿旧缓存覆盖当前用户值，也不隐式换模型。",
         "与 POST /retry 区分：retry 仅接受 failed 并直接重新入队；resume 接受 paused / failed 并增加上述执行上下文版本保护。谱专用续跑还须另满足 spectra-resume 的全部条件。"
       ],
@@ -961,7 +966,7 @@
       "description": "记录 failed、failed_stage 与安全错误信息，保留可追查产物。重试受原文件有效性和当前任务状态限制。",
       "notes": [
         "不是科学字段不通过，也不伪造 ready。",
-        "科学处理与工具行动按各自预算有界停止；临时传输故障不属于此固定失败路径，而由 ModelRuntime 持续退避，直到成功或人工停止。"
+        "科学处理与工具行动按各自预算有界停止；临时传输故障不属于此固定失败路径，而由 ModelRuntime 对每组连续临时失败最多尝试 5 次，第 5 次后经 pausing 收敛为 paused；人工继续重新累计，压缩重试可重置连续失败计数。"
       ],
       "code": "backend/ingest/upload_jobs.py::process_upload_task / _process_conventional_upload_task",
       "links": [
@@ -1048,15 +1053,15 @@
       "label": "坐标表需查原页",
       "returnTo": "structure-reading",
       "returnLabel": "继续有界读取",
-      "title": "read_original_page 读取真实 PDF 页",
-      "summary": "实际 PNG 进入下一轮结构读取请求",
-      "owner": "结构读取工具 / 存储层",
-      "description": "工具只接受当前 PDF 的 file_id 和真实页码，消耗既有动作预算并渲染该页 PNG；下一轮模型请求携带 page_images。成功响应后才把相应页计入 imaged_pages，用于判断全部坐标表原页是否已读。",
+      "title": "真实 PDF 原页与统一图像动作",
+      "summary": "至少 600 DPI；实际 PNG 进入下一轮结构读取请求",
+      "owner": "结构读取工具 / 统一图像工具 / 存储层",
+      "description": "旧 read_original_page 只接受当前 PDF 的 file_id 和真实页码，消耗既有动作预算并以至少 600 DPI 渲染该页 PNG；下一轮模型请求携带 page_images。成功响应后才把相应页计入 imaged_pages。结构读取还可按需调用六类统一图像动作；工具传输可用短 source_id 作为 block_id 别名，执行前由服务端恢复真实块身份，未变化的当前 observation 可引用既有 tool_call_id。",
       "notes": [
-        "图像渲染成功不等于模型已经理解正确；请求失败不能记为已完成视觉读取。",
+        "图像渲染成功不等于模型已经理解正确；真实图片随成功请求被接收后才记为已读，请求失败不能记为已完成视觉读取。",
         "坐标表续页也需读取；不能靠 inspect_figure 的文字或数值范围猜测 fractional / Cartesian。"
       ],
-      "code": "backend/ingest/structure_reading.py::extract_structure_candidates；backend/ingest/document_agent.py::DocumentTools.call",
+      "code": "backend/ingest/structure_reading.py::extract_structure_candidates；backend/ingest/image_reading.py；backend/ingest/document_agent.py::DocumentTools.call",
       "links": [
         {
           "href": "#structure-reading",
@@ -1073,9 +1078,9 @@
       "title": "保留未决状态，不伪造无结构",
       "summary": "技术异常与未读覆盖都不能变成空结构结论",
       "owner": "结构读取程序 / 上传 Worker",
-      "description": "13 次模型迭代耗尽、ActionBudget 的 12 次工具行动耗尽、文件身份或响应 Schema 等固定错误会抛出并由上传流程记录 failed；模型连接、超时、限流和暂时服务错误则先由 ModelRuntime 持续退避，不进入固定失败出口。人工停止通过 ExecutionStopped 与 RQ 实际状态沿 pausing → paused 收敛，也不写成 failed。单项结构的来源、原子坐标或晶格等科学校验失败转为该结构的 blocked 候选，不抹掉其他有效几何。任何情况都不会以空 structures 宣称全文没有结构；模型已 report_structures 但覆盖或解释仍不完整时，_reading_result 另保留 uncertainties 对应的 blocked 诊断候选。",
+      "description": "13 次模型迭代耗尽、ActionBudget 的 12 次工具行动耗尽、文件身份或响应 Schema 等固定错误会抛出并由上传流程记录 failed；模型连接、超时、限流和暂时服务错误由 ModelRuntime 对每组连续临时失败最多尝试 5 次，第 5 次后经 pausing 收敛为 paused，不进入固定失败出口；一次上下文溢出压缩重试会重置连续失败计数。人工或自动暂停通过 ExecutionStopped 与 RQ 实际状态沿 pausing / paused 收敛，也不写成 failed。修订报告漏掉此前完整报告中的结构时，先在原有界预算内反馈补全；仍不完整则失败并保留完整响应，不以局部结果覆盖完整结果。单项结构的来源、原子坐标或晶格等科学校验失败转为该结构的 blocked 候选，不抹掉其他有效几何。任何情况都不会以空 structures 宣称全文没有结构。",
       "notes": [
-        "临时传输重试、pausing / paused 与固定 failed 是三条不同路径；只有固定错误和科学处理预算耗尽进入本失败出口。",
+        "临时传输有界重试、人工/自动 paused 与固定 failed 是三条不同路径；只有固定错误和科学处理预算耗尽进入本失败出口。重复反馈无新证据时停止。",
         "有效几何、单项科学校验失败与文件级读取疑点分别保留，不用一个失败项抹掉其他候选。",
         "失败不是后续 structure-assign 的“无候选可分配”正常路径。"
       ],
@@ -1204,7 +1209,7 @@
       "owner": "引用匹配程序 / 上传 Worker",
       "description": "LLM2 调用异常、响应 Schema 不合法、非法候选 ID、漏答、缓存/数据库或快照生成异常会使 complete_upload_matching 写 citation_matching_status=failed 并抛出，外层上传流程记录 failed。match_references 另按失败输入与最后原始响应保存 state=failed 回执；已写出的独立有效缓存不因此被清空。",
       "notes": [
-        "临时模型连接、限流与服务故障沿 #224 ModelRuntime 持续退避；固定协议错误直接停止，二者都不伪造 completed。",
+        "临时模型连接、限流与服务故障沿 #224 ModelRuntime 对每组连续临时失败最多退避 5 次，第 5 次后经 pausing 收敛为 paused；固定协议错误直接停止，二者都不伪造 completed。",
         "停止/暂停使用原执行信号，不写 failed 冒充科学失败；同任务恢复只重做未完成匹配，已有完整模型响应和有效决定按身份复用。",
         "原始 GROBID 引文与用户当前草稿保留；匹配失败与 GROBID unavailable 的可继续分支不同。"
       ],
@@ -1250,10 +1255,155 @@
       ]
     },
     {
+      "id": "image-input-tiling",
+      "attachTo": "chart-reading",
+      "side": "right",
+      "kind": "wait",
+      "label": "单图超过模型容量",
+      "returnTo": "chart-reading",
+      "returnLabel": "保留原坐标映射后读图",
+      "title": "高清图片超限无损分片",
+      "summary": "保留 600 DPI 像素；64 像素重叠；每片最多 30000 个 32 像素 patch",
+      "owner": "图像输入准备程序",
+      "description": "只有超过实际模型单图容量时才分片，不通过缩放降低清晰度。prepare_image_inputs 以 64 像素重叠切分，每片不超过已核验的 30000 个 32 像素 patch，并保存原图/精读图编号、完整尺寸、SHA、像素框及分片到原图的坐标映射。",
+      "notes": [
+        "映射在预算、归档和缓存身份计算前登记；未超限图片保持原字节，不增加模型核对。",
+        "此分片属于通用 complete_json 图像输入，不是公开 RAG 视觉来源工具的必经步骤。"
+      ],
+      "code": "backend/rag/image_inputs.py::prepare_image_inputs；backend/rag/llm.py::complete_json",
+      "links": [{"href": "#chart-reading", "label": "返回科学图表读取"}]
+    },
+    {
+      "id": "image-catalog",
+      "attachTo": "chart-reading",
+      "side": "right",
+      "kind": "wait",
+      "label": "建立原始对象目录",
+      "returnTo": "chart-reading",
+      "returnLabel": "按真实对象盘点与精读",
+      "title": "图片目录预算与派生观察隔离",
+      "summary": "目录只列仍参与选择的原始对象",
+      "owner": "图像目录程序",
+      "description": "visual_objects 排除 chart_reading、chart_unresolved 等派生读图回执，避免旧派生观察被当成印刷原文。完整父表的实际 bbox 覆盖单元格时，单元格共用父表入口；孤立或越界单元格仍保留独立入口。",
+      "notes": ["原文、图片、IR、科学候选和历史引用不因目录收敛而删除。"],
+      "code": "backend/ingest/image_catalog.py::original_source_blocks / visual_objects",
+      "links": [{"href": "#chart-reading", "label": "返回科学图表读取"}]
+    },
+    {
+      "id": "chart-feedback",
+      "attachTo": "chart-reading",
+      "side": "left",
+      "kind": "wait",
+      "label": "图像疑点或科学对应异常",
+      "returnTo": "chart-reading",
+      "returnLabel": "取得新证据后有界修复",
+      "title": "同一主模型定向反馈修复",
+      "summary": "真实重裁、补读、重取和程序复算；含首次读取最多 13 轮模型循环",
+      "owner": "固定主模型 / 图像反馈与科学校验程序",
+      "description": "反馈包含来源、回执、元素、位置、具体问题、原因代码和核验条件。程序执行真实重裁、原 PDF 重渲染、文字识别、完整对象补读、图形数据重取与结果复算，并同时检查坐标、刻度、计算及材料、压力、物相、单位、mu* 等科学对应。只有实际新图片、新观察或新计算才算进展。",
+      "notes": [
+        "仅答案变化、模型自称正确或置信度提高不算解决；相同来源和参数的重复动作没有新证据时停止或改用其他合法动作。",
+        "真实缺失、遮挡或不可标定保留未读及原因，不填 0；新回执与旧回执关联保留，不直接覆盖业务字段。",
+        "含首次读取在内最多 13 轮模型循环，图像工具动作最多出现在前 12 轮，预算耗尽即停止；它与 #224 的连续临时失败计数是两套不同预算，不能合并或相互替代。"
+      ],
+      "code": "backend/ingest/image_feedback.py::issue_signature / read_chart",
+      "links": [{"href": "#chart-reading", "label": "返回科学图表读取"}]
+    },
+    {
+      "id": "discovery-feedback",
+      "attachTo": "chart-reading",
+      "side": "left",
+      "kind": "wait",
+      "label": "前置盘点几何异常",
+      "returnTo": "chart-reading",
+      "returnLabel": "只重读错误页",
+      "title": "前置图表盘点反馈",
+      "summary": "保留合法页；原模型结合真实原图与图注重读错误页",
+      "owner": "固定主模型 / 盘点几何校验程序",
+      "description": "盘点出现重复物理区域、非法几何等问题时，geometry_issues 保留原响应和原因代码，discover_pages 只让错误页由原模型结合真实原图和图注重读；已合法页面保持，不整篇重跑。",
+      "notes": [
+        "重复响应没有新依据时停止；严格 JSON 错误不能冒充几何问题反复反馈。",
+        "缺页、重复页、越权和严格 JSON 保护继续有效。"
+      ],
+      "code": "backend/ingest/discovery_feedback.py::geometry_issues / discover_pages",
+      "links": [{"href": "#chart-reading", "label": "返回科学图表读取"}]
+    },
+    {
+      "id": "extraction-source-handoff",
+      "attachTo": "read",
+      "side": "left",
+      "kind": "wait",
+      "label": "当前来源不足但有明确备用引用",
+      "returnTo": "read",
+      "returnLabel": "备用原块补入只读来源视图",
+      "title": "备用原文回交科学读取与材料填写",
+      "summary": "核对真实原块；规划答案不直接成为科学值或证据",
+      "owner": "来源交接程序 / 科学提取与表单整理",
+      "description": "prepare_source_handoff 在当前分段存在不可读 OCR、缺失原文，或适用范围判断缺少原始依据时，从明确引用或规划冲突中找回备用原块。inventory_scope_sources 与来源交接核对文件、块、页、来源版本、SHA 和真实引句；材料填写再把合法备用原块补入只读 IR 的 selected_for_reading。",
+      "notes": [
+        "不把派生读图结果或未读回执伪装成原始印刷内容；找不到合法备用来源时保留未知或失败，不伪造引句。",
+        "不修改原 IR、不改变主备路由；#231 研究驱动力原文交接修复尚未实施，不把该计划画成当前成功分支。"
+      ],
+      "code": "backend/ingest/extraction_sources.py::inventory_scope_sources / prepare_source_handoff；backend/ingest/scientific_form_filling.py::form_sources；docs/specs/136-complementary-pdf-parsing/cited-original-handoff.md",
+      "links": [{"href": "#read", "label": "返回分段科学读取"}, {"href": "#form-fill", "label": "查看材料小组填写"}]
+    },
+    {
+      "id": "image-reading-actions",
+      "attachTo": "evidence",
+      "side": "right",
+      "kind": "wait",
+      "label": "按需读取真实视觉内容",
+      "returnTo": "evidence",
+      "returnLabel": "观察与计算候选返回核对",
+      "title": "统一六类图像动作与旧工具并存",
+      "summary": "同一固定主模型；image-reading-v1 回执；图片另行传输",
+      "owner": "ImageReadingTools / 当前核对模型 / 服务端来源校验",
+      "description": "可按需执行 read_image_context、read_complete_object、adjust_image_region、recognize_image_text、digitize_image_elements、verify_image_reading。旧 read_original_page 与 inspect_figure 仍保留。工具使用任务开始时固定的同一主模型，不新增第二视觉模型或多模型投票；回执不内嵌 base64，真实 PNG 通过模型请求 images 参数另行传输。",
+      "notes": [
+        "本地路径、图片编号或纯文字回执不算模型已看图；只有真实图片随成功请求被接收后才记录读取状态。",
+        "工具参数封闭，服务端校验文件、来源、权限、区域和动作可用性，并把实际采用定位绑定到 evidence；模型不能任意声明新来源。",
+        "工具只提供观察和计算候选，不直接修改科学字段、原件或批准状态；图、表、文字、公式保留各自专用处理路径，标定、像素追踪、积分和几何校验仍由程序完成。"
+      ],
+      "code": "backend/ingest/image_reading.py::ImageReadingTools / image_receipt / manifest_tools；backend/ingest/review_tool_contract.py；backend/ingest/model_review.py::review_fields",
+      "links": [{"href": "#native-page", "label": "查看旧原页读取"}, {"href": "#figure-inspection", "label": "查看旧图块文字工具"}]
+    },
+    {
+      "id": "structure-completeness",
+      "attachTo": "structure-reading",
+      "side": "left",
+      "kind": "wait",
+      "label": "修订报告漏项",
+      "returnTo": "structure-reading",
+      "returnLabel": "原模型有界补全",
+      "title": "结构修订完整性反馈",
+      "summary": "局部报告不能覆盖此前的完整报告",
+      "owner": "结构读取模型 / 完整性校验程序",
+      "description": "程序比较修订报告与此前完整报告；遗漏结构时在原 range(13) 有界预算内由原模型结合真实新证据补全。仍不完整则失败并保留完整响应，重复无新证据时停止。",
+      "notes": ["失败不能变成后续 structure-assign 的“无结构候选可分配”正常科学结论。"],
+      "code": "backend/ingest/structure_reading.py::extract_structure_candidates",
+      "links": [{"href": "#structure-reading-incomplete", "label": "查看失败与暂停边界"}]
+    },
+    {
+      "id": "spectra-image-feedback",
+      "attachTo": "automatic-spectra",
+      "side": "left",
+      "kind": "wait",
+      "label": "谱图疑点",
+      "returnTo": "automatic-spectra",
+      "returnLabel": "新证据交回原谱计算",
+      "title": "谱专用同模型图像反馈",
+      "summary": "只开放部分取源动作；不用目标 Tc 修曲线",
+      "owner": "固定主模型 / 谱处理 engine",
+      "description": "read_spectrum 对谱图疑点执行定向反馈，真实重裁、文字补读或像素重取后仍由原谱 engine 完成计算。像素坐标始终属于原目标图或其明确声明的 crop 坐标系。",
+      "notes": ["谱专用路径不开放通用六类动作全集；无新证据停止，真实不可读保留待审核或未读状态。"],
+      "code": "backend/ingest/image_feedback.py::read_spectrum；backend/spectra/jobs.py::run_upload",
+      "links": [{"href": "#automatic-spectra", "label": "返回自动谱处理"}]
+    },
+    {
       "id": "native-page",
       "title": "需要查看 PDF 原页",
       "summary": "实际图像送入下一轮模型请求",
-      "description": "read_original_page 核验 PDF 文件身份、大小与 SHA，按真实 PDF 页码渲染 PNG，并把 data:image/png;base64 图像交给下一轮模型请求；没有文本块的原页仍可看图，但不伪造文字或来源编号。原生 assistant tool_calls 与 role=tool 使用同一 tool_call_id 配对。",
+      "description": "read_original_page 核验 PDF 文件身份、大小与 SHA，按真实 PDF 页码以至少 600 DPI 渲染 PNG，并把 data:image/png;base64 图像交给下一轮模型请求；没有文本块的原页仍可看图，但不伪造文字或来源编号。原生 assistant tool_calls 与 role=tool 使用同一 tool_call_id 配对。需要曲线、图例、插图视觉内容时也可按需进入统一六类图像动作。",
       "code": "backend/ingest/model_review.py::_read_original_page / review_fields；backend/ingest/review_tool_contract.py",
       "owner": "模型工具 / 存储层",
       "attachTo": "evidence",
@@ -1282,7 +1432,7 @@
       "title": "inspect_figure 读取图块文字与定位",
       "summary": "不返回像素，不等同于读取原图",
       "owner": "DocumentTools / Document IR",
-      "description": "inspect_figure 只接受真实 figure 类型的 block_id，返回该图块的文本与定位元数据；工具合同明确不返回像素。需要曲线、图例或插图视觉内容时必须另调 read_original_page。",
+      "description": "inspect_figure 只接受真实 figure 类型的 block_id，返回该图块的文本与定位元数据；工具合同明确不返回像素。需要曲线、图例或插图视觉内容时必须另调 read_original_page 或统一图像动作，不能把图块文字当作已读像素。",
       "notes": [
         "图块不存在、类型不是 figure 或参数越界会停止该工具调用，不伪造图像。",
         "此工具本身不会设置 review_images_read，因为没有把真实图像交给模型请求。"
@@ -1437,13 +1587,14 @@
       "title": "原文上下文与可切换来源标记",
       "summary": "唯一定位才高亮；失败不猜位置，不启动模型",
       "owner": "Python evidence/region / React EvidenceRegion",
-      "description": "字段原文区通过 POST /api/rag/evidence/region 按文件、页码、块和引句只读定位。text_locator 在确定来源块内计算 Unicode 字符区间，前端以 mark 显示原文上下文；同一“显示/隐藏来源标记”开关同时控制文字高亮和原图区域框。",
+      "description": "字段原文区通过 POST /api/rag/evidence/region 按文件、页码、块和引句只读定位。text_locator 在确定来源块内计算 Unicode 字符区间，前端以 mark 显示原文上下文；图、表、单元格和公式区域通过 object_region 取得 pdf-region-v2 定位，由 render_region_image 从原 PDF 按固定定位渲染。同一“显示/隐藏来源标记”开关同时控制文字高亮和原图区域框。",
       "notes": [
         "重复匹配返回 ambiguous，找不到返回 unlocated；原文件哈希或页面几何不匹配时不渲染有效区域，无可靠坐标时仍可保留文本上下文。",
-        "图中点位只使用实际识别与标定位置，不根据科学数值反推坐标；定位不产生科学支持结论，也不增加模型核对门。",
+        "缓存命中需校验图片 SHA、cache key、来源 SHA、DPI、尺寸和可见内容；缓存缺失或损坏后可重建。跨页上下文为有序分片，高亮只映射到原目标所在页。",
+        "图中点位只使用实际识别与标定位置，不根据科学数值反推坐标；定位不产生科学支持结论，也不增加模型核对门。红框和文字高亮属于展示层，不改写缓存中的干净原图。",
         "隐藏标记只改变显示，不删除原文、历史证据或文件。"
       ],
-      "code": "backend/api/evidence.py::document_region；backend/ingest/document_regions.py::render_region；backend/ingest/source_highlight.py::text_locator；frontend/src/components/EvidenceRegion.tsx；frontend/src/components/EvidenceWorkflow.tsx",
+      "code": "backend/api/evidence.py::document_region；backend/ingest/document_regions.py::render_region；backend/ingest/pdf_regions.py::render_region_image；backend/ingest/source_highlight.py::text_locator；frontend/src/components/EvidenceRegion.tsx；frontend/src/components/EvidenceWorkflow.tsx",
       "links": [
         {
           "href": "#field-review-workflow",

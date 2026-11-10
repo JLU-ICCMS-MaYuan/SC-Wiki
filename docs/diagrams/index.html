@@ -31,7 +31,7 @@
       </div>
     </aside>
   </div>
-  <p class="boundary">上传与审核形成批准数据；普通身份的公开检索与引用图读取当前批准事实，管理员检索扩展不改变引用图范围。问答按工具分别读取 MySQL、Qdrant 或旧 Neo4j。社区、热点与预测独立进入；热点不进入正式论文库，预测不回写主库。</p>
+  <p class="boundary">上传与审核形成批准数据；普通身份的公开检索与引用图读取当前批准事实，管理员检索扩展不改变引用图范围。问答按工具分别读取 MySQL、Qdrant、旧 Neo4j 或当前批准视觉来源；视觉图片从匹配的原 PDF 与版本化定位重建或复用，缓存不扩大访问权限。社区、热点与预测独立进入；热点不进入正式论文库，预测不回写主库。</p>
   <footer><span>依据本机实际源码（含工作区改动）静态核对；不代表模型科学结果或运行服务已验收。</span><a href="index.html">返回全站主流程 ↑</a></footer>
 </main>
 <script type="application/json" id="flow-data">
@@ -56,9 +56,9 @@
       "id": "upload",
       "module": "01",
       "title": "上传与解析",
-      "summary": "通用读取 → 论文级核对与图表读取 → 适用性门禁 → 材料分组与引用匹配",
-      "description": "Worker 建立可恢复模型运行器，通用读取后先填写、核对并保存论文级字段，再逐页盘点和精读正文/SI科学图表，随后执行 typed-parsing-v1 适用性判断；只有常规超导理论计算进入专用科学管线，其他类型、证据不足或判断失败进入 needs_workflow，并保留论文阶段草稿。临时传输故障持续退避，可停止保留进度后同任务继续并复用完整响应。材料状态按每两个一组串行执行填写、来源定位、核对与保存，写组检查点后才继续；汇总及科学核对后、ready 前完成程序与受限 LLM2 双向引用匹配并保存快照。上传者校对并正式提交才创建待审论文。",
-      "code": "backend/ingest/model_runtime.py；backend/ingest/paper_first.py；backend/ingest/chart_reading.py；backend/ingest/parsing_workflows.py；backend/ingest/material_batches.py；backend/ingest/upload_jobs.py；backend/services/citation_matching.py；backend/api/rag.py",
+      "summary": "通用读取 → 论文级核对与高清图表读取 → 适用性门禁 → 材料分组与引用匹配",
+      "description": "Worker 建立可恢复模型运行器，通用读取后先填写、核对并保存论文级字段，再以至少 300 DPI 逐页盘点；仅对盘点判定为目标的图以至少 600 DPI 读取完整科学图并尝试关联完整图注，无法唯一定位时保留整页并标记 ambiguous 或 unlocated。图像疑点由同一主模型结合真实重裁、补读和程序复算作有界反馈，重复动作没有新证据时停止，真实不可读项继续保留。随后执行 typed-parsing-v1 适用性判断；只有常规超导理论计算进入专用科学管线，其他类型、证据不足或判断失败进入 needs_workflow，并保留论文阶段草稿。同一模型请求的每组连续临时失败最多 5 次，第 5 次后活动任务先写 pausing 再收敛为 paused；一次上下文溢出可触发额外压缩重试并重置连续失败计数，因此总尝试数可超过 5。人工继续后重新累计连续失败，完整响应复用而半截输出不拼接。材料状态按每两个一组串行执行填写、来源定位、核对与保存，写组检查点后才继续；汇总及科学核对后、ready 前完成程序与受限 LLM2 双向引用匹配并保存快照。上传者校对并正式提交才创建待审论文，交接快照保存实际采用视觉来源的原件引用与 pdf-region-v2 定位，不重复嵌入裁剪 PNG。",
+      "code": "backend/ingest/model_runtime.py；backend/ingest/paper_first.py；backend/ingest/chart_reading.py；backend/ingest/pdf_regions.py；backend/ingest/image_feedback.py；backend/ingest/parsing_workflows.py；backend/ingest/material_batches.py；backend/ingest/upload_jobs.py；backend/services/citation_matching.py；backend/services/manuscript_handoffs.py；backend/api/rag.py",
       "owner": "上传者 / Worker",
       "links": [
         {
@@ -196,14 +196,14 @@
       "id": "rag",
       "module": "05",
       "title": "检索增强问答",
-      "summary": "问题 → Mentor 按需工具 → 流式回答",
-      "description": "普通问答由 Mentor 按需调用 MySQL 结构化、Qdrant 语义或旧 Neo4j 工具，灵感探索走独立图。语义检索共用独立 Embedding；当前本机已接入 Qwen3-Embedding-4B，经阿里云 HTTPS 与受限常驻 SSH 中转，阿里云生产站点自身模型和索引未切换。SSE 输出回答后，前端另行解析可访问来源链接；旧 Neo4j 工具不具备公开 MySQL 图的当前批准版本条件。",
-      "code": "backend/rag/agent/mentor.py；backend/rag/agent/graph.py；backend/rag/agent/tools.py；backend/ingest/embedder.py；backend/rag/search/vector_search.py",
+      "summary": "问题 → Mentor 按需工具（含批准视觉来源与图片）→ 流式回答",
+      "description": "普通问答由 Mentor 按需调用 MySQL 结构化、Qdrant 语义、旧 Neo4j 及当前批准视觉来源工具。视觉来源在交接快照含 visual_sources 时只读冻结目录；快照不含该键时（包括旧版快照或新快照未捕获到来源）回退当前批准 revision 的原 IR；确需像素时按匹配原件复用缓存或重建 PNG，并在本轮工具循环中把文字回执与实际图片交给同一 Mentor 模型。另有独立公开视觉来源 GET API，每次读取均核验批准版本和来源归属，不运行模型。灵感探索走独立图。语义检索共用独立 Embedding；当前本机已接入 Qwen3-Embedding-4B，经阿里云 HTTPS 与受限常驻 SSH 中转，阿里云生产站点自身模型和索引未切换。SSE 输出回答后，前端另行解析可访问来源链接；旧 Neo4j 工具不具备公开 MySQL 图的当前批准版本条件。",
+      "code": "backend/rag/agent/mentor.py::image_tool_messages；backend/rag/agent/graph.py；backend/rag/agent/tools.py；backend/rag/visual_sources.py；backend/api/visual_sources.py；backend/ingest/embedder.py；backend/rag/search/vector_search.py",
       "owner": "Python RAG / 模型",
       "attachTo": "public",
       "side": "right",
       "kind": "result",
-      "label": "科学来源与向量片段",
+      "label": "科学来源、向量片段与批准视觉来源",
       "links": [
         {
           "label": "展开问答主干",

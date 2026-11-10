@@ -43,12 +43,13 @@
       "title": "选择问答或检索入口",
       "summary": "普通对话、直接检索与探索分流",
       "owner": "React 前端 / API 调用方",
-      "description": "普通 /api/rag/chat 与 /api/rag/chat/stream 都进入 Mentor；GET /api/rag/search 是独立直接检索；只有 chat_stream 请求显式 explore=true 才进入 Inspiration。三者不能合并成固定 SQL→Qdrant→RRF→重排流水线。",
+      "description": "普通 /api/rag/chat 与 /api/rag/chat/stream 都进入 Mentor；GET /api/rag/search 是独立直接检索；只有 chat_stream 请求显式 explore=true 才进入 Inspiration。三者不能合并成固定 SQL→Qdrant→RRF→重排流水线。另有独立 GET /api/rag/visual-sources/{paper_id} 和 /api/rag/visual-sources/{paper_id}/{source_id}/image 读取当前批准视觉来源目录和 PNG，不运行 Mentor、直接 search 或 Inspiration。",
       "notes": [
         "访客会话保存在浏览器本机；登录会话由服务端按本人会话读写。",
-        "普通请求可携带 explore 标记，但缺省 false；直接 search 不接受这个探索分支。"
+        "普通请求可携带 explore 标记，但缺省 false；直接 search 不接受这个探索分支。",
+        "视觉来源 GET 是独立读取 API，不是第四种问答模式。"
       ],
-      "code": "frontend/src/pages/RagPage.tsx；frontend/src/lib/useStreamingChat.ts；backend/api/rag.py",
+      "code": "frontend/src/pages/RagPage.tsx；frontend/src/lib/useStreamingChat.ts；backend/api/rag.py；backend/api/visual_sources.py",
       "links": [
         {
           "href": "05-rag-qa.html#q-submit",
@@ -69,6 +70,7 @@
       "description": "health 分别检查 RAG 数据库和 Qdrant，并以 bool(get_llm_config().api_key) 得出 chat_available。该字段只表示当前请求上下文里的 API key 非空，不验证密钥有效、模型可访问或供应商可用。",
       "notes": [
         "health 不主动探测独立 Embedding 服务或 HTTPS 中转；available=true 不代表语义检索所用 Embedding 已验证可用，实际调用失败仍进入各入口既有异常分支。",
+        "health 也不检查视觉来源原件、定位、渲染缓存或当前聊天模型的图片能力；available=true 与 chat_available=true 不保证视觉工具成功。独立公开 visual-sources API 不经过此 health 门。",
         "主应用数据库正常不代表独立 RAG 数据库正常。",
         "个人配置与服务端模型目录按请求解析，不把匿名或登录身份当作绕过配置校验的方式。",
         "真实供应商连通性由独立 /llm/test-connection 请求验证。"
@@ -110,7 +112,8 @@
       "notes": [
         "直接传入的 history 也只截最近 20 条消息；条数与轮次不能混称。",
         "访客本机历史与登录云端历史是不同持久化边界。",
-        "请求级 top_k/rerank_top_k 虽仍在普通 chat 接口签名中传递，但普通 Mentor 上下文组装不读取它们。"
+        "请求级 top_k/rerank_top_k 虽仍在普通 chat 接口签名中传递，但普通 Mentor 上下文组装不读取它们。",
+        "视觉图片只在当前 Mentor 工具循环回传；下一云端轮次仍只由最近完成轮次的 user/assistant 文本构造历史，不携带 ToolMessage、artifact 或 PNG。"
       ],
       "code": "backend/rag/service.py::chat_stream；backend/rag/agent/mentor.py::run_stream；backend/services/rag_chat_conversations.py::prepare",
       "links": [
@@ -124,13 +127,15 @@
       "id": "llm-generate",
       "kind": "check",
       "title": "Mentor 生成或选工具",
-      "summary": "七类工具按需，最多5次工具迭代",
+      "summary": "九个工具按需，最多 5 次工具迭代",
       "owner": "Mentor LangGraph / LLM 供应商",
-      "description": "mentor_node 绑定 ALL_TOOLS 后调用模型。七类工具为 search_papers、paper_context、material_info、explore_graph、paper_path、search_literature、query_properties；模型可直接给文本，也可按 tool_calls 进入相应工具，不存在每轮固定执行全部工具的步骤。",
+      "description": "mentor_node 绑定 ALL_TOOLS 后调用模型。九个工具为 search_papers、paper_context、material_info、explore_graph、paper_path、search_literature、query_properties、visual_source_catalog、visual_source_image；模型可直接给文本，也可按 tool_calls 进入相应工具，不存在每轮固定执行全部工具的步骤。含图片的 ToolMessage 在下一次 Mentor 调用前经 image_tool_messages 转换，保留文字回执和工具编号，并把实际图片放入后续 user 消息。",
       "notes": [
         "material_info 与 query_properties 是 MySQL 当前批准结构化工具。",
-        "search_literature 是 Qdrant 语义工具。",
-        "search_papers、paper_context、explore_graph、paper_path 是旧 Neo4j 工具。",
+        "search_literature 是 Qdrant 语义工具；search_papers、paper_context、explore_graph、paper_path 是旧 Neo4j 工具。",
+        "visual_source_catalog 与 visual_source_image 是当前批准视觉来源工具，不属于 Qdrant 或旧 Neo4j；代码不强制每轮必须先 catalog 再 image。",
+        "TOOL_NAMES_CN 只有原七个工具的中文映射，两个视觉工具的 SSE 名称按 fallback 使用原始英文名。",
+        "ChatOpenAI 通过 protocol_for(config) 选择协议：显式配置优先，否则官方 api.openai.com 使用 Responses，第三方兼容网关保持 Chat Completions。",
         "router 在 iteration >= 5 时不再进入工具节点，即最多 5 次工具迭代。"
       ],
       "code": "backend/rag/agent/mentor.py::mentor_node / router / TOOL_NAMES_CN；backend/rag/agent/tools.py::ALL_TOOLS",
@@ -167,7 +172,7 @@
       "owner": "FastAPI / React",
       "description": "普通 Mentor 业务事件只有 status、token、tool_start、tool_end、done；新生成普通回答的 done 提供 answer、provider、model。它不主动推送 citations、papers、top10、chunks 或 evidence_card。外层 API 另以 error/end 表示异常与流结束，云端 done 可附会话标识和序号。",
       "notes": [
-        "tool_start/tool_end 只报告工具名称、输入或截断输出，不等于检索结果已作为引用证据发布。",
+        "tool_start/tool_end 只报告工具名称、输入或截断输出，不等于检索结果已作为引用证据发布。视觉工具没有新增 SSE 图像或引用事件；tool_end 仍把 output 转字符串并截断到 500 字符，完整 PNG 只回传本轮 Mentor。",
         "没有增量 token 时，done 仍可从最终图状态提供完整 answer。",
         "explore=true 仅在 READY 路径的完整设计与 discuss 完成后逐字符回放，并由 done 返回 ideas；clarify_end 提前返回澄清问题走另一分支，不能据此推断普通 Mentor 也发送 ideas 或评审事件。"
       ],
@@ -211,7 +216,7 @@
       "notes": [
         "链接可解析只说明标识或科学术语能定位到站内目标，不验证模型论断是否由原文支持。",
         "解析失败时链接为空，不应据此反推论文不存在或回答没有引用。",
-        "source-links 请求不依赖浏览器当前 LLM 凭据，也不把密钥用于链接解析。"
+        "source-links 请求不依赖浏览器当前 LLM 凭据，也不把密钥用于链接解析。当前 MarkdownMessage 未接入 visual-sources，不把视觉来源 API 自动变成回答后的图片解析或来源卡片推送。"
       ],
       "code": "frontend/src/components/MarkdownMessage.tsx；backend/api/rag.py::rag_source_links；backend/rag/llm_context.py::request_llm_config",
       "links": [
@@ -604,6 +609,82 @@
           "label": "返回主干对应支线"
         }
       ]
+    },
+    {
+      "id": "visual-source-tools",
+      "attachTo": "llm-generate",
+      "side": "right",
+      "kind": "wait",
+      "label": "按需选 2 个视觉工具",
+      "returnTo": "fuse-rank",
+      "returnLabel": "工具返回",
+      "title": "当前批准视觉来源目录与按需读图",
+      "summary": "快照含 visual_sources 才读冻结目录；不含该键时回退当前批准 revision 原 IR",
+      "owner": "Mentor 工具 / visual_sources / 当前批准 MySQL 论文",
+      "description": "visual_source_catalog(paper_id) 返回当前批准论文的图、表、公式及采用读数来源目录。发布交接快照含 visual_sources 时只读该冻结目录；快照不含该键时（包括旧版快照或新快照未捕获到来源）回退当前批准 revision 的 PaperFile、ParserRun 和原 IR。visual_source_image(paper_id, source_id) 再次核验批准状态及来源归属，按登记定位复用缓存或重建 PNG，返回文字元数据、实际图片和 artifact。",
+      "notes": [
+        "有冻结目录时不每次对当前 IR 全量重扫；程序不调用模型重新找位置，也不重新数字化。",
+        "两个工具均由模型按需选择，不强制先 catalog 后 image；它们不属于上传六类 ImageReadingTools。",
+        "RAG 工具经异步数据库会话读取；独立 RAG 库与主业务库分离时仍须遵守既有数据实例一致性边界。"
+      ],
+      "code": "backend/rag/agent/tools.py::visual_source_catalog / visual_source_image；backend/rag/visual_sources.py::visual_catalog / read_visual_source；backend/rag/visual_sources.py::capture_visual_sources",
+      "links": [{"href": "#llm-generate", "label": "返回 Mentor 工具选择"}]
+    },
+    {
+      "id": "visual-source-render",
+      "attachTo": "visual-source-tools",
+      "side": "left",
+      "kind": "wait",
+      "label": "确需来源像素",
+      "returnTo": "visual-source-tools",
+      "returnLabel": "返回文字元数据与 PNG",
+      "title": "原件与定位校验后复用缓存或重建 PNG",
+      "summary": "批准与归属先核验；不调用模型重新定位",
+      "owner": "visual_sources / pdf_regions / 原 PDF",
+      "description": "读取图片时先核验当前批准版本和 source_id 归属，再由 render_region_image 校验定位协议与摘要、原 PDF SHA、页面几何和渲染器版本。有效 PNG/JSON 缓存可复用；缓存缺失或损坏时按固定 bbox 和 DPI 从原 PDF 渲染。",
+      "notes": [
+        "缓存只减少派生图片渲染和存储，不等于减少本轮模型图片输入，也不保证节省供应商图片 token。",
+        "私有工作稿、非当前批准 revision 或不属于批准快照的 source_id 不能因缓存存在而读取。"
+      ],
+      "code": "backend/rag/visual_sources.py::read_visual_source；backend/ingest/pdf_regions.py::render_region_image",
+      "links": [{"href": "#visual-source-tools", "label": "返回视觉来源工具"}]
+    },
+    {
+      "id": "visual-image-feedback",
+      "attachTo": "visual-source-tools",
+      "side": "right",
+      "kind": "wait",
+      "label": "工具回执含实际图片",
+      "returnTo": "fuse-rank",
+      "returnLabel": "同一 Mentor 继续本轮",
+      "title": "文字回执保留工具编号，PNG 进入本轮 user 消息",
+      "summary": "不修改原 state；不新增第二视觉模型",
+      "owner": "Mentor image_tool_messages / 当前 LLM",
+      "description": "visual_source_image 以 content_and_artifact 返回文字内容和元数据 artifact。下一次 mentor_node 调用前，image_tool_messages 找出 ToolMessage 中的 image_url 块：复制只含文字等内容的 ToolMessage 以保留 tool_call_id，随后追加带说明和实际图片的 HumanMessage，再交给当前请求的同一个 Mentor LLM。",
+      "notes": [
+        "转换不修改原 state 中的历史消息；图片反馈仅发生在当前工具循环。",
+        "下一云端请求仍只展开最近完成轮次的 user/assistant 文本，不把 ToolMessage、artifact 或 PNG 带入下一轮；访客 history 同样只转文本消息。"
+      ],
+      "code": "backend/rag/agent/mentor.py::image_tool_messages / mentor_node；backend/rag/service.py::chat_stream；backend/services/rag_chat_conversations.py::prepare",
+      "links": [{"href": "#prompt-build", "label": "查看跨轮文本历史边界"}]
+    },
+    {
+      "id": "visual-source-api",
+      "attachTo": "q-submit",
+      "side": "right",
+      "kind": "result",
+      "label": "独立公开读取",
+      "title": "当前批准视觉来源 GET API",
+      "summary": "目录与 PNG 独立读取；不运行模型或健康门",
+      "owner": "FastAPI visual_sources / 主应用数据库",
+      "description": "GET /api/rag/visual-sources/{paper_id} 返回 {paper_id, sources}；GET /api/rag/visual-sources/{paper_id}/{source_id}/image 每次重新核验批准版本和来源归属，成功返回 PNG、Cache-Control: private, no-cache 及图片摘要 ETag，ValueError 映射为 404。",
+      "notes": [
+        "论文未批准时目录为 []，批准但没有公开来源也可能为空，不能仅凭空目录区分原因。",
+        "API 不调用 LLM、不需要聊天 API key，也不经过 RAG health、Qdrant 可用性检查或 source-links。",
+        "历史快照图片另走需登录及 readable 权限的 handoffs snapshots visual-sources 路径，只使用旧快照文件和旧定位。"
+      ],
+      "code": "backend/api/visual_sources.py；backend/main.py；backend/rag/visual_sources.py::visual_catalog / read_visual_source；backend/api/manuscript_handoffs.py",
+      "links": [{"href": "#q-submit", "label": "返回问答入口"}, {"href": "02-review-audit-details.html#history-visual-source", "label": "查看历史快照只读图片"}]
     },
     {
       "id": "fuse-rank",

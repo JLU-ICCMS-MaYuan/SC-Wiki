@@ -129,12 +129,13 @@
       "title": "进行 AI 核对",
       "summary": "明确触发，复用仍有效的字段结果",
       "owner": "Python 证据服务 + RQ",
-      "description": "点击 AI 审核或侧栏字段核对时，先保存必要修改，校验草稿与来源版本，再确定需核对字段。仍有效的未指定重试结果复用，无需重跑时直接完成；必要字段进入现有有界模型工具循环。",
+      "description": "点击 AI 审核或侧栏字段核对时，先保存必要修改，校验草稿与来源版本，再确定需核对字段。仍有效的未指定重试结果复用，无需重跑时直接完成；必要字段进入现有有界模型工具循环，按需以旧原页/图块工具或统一六类图像动作读取真实视觉来源，不重新执行整套上传提取或全表扫描。",
       "notes": [
         "输入和普通保存不发起模型核对。",
-        "单字段令牌只核对指定字段及其真实依赖；失败不清空其他成功结果。"
+        "单字段令牌只核对指定字段及其真实依赖；失败不清空其他成功结果。",
+        "审核 model_review 使用自身有界调用路径，不套上传 ModelRuntime 的第 5 次自动暂停规则。"
       ],
-      "code": "backend/api/evidence.py::create_job / enqueue_review；backend/ingest/model_review.py",
+      "code": "backend/api/evidence.py::create_job / enqueue_review；backend/ingest/model_review.py；backend/ingest/image_reading.py；backend/ingest/review_tool_contract.py",
       "links": [
         {
           "href": "02-review-audit.html#run-evidence",
@@ -292,12 +293,12 @@
       "title": "批准事务落库",
       "summary": "科学内容、来源、批准和交接原子切换",
       "owner": "Python 审核事务 / MySQL",
-      "description": "同一 Python 数据库事务物化工作稿，写当前字段来源与必要谱绑定，更新 approved / approved_revision，并记录正式整稿交接。内容和采用依据未变时复用上一整稿快照，交接事件仍新增。",
+      "description": "同一 Python 数据库事务物化工作稿，写当前字段来源与必要谱绑定，更新 approved / approved_revision，并记录正式整稿交接。record_handoff 调用 capture_visual_sources，把当时实际采用来源及 pdf-region-v2 精读定位写入快照 visual_sources；原 PDF 冻结并校验 SHA，不重复存储裁剪 PNG。内容和采用依据未变时复用上一整稿快照，交接事件仍新增。",
       "notes": [
-        "整稿包含当前值、理由、核对资料和内容寻址的冻结附件。",
-        "标题旁可进入独立交接列表及只读整稿，历史查看不调用模型。"
+        "整稿包含当前值、理由、核对资料、内容寻址的冻结附件及视觉来源引用；visual_sources 纳入快照内容哈希。",
+        "标题旁可进入独立交接列表及只读整稿，历史查看不调用模型；PNG 后续按固定定位重建并缓存。"
       ],
-      "code": "backend/services/field_review_commit.py::commit_review；backend/services/manuscript_handoffs.py::record_handoff / capture",
+      "code": "backend/services/field_review_commit.py::commit_review；backend/services/manuscript_handoffs.py::record_handoff / capture；backend/rag/visual_sources.py::capture_visual_sources",
       "links": [
         {
           "href": "02-review-audit.html#approve-commit",
@@ -467,6 +468,43 @@
       ]
     },
     {
+      "id": "review-image-reading",
+      "attachTo": "run-evidence",
+      "side": "right",
+      "kind": "wait",
+      "label": "字段核对按需查图",
+      "returnTo": "run-evidence",
+      "returnLabel": "观察返回当前字段核对",
+      "title": "旧工具与统一六类图像动作并存",
+      "summary": "至少 600 DPI 原页；image-reading-v1；真实图片另行进入模型请求",
+      "owner": "当前审核宿主 / model_review / ImageReadingTools",
+      "description": "字段核对可按需使用旧 read_original_page、inspect_figure，以及 read_image_context、read_complete_object、adjust_image_region、recognize_image_text、digitize_image_elements、verify_image_reading。原页至少 600 DPI；回执不内嵌 base64，真实 PNG 通过模型请求 images 参数另行传输。",
+      "notes": [
+        "只有真实图片随成功请求被接收后才记录读取状态；服务端把实际采用定位绑定到 evidence，模型不能任意声明新来源。",
+        "图像工具只提供观察和计算候选，不直接修改科学字段、原件或批准状态，也不重新执行整套上传提取。",
+        "当前审核宿主自己的有界循环和预算继续控制调用；不把上传专用 ModelRuntime 的第 5 次自动暂停套到这里。"
+      ],
+      "code": "backend/ingest/model_review.py::review_fields；backend/ingest/image_reading.py::ImageReadingTools；backend/ingest/review_tool_contract.py",
+      "links": [{"href": "#run-evidence", "label": "返回 AI 核对"}]
+    },
+    {
+      "id": "history-visual-source",
+      "attachTo": "approve-commit",
+      "side": "right",
+      "kind": "result",
+      "label": "历史交接只读图片",
+      "title": "按历史快照权限重建视觉来源",
+      "summary": "旧快照、旧原件、旧定位；不以当前内容替代",
+      "owner": "历史交接 API / visual_sources / 原 PDF 渲染",
+      "description": "登录用户选择历史交接快照后，API 复用该快照 readable 权限并读取其 visual_sources。read_snapshot_visual_source 找到同一快照冻结的旧原件，校验 SHA 后按旧 pdf-region-v2 定位渲染或重建 PNG。",
+      "notes": [
+        "快照没有该来源、历史原件引用缺失、原件 SHA 或定位不兼容时拒绝；不使用当前 IR、当前原件或当前谱结果替代。",
+        "缓存命中不能绕过历史访问权限；缓存重建不调用模型重新找位置。此只读出口不是新的批准动作。"
+      ],
+      "code": "backend/api/manuscript_handoffs.py；backend/rag/visual_sources.py::read_snapshot_visual_source；backend/ingest/pdf_regions.py::render_region_image",
+      "links": [{"href": "#approve-commit", "label": "返回批准与快照"}]
+    },
+    {
       "id": "manual-evidence-226",
       "attachTo": "manual-decision",
       "side": "right",
@@ -581,13 +619,14 @@
       "title": "原文上下文与可切换来源标记",
       "summary": "唯一定位才高亮；失败不猜位置，不启动模型",
       "owner": "Python evidence/region / React EvidenceRegion",
-      "description": "审核、返修与维护共用字段侧栏的只读定位。POST /api/rag/evidence/region 按文件、页码、块和引句限定范围；text_locator 在确定来源块内计算 Unicode 字符区间，前端以 mark 显示文字上下文，同一开关控制文字高亮和原图区域框。",
+      "description": "审核、返修与维护共用字段侧栏的只读定位。POST /api/rag/evidence/region 按文件、页码、块和引句限定范围；text_locator 在确定来源块内计算 Unicode 字符区间，前端以 mark 显示文字上下文。图、表、单元格和公式通过 object_region 取得 pdf-region-v2 定位，再由 render_region_image 从原 PDF 固定渲染；同一开关控制文字高亮和原图区域框。",
       "notes": [
         "重复匹配返回 ambiguous，找不到返回 unlocated；原文件哈希或页面几何不匹配时不渲染有效区域，无可靠坐标时仍可保留文本上下文。",
-        "图中点位只使用实际识别与标定位置，不根据科学数值反推坐标；来源定位不产生科学支持结论，也不增加一道模型核对门。",
+        "缓存命中需校验图片 SHA、cache key、来源 SHA、DPI、尺寸和可见内容，缺失或损坏后可重建；跨页上下文为有序分片，高亮只映射到原目标所在页。",
+        "图中点位只使用实际识别与标定位置，不根据科学数值反推坐标；来源定位不产生科学支持结论，也不增加一道模型核对门。展示层标记不改写缓存中的干净原图。",
         "隐藏标记只改变显示，不删除原文、历史证据或文件。"
       ],
-      "code": "backend/api/evidence.py::document_region；backend/ingest/document_regions.py::render_region；backend/ingest/source_highlight.py::text_locator；frontend/src/components/EvidenceRegion.tsx；frontend/src/components/EvidenceWorkflow.tsx",
+      "code": "backend/api/evidence.py::document_region；backend/ingest/document_regions.py::render_region；backend/ingest/pdf_regions.py::render_region_image；backend/ingest/source_highlight.py::text_locator；frontend/src/components/EvidenceRegion.tsx；frontend/src/components/EvidenceWorkflow.tsx",
       "links": [
         {
           "href": "#save-edit",
