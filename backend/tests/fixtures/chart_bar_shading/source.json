@@ -1,0 +1,74 @@
+{
+  "document": {
+    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+    "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+    "filename": "2017 YHn LaHn-彭枫.pdf",
+    "role": "main"
+  },
+  "pdf_page": 4,
+  "crop_bbox": [
+    55.31999999999999,
+    129.768,
+    291.072,
+    210.792
+  ],
+  "crop_image_size": [
+    1965,
+    676
+  ],
+  "selected_regions": [
+    {
+      "region_id": "chart-page-4-figure-2",
+      "page": 4,
+      "block_id": null,
+      "label": "Figure 4, bottom panel",
+      "reason": "Tc bar chart for the hydrides with two Coulomb-pseudopotential series, including material labels and legend.",
+      "bbox": [
+        67.32,
+        141.768,
+        279.072,
+        198.792
+      ]
+    }
+  ],
+  "crop_sha256": "4239182ff4c153a341a0ac39c1e8efbfef126db7d7f96ab3f19e41c8bd715e6b",
+  "image_origin": {
+    "image_kind": "original_page_region",
+    "render_dpi": 600
+  },
+  "complete_figure": {
+    "version": "pdf-region-v1",
+    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+    "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+    "pdf_page": 4,
+    "kind": "figure",
+    "bbox_page": [
+      0.0,
+      0.0,
+      612.0,
+      792.0
+    ],
+    "page_size": [
+      612.0,
+      792.0
+    ],
+    "cropbox": [
+      0.0,
+      0.0,
+      612.0,
+      792.0
+    ],
+    "rotation": 0,
+    "dpi": 600,
+    "renderer": "pymupdf-1.28.2",
+    "parent_region_id": null,
+    "caption_boxes": [],
+    "caption_text": "",
+    "caption_status": "ambiguous",
+    "region_id": "pdf-region-6fa35222c325eb2e5d9d2ce3fcd3fb228792f224eb127e5df37a240d33a881f2"
+  },
+  "context_image_size": [
+    5100,
+    6600
+  ]
+}

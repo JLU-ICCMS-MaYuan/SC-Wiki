@@ -1,0 +1,6 @@
+{
+  "head": "b62b394647cf1347818912d2e9f00f48202ade00",
+  "source_hash": "176ed5d8e323eed2dae9627e0354a9d6b56bb3041c8212471382da8047884f91",
+  "returncode": 0,
+  "scope": "仅HEAD+柱边修复、读图版本/请求版本和新回归；不含#232共享实现"
+}

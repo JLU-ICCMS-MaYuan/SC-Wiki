@@ -141,7 +141,9 @@ def bar_edge(image, point, axis):
         denominator = float(np.dot(centered, centered))
         if denominator <= tolerance ** 2: return float(np.ptp(value)) <= tolerance
         alpha = float(np.dot(shade, centered)) / denominator
-        return 0 <= alpha <= 1 and np.linalg.norm(shade - alpha * centered) <= tolerance
+        # 原图压缩/网格叠加可使同色像素比内部采样更亮，alpha并不以1为上界。
+        # 仍按色相残差检查；白色背景及不同色相不能借此连接。
+        return 0 <= alpha and np.linalg.norm(shade - alpha * centered) <= tolerance
     if not mask[probe]:
         candidates = [y for y in range(max(low, probe - 3), min(high, probe + 3) + 1) if mask[y]]
         if not candidates: raise ChartReadingError('无法识别柱内部的稳定像素')

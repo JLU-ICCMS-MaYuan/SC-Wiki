@@ -15,7 +15,7 @@ from .chart_calibration import ChartReadingError, approximate, coordinate_value,
 from .document_ir import DocumentBlock, content_hash
 from .scientific_output_schema import obj, array, nullable, TEXT, NUMBER
 
-VERSION = 'scientific-chart-reading-v5'
+VERSION = 'scientific-chart-reading-v7'
 QUANTITIES = ['tc', 'lambda_ep', 'omega_log', 'dos_fermi']
 
 DISCOVERY_PROMPT = '''Inventory EVERY attached PDF page and EVERY figure visible on it, including SI.
@@ -374,7 +374,7 @@ def enrich_document(ir, pdf_path, source, model, *, cancelled=lambda: False, on_
                     native_error = max(native_error,
                         bounds.width / embedded['width'] / (crop[2] - crop[0]) * 1000,
                         bounds.height / embedded['height'] / (crop[3] - crop[1]) * 1000)
-            request = {'document': source, 'pdf_page': page, 'crop_bbox': crop,
+            request = {'reader_version': VERSION, 'document': source, 'pdf_page': page, 'crop_bbox': crop,
                        'crop_image_size': list(image.size), 'selected_regions': selected,
                        'source_pages': texts, 'crop_sha256': hashlib.sha256(crop_png).hexdigest(),
                        'image_origin': image_origin}
