@@ -255,6 +255,14 @@ def test_explicit_non_retryable_service_error_is_not_retried():
     assert not transient(error)
 
 
+def test_503_explicit_tool_schema_rejection_is_fixed():
+    from backend.ingest.model_runtime import transient
+    req=httpx.Request('POST','https://test.invalid')
+    error=APIStatusError('gateway error',response=httpx.Response(503,request=req),body={'error':{
+        'code':'service_unavailable','message':"Invalid schema for function 'report_spectrum_calibration': array schema must define items"}})
+    assert not transient(error)
+
+
 def test_receiving_transition_is_logged_once_per_request(tmp_path,monkeypatch):
     runtime,context,state=setup_runtime(tmp_path,monkeypatch)
     import time

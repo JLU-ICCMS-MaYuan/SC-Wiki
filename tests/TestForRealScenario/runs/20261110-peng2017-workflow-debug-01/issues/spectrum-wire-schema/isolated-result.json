@@ -1,0 +1,12 @@
+{
+  "base": "a2bc6bb9a3fca2c9acedf8c2b4cc2a0084f04697",
+  "overlays": {
+    "backend/ingest/image_feedback.py": "fe55016fb03abd4baf4fbb9f6d7276f4248d9f92df2af025a3487c7d228125e9",
+    "backend/ingest/model_runtime.py": "27e428a734c1e8c3c16c56df43d4a81eb93aea60cedd0bab8538bd897f939aed",
+    "backend/spectra/discovery.py": "e3a4ca97f935eb1e148a8e6b79e58acbaa3ca2219fe5c72a629cb45727c43dd2",
+    "backend/tests/test_image_feedback.py": "36442d4cf591a3c210e25a636d7b771fd46868f09188cc701e6dc6fd78d7927b",
+    "backend/tests/test_model_runtime.py": "5672c7c8ef7eae0770fede1123b1d40a312f685feccd904113a28948fa55aabf"
+  },
+  "exit_code": 0,
+  "business_database_used": false
+}

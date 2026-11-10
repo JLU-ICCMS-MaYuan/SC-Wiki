@@ -1,3 +1,11 @@
+## 最新：用户已确认ScH6真实返修项；52状态完成后谱503格式故障已修复验证
+
+Task仍d789acceee124022b3257f84780d1156，Job862cbf40-6dab-4c37-9b5e-50fd29c7c18f已保存26/26组52状态，automatic_spectra因明确report_spectrum_calibration数组schema错误被网关包装503，5次后按规则paused，未收到输出。五份失败保留issues/spectrum-wire-schema/。当前没有正式PaperID，阶段二至五未执行。
+
+用户原话“采用，并作为材料级返修项（推荐）”：若最终稿ScH6@300 GPa仍Im-3m，管理员真实退回后Tc/DOS归属改P63/mmc；正文Fig1(c)及SI S28(f)证据，Tc约99/86和原来源不改，300晶胞不借200/350；若已正确不写坏。论文级图谱标题仍High-throughput Study on Rare-earth Clathrate Hydride High-temperature Superconductors。笼型标签继续核对；CeH10@200 Fm-3m用户确认保持。其他相图差异依原文和既有人审，不加产品特例。
+
+已实现谱同类型定长tuple的等价items/min/max传输、明确schema拒绝503不重试；真FigS15暴露面板级物理单位错提前整批拒绝，恢复原逐面板反馈与已有不完整保留，明确α²F单位/α²F/ω不确定不积分。共享/独立225、四宿主233、12变异和字段契约通过。原正文1页非谱零面板、SI14真FigS15四面板，原模型LLM2/gpt-6.1-sol、原源、正式谱engine、隔离保存重读通过；α²F未确认且积分不可用。非整篇谱或业务完成。docs/specs/233-unified-image-tool/spectrum-wire-validation.md。下一步提交本次代码及证据，Safari原任务继续，不重传；其余已保存同版本组应复用，仍需全谱/引用/ready和真实五阶段及最终无debug复测。
+
 ## 最新：第5组已越过旧图读阻塞并真实保存，继续第6/26组；ScH6科学返修选项待用户答复
 
 Task d789acceee124022b3257f84780d1156，现Job862cbf40-6dab-4c37-9b5e-50fd29c7c18f，代码5d400eab，LLM2/gpt-6.1-sol及原文件/端点/hash保持，正常Safari18044继续，无重传。29/29和覆盖通过；正文最后窗口首次规范值与value_kind不符，由既有一次纠正通过，未加新轮次。新规划52状态26组（原54/27）；全稿输入签名因原页/来源变化未直接复用旧整组检查点，重新处理有实际新模型调用。前8持久快照和旧核对记录均保留，新旧按相同材料/压力/相对照主要Tc、DOS、μ配对、方法原名一致；LaH9@50状态内部key有变化，整树并不一致，不声称完整复用。原/新快照及实际调用账本见issues/retired-chart-scope/。按#230实际持久表ScientificUploadDraft和tc_contexts.map_draft重读，Redis旧缓存不能验收解析中间保存。

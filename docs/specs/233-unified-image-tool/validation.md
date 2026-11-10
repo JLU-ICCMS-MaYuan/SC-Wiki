@@ -1,5 +1,7 @@
 # 实施验证与当前边界
 
+真实谱工具的503结构拒绝、等价定长数组适配与逐面板反馈验证见[谱工具验证](spectrum-wire-validation.md)。
+
 本次采用后续实施授权；先前仅文档阶段的记录保留在Git历史、原始需求及history/。共享详细记录见[#232实施验收](../232-complete-pdf-regions/implementation-validation.md)。
 
 ## 成功标准逐项核对

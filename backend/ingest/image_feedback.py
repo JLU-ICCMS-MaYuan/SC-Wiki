@@ -182,12 +182,29 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
     raise ValueError('图像工具动作预算已用尽，未将技术未完成当作没有科学数据')
 
 
+def _spectrum_wire_schema(node):
+    """同类型定长元组可无损用 items 表示；不放宽不同位置的类型。"""
+    if isinstance(node, list):
+        return [_spectrum_wire_schema(value) for value in node]
+    if not isinstance(node, dict):
+        return node
+    result = {key: _spectrum_wire_schema(value) for key, value in node.items()}
+    if 'prefixItems' in result:
+        slots = result.pop('prefixItems')
+        if (not slots or 'items' in result or result.get('type') != 'array'
+                or result.get('minItems') != len(slots) or result.get('maxItems') != len(slots)
+                or any(slot != slots[0] for slot in slots[1:])):
+            raise ValueError('谱工具含不能无损转换的定长数组声明')
+        result['items'] = slots[0]
+    return result
+
+
 def read_spectrum(model,prompt,payload,figure,states,images):
     """谱专用像素坐标保持原目标图；局部重裁作为附加证据，不改积分输入。"""
     import base64
     import io
     from PIL import Image
-    from pydantic import BaseModel,ConfigDict
+    from pydantic import BaseModel,ConfigDict,ValidationError
     from backend.spectra.contracts import PanelCalibration
     from backend.spectra.engine import extract_panel
     from backend.spectra.context import references_for
@@ -208,7 +225,7 @@ def read_spectrum(model,prompt,payload,figure,states,images):
     definitions=[t for t in tool_definitions(tools.documents,[{'file_id':ir.source_file_id,'kind':'pdf'}]) if t['function']['name'] in names]
     definitions.append({'type':'function','function':{'name':'report_spectrum_calibration',
         'description':'提交谱专用标定；像素坐标始终属于原目标图，不属于附加放大图。',
-        'strict':True,'parameters':_strict(Reading.model_json_schema())}})
+        'strict':True,'parameters':_spectrum_wire_schema(_strict(Reading.model_json_schema()))}})
     request={**payload,'region_id':figure['region_locator']['region_id'],
         'target_bbox_pdf_pt':figure['bbox_pdf_pt'],'feedback_version':VERSION}
     progress=FeedbackProgress();history=[];target_images=list(images);exhausted=set()
@@ -242,9 +259,17 @@ def read_spectrum(model,prompt,payload,figure,states,images):
                 {'role':'tool','tool_call_id':native['id'],'content':json.dumps(request['observation'],ensure_ascii=False)}]
             continue
         answer=action.get('arguments') if name=='report_spectrum_calibration' else result
-        parsed=Reading.model_validate(answer)
+        if not isinstance(answer, dict) or not isinstance(answer.get('panels'), list):
+            raise ValueError('读图模型未返回谱面板列表')
         failures=[]
-        for panel in parsed.panels:
+        for index, raw in enumerate(answer['panels']):
+            try:
+                panel=PanelCalibration.model_validate(raw)
+            except ValidationError as error:
+                failures.extend({'panel_index':index, 'field':'.'.join(map(str, item['loc'])),
+                    'reason':item['msg']} for item in error.errors(
+                        include_input=False, include_context=False, include_url=False))
+                continue
             state=next((s for s in states if s.get('state_key')==panel.state_key),None)
             check=extract_panel(np.asarray(Image.open(io.BytesIO(figure['image'])).convert('RGB')),
                 panel.model_dump(),references=references_for(state))

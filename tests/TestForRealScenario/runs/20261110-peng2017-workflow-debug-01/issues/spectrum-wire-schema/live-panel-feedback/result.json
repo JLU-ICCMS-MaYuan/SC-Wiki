@@ -1,0 +1,1 @@
+{"model": "gpt-6.1-sol", "provider": "server:LLM2", "results": [{"role": "main", "page": 1, "panels": 0, "failures": [], "saved_reread": true}, {"role": "supplementary", "page": 14, "panels": 4, "failures": [], "saved_reread": true}], "scope": "真原页模型谱工具、标定和正式谱engine及隔离保存重读；不写业务任务，非整篇谱或业务验收"}

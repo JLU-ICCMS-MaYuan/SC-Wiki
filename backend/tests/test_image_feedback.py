@@ -1,5 +1,6 @@
 from copy import deepcopy
 import json
+import pytest
 
 from backend.tests.test_chart_reading import original, panel
 from backend.ingest.chart_reading import enrich_document
@@ -146,7 +147,8 @@ def test_feedback_checkpoint_resumes_with_pixels_and_without_reasking_successes(
     assert sum('image_pages' in data for data in requests)==1
 
 
-def test_spectrum_feedback_uses_new_crop_as_evidence_and_keeps_original_coordinates(tmp_path):
+@pytest.mark.parametrize('fault',['roi','unit'])
+def test_spectrum_feedback_uses_new_crop_as_evidence_and_keeps_original_coordinates(tmp_path,fault):
     import base64,hashlib,io
     import pymupdf
     from PIL import Image
@@ -175,8 +177,16 @@ def test_spectrum_feedback_uses_new_crop_as_evidence_and_keeps_original_coordina
     original='data:image/png;base64,'+base64.b64encode(rendered['png']).decode();calls=[]
     def model(prompt,content,**options):
         request=json.loads(content);calls.append(request)
+        schema=next(x['function']['parameters'] for x in options['tool_definitions']
+                    if x['function']['name']=='report_spectrum_calibration')
+        assert 'prefixItems' not in json.dumps(schema)
+        pair=schema['$defs']['CurveCalibration']['properties']['amplitude_ticks']['items']
+        assert pair=={'type':'array','items':{'type':'number'},'minItems':2,'maxItems':2}
         if len(calls)==1:
             bad=deepcopy(correct);bad['curves'][0]['roi']=[0,0,1,1]
+            if fault=='unit':
+                bad['curves'][0]['kind']='alpha2f'
+                bad['curves'][0]['unit']='arbitrary_units'
             return {'action':{'name':'report_spectrum_calibration','arguments':{'panels':[bad],'issues':[]}}}
         if len(calls)==2:
             assert request['verification_issues']

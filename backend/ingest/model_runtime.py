@@ -137,6 +137,9 @@ def transient(error):
         return False
     if isinstance(node, dict) and node.get('code') in {'insufficient_quota', 'billing_hard_limit_reached', 'credit_balance_too_low'}:
         return False
+    # 网关可能用503包装明确的固定工具结构错误；重复发送同一声明不能恢复。
+    if isinstance(node, dict) and re.match(r"^Invalid schema for function ['\"]", str(node.get('message') or ''), re.I):
+        return False
     return (isinstance(error, (APIConnectionError, APITimeoutError, httpx.TransportError)) or
         isinstance(error, APIStatusError) and error.status_code in {408, 429, 500, 502, 503, 504})
 
