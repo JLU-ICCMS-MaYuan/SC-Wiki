@@ -20,13 +20,14 @@ def test_four_explicit_scalar_labels_keep_quantity_and_units(quantity, unit, val
     assert values[0]['value_number'] == value and values[0]['precision_kind'] == 'reported_label'
 
 
-def test_dos_curve_requires_fermi_energy_calibration_and_rejects_other_energy():
+@pytest.mark.parametrize('bounds', [[0, 1000], [1000, 0]])
+def test_dos_curve_requires_fermi_energy_calibration_and_rejects_other_energy(bounds):
     chart = panel('line'); chart.update(quantity='dos_fermi', unit='states/eV', layout='sparse')
     chart['series'] = ['blue']; chart['points'] = [chart['points'][0]]
     source = {'file_id': 'si', 'sha256': 'f' * 64, 'page': 2}
     image = Image.new('RGB', (200, 200), 'white')
     assert not calibrate_panel(chart, image, source, [0, 0, 200, 200])[0]
-    chart.update(x_axis={'scale': 'linear', 'bounds': [0, 1000], 'ticks': [
+    chart.update(x_axis={'scale': 'linear', 'bounds': bounds, 'ticks': [
         {'position': 0, 'value': -10}, {'position': 1000, 'value': 10}]}, x_quantity='energy', x_unit='eV')
     chart['points'][0]['x'] = 500
     assert len(calibrate_panel(chart, image, source, [0, 0, 200, 200])[0]) == 1

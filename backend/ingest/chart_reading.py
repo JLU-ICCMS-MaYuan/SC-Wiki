@@ -15,7 +15,7 @@ from .chart_calibration import ChartReadingError, approximate, coordinate_value,
 from .document_ir import DocumentBlock, content_hash
 from .scientific_output_schema import obj, array, nullable, TEXT, NUMBER
 
-VERSION = 'scientific-chart-reading-v3'
+VERSION = 'scientific-chart-reading-v4'
 QUANTITIES = ['tc', 'lambda_ep', 'omega_log', 'dos_fermi']
 
 DISCOVERY_PROMPT = '''Inventory EVERY attached PDF page and EVERY figure visible on it, including SI.
@@ -56,6 +56,9 @@ or null for material categories. Read actual markers/source-requested x values, 
 For DOS at EF, the point must be at E-EF=0, with the actual energy-axis calibration.
 axis.bounds are the ACTUAL visible minimum/maximum positions of that value axis, including frame space
 beyond the first/last labeled tick. Do not confuse the last tick with the plotted axis limit.
+Always return bounds=[smaller image coordinate, larger image coordinate], NOT the positions of the
+minimum/maximum physical values. For a vertical axis this is [top_y, bottom_y] because y grows downward;
+for a horizontal axis it is [left_x, right_x]. Tick position/value pairs retain the actual axis direction.
 Use scale=linear/log10 from actual ticks. Broken/unknown axes are unresolved, not silently linearized.
 pixel_error is the visually justified normalized-coordinate localization precision, at least one image
 pixel; it is NOT a physical measurement uncertainty. Do not invent error bars or significant digits.

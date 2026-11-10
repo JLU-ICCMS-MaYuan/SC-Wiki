@@ -9,12 +9,31 @@ class ChartReadingError(ValueError):
     pass
 
 
+def axis_bounds(axis):
+    """边界是图像位置；排序不改变刻度的物理值、方向或原始响应。"""
+    bounds = axis.get('bounds')
+    if bounds is None:
+        positions = [tick['position'] for tick in axis['ticks']]
+        if len(positions) < 2:
+            raise ChartReadingError('坐标刻度不足，无法确定图像边界')
+        bounds = [min(positions), max(positions)]
+    if (not isinstance(bounds, (list, tuple)) or len(bounds) != 2
+            or any(isinstance(value, bool) or not isinstance(value, (int, float))
+                   or not math.isfinite(value) for value in bounds)):
+        raise ChartReadingError('坐标边界必须为两个有限的图像位置')
+    low, high = sorted(bounds)
+    if not 0 <= low < high <= 1000:
+        raise ChartReadingError('坐标边界超出原图或宽度为零')
+    return [low, high]
+
+
 def align_value_ticks(image, axis, *, localization_error=1.0):
     """在实际轴线附近对齐刻度短线；没有唯一像素信号时保留原定位，不从科学值反推。"""
     from copy import deepcopy
+    axis = {**axis, 'bounds': axis_bounds(axis)}
     rgb = np.asarray(image.convert('RGB'), dtype=float)
     height, width = rgb.shape[:2]
-    bounds = axis.get('bounds') or [min(t['position'] for t in axis['ticks']), max(t['position'] for t in axis['ticks'])]
+    bounds = axis['bounds']
     low, high = max(0, round(bounds[0] * (height - 1) / 1000)), min(height - 1, round(bounds[1] * (height - 1) / 1000))
     if high <= low: return axis, {'ticks_aligned': False}
     dark = (np.ptp(rgb, axis=2) < 8) & (np.mean(rgb, axis=2) < 128)
@@ -62,9 +81,10 @@ def coordinate_value(axis, position, *, pixel_error=1.0):
     order = np.argsort(x); x, y = x[order], y[order]
     if len(set(x)) != len(x) or not (np.all(np.diff(y) > 0) or np.all(np.diff(y) < 0)):
         raise ChartReadingError('坐标刻度重复或不单调，不能猜测轴变换')
-    bounds = axis.get('bounds') or [float(x[0]), float(x[-1])]
-    if (len(bounds) != 2 or not np.isfinite(bounds).all() or not 0 <= bounds[0] <= x[0] <= x[-1] <= bounds[1] <= 1000
-            or not bounds[0] <= position <= bounds[1]):
+    bounds = axis_bounds(axis)
+    if not bounds[0] <= x[0] <= x[-1] <= bounds[1]:
+        raise ChartReadingError('坐标刻度超出声明的图像边界')
+    if not bounds[0] <= position <= bounds[1]:
         raise ChartReadingError('数据位置超出已标定坐标，未外推')
     logarithmic = axis['scale'] == 'log10'
     if logarithmic and np.any(y <= 0):
@@ -89,7 +109,7 @@ def bar_edge(image, point, axis):
     height, width = rgb.shape[:2]
     ticks = axis['ticks']
     if not ticks: raise ChartReadingError('柱状图缺少标定轴')
-    bounds = axis.get('bounds') or [min(t['position'] for t in ticks), max(t['position'] for t in ticks)]
+    bounds = axis_bounds(axis)
     low = max(0, int(math.floor(bounds[0] * (height - 1) / 1000)))
     high = min(height - 1, int(math.ceil(bounds[1] * (height - 1) / 1000)))
     area = rgb[low:high + 1].reshape(-1, 3)

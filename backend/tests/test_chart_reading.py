@@ -58,9 +58,17 @@ def fake_model(calls):
     return model
 
 
-def test_native_images_calibration_and_ir_roundtrip_keep_each_series(tmp_path):
+@pytest.mark.parametrize('reverse_bounds', [False, True])
+def test_native_images_calibration_and_ir_roundtrip_keep_each_series(tmp_path, reverse_bounds):
     path, ir, source = original(tmp_path); calls = []; original_blocks = deepcopy(ir.blocks)
-    report = enrich_document(ir, path, source, fake_model(calls))
+    model = fake_model(calls)
+    def read(prompt, content, **options):
+        answer = model(prompt, content, **options)
+        if reverse_bounds:
+            for value in answer.get('panels', []):
+                value['axis']['bounds'].reverse()
+        return answer
+    report = enrich_document(ir, path, source, read)
     assert len(calls) == 2 and report['readings'] == 2
     assert ir.blocks[:2] == original_blocks
     restored = DocumentIR.model_validate_json(ir.model_dump_json())
@@ -72,6 +80,15 @@ def test_native_images_calibration_and_ir_roundtrip_keep_each_series(tmp_path):
     assert all(v['source_sha256'] == source['sha256'] for v in values)
     assert all('NOT physical measurement error' in b.text for b in restored.blocks[2:])
     assert enrich_document(ir, path, source, fake_model(calls)) == report and len(calls) == 2
+
+
+def test_old_completed_chart_reading_is_reprocessed_after_axis_fix(tmp_path):
+    path, ir, source = original(tmp_path); calls = []
+    ir.coverage['chart_reading'] = {'version': 'scientific-chart-reading-v3',
+        'status': 'completed', 'readings': 0, 'unresolved': [{'reason': '坐标边界反序'}]}
+    report = enrich_document(ir, path, source, fake_model(calls))
+    assert len(calls) == 2 and report['readings'] == 2
+    assert report['version'] != 'scientific-chart-reading-v3'
 
 
 def test_graph_precision_and_original_locator_survive_transaction_and_reread(tmp_path):

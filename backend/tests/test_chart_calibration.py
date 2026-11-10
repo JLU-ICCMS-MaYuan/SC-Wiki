@@ -6,12 +6,43 @@ from PIL import Image, ImageDraw
 from backend.ingest.chart_calibration import coordinate_value, approximate, heatmap_position, bar_edge, ChartReadingError
 
 
+@pytest.mark.parametrize('scale,ticks,expected', [
+    ('linear', [{'position': 100, 'value': 200}, {'position': 900, 'value': 0}], 100),
+    ('linear', [{'position': 100, 'value': 0}, {'position': 900, 'value': 200}], 100),
+    ('log10', [{'position': 100, 'value': 100}, {'position': 900, 'value': 1}], 10),
+])
+def test_boundary_order_does_not_change_tick_value_direction(scale, ticks, expected):
+    axis = {'scale': scale, 'ticks': ticks, 'bounds': [900, 100]}
+    value, _, _ = coordinate_value(axis, 500)
+    assert value == pytest.approx(expected)
+    assert axis['bounds'] == [900, 100]
+
+
+@pytest.mark.parametrize('bounds', [[900, 100], [100, 900]])
+@pytest.mark.parametrize('position', [50, 950])
+def test_boundary_order_does_not_allow_values_outside_the_axis(bounds, position):
+    axis = {'scale': 'linear', 'bounds': bounds,
+            'ticks': [{'position': 100, 'value': 200}, {'position': 900, 'value': 0}]}
+    with pytest.raises(ChartReadingError):
+        coordinate_value(axis, position)
+
+
+@pytest.mark.parametrize('bounds', [[100, 100], [-1, 900], [1001, 100],
+    [float('nan'), 900], [100, float('inf')], [], [100], [100, 500, 900], [200, 800]])
+def test_invalid_axis_bounds_remain_rejected(bounds):
+    axis = {'scale': 'linear', 'bounds': bounds,
+            'ticks': [{'position': 100, 'value': 200}, {'position': 900, 'value': 0}]}
+    with pytest.raises(ChartReadingError):
+        coordinate_value(axis, 500)
+
+
 @pytest.mark.parametrize('grid', ['black', (0, 60, 0), (140, 240, 140)])
-def test_bar_pixel_edge_crosses_an_internal_grid_line(grid):
+@pytest.mark.parametrize('bounds', [[100, 900], [900, 100]])
+def test_bar_pixel_edge_crosses_an_internal_grid_line(grid, bounds):
     image = Image.new('RGB', (100, 100), 'white'); draw = ImageDraw.Draw(image)
     draw.rectangle((30, 30, 40, 90), fill=(0, 200, 0)); draw.line((20, 50, 90, 50), fill=grid, width=3)
     result = bar_edge(image, {'x': 350, 'y': 305, 'pixel_error': 10},
-        {'ticks': [{'position': 100, 'value': 200}, {'position': 900, 'value': 0}], 'bounds': [100, 900]})
+        {'ticks': [{'position': 100, 'value': 200}, {'position': 900, 'value': 0}], 'bounds': bounds})
     assert result[0] == pytest.approx(300, abs=12)
 
 
@@ -45,7 +76,8 @@ def test_missing_invalid_or_extrapolated_axis_is_rejected(axis, position):
     with pytest.raises(ChartReadingError): coordinate_value(axis, position)
 
 
-def test_heatmap_reads_actual_colorbar_pixels():
+@pytest.mark.parametrize('bounds', [[125, 875], [875, 125]])
+def test_heatmap_reads_actual_colorbar_pixels(bounds):
     image = Image.new('RGB', (400, 400), 'white')
     draw = ImageDraw.Draw(image)
     for y in range(50, 351):
@@ -53,7 +85,7 @@ def test_heatmap_reads_actual_colorbar_pixels():
     color = image.getpixel((310, 200)); draw.rectangle((50, 50, 150, 150), fill=color)
     pos, error, metadata = heatmap_position(image, (250, 250),
         {'bbox': [750, 125, 800, 875], 'orientation': 'vertical'})
-    value, precision, _ = coordinate_value({'scale': 'linear', 'ticks': [
+    value, precision, _ = coordinate_value({'scale': 'linear', 'bounds': bounds, 'ticks': [
         {'position': 125, 'value': 300}, {'position': 875, 'value': 0}]}, pos, pixel_error=error)
     assert value == pytest.approx(150, abs=precision)
     assert metadata['color_distance'] == 0

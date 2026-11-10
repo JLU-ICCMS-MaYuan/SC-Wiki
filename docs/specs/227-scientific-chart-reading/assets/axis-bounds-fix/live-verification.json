@@ -1,0 +1,2552 @@
+{
+  "provenance": {
+    "source_pdf": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261106-peng2017/sources/2017 YHn LaHn-彭枫.pdf",
+    "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+    "pdf_page": 4,
+    "model": "gpt-6.1-sol",
+    "provider": "server:LLM2",
+    "reused": "原PDF、未改动的文字提取；不复用旧读图或提取回答",
+    "rerun": "第4页图表发现、精读、标定、ScH6科学提取和固定表单填写",
+    "source_code": {
+      "backend/ingest/chart_reading.py": "89020f7ccb21b219d9d517d2f6ef7039b7aabe14558aad760132a9fbc0c6e5cd",
+      "backend/ingest/chart_calibration.py": "ee97051e6e8890137df86edce2596142f05ae3723a06c4e0847705e21649ef64"
+    }
+  },
+  "summary": {
+    "status": "completed",
+    "chart_readings": 38,
+    "sc_readings": [
+      {
+        "version": "scientific-chart-reading-v4",
+        "source_file_id": "main",
+        "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "pdf_page": 4,
+        "figure": "Fig. 4",
+        "panel": "top",
+        "kind": "bar",
+        "quantity": "dos_fermi",
+        "quantity_name": "Hydrogen electronic density of states at the Fermi level per unit volume",
+        "unit": "states/(eV Å³)",
+        "crop_bbox": [
+          55.31999999999999,
+          35.52,
+          290.46,
+          109.416
+        ],
+        "image_size": [
+          785,
+          247
+        ],
+        "point": {
+          "category": "ScH6",
+          "conditions": [],
+          "label_text": null,
+          "label_value": null,
+          "material": "ScH6",
+          "method_raw": null,
+          "mu_star": null,
+          "pixel_error": 4.1,
+          "pressure_value_gpa": 300,
+          "reading": "position",
+          "reason": "First red bar; material order and pressure are mapped by the full figure and caption.",
+          "series": "H-derived DOS at EF per unit volume",
+          "space_group_symbol": null,
+          "x": 252.2,
+          "y": 587.0
+        },
+        "axis": {
+          "bounds": [
+            198.4,
+            813.8
+          ],
+          "scale": "linear",
+          "ticks": [
+            {
+              "position": 230.8,
+              "value": 0.04
+            },
+            {
+              "position": 522.3,
+              "value": 0.02
+            },
+            {
+              "position": 813.8,
+              "value": 0
+            }
+          ]
+        },
+        "colorbar": null,
+        "axis_alignment": {
+          "ticks_aligned": true,
+          "axis_spine_pixel": 169,
+          "tick_positions": [
+            {
+              "value": 0.04,
+              "original_position": 230.8,
+              "position": 235.77235772357724
+            },
+            {
+              "value": 0.02,
+              "original_position": 522.3,
+              "position": 524.390243902439
+            }
+          ]
+        },
+        "calibrated_axis": {
+          "bounds": [
+            198.4,
+            813.8
+          ],
+          "scale": "linear",
+          "ticks": [
+            {
+              "position": 235.77235772357724,
+              "value": 0.04
+            },
+            {
+              "position": 524.390243902439,
+              "value": 0.02
+            },
+            {
+              "position": 813.8,
+              "value": 0
+            }
+          ]
+        },
+        "bar_rgb": [
+          255.0,
+          0.0,
+          0.0
+        ],
+        "background_rgb": [
+          255.0,
+          255.0,
+          255.0
+        ],
+        "bar_pixel_span": [
+          146,
+          198
+        ],
+        "bar_edge_error": 8.130081300813009,
+        "bar_edge_interval": [
+          146,
+          144
+        ],
+        "initial_model_y": 587.0,
+        "snapped_y": 589.430894308943,
+        "calculated_value": 0.015517401002605485,
+        "calibration": {
+          "slope": -6.920079949622933e-05,
+          "intercept": 0.05630649013656179,
+          "residual": 1.826601049031637e-05,
+          "scale": "linear"
+        },
+        "value_number": 0.016,
+        "value_raw": "~0.016 states/(eV Å³)",
+        "reading_precision": 0.002,
+        "precision_kind": "graph_reading_resolution",
+        "image_origin": {
+          "image_kind": "original_page_region",
+          "render_dpi": 240
+        }
+      },
+      {
+        "version": "scientific-chart-reading-v4",
+        "source_file_id": "main",
+        "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "pdf_page": 4,
+        "figure": "Fig. 4",
+        "panel": "middle",
+        "kind": "bar",
+        "quantity": "lambda_ep",
+        "quantity_name": "Electron–phonon coupling parameter λ",
+        "unit": "dimensionless",
+        "crop_bbox": [
+          55.31999999999999,
+          84.624,
+          290.46,
+          155.352
+        ],
+        "image_size": [
+          785,
+          236
+        ],
+        "point": {
+          "category": "ScH6",
+          "conditions": [],
+          "label_text": null,
+          "label_value": null,
+          "material": "ScH6",
+          "method_raw": "linear response theory",
+          "mu_star": null,
+          "pixel_error": 5,
+          "pressure_value_gpa": 300,
+          "reading": "position",
+          "reason": "First blue λ bar; material order and pressure are mapped by the original figure caption.",
+          "series": "Calculated EPC parameter",
+          "space_group_symbol": null,
+          "x": 252,
+          "y": 631
+        },
+        "axis": {
+          "bounds": [
+            157,
+            805
+          ],
+          "scale": "linear",
+          "ticks": [
+            {
+              "position": 288,
+              "value": 4
+            },
+            {
+              "position": 542,
+              "value": 2
+            },
+            {
+              "position": 805,
+              "value": 0
+            }
+          ]
+        },
+        "colorbar": null,
+        "axis_alignment": {
+          "ticks_aligned": true,
+          "axis_spine_pixel": 169,
+          "tick_positions": [
+            {
+              "value": 4,
+              "original_position": 288,
+              "position": 285.1063829787234
+            },
+            {
+              "value": 2,
+              "original_position": 542,
+              "position": 544.6808510638298
+            },
+            {
+              "value": 0,
+              "original_position": 805,
+              "position": 804.2553191489362
+            }
+          ]
+        },
+        "calibrated_axis": {
+          "bounds": [
+            157,
+            805
+          ],
+          "scale": "linear",
+          "ticks": [
+            {
+              "position": 285.1063829787234,
+              "value": 4
+            },
+            {
+              "position": 544.6808510638298,
+              "value": 2
+            },
+            {
+              "position": 804.2553191489362,
+              "value": 0
+            }
+          ]
+        },
+        "bar_rgb": [
+          0.0,
+          0.0,
+          255.0
+        ],
+        "background_rgb": [
+          255.0,
+          255.0,
+          255.0
+        ],
+        "bar_pixel_span": [
+          150,
+          186
+        ],
+        "bar_edge_error": 8.51063829787234,
+        "bar_edge_interval": [
+          150,
+          148
+        ],
+        "initial_model_y": 631,
+        "snapped_y": 634.0425531914893,
+        "calculated_value": 1.3114754098360644,
+        "calibration": {
+          "slope": -0.007704918032786885,
+          "intercept": 6.196721311475408,
+          "residual": 1.7763568394002505e-15,
+          "scale": "linear"
+        },
+        "value_number": 1.3,
+        "value_raw": "~1.3 dimensionless",
+        "reading_precision": 0.2,
+        "precision_kind": "graph_reading_resolution",
+        "image_origin": {
+          "image_kind": "original_page_region",
+          "render_dpi": 240
+        }
+      },
+      {
+        "version": "scientific-chart-reading-v4",
+        "source_file_id": "main",
+        "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "pdf_page": 4,
+        "figure": "Fig. 4",
+        "panel": "bottom",
+        "kind": "bar",
+        "quantity": "tc",
+        "quantity_name": "Superconducting transition temperature",
+        "unit": "K",
+        "crop_bbox": [
+          55.31999999999999,
+          130.56,
+          290.46,
+          212.376
+        ],
+        "image_size": [
+          785,
+          273
+        ],
+        "point": {
+          "category": "ScH6",
+          "conditions": [],
+          "label_text": null,
+          "label_value": null,
+          "material": "ScH6",
+          "method_raw": "Eliashberg equation",
+          "mu_star": 0.1,
+          "pixel_error": 4,
+          "pressure_value_gpa": 300,
+          "reading": "position",
+          "reason": "Green bar for ScH6; pressure mapped by the caption.",
+          "series": "μ* = 0.1",
+          "space_group_symbol": null,
+          "x": 246,
+          "y": 542
+        },
+        "axis": {
+          "bounds": [
+            132,
+            692
+          ],
+          "scale": "linear",
+          "ticks": [
+            {
+              "position": 689,
+              "value": 0
+            },
+            {
+              "position": 538,
+              "value": 100
+            },
+            {
+              "position": 388,
+              "value": 200
+            },
+            {
+              "position": 238,
+              "value": 300
+            }
+          ]
+        },
+        "colorbar": null,
+        "axis_alignment": {
+          "ticks_aligned": true,
+          "axis_spine_pixel": 169,
+          "tick_positions": [
+            {
+              "value": 0,
+              "original_position": 689,
+              "position": 691.1764705882352
+            },
+            {
+              "value": 100,
+              "original_position": 538,
+              "position": 540.4411764705883
+            },
+            {
+              "value": 200,
+              "original_position": 388,
+              "position": 389.70588235294116
+            },
+            {
+              "value": 300,
+              "original_position": 238,
+              "position": 238.97058823529412
+            }
+          ]
+        },
+        "calibrated_axis": {
+          "bounds": [
+            132,
+            692
+          ],
+          "scale": "linear",
+          "ticks": [
+            {
+              "position": 691.1764705882352,
+              "value": 0
+            },
+            {
+              "position": 540.4411764705883,
+              "value": 100
+            },
+            {
+              "position": 389.70588235294116,
+              "value": 200
+            },
+            {
+              "position": 238.97058823529412,
+              "value": 300
+            }
+          ]
+        },
+        "bar_rgb": [
+          0.0,
+          255.0,
+          0.0
+        ],
+        "background_rgb": [
+          255.0,
+          255.0,
+          255.0
+        ],
+        "bar_pixel_span": [
+          148,
+          186
+        ],
+        "bar_edge_error": 5.514705882352941,
+        "bar_edge_interval": [
+          148,
+          147
+        ],
+        "initial_model_y": 542,
+        "snapped_y": 542.2794117647059,
+        "calculated_value": 98.78048780487796,
+        "calibration": {
+          "slope": -0.6634146341463416,
+          "intercept": 458.5365853658536,
+          "residual": 1.7053025658242404e-13,
+          "scale": "linear"
+        },
+        "value_number": 99.0,
+        "value_raw": "~99 K",
+        "reading_precision": 10.0,
+        "precision_kind": "graph_reading_resolution",
+        "image_origin": {
+          "image_kind": "original_page_region",
+          "render_dpi": 240
+        }
+      },
+      {
+        "version": "scientific-chart-reading-v4",
+        "source_file_id": "main",
+        "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+        "pdf_page": 4,
+        "figure": "Fig. 4",
+        "panel": "bottom",
+        "kind": "bar",
+        "quantity": "tc",
+        "quantity_name": "Superconducting transition temperature",
+        "unit": "K",
+        "crop_bbox": [
+          55.31999999999999,
+          130.56,
+          290.46,
+          212.376
+        ],
+        "image_size": [
+          785,
+          273
+        ],
+        "point": {
+          "category": "ScH6",
+          "conditions": [],
+          "label_text": null,
+          "label_value": null,
+          "material": "ScH6",
+          "method_raw": "Eliashberg equation",
+          "mu_star": 0.13,
+          "pixel_error": 4,
+          "pressure_value_gpa": 300,
+          "reading": "position",
+          "reason": "Blue bar for ScH6; pressure mapped by the caption.",
+          "series": "μ* = 0.13",
+          "space_group_symbol": null,
+          "x": 257,
+          "y": 560
+        },
+        "axis": {
+          "bounds": [
+            132,
+            692
+          ],
+          "scale": "linear",
+          "ticks": [
+            {
+              "position": 689,
+              "value": 0
+            },
+            {
+              "position": 538,
+              "value": 100
+            },
+            {
+              "position": 388,
+              "value": 200
+            },
+            {
+              "position": 238,
+              "value": 300
+            }
+          ]
+        },
+        "colorbar": null,
+        "axis_alignment": {
+          "ticks_aligned": true,
+          "axis_spine_pixel": 169,
+          "tick_positions": [
+            {
+              "value": 0,
+              "original_position": 689,
+              "position": 691.1764705882352
+            },
+            {
+              "value": 100,
+              "original_position": 538,
+              "position": 540.4411764705883
+            },
+            {
+              "value": 200,
+              "original_position": 388,
+              "position": 389.70588235294116
+            },
+            {
+              "value": 300,
+              "original_position": 238,
+              "position": 238.97058823529412
+            }
+          ]
+        },
+        "calibrated_axis": {
+          "bounds": [
+            132,
+            692
+          ],
+          "scale": "linear",
+          "ticks": [
+            {
+              "position": 691.1764705882352,
+              "value": 0
+            },
+            {
+              "position": 540.4411764705883,
+              "value": 100
+            },
+            {
+              "position": 389.70588235294116,
+              "value": 200
+            },
+            {
+              "position": 238.97058823529412,
+              "value": 300
+            }
+          ]
+        },
+        "bar_rgb": [
+          0.0,
+          0.0,
+          128.0
+        ],
+        "background_rgb": [
+          255.0,
+          255.0,
+          255.0
+        ],
+        "bar_pixel_span": [
+          154,
+          186
+        ],
+        "bar_edge_error": 9.191176470588236,
+        "bar_edge_interval": [
+          154,
+          151
+        ],
+        "initial_model_y": 560,
+        "snapped_y": 560.6617647058823,
+        "calculated_value": 86.58536585365846,
+        "calibration": {
+          "slope": -0.6634146341463416,
+          "intercept": 458.5365853658536,
+          "residual": 1.7053025658242404e-13,
+          "scale": "linear"
+        },
+        "value_number": 90.0,
+        "value_raw": "~90 K",
+        "reading_precision": 20.0,
+        "precision_kind": "graph_reading_resolution",
+        "image_origin": {
+          "image_kind": "original_page_region",
+          "render_dpi": 240
+        }
+      }
+    ],
+    "material_states": 1,
+    "filling_status": "completed",
+    "calls": 7,
+    "ir_save_reread": true,
+    "form_save_reread": true,
+    "boundary": "仅第4页图表和ScH6受影响字段；未运行人工科学核对、业务库保存或五阶段黑盒"
+  },
+  "chart_report": {
+    "version": "scientific-chart-reading-v4",
+    "status": "completed",
+    "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+    "regions": [
+      {
+        "region_id": "chart-region-0",
+        "block_id": "original-figure-4",
+        "page": 4,
+        "bbox": [
+          69.052001953125,
+          47.05598449707031,
+          280.010986328125,
+          198.614990234375
+        ]
+      }
+    ],
+    "scanned_pages": [
+      4
+    ],
+    "targets": [
+      {
+        "region_id": "chart-page-4-figure-0",
+        "page": 4,
+        "block_id": null,
+        "label": "Fig. 4 (top panel)",
+        "reason": "Bar chart of hydrogen electronic density of states at the Fermi level per unit volume for the clathrate hydrides.",
+        "bbox": [
+          67.32,
+          47.52,
+          278.46,
+          97.416
+        ]
+      },
+      {
+        "region_id": "chart-page-4-figure-1",
+        "page": 4,
+        "block_id": null,
+        "label": "Fig. 4 (middle panel)",
+        "reason": "Bar chart of electron–phonon coupling parameter λ for the clathrate hydrides.",
+        "bbox": [
+          67.32,
+          96.624,
+          278.46,
+          143.352
+        ]
+      },
+      {
+        "region_id": "chart-page-4-figure-2",
+        "page": 4,
+        "block_id": null,
+        "label": "Fig. 4 (bottom panel)",
+        "reason": "Bar chart of superconducting Tc for the clathrate hydrides, with series for Coulomb pseudopotentials μ*=0.1 and 0.13.",
+        "bbox": [
+          67.32,
+          142.56,
+          278.46,
+          200.376
+        ]
+      }
+    ],
+    "excluded": [],
+    "readings": 38,
+    "unresolved": [
+      {
+        "page": 4,
+        "region_id": "chart-page-4-figure-0",
+        "crop_bbox": [
+          55.31999999999999,
+          35.52,
+          290.46,
+          109.416
+        ],
+        "reason": "The crop contains the complete DOS panel but only a clipped upper strip of the EPC panel. EPC bar endpoints and its full value axis cannot be read from image 2; the Tc panel is outside image 2."
+      },
+      {
+        "page": 4,
+        "region_id": "chart-page-4-figure-1",
+        "crop_bbox": [
+          55.31999999999999,
+          84.624,
+          290.46,
+          155.352
+        ],
+        "reason": "The crop contains the complete middle λ panel, but only truncated portions of the DOS panel above and Tc panel below. Those truncated panels lack sufficient visible value-axis calibration and bar coverage for extraction."
+      },
+      {
+        "page": 4,
+        "region_id": "chart-page-4-figure-2",
+        "figure": "Fig. 4",
+        "panel": "bottom",
+        "crop_bbox": [
+          55.31999999999999,
+          130.56,
+          290.46,
+          212.376
+        ],
+        "category": "PrH9",
+        "reason": "No distinguishable green bar above the baseline; a numerical height cannot be localized.",
+        "series": "μ* = 0.1"
+      },
+      {
+        "page": 4,
+        "region_id": "chart-page-4-figure-2",
+        "figure": "Fig. 4",
+        "panel": "bottom",
+        "crop_bbox": [
+          55.31999999999999,
+          130.56,
+          290.46,
+          212.376
+        ],
+        "category": "PrH9",
+        "reason": "No distinguishable blue bar above the baseline; a numerical height cannot be localized.",
+        "series": "μ* = 0.13"
+      },
+      {
+        "page": 4,
+        "region_id": "chart-page-4-figure-2",
+        "crop_bbox": [
+          55.31999999999999,
+          130.56,
+          290.46,
+          212.376
+        ],
+        "reason": "The crop includes only a truncated fragment of the middle λ panel, with no usable nonzero tick calibration; λ values cannot be extracted from this crop."
+      },
+      {
+        "page": 4,
+        "region_id": "chart-page-4-figure-2",
+        "crop_bbox": [
+          55.31999999999999,
+          130.56,
+          290.46,
+          212.376
+        ],
+        "reason": "Neither Tc series has a distinguishable bar at PrH9; absence of a visible bar is not assigned a numerical zero."
+      }
+    ]
+  },
+  "saved_and_reread_fields": [
+    {
+      "material": "ScH6",
+      "pressure_value_gpa": 300.0,
+      "record_key": "fill-2c9d63e3df24b40860156b5fe7fd",
+      "property_code": "dos_fermi",
+      "record_type": "property",
+      "value_number": 0.016,
+      "value_raw": "~0.016 states/(eV Å³)",
+      "canonical_unit": "states/(eV Å³)",
+      "parameters": null,
+      "sources": [
+        {
+          "file_id": "main",
+          "pdf_page": 4,
+          "block_id": "chart-reading-e5b5236f888574e3e83138cc081dd7bbff0770cd"
+        },
+        {
+          "file_id": "main",
+          "pdf_page": 4,
+          "block_id": "original-page-4"
+        }
+      ]
+    },
+    {
+      "material": "ScH6",
+      "pressure_value_gpa": 300.0,
+      "record_key": "fill-ba5ac47769d359cc735a5bcd5d5a",
+      "property_code": "tc",
+      "record_type": "predicted_tc",
+      "value_number": 99,
+      "value_raw": "~99",
+      "canonical_unit": "K",
+      "parameters": {
+        "lambda_ep": {
+          "evidences": [
+            {
+              "block_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293",
+              "file_id": "main",
+              "pdf_page": 4,
+              "quote": null,
+              "quote_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293"
+            }
+          ],
+          "reported": true,
+          "unit_raw": "dimensionless",
+          "value_boolean": null,
+          "value_kind": "number",
+          "value_max": null,
+          "value_min": null,
+          "value_number": 1.3,
+          "value_raw": "~1.3 dimensionless",
+          "value_text": null
+        },
+        "mu_star": 0.1
+      },
+      "sources": [
+        {
+          "file_id": "main",
+          "pdf_page": 4,
+          "block_id": "chart-reading-be28c1a218e56f2384ceda471685184bbec9b9ce"
+        },
+        {
+          "file_id": "main",
+          "pdf_page": 4,
+          "block_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293"
+        },
+        {
+          "file_id": "main",
+          "pdf_page": 4,
+          "block_id": "original-page-4"
+        }
+      ]
+    },
+    {
+      "material": "ScH6",
+      "pressure_value_gpa": 300.0,
+      "record_key": "fill-1b2a2e4b9ae4cde61ca688e273c1",
+      "property_code": "tc",
+      "record_type": "predicted_tc",
+      "value_number": 90,
+      "value_raw": "~90",
+      "canonical_unit": "K",
+      "parameters": {
+        "lambda_ep": {
+          "evidences": [
+            {
+              "block_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293",
+              "file_id": "main",
+              "pdf_page": 4,
+              "quote": null,
+              "quote_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293"
+            }
+          ],
+          "reported": true,
+          "unit_raw": "dimensionless",
+          "value_boolean": null,
+          "value_kind": "number",
+          "value_max": null,
+          "value_min": null,
+          "value_number": 1.3,
+          "value_raw": "~1.3 dimensionless",
+          "value_text": null
+        },
+        "mu_star": 0.13
+      },
+      "sources": [
+        {
+          "file_id": "main",
+          "pdf_page": 4,
+          "block_id": "chart-reading-493725aa5b49203a7b5a7286039aaf6f4e7323f9"
+        },
+        {
+          "file_id": "main",
+          "pdf_page": 4,
+          "block_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293"
+        },
+        {
+          "file_id": "main",
+          "pdf_page": 4,
+          "block_id": "original-page-4"
+        }
+      ]
+    }
+  ],
+  "calls": [
+    {
+      "number": 1,
+      "request_sha256": "96b60e3767470b82b31b35724ee44da95d491ebc36b843bfee39fe3bc423e5cb",
+      "receipt": {
+        "thinking": "provider_default",
+        "output_started": true,
+        "usage": {
+          "completion_tokens": 276,
+          "prompt_tokens": 2884,
+          "total_tokens": 3160,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 95,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": null
+        },
+        "finish_reason": "stop",
+        "attempt": 1,
+        "status": "completed",
+        "elapsed_seconds": 12.09936666599242
+      },
+      "response": {
+        "pages": [
+          {
+            "figures": [
+              {
+                "bbox": [
+                  110,
+                  60,
+                  455,
+                  123
+                ],
+                "label": "Fig. 4 (top panel)",
+                "reason": "Bar chart of hydrogen electronic density of states at the Fermi level per unit volume for the clathrate hydrides.",
+                "target": true
+              },
+              {
+                "bbox": [
+                  110,
+                  122,
+                  455,
+                  181
+                ],
+                "label": "Fig. 4 (middle panel)",
+                "reason": "Bar chart of electron–phonon coupling parameter λ for the clathrate hydrides.",
+                "target": true
+              },
+              {
+                "bbox": [
+                  110,
+                  180,
+                  455,
+                  253
+                ],
+                "label": "Fig. 4 (bottom panel)",
+                "reason": "Bar chart of superconducting Tc for the clathrate hydrides, with series for Coulomb pseudopotentials μ*=0.1 and 0.13.",
+                "target": true
+              }
+            ],
+            "page": 4
+          }
+        ]
+      }
+    },
+    {
+      "number": 2,
+      "request_sha256": "a02a051da19f50597829247b84bfe60b907b5b9fcb891806cdbce672f5aee65f",
+      "receipt": {
+        "thinking": "provider_default",
+        "output_started": true,
+        "usage": {
+          "completion_tokens": 2063,
+          "prompt_tokens": 5099,
+          "total_tokens": 7162,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 212,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": null
+        },
+        "finish_reason": "stop",
+        "attempt": 1,
+        "status": "completed",
+        "elapsed_seconds": 45.71186766598839
+      },
+      "response": {
+        "notes": [
+          "The crop contains the complete DOS panel but only a clipped upper strip of the EPC panel. EPC bar endpoints and its full value axis cannot be read from image 2; the Tc panel is outside image 2."
+        ],
+        "panels": [
+          {
+            "axis": {
+              "bounds": [
+                198.4,
+                813.8
+              ],
+              "scale": "linear",
+              "ticks": [
+                {
+                  "position": 230.8,
+                  "value": 0.04
+                },
+                {
+                  "position": 522.3,
+                  "value": 0.02
+                },
+                {
+                  "position": 813.8,
+                  "value": 0
+                }
+              ]
+            },
+            "categories": [
+              "ScH6",
+              "ScH9",
+              "YH6",
+              "YH9",
+              "YH10",
+              "LaH6",
+              "LaH9",
+              "CeH9",
+              "CeH10",
+              "PrH9"
+            ],
+            "colorbar": null,
+            "figure": "Fig. 4",
+            "kind": "bar",
+            "layout": "matrix",
+            "panel": "top",
+            "points": [
+              {
+                "category": "ScH6",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "ScH6",
+                "method_raw": null,
+                "mu_star": null,
+                "pixel_error": 4.1,
+                "pressure_value_gpa": 300,
+                "reading": "position",
+                "reason": "First red bar; material order and pressure are mapped by the full figure and caption.",
+                "series": "H-derived DOS at EF per unit volume",
+                "space_group_symbol": null,
+                "x": 252.2,
+                "y": 587.0
+              },
+              {
+                "category": "ScH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "ScH9",
+                "method_raw": null,
+                "mu_star": null,
+                "pixel_error": 4.1,
+                "pressure_value_gpa": 400,
+                "reading": "position",
+                "reason": "Second red bar; material order and pressure are mapped by the full figure and caption.",
+                "series": "H-derived DOS at EF per unit volume",
+                "space_group_symbol": null,
+                "x": 324.8,
+                "y": 587.0
+              },
+              {
+                "category": "YH6",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "YH6",
+                "method_raw": null,
+                "mu_star": null,
+                "pixel_error": 4.1,
+                "pressure_value_gpa": 120,
+                "reading": "position",
+                "reason": "Third red bar; material order and pressure are mapped by the full figure and caption.",
+                "series": "H-derived DOS at EF per unit volume",
+                "space_group_symbol": null,
+                "x": 397.5,
+                "y": 562.8
+              },
+              {
+                "category": "YH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "YH9",
+                "method_raw": null,
+                "mu_star": null,
+                "pixel_error": 4.1,
+                "pressure_value_gpa": 150,
+                "reading": "position",
+                "reason": "Fourth red bar; material order and pressure are mapped by the full figure and caption.",
+                "series": "H-derived DOS at EF per unit volume",
+                "space_group_symbol": null,
+                "x": 470.1,
+                "y": 591.1
+              },
+              {
+                "category": "YH10",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "YH10",
+                "method_raw": null,
+                "mu_star": null,
+                "pixel_error": 4.1,
+                "pressure_value_gpa": 400,
+                "reading": "position",
+                "reason": "Fifth red bar; material order and pressure are mapped by the full figure and caption.",
+                "series": "H-derived DOS at EF per unit volume",
+                "space_group_symbol": null,
+                "x": 542.7,
+                "y": 522.3
+              },
+              {
+                "category": "LaH6",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "LaH6",
+                "method_raw": null,
+                "mu_star": null,
+                "pixel_error": 4.1,
+                "pressure_value_gpa": 100,
+                "reading": "position",
+                "reason": "Sixth red bar; material order and pressure are mapped by the full figure and caption.",
+                "series": "H-derived DOS at EF per unit volume",
+                "space_group_symbol": null,
+                "x": 615.3,
+                "y": 542.5
+              },
+              {
+                "category": "LaH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "LaH9",
+                "method_raw": null,
+                "mu_star": null,
+                "pixel_error": 4.1,
+                "pressure_value_gpa": 50,
+                "reading": "position",
+                "reason": "Seventh red bar; material order and pressure are mapped by the full figure and caption.",
+                "series": "H-derived DOS at EF per unit volume",
+                "space_group_symbol": null,
+                "x": 687.9,
+                "y": 736.8
+              },
+              {
+                "category": "CeH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "CeH9",
+                "method_raw": null,
+                "mu_star": null,
+                "pixel_error": 4.1,
+                "pressure_value_gpa": 100,
+                "reading": "position",
+                "reason": "Eighth red bar; material order and pressure are mapped by the full figure and caption.",
+                "series": "H-derived DOS at EF per unit volume",
+                "space_group_symbol": null,
+                "x": 760.5,
+                "y": 481.8
+              },
+              {
+                "category": "CeH10",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "CeH10",
+                "method_raw": null,
+                "mu_star": null,
+                "pixel_error": 4.1,
+                "pressure_value_gpa": 200,
+                "reading": "position",
+                "reason": "Ninth red bar; material order and pressure are mapped by the full figure and caption.",
+                "series": "H-derived DOS at EF per unit volume",
+                "space_group_symbol": null,
+                "x": 833.1,
+                "y": 481.8
+              },
+              {
+                "category": "PrH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "PrH9",
+                "method_raw": null,
+                "mu_star": null,
+                "pixel_error": 4.1,
+                "pressure_value_gpa": 100,
+                "reading": "position",
+                "reason": "Tenth red bar; material order and pressure are mapped by the full figure and caption.",
+                "series": "H-derived DOS at EF per unit volume",
+                "space_group_symbol": null,
+                "x": 905.7,
+                "y": 271.3
+              }
+            ],
+            "quantity": "dos_fermi",
+            "quantity_name": "Hydrogen electronic density of states at the Fermi level per unit volume",
+            "reason": "Red bar heights report the H contribution to DOS at EF, normalized by volume. The original page supplies the category order and caption-specific pressures; all bar coordinates and axis calibration are taken from image 2. This is a scalar DOS panel, not an energy-resolved DOS curve.",
+            "series": [
+              "H-derived DOS at EF per unit volume"
+            ],
+            "unit": "states/(eV Å³)",
+            "unresolved": [],
+            "x_axis": null,
+            "x_quantity": null,
+            "x_unit": null
+          }
+        ]
+      }
+    },
+    {
+      "number": 3,
+      "request_sha256": "d4c3dc7551b2c7eea6e79be9493a9eabec05ee48f13a236a9204a12ffb47fd9d",
+      "receipt": {
+        "thinking": "provider_default",
+        "output_started": true,
+        "usage": {
+          "completion_tokens": 1862,
+          "prompt_tokens": 5098,
+          "total_tokens": 6960,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 125,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": null
+        },
+        "finish_reason": "stop",
+        "attempt": 1,
+        "status": "completed",
+        "elapsed_seconds": 41.394896457961295
+      },
+      "response": {
+        "notes": [
+          "The crop contains the complete middle λ panel, but only truncated portions of the DOS panel above and Tc panel below. Those truncated panels lack sufficient visible value-axis calibration and bar coverage for extraction."
+        ],
+        "panels": [
+          {
+            "axis": {
+              "bounds": [
+                157,
+                805
+              ],
+              "scale": "linear",
+              "ticks": [
+                {
+                  "position": 288,
+                  "value": 4
+                },
+                {
+                  "position": 542,
+                  "value": 2
+                },
+                {
+                  "position": 805,
+                  "value": 0
+                }
+              ]
+            },
+            "categories": [
+              "ScH6",
+              "ScH9",
+              "YH6",
+              "YH9",
+              "YH10",
+              "LaH6",
+              "LaH9",
+              "CeH9",
+              "CeH10",
+              "PrH9"
+            ],
+            "colorbar": null,
+            "figure": "Fig. 4",
+            "kind": "bar",
+            "layout": "matrix",
+            "panel": "middle",
+            "points": [
+              {
+                "category": "ScH6",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "ScH6",
+                "method_raw": "linear response theory",
+                "mu_star": null,
+                "pixel_error": 5,
+                "pressure_value_gpa": 300,
+                "reading": "position",
+                "reason": "First blue λ bar; material order and pressure are mapped by the original figure caption.",
+                "series": "Calculated EPC parameter",
+                "space_group_symbol": null,
+                "x": 252,
+                "y": 631
+              },
+              {
+                "category": "ScH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "ScH9",
+                "method_raw": "linear response theory",
+                "mu_star": null,
+                "pixel_error": 5,
+                "pressure_value_gpa": 400,
+                "reading": "position",
+                "reason": "Second blue λ bar; material order and pressure are mapped by the original figure caption.",
+                "series": "Calculated EPC parameter",
+                "space_group_symbol": null,
+                "x": 325,
+                "y": 623
+              },
+              {
+                "category": "YH6",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "YH6",
+                "method_raw": "linear response theory",
+                "mu_star": null,
+                "pixel_error": 5,
+                "pressure_value_gpa": 120,
+                "reading": "position",
+                "reason": "Third blue λ bar; material order and pressure are mapped by the original figure caption.",
+                "series": "Calculated EPC parameter",
+                "space_group_symbol": null,
+                "x": 397,
+                "y": 428
+              },
+              {
+                "category": "YH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "YH9",
+                "method_raw": "linear response theory",
+                "mu_star": null,
+                "pixel_error": 5,
+                "pressure_value_gpa": 150,
+                "reading": "position",
+                "reason": "Fourth blue λ bar; pressure follows the caption mapping. The bar position, not the numerical body-text result, is recorded.",
+                "series": "Calculated EPC parameter",
+                "space_group_symbol": null,
+                "x": 470,
+                "y": 246
+              },
+              {
+                "category": "YH10",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "YH10",
+                "method_raw": "linear response theory",
+                "mu_star": null,
+                "pixel_error": 5,
+                "pressure_value_gpa": 400,
+                "reading": "position",
+                "reason": "Fifth blue λ bar; material order and pressure are mapped by the original figure caption.",
+                "series": "Calculated EPC parameter",
+                "space_group_symbol": null,
+                "x": 543,
+                "y": 492
+              },
+              {
+                "category": "LaH6",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "LaH6",
+                "method_raw": "linear response theory",
+                "mu_star": null,
+                "pixel_error": 5,
+                "pressure_value_gpa": 100,
+                "reading": "position",
+                "reason": "Sixth blue λ bar; material order and pressure are mapped by the original figure caption.",
+                "series": "Calculated EPC parameter",
+                "space_group_symbol": null,
+                "x": 615,
+                "y": 568
+              },
+              {
+                "category": "LaH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "LaH9",
+                "method_raw": "linear response theory",
+                "mu_star": null,
+                "pixel_error": 5,
+                "pressure_value_gpa": 50,
+                "reading": "position",
+                "reason": "Seventh blue λ bar; material order and pressure are mapped by the original figure caption.",
+                "series": "Calculated EPC parameter",
+                "space_group_symbol": null,
+                "x": 688,
+                "y": 686
+              },
+              {
+                "category": "CeH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "CeH9",
+                "method_raw": "linear response theory",
+                "mu_star": null,
+                "pixel_error": 5,
+                "pressure_value_gpa": 100,
+                "reading": "position",
+                "reason": "Eighth blue λ bar; material order and pressure are mapped by the original figure caption.",
+                "series": "Calculated EPC parameter",
+                "space_group_symbol": null,
+                "x": 760,
+                "y": 703
+              },
+              {
+                "category": "CeH10",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "CeH10",
+                "method_raw": "linear response theory",
+                "mu_star": null,
+                "pixel_error": 5,
+                "pressure_value_gpa": 200,
+                "reading": "position",
+                "reason": "Ninth blue λ bar; material order and pressure are mapped by the original figure caption.",
+                "series": "Calculated EPC parameter",
+                "space_group_symbol": null,
+                "x": 833,
+                "y": 699
+              },
+              {
+                "category": "PrH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "PrH9",
+                "method_raw": "linear response theory",
+                "mu_star": null,
+                "pixel_error": 5,
+                "pressure_value_gpa": 100,
+                "reading": "position",
+                "reason": "Tenth blue λ bar; material order and pressure are mapped by the original figure caption.",
+                "series": "Calculated EPC parameter",
+                "space_group_symbol": null,
+                "x": 906,
+                "y": 767
+              }
+            ],
+            "quantity": "lambda_ep",
+            "quantity_name": "Electron–phonon coupling parameter λ",
+            "reason": "The complete middle panel displays one blue bar for each of ten clathrate hydrides. Category identities and pressures follow the original page caption; coordinates and value-axis ticks are read from image 2. The body identifies the EPC calculations as linear response theory.",
+            "series": [
+              "Calculated EPC parameter"
+            ],
+            "unit": "dimensionless",
+            "unresolved": [],
+            "x_axis": null,
+            "x_quantity": null,
+            "x_unit": null
+          }
+        ]
+      }
+    },
+    {
+      "number": 4,
+      "request_sha256": "8d6ed442bb54ce8050b98b7a9a31d64fd2b56e41079da11a983d06161d830abf",
+      "receipt": {
+        "thinking": "provider_default",
+        "output_started": true,
+        "usage": {
+          "completion_tokens": 3449,
+          "prompt_tokens": 5137,
+          "total_tokens": 8586,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 365,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": null
+        },
+        "finish_reason": "stop",
+        "attempt": 1,
+        "status": "completed",
+        "elapsed_seconds": 74.08757787500508
+      },
+      "response": {
+        "notes": [
+          "The crop includes only a truncated fragment of the middle λ panel, with no usable nonzero tick calibration; λ values cannot be extracted from this crop.",
+          "Neither Tc series has a distinguishable bar at PrH9; absence of a visible bar is not assigned a numerical zero."
+        ],
+        "panels": [
+          {
+            "axis": {
+              "bounds": [
+                132,
+                692
+              ],
+              "scale": "linear",
+              "ticks": [
+                {
+                  "position": 689,
+                  "value": 0
+                },
+                {
+                  "position": 538,
+                  "value": 100
+                },
+                {
+                  "position": 388,
+                  "value": 200
+                },
+                {
+                  "position": 238,
+                  "value": 300
+                }
+              ]
+            },
+            "categories": [
+              "ScH6",
+              "ScH9",
+              "YH6",
+              "YH9",
+              "YH10",
+              "LaH6",
+              "LaH9",
+              "CeH9",
+              "CeH10",
+              "PrH9"
+            ],
+            "colorbar": null,
+            "figure": "Fig. 4",
+            "kind": "bar",
+            "layout": "matrix",
+            "panel": "bottom",
+            "points": [
+              {
+                "category": "ScH6",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "ScH6",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.1,
+                "pixel_error": 4,
+                "pressure_value_gpa": 300,
+                "reading": "position",
+                "reason": "Green bar for ScH6; pressure mapped by the caption.",
+                "series": "μ* = 0.1",
+                "space_group_symbol": null,
+                "x": 246,
+                "y": 542
+              },
+              {
+                "category": "ScH6",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "ScH6",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.13,
+                "pixel_error": 4,
+                "pressure_value_gpa": 300,
+                "reading": "position",
+                "reason": "Blue bar for ScH6; pressure mapped by the caption.",
+                "series": "μ* = 0.13",
+                "space_group_symbol": null,
+                "x": 257,
+                "y": 560
+              },
+              {
+                "category": "ScH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "ScH9",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.1,
+                "pixel_error": 4,
+                "pressure_value_gpa": 400,
+                "reading": "position",
+                "reason": "Green bar for ScH9; pressure mapped by the caption.",
+                "series": "μ* = 0.1",
+                "space_group_symbol": null,
+                "x": 318,
+                "y": 418
+              },
+              {
+                "category": "ScH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "ScH9",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.13,
+                "pixel_error": 4,
+                "pressure_value_gpa": 400,
+                "reading": "position",
+                "reason": "Blue bar for ScH9; pressure mapped by the caption.",
+                "series": "μ* = 0.13",
+                "space_group_symbol": null,
+                "x": 330,
+                "y": 440
+              },
+              {
+                "category": "YH6",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "YH6",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.1,
+                "pixel_error": 4,
+                "pressure_value_gpa": 120,
+                "reading": "position",
+                "reason": "Green bar for YH6; pressure mapped by the caption.",
+                "series": "μ* = 0.1",
+                "space_group_symbol": null,
+                "x": 391,
+                "y": 293
+              },
+              {
+                "category": "YH6",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "YH6",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.13,
+                "pixel_error": 4,
+                "pressure_value_gpa": 120,
+                "reading": "position",
+                "reason": "Blue bar for YH6; pressure mapped by the caption.",
+                "series": "μ* = 0.13",
+                "space_group_symbol": null,
+                "x": 403,
+                "y": 311
+              },
+              {
+                "category": "YH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "YH9",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.1,
+                "pixel_error": 4,
+                "pressure_value_gpa": 150,
+                "reading": "position",
+                "reason": "Green bar for YH9; caption and body map this material to 150 GPa.",
+                "series": "μ* = 0.1",
+                "space_group_symbol": null,
+                "x": 464,
+                "y": 289
+              },
+              {
+                "category": "YH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "YH9",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.13,
+                "pixel_error": 4,
+                "pressure_value_gpa": 150,
+                "reading": "position",
+                "reason": "Blue bar for YH9; caption and body map this material to 150 GPa.",
+                "series": "μ* = 0.13",
+                "space_group_symbol": null,
+                "x": 475,
+                "y": 311
+              },
+              {
+                "category": "YH10",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "YH10",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.1,
+                "pixel_error": 4,
+                "pressure_value_gpa": 400,
+                "reading": "position",
+                "reason": "Green bar for YH10; caption and body map this material to 400 GPa.",
+                "series": "μ* = 0.1",
+                "space_group_symbol": null,
+                "x": 536,
+                "y": 227
+              },
+              {
+                "category": "YH10",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "YH10",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.13,
+                "pixel_error": 4,
+                "pressure_value_gpa": 400,
+                "reading": "position",
+                "reason": "Blue bar for YH10; caption and body map this material to 400 GPa.",
+                "series": "μ* = 0.13",
+                "space_group_symbol": null,
+                "x": 548,
+                "y": 256
+              },
+              {
+                "category": "LaH6",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "LaH6",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.1,
+                "pixel_error": 4,
+                "pressure_value_gpa": 100,
+                "reading": "position",
+                "reason": "Green bar for LaH6; pressure mapped by the caption.",
+                "series": "μ* = 0.1",
+                "space_group_symbol": null,
+                "x": 609,
+                "y": 432
+              },
+              {
+                "category": "LaH6",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "LaH6",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.13,
+                "pixel_error": 4,
+                "pressure_value_gpa": 100,
+                "reading": "position",
+                "reason": "Blue bar for LaH6; pressure mapped by the caption.",
+                "series": "μ* = 0.13",
+                "space_group_symbol": null,
+                "x": 620,
+                "y": 458
+              },
+              {
+                "category": "LaH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "LaH9",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.1,
+                "pixel_error": 4,
+                "pressure_value_gpa": 50,
+                "reading": "position",
+                "reason": "Short green bar for LaH9; pressure mapped by the caption.",
+                "series": "μ* = 0.1",
+                "space_group_symbol": null,
+                "x": 682,
+                "y": 652
+              },
+              {
+                "category": "LaH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "LaH9",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.13,
+                "pixel_error": 4,
+                "pressure_value_gpa": 50,
+                "reading": "position",
+                "reason": "Short blue bar for LaH9; pressure mapped by the caption.",
+                "series": "μ* = 0.13",
+                "space_group_symbol": null,
+                "x": 693,
+                "y": 659
+              },
+              {
+                "category": "CeH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "CeH9",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.1,
+                "pixel_error": 4,
+                "pressure_value_gpa": 100,
+                "reading": "position",
+                "reason": "Green bar for CeH9; pressure mapped by the caption.",
+                "series": "μ* = 0.1",
+                "space_group_symbol": null,
+                "x": 754,
+                "y": 612
+              },
+              {
+                "category": "CeH9",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "CeH9",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.13,
+                "pixel_error": 4,
+                "pressure_value_gpa": 100,
+                "reading": "position",
+                "reason": "Blue bar for CeH9; pressure mapped by the caption.",
+                "series": "μ* = 0.13",
+                "space_group_symbol": null,
+                "x": 766,
+                "y": 619
+              },
+              {
+                "category": "CeH10",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "CeH10",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.1,
+                "pixel_error": 4,
+                "pressure_value_gpa": 200,
+                "reading": "position",
+                "reason": "Green bar for CeH10; pressure mapped by the caption.",
+                "series": "μ* = 0.1",
+                "space_group_symbol": null,
+                "x": 827,
+                "y": 601
+              },
+              {
+                "category": "CeH10",
+                "conditions": [],
+                "label_text": null,
+                "label_value": null,
+                "material": "CeH10",
+                "method_raw": "Eliashberg equation",
+                "mu_star": 0.13,
+                "pixel_error": 4,
+                "pressure_value_gpa": 200,
+                "reading": "position",
+                "reason": "Blue bar for CeH10; pressure mapped by the caption.",
+                "series": "μ* = 0.13",
+                "space_group_symbol": null,
+                "x": 838,
+                "y": 615
+              }
+            ],
+            "quantity": "tc",
+            "quantity_name": "Superconducting transition temperature",
+            "reason": "Bottom panel of Fig. 4. Bar colors identify Coulomb pseudopotentials; the caption maps pressures to material categories. The body identifies the Eliashberg equation as the Tc method. Bar heights, rather than body-text values, are recorded. All plotted materials are described as clathrate structures; space-group symbols are not supplied in this figure.",
+            "series": [
+              "μ* = 0.1",
+              "μ* = 0.13"
+            ],
+            "unit": "K",
+            "unresolved": [
+              {
+                "category": "PrH9",
+                "reason": "No distinguishable green bar above the baseline; a numerical height cannot be localized.",
+                "series": "μ* = 0.1"
+              },
+              {
+                "category": "PrH9",
+                "reason": "No distinguishable blue bar above the baseline; a numerical height cannot be localized.",
+                "series": "μ* = 0.13"
+              }
+            ],
+            "x_axis": null,
+            "x_quantity": null,
+            "x_unit": null
+          }
+        ]
+      }
+    },
+    {
+      "number": 5,
+      "request_sha256": "822478c84bfa3243300382bd10f5cdf573bdc7f35c3ea22a0062b4d4d3344692",
+      "receipt": {
+        "thinking": "provider_default",
+        "output_started": true,
+        "usage": {
+          "completion_tokens": 3662,
+          "prompt_tokens": 12069,
+          "total_tokens": 15731,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 42,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": null
+        },
+        "finish_reason": "stop",
+        "attempt": 1,
+        "status": "completed",
+        "elapsed_seconds": 77.1650910830358
+      },
+      "response": {
+        "coverage_exclusions": [
+          {
+            "block_id": "original-page-4",
+            "category": "out_of_model_scope",
+            "file_id": "main",
+            "pdf_page": null,
+            "reason": "The body-level ScH6/ScH9 maximum of approximately 150 K is not assigned a unique ScH6 pressure or series. The detailed ScH6 Fig. 4 results are retained instead. Results for other materials and unregistered structural quantities are outside this ScH6-only extraction.",
+            "row_index": null,
+            "table_id": null
+          },
+          {
+            "block_id": "chart-unresolved-fc75310651a0b8c8dcc3375b3ea692734bcec725",
+            "category": "out_of_model_scope",
+            "file_id": "main",
+            "pdf_page": null,
+            "reason": "This crop does not resolve EPC or Tc values. Independently supplied calibrated ScH6 readings are retained; no additional values are estimated.",
+            "row_index": null,
+            "table_id": null
+          },
+          {
+            "block_id": "chart-unresolved-5b327315121497ad6a28a2534b52d7855234d2ce",
+            "category": "out_of_model_scope",
+            "file_id": "main",
+            "pdf_page": null,
+            "reason": "Truncated DOS and Tc panels do not support additional values. The independently calibrated ScH6 readings are retained.",
+            "row_index": null,
+            "table_id": null
+          },
+          {
+            "block_id": "chart-unresolved-3f452f27e4da1402a6bc143eecf852516e418782",
+            "category": "out_of_model_scope",
+            "file_id": "main",
+            "pdf_page": null,
+            "reason": "Unresolved PrH9 series is outside the ScH6-only extraction.",
+            "row_index": null,
+            "table_id": null
+          },
+          {
+            "block_id": "chart-unresolved-ec132a8e651714f7feff2552bcdb83e6732c768d",
+            "category": "out_of_model_scope",
+            "file_id": "main",
+            "pdf_page": null,
+            "reason": "Unresolved PrH9 series is outside the ScH6-only extraction.",
+            "row_index": null,
+            "table_id": null
+          },
+          {
+            "block_id": "chart-unresolved-9c8efebb5665916ee0e6730fe5e3baa9f91bffb2",
+            "category": "out_of_model_scope",
+            "file_id": "main",
+            "pdf_page": null,
+            "reason": "The truncated EPC panel supplies no additional calibrated value. The independently calibrated ScH6 EPC parameter is preserved in both corresponding Tc records.",
+            "row_index": null,
+            "table_id": null
+          },
+          {
+            "block_id": "chart-unresolved-ddafa80dd177c9324f5a8f522b3538aaa27f1391",
+            "category": "out_of_model_scope",
+            "file_id": "main",
+            "pdf_page": null,
+            "reason": "Unresolved PrH9 series is outside the ScH6-only extraction.",
+            "row_index": null,
+            "table_id": null
+          }
+        ],
+        "extraction_version": "1",
+        "key_findings": [],
+        "material_states": [
+          {
+            "basis_kind": "paper_quote",
+            "evidences": [
+              {
+                "block_id": "original-page-4",
+                "file_id": "main",
+                "pdf_page": 4,
+                "quote": null,
+                "quote_id": "original-page-4"
+              }
+            ],
+            "material": "ScH6",
+            "material_dimensionality": "three_dimensional",
+            "material_family": null,
+            "material_name": null,
+            "pressure_value_gpa": 300,
+            "property_modules": [
+              {
+                "module_code": "electronic_properties",
+                "records": [
+                  {
+                    "basis_kind": "paper_quote",
+                    "canonical_unit": "states/(eV Å³)",
+                    "criterion_code": null,
+                    "criterion_raw": null,
+                    "evidences": [
+                      {
+                        "block_id": "chart-reading-e5b5236f888574e3e83138cc081dd7bbff0770cd",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-e5b5236f888574e3e83138cc081dd7bbff0770cd"
+                      },
+                      {
+                        "block_id": "original-page-4",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "original-page-4"
+                      }
+                    ],
+                    "is_representative": false,
+                    "method_code": null,
+                    "method_raw": null,
+                    "module_code": "electronic_properties",
+                    "name_raw": "Hydrogen electronic density of states at the Fermi level per unit volume",
+                    "payload": {
+                      "calculation_conditions": null,
+                      "method_variant_status": null,
+                      "parameters": null,
+                      "table_row_ref": null,
+                      "thermodynamic_stability": null
+                    },
+                    "property_code": "dos_fermi",
+                    "record_type": "property",
+                    "uncertainty": null,
+                    "unit_raw": "states/(eV Å³)",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 0.016,
+                    "value_raw": "~0.016 states/(eV Å³)",
+                    "value_text": null
+                  }
+                ]
+              },
+              {
+                "module_code": "superconductive_properties",
+                "records": [
+                  {
+                    "basis_kind": "paper_quote",
+                    "canonical_unit": "K",
+                    "criterion_code": null,
+                    "criterion_raw": null,
+                    "evidences": [
+                      {
+                        "block_id": "chart-reading-be28c1a218e56f2384ceda471685184bbec9b9ce",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-be28c1a218e56f2384ceda471685184bbec9b9ce"
+                      },
+                      {
+                        "block_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293"
+                      },
+                      {
+                        "block_id": "original-page-4",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "original-page-4"
+                      }
+                    ],
+                    "is_representative": false,
+                    "method_code": "unknown",
+                    "method_raw": "Eliashberg equation",
+                    "module_code": "superconductive_properties",
+                    "name_raw": "Superconducting transition temperature",
+                    "payload": {
+                      "calculation_conditions": {
+                        "calculation_code": null,
+                        "electronic_method": null,
+                        "epw": null,
+                        "exchange_correlation_functional": null,
+                        "phonon_method": "linear response theory",
+                        "qe": null,
+                        "sscha": null,
+                        "vibrational_treatment": null
+                      },
+                      "method_variant_status": "Eliashberg variant not specified",
+                      "parameters": {
+                        "extensions": [],
+                        "lambda_ep": {
+                          "evidences": [
+                            {
+                              "block_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293",
+                              "file_id": "main",
+                              "pdf_page": 4,
+                              "quote": null,
+                              "quote_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293"
+                            }
+                          ],
+                          "reported": true,
+                          "unit_raw": "dimensionless",
+                          "value_boolean": null,
+                          "value_kind": "number",
+                          "value_max": null,
+                          "value_min": null,
+                          "value_number": 1.3,
+                          "value_raw": "~1.3 dimensionless",
+                          "value_text": null
+                        },
+                        "mu_star": {
+                          "evidences": [
+                            {
+                              "block_id": "chart-reading-be28c1a218e56f2384ceda471685184bbec9b9ce",
+                              "file_id": "main",
+                              "pdf_page": 4,
+                              "quote": null,
+                              "quote_id": "chart-reading-be28c1a218e56f2384ceda471685184bbec9b9ce"
+                            }
+                          ],
+                          "reported": true,
+                          "unit_raw": null,
+                          "value_boolean": null,
+                          "value_kind": "number",
+                          "value_max": null,
+                          "value_min": null,
+                          "value_number": 0.1,
+                          "value_raw": "0.1",
+                          "value_text": null
+                        },
+                        "omega_log": null
+                      },
+                      "table_row_ref": null,
+                      "thermodynamic_stability": null
+                    },
+                    "property_code": "tc",
+                    "record_type": "predicted_tc",
+                    "uncertainty": null,
+                    "unit_raw": "K",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 99,
+                    "value_raw": "~99 K",
+                    "value_text": null
+                  },
+                  {
+                    "basis_kind": "paper_quote",
+                    "canonical_unit": "K",
+                    "criterion_code": null,
+                    "criterion_raw": null,
+                    "evidences": [
+                      {
+                        "block_id": "chart-reading-493725aa5b49203a7b5a7286039aaf6f4e7323f9",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-493725aa5b49203a7b5a7286039aaf6f4e7323f9"
+                      },
+                      {
+                        "block_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293"
+                      },
+                      {
+                        "block_id": "original-page-4",
+                        "file_id": "main",
+                        "pdf_page": 4,
+                        "quote": null,
+                        "quote_id": "original-page-4"
+                      }
+                    ],
+                    "is_representative": false,
+                    "method_code": "unknown",
+                    "method_raw": "Eliashberg equation",
+                    "module_code": "superconductive_properties",
+                    "name_raw": "Superconducting transition temperature",
+                    "payload": {
+                      "calculation_conditions": {
+                        "calculation_code": null,
+                        "electronic_method": null,
+                        "epw": null,
+                        "exchange_correlation_functional": null,
+                        "phonon_method": "linear response theory",
+                        "qe": null,
+                        "sscha": null,
+                        "vibrational_treatment": null
+                      },
+                      "method_variant_status": "Eliashberg variant not specified",
+                      "parameters": {
+                        "extensions": [],
+                        "lambda_ep": {
+                          "evidences": [
+                            {
+                              "block_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293",
+                              "file_id": "main",
+                              "pdf_page": 4,
+                              "quote": null,
+                              "quote_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293"
+                            }
+                          ],
+                          "reported": true,
+                          "unit_raw": "dimensionless",
+                          "value_boolean": null,
+                          "value_kind": "number",
+                          "value_max": null,
+                          "value_min": null,
+                          "value_number": 1.3,
+                          "value_raw": "~1.3 dimensionless",
+                          "value_text": null
+                        },
+                        "mu_star": {
+                          "evidences": [
+                            {
+                              "block_id": "chart-reading-493725aa5b49203a7b5a7286039aaf6f4e7323f9",
+                              "file_id": "main",
+                              "pdf_page": 4,
+                              "quote": null,
+                              "quote_id": "chart-reading-493725aa5b49203a7b5a7286039aaf6f4e7323f9"
+                            }
+                          ],
+                          "reported": true,
+                          "unit_raw": null,
+                          "value_boolean": null,
+                          "value_kind": "number",
+                          "value_max": null,
+                          "value_min": null,
+                          "value_number": 0.13,
+                          "value_raw": "0.13",
+                          "value_text": null
+                        },
+                        "omega_log": null
+                      },
+                      "table_row_ref": null,
+                      "thermodynamic_stability": null
+                    },
+                    "property_code": "tc",
+                    "record_type": "predicted_tc",
+                    "uncertainty": null,
+                    "unit_raw": "K",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 90,
+                    "value_raw": "~90 K",
+                    "value_text": null
+                  }
+                ]
+              }
+            ],
+            "reported_space_group_number": null,
+            "reported_space_group_symbol": null,
+            "scope": "current_paper",
+            "state_kind": "theoretical",
+            "structure_families": [
+              {
+                "name": "clathrate",
+                "page": 4,
+                "quote": "The H clathrate structures of REH6, REH9, and REH10",
+                "scope": "current_paper"
+              }
+            ],
+            "structure_optimization": "unknown"
+          }
+        ],
+        "metadata": {
+          "abstract": null,
+          "authors": null,
+          "co_first_authors": null,
+          "corresponding_authors": null,
+          "doi": null,
+          "issue_number": null,
+          "journal": "PHYSICAL REVIEW LETTERS",
+          "key_finding": null,
+          "keywords_tags": null,
+          "knowledge_graph_title": null,
+          "material_families": null,
+          "methodology": null,
+          "pages": "107001",
+          "paper_type": "theoretical",
+          "research_motivation": null,
+          "summary": null,
+          "superconductor_kind": "conventional",
+          "theoretical_subtype": "calculation",
+          "volume": "119",
+          "year": 2017
+        },
+        "methodology": [],
+        "paper_type_evidence": [
+          {
+            "block_id": "original-page-4",
+            "candidate": "theoretical",
+            "file_id": "main",
+            "pdf_page": 4,
+            "quote": null,
+            "quote_id": "original-page-4",
+            "scope": "current_paper"
+          }
+        ],
+        "referenced_materials": [],
+        "research_materials": [
+          {
+            "evidences": [
+              {
+                "block_id": "original-page-4",
+                "file_id": "main",
+                "pdf_page": 4,
+                "quote": null,
+                "quote_id": "original-page-4"
+              }
+            ],
+            "scope": "current_paper",
+            "value": "ScH6"
+          }
+        ]
+      }
+    },
+    {
+      "number": 6,
+      "request_sha256": "8d68fa2e603c8872a0484e77087d8a6a24442d3c515263ddcc43ae5b6a04504a",
+      "receipt": {
+        "thinking": "provider_default",
+        "output_started": true,
+        "usage": {
+          "completion_tokens": 74,
+          "prompt_tokens": 9664,
+          "total_tokens": 9738,
+          "completion_tokens_details": {
+            "accepted_prediction_tokens": null,
+            "audio_tokens": null,
+            "reasoning_tokens": 11,
+            "rejected_prediction_tokens": null
+          },
+          "prompt_tokens_details": null
+        },
+        "finish_reason": "stop",
+        "attempt": 1,
+        "status": "completed",
+        "elapsed_seconds": 6.797265709028579
+      },
+      "response": {
+        "done": false,
+        "excluded": [],
+        "read_source_ids": [],
+        "records": [],
+        "search": [
+          "Methods computational details superconductivity Quantum ESPRESSO plane wave cutoff k mesh",
+          "Supplemental Material electron phonon coupling ScH6 Eliashberg"
+        ],
+        "unresolved": []
+      }
+    },
+    {
+      "number": 7,
+      "request_sha256": "91970db8e80070f6156ba27d72047c2d92a8be550010d87fe67d1420127afce3",
+      "receipt": {
+        "thinking": "provider_default",
+        "output_started": true,
+        "usage": {
+          "completion_tokens": 1557,
+          "prompt_tokens": 9706,
+          "total_tokens": 11263,
+          "completion_tokens_details": null,
+          "prompt_tokens_details": null
+        },
+        "finish_reason": "stop",
+        "attempt": 1,
+        "status": "completed",
+        "elapsed_seconds": 33.87710458296351
+      },
+      "response": {
+        "done": true,
+        "excluded": [],
+        "read_source_ids": [
+          "source-0",
+          "source-1",
+          "source-2",
+          "source-3",
+          "source-4"
+        ],
+        "records": [
+          {
+            "candidate_ids": [
+              "s0:m0:r0"
+            ],
+            "group": "ScH6-300GPa-H-derived-DOS",
+            "method": "DOS-method-unspecified",
+            "reason": "The calibrated Fig. 4 top-panel reading establishes the hydrogen-derived DOS per unit volume for ScH6; the original caption maps ScH6 to 300 GPa. Preserve its approximate reading and hydrogen-only, volume-normalized definition. Graph-reading precision is not a physical uncertainty. The supplied sources do not establish the electronic calculation settings for this DOS result.",
+            "source_ids": [
+              "source-1",
+              "source-0"
+            ],
+            "values": {
+              "calculation_conditions": null,
+              "canonical_unit": "states/(eV Å³)",
+              "method_code": null,
+              "method_raw": null,
+              "parameters": null,
+              "uncertainty": null,
+              "unit_raw": "states/(eV Å³)",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 0.016,
+              "value_raw": "~0.016 states/(eV Å³)",
+              "value_text": null
+            }
+          },
+          {
+            "candidate_ids": [
+              "s0:m1:r0"
+            ],
+            "group": "ScH6-300GPa-EPC",
+            "method": "ScH6-Eliashberg-equation",
+            "reason": "The calibrated Fig. 4 bottom-panel reading gives ~99 K for ScH6 at μ*=0.1, and the caption assigns 300 GPa. The body explicitly identifies the calculation as the “Eliashberg equation,” but does not establish an isotropic or anisotropic variant; therefore the method code remains unknown. This point and the μ*=0.13 point share the same material, pressure, EPC parameter and reported linear-response calculation conditions, so they use the same common-parameter group and method identity. The collective body statement that ScH6 and ScH9 reach ~150 K does not replace the material-specific calibrated reading. Neither omega_log nor additional software, functional or vibrational-treatment settings are established by the supplied sources.",
+            "source_ids": [
+              "source-3",
+              "source-2",
+              "source-0"
+            ],
+            "values": {
+              "calculation_conditions": {
+                "calculation_code": null,
+                "electronic_method": null,
+                "epw": null,
+                "exchange_correlation_functional": null,
+                "phonon_method": "linear response theory",
+                "qe": null,
+                "sscha": null,
+                "vibrational_treatment": null
+              },
+              "canonical_unit": "K",
+              "method_code": "unknown",
+              "method_raw": "Eliashberg equation",
+              "parameters": {
+                "extensions": [],
+                "lambda_ep": {
+                  "evidences": [
+                    {
+                      "block_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293",
+                      "file_id": "main",
+                      "pdf_page": 4,
+                      "quote": null,
+                      "quote_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293"
+                    }
+                  ],
+                  "reported": true,
+                  "unit_raw": "dimensionless",
+                  "value_boolean": null,
+                  "value_kind": "number",
+                  "value_max": null,
+                  "value_min": null,
+                  "value_number": 1.3,
+                  "value_raw": "~1.3 dimensionless",
+                  "value_text": null
+                },
+                "mu_star": 0.1,
+                "omega_log": null
+              },
+              "uncertainty": null,
+              "unit_raw": "K",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 99,
+              "value_raw": "~99 K",
+              "value_text": null
+            }
+          },
+          {
+            "candidate_ids": [
+              "s0:m1:r1"
+            ],
+            "group": "ScH6-300GPa-EPC",
+            "method": "ScH6-Eliashberg-equation",
+            "reason": "The calibrated Fig. 4 bottom-panel reading gives ~90 K for ScH6 at μ*=0.13, with 300 GPa established by the caption. Its reported method spelling is “Eliashberg equation,” matching the body description and the μ*=0.1 series; no specific Eliashberg variant is established. Only Tc and μ* differ between these two points, so their group, method identity, lambda_ep and calculation conditions are identical. Preserve the approximate figure reading without treating localization precision as physical uncertainty. The collective ~150 K body maximum for ScH6 and ScH9 is not a separate ScH6 result at this pressure.",
+            "source_ids": [
+              "source-4",
+              "source-2",
+              "source-0"
+            ],
+            "values": {
+              "calculation_conditions": {
+                "calculation_code": null,
+                "electronic_method": null,
+                "epw": null,
+                "exchange_correlation_functional": null,
+                "phonon_method": "linear response theory",
+                "qe": null,
+                "sscha": null,
+                "vibrational_treatment": null
+              },
+              "canonical_unit": "K",
+              "method_code": "unknown",
+              "method_raw": "Eliashberg equation",
+              "parameters": {
+                "extensions": [],
+                "lambda_ep": {
+                  "evidences": [
+                    {
+                      "block_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293",
+                      "file_id": "main",
+                      "pdf_page": 4,
+                      "quote": null,
+                      "quote_id": "chart-reading-153dadb4cffcf482c0d6d4a222a9d90a9e9ae293"
+                    }
+                  ],
+                  "reported": true,
+                  "unit_raw": "dimensionless",
+                  "value_boolean": null,
+                  "value_kind": "number",
+                  "value_max": null,
+                  "value_min": null,
+                  "value_number": 1.3,
+                  "value_raw": "~1.3 dimensionless",
+                  "value_text": null
+                },
+                "mu_star": 0.13,
+                "omega_log": null
+              },
+              "uncertainty": null,
+              "unit_raw": "K",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 90,
+              "value_raw": "~90 K",
+              "value_text": null
+            }
+          }
+        ],
+        "search": [],
+        "unresolved": []
+      }
+    }
+  ],
+  "local_full_artifacts": "tests/TestForRealScenario/runs/20261110-chart-axis-bounds-fix",
+  "artifact_sha256": {
+    "call-4-response.json": "446f0ff5ec67ee5f231362fc435954ebe43cd7831c2dca899cefb37a9fcefe3b",
+    "summary.json": "55638df52200266fccf2412d8bd93dd90832a92c1cf5984d14e773915cae91fc",
+    "document-ir.json": "135bfec15fe0b908d480932c6df320aa7185d53198441ddf91b4e45d3f9ccd43",
+    "provenance.json": "51b8164fb7911bf772a86857d880a4075b40bed198a4083ec2f49902b386773b",
+    "call-7-response.json": "577f677e3d377a117eb817daf9b37d3a2779962140518425b93a5bad566b6d01",
+    "extracted.json": "49749653e8263ee8f51643ab3b5b13feb31fa9b4a71ff4d0d99d9c7d6b5cc251",
+    "call-3-response.json": "ad0d71ebabb0513fcdaa53c0a59f4bc503c9956137e8ee9ffa253f28ce004fa9",
+    "call-6-request.json": "8d68fa2e603c8872a0484e77087d8a6a24442d3c515263ddcc43ae5b6a04504a",
+    "call-1-request.json": "96b60e3767470b82b31b35724ee44da95d491ebc36b843bfee39fe3bc423e5cb",
+    "call-3-receipt.json": "5633c6410273b27cdb81fd4e65b3987553df2a7996640bddbcc500c8facda213",
+    "chart-discovery-started-0.json": "445f7945d3b3f1cf3f9a1f802c376aedbb4f07eb9723f3f7e38ffdab5261eb80",
+    "chart-reading-started-3.json": "f9dcd04b65c05b5b13a0fb9675083e4da8c80de9272dc2ae5b92fb7ec56307b5",
+    "call-4-receipt.json": "7a3c560e295dd75e937cb67e095be163e732694cc4850437b8a51b7d29049e2a",
+    "call-7-request.json": "91970db8e80070f6156ba27d72047c2d92a8be550010d87fe67d1420127afce3",
+    "filling-attempt.json": "5d634876a6101ac679938bef646729d0402c3380413b3d08717f4dec48ddd32a",
+    "chart-reading-started-2.json": "9928a9d19b667c982c6ac64997eb3265148b59b15f117752c0333b2b0ace9f87",
+    "call-5-receipt.json": "f4de8c06d045109b9100fda5e417ac74cc875549ad4e42fc05f91501736a8857",
+    "call-2-receipt.json": "cb9fb105b159411c9be28645e792c50111ab2838dfe87f9931836a3e80f5d3a9",
+    "call-5-request.json": "822478c84bfa3243300382bd10f5cdf573bdc7f35c3ea22a0062b4d4d3344692",
+    "call-2-request.json": "a02a051da19f50597829247b84bfe60b907b5b9fcb891806cdbce672f5aee65f",
+    "chart-report.json": "aef28ec12666b4d9ddfcaed6d9ed2acb3a240077d4ca54dcb72ec71193e6f0c8",
+    "call-7-receipt.json": "f14d991b1f7deace6ee7ced5b81311153dbed570179375915b850cb545fa4f45",
+    "chart-reading-started-1.json": "fca5832b47b7cbc3f36132b34fa89f88aead3d738c336f18a57be4d309170242",
+    "call-3-request.json": "d4c3dc7551b2c7eea6e79be9493a9eabec05ee48f13a236a9204a12ffb47fd9d",
+    "call-4-request.json": "8d6ed442bb54ce8050b98b7a9a31d64fd2b56e41079da11a983d06161d830abf",
+    "chart-discovery-completed-1.json": "77cc2fcd05c5b52d746492c3a096cea29ddbb0af801656b96b20802cc1580516",
+    "call-6-receipt.json": "71e18e0829a51178c5f36f427a871c635f12cf95b8d2d55f0569944863bd4d68",
+    "call-1-receipt.json": "c89e052ff4f950d5a1225e6b08080b2d64a8998478a088eb2e11014ab0ffbb12",
+    "chart-reading-completed-4.json": "1e33d7c7b63942219da90f47d978b56ea29125f63dcaa7b7165c98797917ea8d",
+    "call-2-response.json": "41eb737d1810c353562e542bbe2a29a45fe6e735f4e24c10a7075854882143ad",
+    "chart-reading-completed-3.json": "c806a8202ec5aea1e0f6162a460dc0e2df6019eed43374d2882a3f230f97ddb8",
+    "call-6-response.json": "e1cef771b5110b879f7802d344c8997e12eb2d895557758e30f9a10ff68eeeb1",
+    "call-1-response.json": "1a8d76361e66a63044635e71de670fea99c92bf8b738e7e78dd796ba789e5764",
+    "call-5-response.json": "bb9a73cccd7927ff36a545ec685c640393e2e2e987f2000c1f0542b84c555554",
+    "chart-reading-completed-2.json": "ceb603c581db0cbd377a25adea20f7fbeb896c0831007030315baa3aeb85d50f",
+    "filled.json": "edf38c2a0565b8513a8bfb78dee5fbc85847cb65d0261159cb00bd5cd49a418e"
+  }
+}
