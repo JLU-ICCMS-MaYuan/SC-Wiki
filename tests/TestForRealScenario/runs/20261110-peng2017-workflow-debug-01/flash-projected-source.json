@@ -1,0 +1,17 @@
+{
+  "head": "b1348ad5e026820266f65725413064578ad139c3",
+  "returncode": 0,
+  "files": {
+    "backend/ingest/chart_reading.py": "c1ba265f135f16f5870cf8b8b528b2985cdbe1849e63a2cea42b7fe2039dcb54",
+    "backend/ingest/discovery_feedback.py": "7fb511d31d98775b3a97c2b9f9cd68102e53e4b9b5f55f96dac82c201c79ea61",
+    "backend/ingest/image_geometry.py": "349ecab28c2f8f436ce8c170049086f7c12aef0901965fcfea7bdb49eb634db5",
+    "backend/ingest/image_feedback.py": "b0de8b02762bda555b36a5a805528381a8a18943cc74f46aeffcca81d8166739",
+    "backend/ingest/image_reading.py": "7e502d8d58c48c3c2c38dd15cc0ed3cbf597f78b7727317458c729a5f2694f15",
+    "backend/tests/test_discovery_feedback.py": "1306d79f6fbcb044ffb61162d943700011ba6f431386ec5ddeefd2198dc32d53",
+    "backend/tests/test_image_geometry.py": "1c5526f131617f020938ff254a80b07e2890fdc5b55074b55053e8bd405dd3ce",
+    "backend/tests/test_flash_scientific_verdict.py": "65ddc54fa5507201597cdde9bffd0c3110d144664d38298841c4643ccfacee0c",
+    "tests/TestForRealScenario/fig4_pixel_reference.py": "c387fe51d32e6d682355e6a28939ac805ef735f76ad2d49ce54108fa6577c4dc",
+    "tests/TestForRealScenario/run_visual_sources_validation.py": "fb7bd8062989c865380a38ad6b9d7a68c7b5e2728bab9ba25e7ec85852956547"
+  },
+  "scope": "HEAD加本次生产/测试路径，隔离临时数据与SQLite；MySQL另起独立实例实测"
+}

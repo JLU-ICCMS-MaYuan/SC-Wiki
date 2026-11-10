@@ -7,6 +7,7 @@ parser=argparse.ArgumentParser(description="原PDF局部新读图及正式后处
 parser.add_argument("--pdf",type=Path,required=True)
 parser.add_argument("--model",required=True,help="实际目录中的模型名，任务过程中固定")
 parser.add_argument("--output",type=Path,required=True,help="新证据目录，禁止覆盖")
+parser.add_argument("--resume-ir",type=Path,help="仅复用同原PDF/同模型/同核心源码已成功的本轮IR；后处理仍真实新调用")
 args=parser.parse_args()
 from dotenv import load_dotenv
 load_dotenv(ROOT/".env");os.environ["DATABASE_URL"]="sqlite:///:memory:"
@@ -53,17 +54,38 @@ with pymupdf.open(path) as pdf:
         parser={'name':'native-page-window','version':'1','mode':'text'},
         pages=[PageGeometry(pdf_page=4,width=page.rect.width,height=page.rect.height)],blocks=blocks)
 save('provenance.json',{'model':config.model,'provider':config.provider,'source_sha256':sha,'pdf_page':4,
-    'reused':'同一原PDF与未改变的文字层；不复用旧读图/科学提取/填写回答',
+    'reused':('同一原PDF/模型/核心源码的本轮成功IR；后续提取/填写不复用回答' if args.resume_ir
+              else '同一原PDF与未改变的文字层；不复用旧读图/科学提取/填写回答'),
     'boundary':'原PDF局部新提取与正式后处理隔离验证；不写业务任务/草稿，不代表五阶段通过',
-    'code_sha256':{p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in ['backend/ingest/chart_reading.py','backend/ingest/pdf_regions.py','backend/ingest/image_reading.py','backend/ingest/image_feedback.py','backend/rag/llm.py']}})
+    'code_sha256':{p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in ['backend/ingest/chart_reading.py','backend/ingest/pdf_regions.py','backend/ingest/image_reading.py','backend/ingest/image_feedback.py','backend/rag/llm.py','backend/ingest/discovery_feedback.py','backend/ingest/image_geometry.py','backend/ingest/image_catalog.py','tests/TestForRealScenario/fig4_pixel_reference.py']}})
 try:
-    report=enrich_document(ir,path,{'file_id':'main','sha256':sha,'filename':path.name,'role':'main'},model,
-        on_event=lambda e:save('event-'+str(counter)+'-'+e['stage']+'-'+e['status']+'.json',e))
+    if args.resume_ir:
+        previous=json.loads((args.resume_ir.parent/'provenance.json').read_text())
+        assert previous['model']==config.model and previous['provider']==config.provider and previous['source_sha256']==sha
+        for name,fingerprint in previous['code_sha256'].items():
+            if name.startswith('backend/'):
+                assert hashlib.sha256((ROOT/name).read_bytes()).hexdigest()==fingerprint, name
+        ir=DocumentIR.model_validate_json(args.resume_ir.read_text())
+        assert ir.source_sha256==sha
+        report=ir.coverage['chart_reading']
+        save('resume.json',{'from':str(args.resume_ir.resolve()),'ir_sha256':hashlib.sha256(args.resume_ir.read_bytes()).hexdigest(),
+            'scope':'复用本轮已完成读图；提取/填写重新执行。仅测试验证代码转义修正，核心源码逐文件不变。',
+            'endpoint_boundary':'旧检查点未记录端点摘要；核验其模型/提供者/源码/PDF身份，本轮沿当前同一LLM1配置，未主动换端点'})
+    else:
+        report=enrich_document(ir,path,{'file_id':'main','sha256':sha,'filename':path.name,'role':'main'},model,
+            on_event=lambda e:save('event-'+str(counter)+'-'+e['stage']+'-'+e['status']+'.json',e))
     save('chart-report.json',report);save('ir.json',ir.model_dump(mode='json'))
     restored=DocumentIR.model_validate_json((OUT/'ir.json').read_text())
     facts=[b.metadata['chart_reading'] for b in restored.blocks if b.metadata.get('chart_reading')]
     sc=[f for f in facts if f['point']['material'].replace(' ','').translate(str.maketrans('₀₁₂₃₄₅₆₇₈₉','0123456789'))=='ScH6']
     print('CHART',identifier,len(facts),'ScH6',[(f['quantity'],f['value_number']) for f in sc],flush=True)
+    from fig4_pixel_reference import reference,validate,validate_form_values
+    pixel_reference=reference(path)
+    scientific_issues=validate(facts,pixel_reference)
+    save('scientific-reference.json',pixel_reference)
+    save('scientific-verdict.json',{'status':'passed' if not scientific_issues else 'failed','issues':scientific_issues,
+        'basis':'同一原始位图的刻度/柱及材料标签；未用其他模型答案或正文结果反推轴'})
+    assert not scientific_issues, scientific_issues
     assert {f['quantity'] for f in sc}>={'tc','lambda_ep','dos_fermi'}
     from backend.ingest.domain_extraction import structured_chunks,COMPLEMENTARY_SYSTEM_PROMPT,EXTRACTION_OUTPUT_SCHEMA,normalize_extraction
     from backend.ingest.scientific_output_schema import bind_extraction_sources,decode_optional_containers,filling_schema
@@ -83,6 +105,9 @@ try:
         on_attempt=lambda a:save('filling-attempt.json',a))
     save('filled.json',{'material_states':values,'report':filling});assert filling['status']=='completed'
     assert json.loads((OUT/'filled.json').read_text())['material_states']==values
+    form_issues=validate_form_values(values,pixel_reference,restored.blocks)
+    save('form-scientific-verdict.json',{'status':'passed' if not form_issues else 'failed','issues':form_issues})
+    assert not form_issues, form_issues
     save('summary.json',{'status':'completed','model':config.model,'calls':counter,'readings':len(facts),
         'unresolved':len(report['unresolved']),'sc_readings':sc,'filling_status':filling['status'],'ir_reread':True,'form_reread':True})
 except BaseException as error:

@@ -1,0 +1,11 @@
+{
+  "model": "deepseek-flash",
+  "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+  "result": {
+    "has_readable_individual_value": false,
+    "value": null,
+    "unit": "K",
+    "reason": "In the Fig. 4 bottom panel (Tc), the PrH9 column is the rightmost bar group. The crop shows the PrH9 bars are cut off at the bottom of the panel and the legend box (μ*=0.1 / μ*=0.13) sits directly above/over the PrH9 region, so no distinct bar tops for the two Tc bars of PrH9 can be located. The text only gives an upper bound (<56 K) for PrH9, which cannot be used as a value. Thus there is no readable individual value for the two PrH9 Tc bars."
+  },
+  "scope": "同模型针对真实未读原因复核，不替换原回复或创造数值；非新增产品核对门"
+}

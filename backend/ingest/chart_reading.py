@@ -371,12 +371,11 @@ def enrich_document(ir, pdf_path, source, model, *, cancelled=lambda: False, on_
             request = {'document': source, 'supported_quantities': QUANTITIES,
                        'regions': hints, 'source_pages': texts, 'image_pages': batch_pages}
             on_event({'stage': 'discovery', 'status': 'started', 'pages': batch_pages, 'request': request})
+            from .discovery_feedback import discover_pages
             with call_phase('chart_discovery', filename=source['filename'], pages=batch_pages):
-                answer = model(DISCOVERY_PROMPT, json.dumps(request, ensure_ascii=False),
-                               images=images, response_schema=discovery_schema())
-            validate_output(answer, discovery_schema())
-            found, skipped = page_inventory(answer, {p: (pdf[p - 1].rect.width, pdf[p - 1].rect.height)
-                                                    for p in batch_pages})
+                answer, found, skipped = discover_pages(model, DISCOVERY_PROMPT, request, images,
+                    ir, path, source, {p: (pdf[p - 1].rect.width, pdf[p - 1].rect.height)
+                                      for p in batch_pages}, cancelled=cancelled, on_event=on_event)
             on_event({'stage': 'discovery', 'status': 'completed', 'pages': batch_pages, 'response': answer})
             targets.extend(found); excluded.extend(skipped)
         for target in targets:

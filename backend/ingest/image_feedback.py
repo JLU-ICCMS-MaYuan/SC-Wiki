@@ -46,6 +46,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
     from .chart_calibration import ChartReadingError
     from .image_reading import ImageReadingTools, ACTIONS
     from .image_catalog import visual_objects
+    from .image_geometry import geometry_observations
     from .review_tool_contract import tool_definitions
     from .pdf_regions import region_locator, render_region_image
     from backend.rag.structured_output import validate_output
@@ -69,6 +70,9 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
     payload = {**request, 'region_id': locator['region_id'], 'image_receipt_version': 'image-reading-v1', 'feedback_version':VERSION,
         'available_actions': [t['function']['name'] for t in definitions]}
     current_crop = list(crop)
+    current_rendered = render_region_image(path, locator)
+    payload['current_crop_geometry'] = geometry_observations(Image.open(io.BytesIO(current_rendered['png'])))
+    payload['current_crop_geometry']['region_id'] = locator['region_id']
     answer = None
     objects = visual_objects(ir)
     for iteration in range(13):  # 复用文档工具已有动作预算，不另设无限循环。
@@ -88,7 +92,12 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
         result = model(prompt + '\nUse the registered tools to inspect or repair a concrete issue. '
             'Keep the SAME task model. Report all target observations with report_chart_reading. '
             'All normalized coordinates refer to the CURRENT crop. Read true labels; do not force agreement '
-            'with a shared body maximum. No unsupported zero values or extra scientific fields.',
+            'with a shared body maximum. current_crop_geometry contains measured coordinates for IMAGE 2; '
+            'rectangles may include legends, so identify material/series and read actual tick labels yourself. '
+            'Use measured center_x and rectangle endpoints after identifying the actual bar; band_index and '
+            'frame contact describe geometry only. Map materials by their printed x-axis labels, not list order. '
+            'Geometry in other tool receipts belongs to their region_id and is context until the crop changes. '
+            'No unsupported zero values or extra scientific fields.',
             json.dumps(payload, ensure_ascii=False), **options)
         action = result.get('action') or {}
         native = result.get('_tool_call')
@@ -120,6 +129,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
                     crop_sha256=receipt['images'][0]['image_sha256'])
                 images = [images[0], actual_images[0]]
                 locator = new
+                payload['current_crop_geometry'] = deepcopy(receipt['geometry_observations'])
             if name != 'adjust_image_region':
                 images = images[:2] + [url for url in actual_images if url not in images[:2]]
                 payload['additional_image_regions'] = [receipt['locator']]
@@ -162,6 +172,9 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
                     for issue in issues if issue.get('reason_code')=='INVALID_PANEL_OBSERVATION')
             return answer, current_crop, progress.state()
         payload['verification_issues'] = issues
+        from .image_geometry import geometry_observations
+        payload['current_crop_geometry'] = geometry_observations(Image.open(io.BytesIO(rendered['png'])))
+        payload['current_crop_geometry']['region_id'] = locator['region_id']
         payload['required_next_step'] = '定位到上述元素，选择实际重裁/读刻度/复算动作；来源确实不足则保留明确未读。'
         if native:
             history = [{'role':'assistant','content':None,'tool_calls':[native]},

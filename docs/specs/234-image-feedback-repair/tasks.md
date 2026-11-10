@@ -35,7 +35,7 @@
 ## 阶段5：完善与跨故事验收
 
 - [x] T011 在本目录`quickstart.md`登记实际测试命令/版本，执行字段契约、四宿主、变异及受影响相邻检查；已有失败用独立基线单列。
-- [ ] T012 在本目录`validation.md`登记原PDF新模型调用、故障注入与工具动作、正式后处理和来源重读证据，逐项核对全部SC；未运行层明确未完成。
+- [x] T012 在本目录`validation.md`登记原PDF新模型调用、故障注入与工具动作、正式后处理和来源重读证据，逐项核对全部SC；未运行层明确未完成。
 - [x] T013 检查本目录`spec.md`的全部FR及`plan.md`映射，与`../232-complete-pdf-regions/delivery-framework.md`核对依赖/接口/模型/版本/权限一致性。
 - [x] T014 实现后更新`docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md`等实际受影响总览及本目录`validation.md`；必要时更新README，按仓库规则提交本任务；远程链接和真实验收未完成不得关闭Issue。
 
@@ -57,13 +57,18 @@
 
 ## 本轮验收边界
 
-所有已勾项的证据和失败边界见[validation.md](validation.md)。真实GPT局部新提取及正式填写/JSON保存重读通过；Flash能输入图片和调用工具，但Y-H科学读数未通过；官方OpenAI账号端点未实测；MySQL并发已在独立实例补齐，不宣称整篇五阶段通过。远程Spec未push，Issue保持OPEN。
+所有已勾项的证据和失败边界见[validation.md](validation.md)。真实GPT局部新提取及正式填写/JSON保存重读通过；Flash此前仅图片/工具通过，现已补齐本篇38读数及正式后处理/保存重读科学门（见../234-image-feedback-repair/flash-fig4-scientific-validation.md）；官方OpenAI账号端点未实测；MySQL并发已在独立实例补齐，不宣称整篇五阶段通过。远程Spec未push，Issue保持OPEN。
 
-- [ ] T015 继续收敛Flash的Y-H实际图像坐标/材料归属与科学读数，按原主模型保留失败和新证据；正确读数通过正式后处理与保存重读后再勾选T012。不能改为换模型或降低科学验收条件。
+- [x] T015 继续收敛Flash的Y-H实际图像坐标/材料归属与科学读数，按原主模型保留失败和新证据；正确读数通过正式后处理与保存重读后再勾选T012。不能改为换模型或降低科学验收条件。
 
 ## MySQL与旧失败补验收
 
 - [x] T016 按用户对MySQL跳过/旧基线的标注补验收：独立实例运行原六项及79项扩展，修正七项过期夹具，隔离源码综合525项通过；保留失败前后证据、业务库准入和清理记录。详见[共享补验收](../232-complete-pdf-regions/mysql-and-baseline-validation.md)。不替代Flash、官方账号、整篇或远程门。
 
-
 - [x] T017 修复真实目录预算及旧观察混入：完整父表覆盖单元格后目录1308→215，保留全文/图片，225154→70814估算token；原始上下文及版本化动作缓存回归、共享/独立102项及原PDF5条标定/IR重读通过。详见catalog-budget-fix.md，完整五阶段仍待继续。
+
+
+- [x] T018 前置盘点错误接入真实原页/整图反馈，保留原保护、有效页、不重复无新依据；实际Flash重复框失败及回归先检出。
+- [x] T019 原主模型使用无标签像素几何观察，完成Flash本篇38读数及原图独立参照；正式新提取/整理、ScH6共同参数/约数/来源保存重读通过，原脚本故障和复用边界另留。见flash-fig4-scientific-validation.md。
+
+T012/T015后续依据：2026-11-11同Flash 13次新读图＋2次真实提取/整理，38独立原位图参照及ScH6共同参数/约数/来源保存重读通过；官方账号、整篇与远程门仍未验收，不据此关闭Issue。

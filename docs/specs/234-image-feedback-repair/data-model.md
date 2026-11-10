@@ -21,3 +21,10 @@
 六类注册名：read_image_context、read_complete_object、adjust_image_region、recognize_image_text、digitize_image_elements、verify_image_reading。标量提取/验证接受封闭panel协议；谱线用独立report_spectrum_calibration及原谱engine，结构仍用report_structures。文字识别当前只声明原PDF文字层/已登记OCR，不冒称新部署OCR服务。
 
 公开来源接口为GET /api/rag/visual-sources/{paper_id}及/{source_id}/image；历史来源按既有交接权限读取，不能用公开路径访问私有快照。模型图像、来源和实际用量分别留证。
+
+
+## 前置盘点与几何观察
+
+盘点纠错沿原discovery_schema，只有当前错误页重问；被拒绝观察标明非原文，额外整图/图注记录原件/定位/图像SHA和全页归一化坐标。已合法页及失败历史保留。
+
+image-geometry-v1只记录当前图的无标签框、刻度候选、色块、分析分辨率和像素摘要。分析副本最多2000像素边长，原模型图片和300/600 DPI原件不缩小；候选可含图例，灰色/超预览范围明确限制，不把缺候选当无数据。动作缓存包含几何版本；回执/区域/原件身份沿既有协议。没有新科学表单键或自动采纳。

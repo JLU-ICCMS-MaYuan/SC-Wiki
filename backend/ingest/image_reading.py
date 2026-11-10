@@ -12,6 +12,7 @@ import pymupdf
 from .document_ir import content_hash
 from .pdf_regions import complete_figure, object_region, region_locator, render_region_image
 from .image_catalog import original_source_blocks, SOURCE_CONTEXT_VERSION
+from .image_geometry import geometry_observations, VERSION as GEOMETRY_VERSION
 
 VERSION = 'image-reading-v1'
 ACTIONS = frozenset({'read_image_context', 'read_complete_object', 'adjust_image_region',
@@ -87,7 +88,7 @@ class ImageReadingTools:
             'adjust_image_region': {'region_id', 'bbox_page', 'reason', 'dpi'},
             'digitize_image_elements': {'region_id', 'panel'}, 'verify_image_reading': {'region_id', 'panel'}}[name]
         if set(arguments) != fields: raise ValueError('图片工具参数不完整或含未知字段')
-        identity = content_hash(SOURCE_CONTEXT_VERSION, name, arguments)
+        identity = content_hash(SOURCE_CONTEXT_VERSION, GEOMETRY_VERSION, name, arguments)
         if identity in self.actions:
             receipt = deepcopy(self.receipts[self.actions[identity]])
             locator, ir, path = self._locate(receipt['locator']['region_id'])
@@ -114,6 +115,8 @@ class ImageReadingTools:
             raise ValueError('裁剪区域没有可见内容，请重新定位，未把空白图当作已读')
         receipt = image_receipt(locator, rendered, action=name,
             observations=self._observations(ir, path, locator), parent_receipt_id=parent_receipt)
+        receipt['geometry_observations'] = geometry_observations(Image.open(io.BytesIO(rendered['png'])))
+        receipt['geometry_observations']['region_id'] = locator['region_id']
         if name == 'read_image_context':
             context_blocks = original_source_blocks(ir, page=locator['pdf_page'])
             receipt['context'] = [{'block_id': b.block_id, 'pdf_page': b.pdf_page, 'text': b.text}

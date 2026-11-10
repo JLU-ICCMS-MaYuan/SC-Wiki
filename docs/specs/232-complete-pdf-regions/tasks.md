@@ -57,7 +57,7 @@
 
 ## 本轮验收边界
 
-所有已勾项的证据和失败边界见[validation.md](validation.md)。真实GPT局部新提取及正式填写/JSON保存重读通过；Flash能输入图片和调用工具，但Y-H科学读数未通过；官方OpenAI账号端点未实测；MySQL并发已在独立实例补齐，不宣称整篇五阶段通过。远程Spec未push，Issue保持OPEN。
+所有已勾项的证据和失败边界见[validation.md](validation.md)。真实GPT局部新提取及正式填写/JSON保存重读通过；Flash此前仅图片/工具通过，现已补齐本篇38读数及正式后处理/保存重读科学门（见../234-image-feedback-repair/flash-fig4-scientific-validation.md）；官方OpenAI账号端点未实测；MySQL并发已在独立实例补齐，不宣称整篇五阶段通过。远程Spec未push，Issue保持OPEN。
 
 ## MySQL与旧失败补验收
 

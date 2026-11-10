@@ -1,0 +1,212 @@
+[
+  {
+    "quantity": "dos_fermi",
+    "unit": "states/eV/Å^3",
+    "point": {
+      "category": "YH10",
+      "series": "N_Ef",
+      "material": "YH10",
+      "pressure_value_gpa": 400,
+      "space_group_symbol": null,
+      "mu_star": null,
+      "method_raw": null,
+      "reading": "position",
+      "x": 540,
+      "y": 205,
+      "label_value": null,
+      "label_text": null,
+      "pixel_error": 6,
+      "conditions": [
+        {
+          "label": "pressure",
+          "value": "400",
+          "unit": "GPa"
+        }
+      ],
+      "reason": "Red bar height for YH10 at 400 GPa."
+    },
+    "crop_bbox": [
+      56.544,
+      34.728,
+      292.296,
+      210.792
+    ],
+    "value_number": 0.016,
+    "calculated_value": 0.016044080890706643
+  },
+  {
+    "quantity": "dos_fermi",
+    "unit": "states/eV/Å^3",
+    "point": {
+      "category": "CeH9",
+      "series": "N_Ef",
+      "material": "CeH9",
+      "pressure_value_gpa": 100,
+      "space_group_symbol": null,
+      "mu_star": null,
+      "method_raw": null,
+      "reading": "position",
+      "x": 750,
+      "y": 185,
+      "label_value": null,
+      "label_text": null,
+      "pixel_error": 6,
+      "conditions": [
+        {
+          "label": "pressure",
+          "value": "100",
+          "unit": "GPa"
+        }
+      ],
+      "reason": "Red bar height for CeH9 at 100 GPa."
+    },
+    "crop_bbox": [
+      56.544,
+      34.728,
+      292.296,
+      210.792
+    ],
+    "value_number": 0.031,
+    "calculated_value": 0.03141937438460955
+  },
+  {
+    "quantity": "dos_fermi",
+    "unit": "states/eV/Å^3",
+    "point": {
+      "category": "CeH10",
+      "series": "N_Ef",
+      "material": "CeH10",
+      "pressure_value_gpa": 200,
+      "space_group_symbol": null,
+      "mu_star": null,
+      "method_raw": null,
+      "reading": "position",
+      "x": 820,
+      "y": 188,
+      "label_value": null,
+      "label_text": null,
+      "pixel_error": 6,
+      "conditions": [
+        {
+          "label": "pressure",
+          "value": "200",
+          "unit": "GPa"
+        }
+      ],
+      "reason": "Red bar height for CeH10 at 200 GPa."
+    },
+    "crop_bbox": [
+      56.544,
+      34.728,
+      292.296,
+      210.792
+    ],
+    "value_number": 0.031,
+    "calculated_value": 0.03126789366053169
+  },
+  {
+    "quantity": "lambda_ep",
+    "unit": "dimensionless",
+    "point": {
+      "category": "YH10",
+      "series": "lambda",
+      "material": "YH10",
+      "pressure_value_gpa": 400,
+      "space_group_symbol": null,
+      "mu_star": null,
+      "method_raw": null,
+      "reading": "position",
+      "x": 540,
+      "y": 620,
+      "label_value": null,
+      "label_text": null,
+      "pixel_error": 6,
+      "conditions": [
+        {
+          "label": "pressure",
+          "value": "400",
+          "unit": "GPa"
+        }
+      ],
+      "reason": "Blue bar height for YH10 at 400 GPa."
+    },
+    "crop_bbox": [
+      56.544,
+      34.728,
+      292.296,
+      210.792
+    ],
+    "value_number": 1.7,
+    "calculated_value": 1.655489833858054
+  },
+  {
+    "quantity": "tc",
+    "unit": "K",
+    "point": {
+      "category": "YH6",
+      "series": "mu*=0.1",
+      "material": "YH6",
+      "pressure_value_gpa": 120,
+      "space_group_symbol": null,
+      "mu_star": 0.1,
+      "method_raw": "Eliashberg",
+      "reading": "position",
+      "x": 392,
+      "y": 820,
+      "label_value": null,
+      "label_text": null,
+      "pixel_error": 6,
+      "conditions": [
+        {
+          "label": "pressure",
+          "value": "120",
+          "unit": "GPa"
+        }
+      ],
+      "reason": "Green bar for YH6 at 120 GPa."
+    },
+    "crop_bbox": [
+      56.544,
+      34.728,
+      292.296,
+      210.792
+    ],
+    "value_number": 170.0,
+    "calculated_value": 169.31767920288917
+  },
+  {
+    "quantity": "tc",
+    "unit": "K",
+    "point": {
+      "category": "YH10",
+      "series": "mu*=0.1",
+      "material": "YH10",
+      "pressure_value_gpa": 400,
+      "space_group_symbol": null,
+      "mu_star": 0.1,
+      "method_raw": "Eliashberg",
+      "reading": "position",
+      "x": 532,
+      "y": 790,
+      "label_value": null,
+      "label_text": null,
+      "pixel_error": 6,
+      "conditions": [
+        {
+          "label": "pressure",
+          "value": "400",
+          "unit": "GPa"
+        }
+      ],
+      "reason": "Green bar for YH10 at 400 GPa (highest Tc)."
+    },
+    "crop_bbox": [
+      56.544,
+      34.728,
+      292.296,
+      210.792
+    ],
+    "value_number": 170.0,
+    "calculated_value": 168.3181873284675
+  }
+]

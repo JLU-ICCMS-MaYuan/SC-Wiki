@@ -1,0 +1,16 @@
+{
+  "source_commit": "b1348ad5e026820266f65725413064578ad139c3",
+  "flash_new_reading_calls": 13,
+  "flash_new_postprocessing_calls": 2,
+  "flash_readings": 38,
+  "pixel_reference_issues": 0,
+  "postprocessing_issues": 0,
+  "mysql": 79,
+  "mysql_skips": 0,
+  "old_regressions": 16,
+  "backend_regressions": 140,
+  "form_tests": 233,
+  "mutations": 12,
+  "business_stages": "仍阶段1未送审，其他四阶段未执行；隔离门不代替黑盒",
+  "missing_reason_limit": "PrH9无可定位值；其因果语言没有另作物理事实授信"
+}
