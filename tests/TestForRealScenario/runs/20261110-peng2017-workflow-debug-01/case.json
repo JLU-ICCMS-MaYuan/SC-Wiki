@@ -1,0 +1,99 @@
+{
+  "files": [
+    {
+      "path": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261106-peng2017/sources/2017 YHn LaHn-彭枫.pdf",
+      "role": "main",
+      "size": 3476148,
+      "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846"
+    },
+    {
+      "path": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261106-peng2017/sources/2017 YHn LaHn-彭枫 Supplementary.pdf",
+      "role": "supplementary",
+      "size": 14260391,
+      "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93"
+    }
+  ],
+  "accounts": {
+    "user": {
+      "email": "myth620137018@163.com",
+      "browser": "safari",
+      "origin": "http://127.0.0.1:5173"
+    },
+    "superadmin": {
+      "email": "mayuan_mark@163.com",
+      "browser": "chrome",
+      "origin": "http://localhost:5173"
+    }
+  },
+  "doi": "10.1103/PhysRevLett.119.107001",
+  "search": "YH10",
+  "workflow": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/document-upload-blackbox-workflow.md",
+  "round_kind": "排障轮",
+  "started": "2026-11-10T06:21:03.520496+00:00",
+  "source_commit": "2b06d1f18033f73bd40a6c54ac288fb52a776a15",
+  "worktree_status": " M backend/rag/llm.py\n?? backend/tests/test_json_mode_request.py\n",
+  "status": "文件已交给正常Safari上传组件，检查通过，提交修复后开始上传",
+  "phases": [
+    {
+      "id": "1",
+      "status": "未执行"
+    },
+    {
+      "id": "2",
+      "status": "未执行"
+    },
+    {
+      "id": "3",
+      "status": "未执行"
+    },
+    {
+      "id": "4",
+      "status": "未执行"
+    },
+    {
+      "id": "5",
+      "status": "未执行"
+    }
+  ],
+  "previous_task": {
+    "task_id": "02b23f7c5e524f8ba718f48d92a07f75",
+    "status": "已按本轮新流程授权留证并清理，正式PaperID无"
+  },
+  "rework_items": {
+    "paper": {
+      "field": "paper.knowledge_graph_title",
+      "target": "High-throughput Study on Rare-earth Clathrate Hydride High-temperature Superconductors",
+      "authorization": "用户本轮明确指定；仅作返修目标，不预先改写AI草稿以制造修改"
+    },
+    "state": {
+      "field": "material_states[].structure_families",
+      "target": "笼型结构",
+      "classes": [
+        {
+          "material": "YH10",
+          "phase": "Fm-3m"
+        },
+        {
+          "material": "CeH10",
+          "phase": "Fm-3m"
+        },
+        {
+          "material": "LaH10",
+          "phase": "Fm-3m"
+        },
+        {
+          "material": "YH9",
+          "phase": "P63/mmc"
+        },
+        {
+          "material": "CeH9",
+          "phase": "P63/mmc"
+        }
+      ],
+      "selection": "新草稿中核验具体状态和当前值后选择真实需改项；已有正确内容不记为修改"
+    }
+  },
+  "scientific_decisions": {
+    "CeH10_200GPa_Tc_DOS": "用户已明确确认Fm-3m，R-3m声子依据独立保留"
+  }
+}

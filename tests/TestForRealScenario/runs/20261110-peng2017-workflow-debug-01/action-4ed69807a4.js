@@ -1,0 +1,2 @@
+if(location.href!=="http://127.0.0.1:5173/upload/tasks/02b23f7c5e524f8ba718f48d92a07f75") throw new Error('论文地址已变化');
+location.href="http://127.0.0.1:5173/upload";return {action:"打开本轮正常上传入口",from:location.href};

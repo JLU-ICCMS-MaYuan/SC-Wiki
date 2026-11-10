@@ -1,0 +1,125 @@
+{
+  "time": "2026-11-10T06:46:37.425495+00:00",
+  "kind": "browser",
+  "browser": "safari",
+  "url": "http://127.0.0.1:5173/upload",
+  "window": 7839,
+  "tab": 1,
+  "script": "action-e29e9f60ef.js",
+  "result": {
+    "url": "http://127.0.0.1:5173/upload",
+    "text": "\n    SCSC-Wiki探索热点脉络社区排行榜Tc~X 演变AI 学术讨论上传对话预测切换模型openAI · gpt-6.1-sol中文English消息通知用户mayuanMUpload上传论文上传组合导入 (JSON)新建论文上传任务分别上传一个正文、可选的多份补充材料和结构源数据文件，共同填写一张论文表单。每个文件最大 50 MB · 同时上传最多 3 个论文正文必填，限一个 · PDF、TXT、MD选择或拖入论文正文补充材料可选，可多个 · PDF、TXT、MD；包括发表后的补充说明和纠正文稿选择或拖入补充材料源数据文件可选，可多个 · CIF、POSCAR、VASP、CONTCAR 结构文件选择或拖入源数据文件开始上传并解析上传解析记录 1/100全选刷新2012 CaH6-王晖.pdf提取内容用时：35 分 46 秒解析 token：1,042,762（统计不完整）已停止，可继续清理\n    \n  \n\n",
+    "file_inputs": [
+      {
+        "accept": ".pdf,.txt,.md",
+        "region": "论文正文"
+      },
+      {
+        "accept": ".pdf,.txt,.md",
+        "region": "补充材料"
+      },
+      {
+        "accept": ".cif,.poscar,.vasp,POSCAR,CONTCAR",
+        "region": "源数据文件"
+      }
+    ],
+    "buttons": [
+      {
+        "text": "SCSC-Wiki",
+        "disabled": false
+      },
+      {
+        "text": "",
+        "disabled": false
+      },
+      {
+        "text": "探索",
+        "disabled": false
+      },
+      {
+        "text": "热点",
+        "disabled": false
+      },
+      {
+        "text": "脉络",
+        "disabled": false
+      },
+      {
+        "text": "社区",
+        "disabled": false
+      },
+      {
+        "text": "排行榜",
+        "disabled": false
+      },
+      {
+        "text": "Tc~X 演变",
+        "disabled": false
+      },
+      {
+        "text": "AI 学术讨论",
+        "disabled": false
+      },
+      {
+        "text": "上传",
+        "disabled": false
+      },
+      {
+        "text": "对话",
+        "disabled": false
+      },
+      {
+        "text": "预测",
+        "disabled": false
+      },
+      {
+        "text": "切换模型openAI · gpt-6.1-sol",
+        "disabled": false
+      },
+      {
+        "text": "中文",
+        "disabled": false
+      },
+      {
+        "text": "English",
+        "disabled": false
+      },
+      {
+        "text": "M",
+        "disabled": false
+      },
+      {
+        "text": "论文上传",
+        "disabled": false
+      },
+      {
+        "text": "组合导入 (JSON)",
+        "disabled": false
+      },
+      {
+        "text": "选择或拖入论文正文",
+        "disabled": false
+      },
+      {
+        "text": "选择或拖入补充材料",
+        "disabled": false
+      },
+      {
+        "text": "选择或拖入源数据文件",
+        "disabled": false
+      },
+      {
+        "text": "开始上传并解析",
+        "disabled": true
+      },
+      {
+        "text": "刷新",
+        "disabled": false
+      },
+      {
+        "text": "清理",
+        "disabled": false
+      }
+    ]
+  }
+}

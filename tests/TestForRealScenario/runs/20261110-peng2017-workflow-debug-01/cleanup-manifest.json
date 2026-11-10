@@ -1,0 +1,39 @@
+{
+  "authorization": "用户本轮明确要求按document-upload-blackbox-workflow.md执行，采用其开始前清理授权",
+  "target": {
+    "host": "127.0.0.1",
+    "port": 3307,
+    "database": "scwiki"
+  },
+  "objects": [
+    {
+      "task_id": "02b23f7c5e524f8ba718f48d92a07f75",
+      "state": "paused",
+      "user_id": 2,
+      "paper_id": null,
+      "action": "清理此未送审任务和草稿"
+    },
+    {
+      "task_id": "005639e78e004c56ab817f4cca589d7b",
+      "state": null,
+      "user_id": null,
+      "paper_id": null,
+      "action": "已不存在，不操作"
+    },
+    {
+      "task_id": "90427eb91a05495fb671a705b5ece82f",
+      "state": null,
+      "user_id": null,
+      "paper_id": null,
+      "action": "已不存在，不操作"
+    },
+    {
+      "task_id": "d2ca41e5f16b4d65bf744f5d5325e855",
+      "state": null,
+      "user_id": null,
+      "paper_id": null,
+      "action": "已不存在，不操作"
+    }
+  ],
+  "exclusions": "其他文献、以前独立存在的正式论文、其他用户和共享工作区全部保留"
+}

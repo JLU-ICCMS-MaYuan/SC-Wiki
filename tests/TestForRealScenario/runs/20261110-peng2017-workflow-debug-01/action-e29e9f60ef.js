@@ -1,0 +1,2 @@
+if(location.href!=="http://127.0.0.1:5173/upload") throw new Error('论文地址已变化');
+return {url:location.href,text:document.body.textContent.slice(0,1800),file_inputs:[...document.querySelectorAll("input[type=file]")].map(i=>({accept:i.accept,region:i.closest('[role="region"]')?.getAttribute("aria-label")})),buttons:[...document.querySelectorAll("button")].filter(b=>!!b.getClientRects().length).map(b=>({text:b.textContent,disabled:b.disabled}))};

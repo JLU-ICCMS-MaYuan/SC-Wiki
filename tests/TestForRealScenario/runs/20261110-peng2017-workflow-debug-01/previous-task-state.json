@@ -1,0 +1,1578 @@
+{
+  "task_id": "02b23f7c5e524f8ba718f48d92a07f75",
+  "user_id": 2,
+  "filename": "2017 YHn LaHn-彭枫.pdf",
+  "status": "paused",
+  "stage": "extracting",
+  "processing_phase": "workflow_selection",
+  "reading_state": "selecting_workflow",
+  "job_id": "207d3e83-a22c-442e-a5db-75bd31306bc3",
+  "revision": 38,
+  "completed_chunks": 29,
+  "total_chunks": 29,
+  "processing_error": null,
+  "error_code": null,
+  "model_activity": {
+    "status": "paused",
+    "updated_at": 1794290816.795798,
+    "phase": "structure_reading",
+    "filename": "2017 YHn LaHn-彭枫.pdf",
+    "attempt": 5,
+    "pages": [],
+    "action": null,
+    "note": null,
+    "error": {
+      "error_type": "InternalServerError",
+      "status_code": 503,
+      "code": "service_unavailable",
+      "message": "连续5次模型请求失败，已停止自动请求；可稍后继续解析。最后错误：模型服务暂时不可用，请稍后重试；如持续出现，请联系管理员并提供错误编号。（错误编号 #fe656ddf）",
+      "request_id": "31d2c88a-c984-456f-b254-2b4dfe656ddf",
+      "output_started": false
+    },
+    "retry_at": null,
+    "started_at": 1794290812.044636,
+    "history": [
+      {
+        "status": "reused",
+        "updated_at": 1794286455.620448,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 0,
+        "pages": [
+          30,
+          31,
+          32
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286437.843478
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794286455.800237,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 0,
+        "pages": [
+          30,
+          31,
+          32,
+          33
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286437.843478
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794286459.6116369,
+        "phase": "chunk_extraction",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          3,
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286459.60422
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794286459.912027,
+        "phase": "chunk_extraction",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          3,
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286459.9045591
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794286486.191749,
+        "phase": "chunk_extraction",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          3,
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286459.9045591
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794286916.073909,
+        "phase": "chunk_extraction",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          3,
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286459.9045591
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794286916.714535,
+        "phase": "claims_ready",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286916.708618
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794286916.874444,
+        "phase": "claims_ready",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286916.867084
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794286920.0654368,
+        "phase": "claims_ready",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286916.867084
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794286921.347892,
+        "phase": "claims_ready",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286916.867084
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794286921.483928,
+        "phase": "claims_ready",
+        "filename": null,
+        "attempt": 0,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286916.867084
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794286921.916697,
+        "phase": "structure_optimization",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286921.908858
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794286922.114304,
+        "phase": "structure_optimization",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286922.10544
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794286939.017505,
+        "phase": "structure_optimization",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286922.10544
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794287090.933492,
+        "phase": "structure_optimization",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794286922.10544
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794287095.1505952,
+        "phase": "material_state_inventory",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794287095.1411421
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794287095.574035,
+        "phase": "material_state_inventory",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794287095.566039
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794287117.8837838,
+        "phase": "material_state_inventory",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794287095.566039
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794287267.1881988,
+        "phase": "material_state_inventory",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794287095.566039
+      },
+      {
+        "status": "processing",
+        "updated_at": 1794290069.291392,
+        "phase": "extracting_sources",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 0,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794287095.566039
+      },
+      {
+        "status": "processing",
+        "updated_at": 1794290069.4411252,
+        "phase": "extracting_sources",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 0,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794287095.566039
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794290069.9690912,
+        "phase": "chart_discovery",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 0,
+        "pages": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794287095.566039
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290070.1867409,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290070.176842
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290070.4920042,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290070.484839
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794290105.5210319,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290070.484839
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794290133.426785,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290070.484839
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290133.739115,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290133.730417
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290133.847973,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290133.839487
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794290152.669844,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290133.839487
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794290191.074219,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290133.839487
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290191.367284,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290191.3576949
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290191.474825,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290191.4614358
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794290211.286967,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290191.4614358
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794290264.9982982,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [
+          4
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290191.4614358
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794290265.458373,
+        "phase": "chart_discovery",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 0,
+        "pages": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290191.4614358
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794290265.761525,
+        "phase": "chart_discovery",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 0,
+        "pages": [
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290191.4614358
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794290266.06367,
+        "phase": "chart_discovery",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 0,
+        "pages": [
+          13,
+          14,
+          15,
+          16,
+          17,
+          18
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290191.4614358
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794290266.38093,
+        "phase": "chart_discovery",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 0,
+        "pages": [
+          19,
+          20,
+          21,
+          22,
+          23,
+          24
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290191.4614358
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794290266.7513442,
+        "phase": "chart_discovery",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 0,
+        "pages": [
+          25,
+          26,
+          27,
+          28,
+          29,
+          30
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290191.4614358
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794290266.9161952,
+        "phase": "chart_discovery",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 0,
+        "pages": [
+          31,
+          32,
+          33,
+          34
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290191.4614358
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290267.093195,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          13
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290267.085603
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290267.1916008,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          13
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290267.18458
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794290328.727623,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          13
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290267.18458
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794290348.50091,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          13
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290267.18458
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290348.729644,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          13
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290348.721577
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290348.832442,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          13
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290348.824317
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794290370.3849542,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          13
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290348.824317
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794290385.5309901,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          13
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290348.824317
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290385.753984,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          13
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290385.74344
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290385.860207,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          13
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290385.8531651
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794290404.5413902,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          13
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290385.8531651
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794290420.110025,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          13
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290385.8531651
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290420.72704,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          26
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290420.7201018
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290420.8818638,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          26
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290420.874272
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794290431.4987352,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          26
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290420.874272
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794290464.479507,
+        "phase": "chart_reading",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 1,
+        "pages": [
+          26
+        ],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290420.874272
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290465.423007,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290465.415709
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290465.533688,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290465.525163
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794290474.8717551,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290465.525163
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794290516.041047,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290465.525163
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290516.131846,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290516.124629
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290516.23327,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290516.226798
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794290527.956428,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290516.226798
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794290533.2081332,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290516.226798
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290533.3022761,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290533.294275
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290533.400219,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290533.3923562
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794290536.585966,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290533.3923562
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794290542.27566,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290533.3923562
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290542.370817,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290542.363231
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290542.47191,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290542.463109
+      },
+      {
+        "status": "receiving",
+        "updated_at": 1794290550.401731,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290542.463109
+      },
+      {
+        "status": "completed",
+        "updated_at": 1794290579.2824519,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290542.463109
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290579.6724591,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290579.665387
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290579.774941,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290579.767883
+      },
+      {
+        "status": "retry_wait",
+        "updated_at": 1794290582.096622,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": {
+          "error_type": "InternalServerError",
+          "status_code": 503,
+          "code": "service_unavailable",
+          "message": "模型服务暂时不可用，请稍后重试；如持续出现，请联系管理员并提供错误编号。（错误编号 #333024b3）",
+          "request_id": "39954795-633e-48a5-a7cc-c1f0333024b3",
+          "output_started": false
+        },
+        "retry_at": 1794290584.088887,
+        "started_at": 1794290579.767883
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290584.182246,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 2,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290584.1733649
+      },
+      {
+        "status": "retry_wait",
+        "updated_at": 1794290586.1311622,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 2,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": {
+          "error_type": "InternalServerError",
+          "status_code": 503,
+          "code": "service_unavailable",
+          "message": "模型服务暂时不可用，请稍后重试；如持续出现，请联系管理员并提供错误编号。（错误编号 #14f9490f）",
+          "request_id": "472cbc97-8f55-43f0-832e-c81214f9490f",
+          "output_started": false
+        },
+        "retry_at": 1794290588.1233878,
+        "started_at": 1794290584.1733649
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290588.2357771,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 3,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290588.22275
+      },
+      {
+        "status": "retry_wait",
+        "updated_at": 1794290590.568458,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 3,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": {
+          "error_type": "InternalServerError",
+          "status_code": 503,
+          "code": "service_unavailable",
+          "message": "模型服务暂时不可用，请稍后重试；如持续出现，请联系管理员并提供错误编号。（错误编号 #e79be6d5）",
+          "request_id": "d9b23378-6a38-4c83-94e6-bf72e79be6d5",
+          "output_started": false
+        },
+        "retry_at": 1794290592.557098,
+        "started_at": 1794290588.22275
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290592.718306,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 4,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290592.7089112
+      },
+      {
+        "status": "retry_wait",
+        "updated_at": 1794290595.2252219,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 4,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": {
+          "error_type": "InternalServerError",
+          "status_code": 503,
+          "code": "service_unavailable",
+          "message": "模型服务暂时不可用，请稍后重试；如持续出现，请联系管理员并提供错误编号。（错误编号 #6d5fa174）",
+          "request_id": "3e5d56ab-7b07-45af-8dce-fc8c6d5fa174",
+          "output_started": false
+        },
+        "retry_at": 1794290597.217748,
+        "started_at": 1794290592.7089112
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290597.3216588,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 5,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290597.3110259
+      },
+      {
+        "status": "paused",
+        "updated_at": 1794290600.8896902,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 5,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": {
+          "error_type": "InternalServerError",
+          "status_code": 503,
+          "code": "service_unavailable",
+          "message": "连续5次模型请求失败，已停止自动请求；可稍后继续解析。最后错误：模型服务暂时不可用，请稍后重试；如持续出现，请联系管理员并提供错误编号。（错误编号 #5ba1b0ae）",
+          "request_id": "77a60a9d-7ca8-4a40-a133-c5935ba1b0ae",
+          "output_started": false
+        },
+        "retry_at": null,
+        "started_at": 1794290597.3110259
+      },
+      {
+        "status": "processing",
+        "updated_at": 1794290778.358742,
+        "phase": "extracting_sources",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 0,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290597.3110259
+      },
+      {
+        "status": "processing",
+        "updated_at": 1794290778.484256,
+        "phase": "extracting_sources",
+        "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+        "attempt": 0,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290597.3110259
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794290779.101603,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 0,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290597.3110259
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794290779.185078,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 0,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290597.3110259
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794290779.267027,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 0,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290597.3110259
+      },
+      {
+        "status": "reused",
+        "updated_at": 1794290779.353894,
+        "phase": "workflow_selection",
+        "filename": null,
+        "attempt": 0,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290597.3110259
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290779.756551,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290779.749608
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290780.0278971,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290780.0200698
+      },
+      {
+        "status": "retry_wait",
+        "updated_at": 1794290787.003238,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 1,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": {
+          "error_type": "InternalServerError",
+          "status_code": 503,
+          "code": "service_unavailable",
+          "message": "模型服务暂时不可用，请稍后重试；如持续出现，请联系管理员并提供错误编号。（错误编号 #f4d274be）",
+          "request_id": "7c918c1a-fe56-4f3f-b10b-06b8f4d274be",
+          "output_started": false
+        },
+        "retry_at": 1794290788.9961221,
+        "started_at": 1794290780.0200698
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290789.093135,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 2,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290789.084162
+      },
+      {
+        "status": "retry_wait",
+        "updated_at": 1794290793.9089122,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 2,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": {
+          "error_type": "InternalServerError",
+          "status_code": 503,
+          "code": "service_unavailable",
+          "message": "模型服务暂时不可用，请稍后重试；如持续出现，请联系管理员并提供错误编号。（错误编号 #cf9cc904）",
+          "request_id": "bbc12a8f-9760-47bd-a566-52d0cf9cc904",
+          "output_started": false
+        },
+        "retry_at": 1794290795.9010801,
+        "started_at": 1794290789.084162
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290796.0002692,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 3,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290795.991285
+      },
+      {
+        "status": "retry_wait",
+        "updated_at": 1794290802.105181,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 3,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": {
+          "error_type": "InternalServerError",
+          "status_code": 503,
+          "code": "service_unavailable",
+          "message": "模型服务暂时不可用，请稍后重试；如持续出现，请联系管理员并提供错误编号。（错误编号 #f131e142）",
+          "request_id": "1f59e320-18db-45a4-8bc9-3cacf131e142",
+          "output_started": false
+        },
+        "retry_at": 1794290804.09775,
+        "started_at": 1794290795.991285
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290804.198456,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 4,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290804.1904771
+      },
+      {
+        "status": "retry_wait",
+        "updated_at": 1794290809.934,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 4,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": {
+          "error_type": "InternalServerError",
+          "status_code": 503,
+          "code": "service_unavailable",
+          "message": "模型服务暂时不可用，请稍后重试；如持续出现，请联系管理员并提供错误编号。（错误编号 #3c267a3a）",
+          "request_id": "68d3a236-a726-44be-823c-099e3c267a3a",
+          "output_started": false
+        },
+        "retry_at": 1794290811.926871,
+        "started_at": 1794290804.1904771
+      },
+      {
+        "status": "requesting",
+        "updated_at": 1794290812.058506,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 5,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": null,
+        "retry_at": null,
+        "started_at": 1794290812.044636
+      },
+      {
+        "status": "paused",
+        "updated_at": 1794290816.795798,
+        "phase": "structure_reading",
+        "filename": "2017 YHn LaHn-彭枫.pdf",
+        "attempt": 5,
+        "pages": [],
+        "action": null,
+        "note": null,
+        "error": {
+          "error_type": "InternalServerError",
+          "status_code": 503,
+          "code": "service_unavailable",
+          "message": "连续5次模型请求失败，已停止自动请求；可稍后继续解析。最后错误：模型服务暂时不可用，请稍后重试；如持续出现，请联系管理员并提供错误编号。（错误编号 #fe656ddf）",
+          "request_id": "31d2c88a-c984-456f-b254-2b4dfe656ddf",
+          "output_started": false
+        },
+        "retry_at": null,
+        "started_at": 1794290812.044636
+      }
+    ]
+  },
+  "execution_model": {
+    "provider": "server:LLM2",
+    "model": "gpt-6.1-sol",
+    "catalog_id": "LLM2",
+    "input_hash": "b35f6d5413336c69944afa9bf3b73b2873dcb8f24dda68f4e071737b3049a9a8",
+    "endpoint_hash": "8f11cc1d483994c69a25d434dbc98dc8be8e43bd63ef3a59af2f68795f62e5af"
+  },
+  "files": [
+    {
+      "file_id": "a6013d5bea8d473b936d8cb8abe143c0",
+      "client_id": "33239560ff744b09bcbeb5b8bfe1adab",
+      "role": "main",
+      "declared_role": "main",
+      "original_filename": "2017 YHn LaHn-彭枫.pdf",
+      "media_type": "application/pdf",
+      "kind": "pdf",
+      "size": 3476148,
+      "sort_order": 0,
+      "upload_status": "completed",
+      "extraction_status": "processing",
+      "error": null,
+      "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "stored_path": "upload_PDFs/02b23f7c5e524f8ba718f48d92a07f75/a6013d5bea8d473b936d8cb8abe143c0/43a4d454b0ee472ca961e1c97bb22b9c.pdf",
+      "source_file_path": "upload_PDFs/02b23f7c5e524f8ba718f48d92a07f75/a6013d5bea8d473b936d8cb8abe143c0/43a4d454b0ee472ca961e1c97bb22b9c.pdf",
+      "parser_profile": "complementary"
+    },
+    {
+      "file_id": "ac262d3aa07f48b0a43280ddc72254c3",
+      "client_id": "2555c07464c64e0b9973a7e90af4c049",
+      "role": "supplementary",
+      "declared_role": "supplementary",
+      "original_filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+      "media_type": "application/pdf",
+      "kind": "pdf",
+      "size": 14260391,
+      "sort_order": 1,
+      "upload_status": "completed",
+      "extraction_status": "completed",
+      "error": null,
+      "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "stored_path": "upload_PDFs/02b23f7c5e524f8ba718f48d92a07f75/ac262d3aa07f48b0a43280ddc72254c3/8423e071258c466f8a414aa367f1c265.pdf",
+      "source_file_path": "upload_PDFs/02b23f7c5e524f8ba718f48d92a07f75/ac262d3aa07f48b0a43280ddc72254c3/8423e071258c466f8a414aa367f1c265.pdf",
+      "parser_profile": "complementary"
+    }
+  ],
+  "created_at": 1794217187,
+  "updated_at": 1794290816
+}

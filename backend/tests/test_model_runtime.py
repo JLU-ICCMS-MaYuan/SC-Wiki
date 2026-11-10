@@ -95,7 +95,8 @@ def test_real_openai_stream_recovers_unanswered_attempts_and_disk_resume(tmp_pat
                 self.send_response(200);self.send_header('Content-Type','text/event-stream');self.send_header('Content-Length',str(len(body)));self.end_headers();self.wfile.write(body)
     server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
     thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
-    monkeypatch.setattr(llm,'_client',lambda timeout:OpenAI(api_key='isolated-fixture',base_url=f'http://127.0.0.1:{server.server_port}/v1',max_retries=0))
+    monkeypatch.setattr(llm,'_client',lambda timeout:OpenAI(api_key='isolated-fixture',base_url=f'http://127.0.0.1:{server.server_port}/v1',max_retries=0,
+        http_client=httpx.Client(trust_env=False)))
     monkeypatch.setattr(llm,'get_llm_config',lambda:NS(model='fixture'))
     schema={'type':'object','properties':{'answer':{'type':'integer'}},'required':['answer'],'additionalProperties':False}
     try:

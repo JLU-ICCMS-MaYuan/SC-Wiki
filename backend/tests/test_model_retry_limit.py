@@ -74,7 +74,8 @@ def model_server(monkeypatch, failure_kind, *, failures=9):
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     monkeypatch.setattr(llm, '_client', lambda _timeout: OpenAI(api_key='isolated-fixture',
-        base_url=f'http://127.0.0.1:{server.server_port}/v1', max_retries=0))
+        base_url=f'http://127.0.0.1:{server.server_port}/v1', max_retries=0,
+        http_client=httpx.Client(trust_env=False)))
     monkeypatch.setattr(llm, 'get_llm_config', lambda: NS(model='fixture'))
     try:
         yield seen, failed
@@ -134,6 +135,9 @@ def test_worker_wrapper_settles_retry_limit_as_paused(task_runtime, tmp_path, mo
     runtime, _, state, _, _, _ = task_runtime
     from backend.ingest import upload_jobs, document_run_metadata, document_shadow
     from backend.rag.llm_context import LlmConfig
+    # Worker可能已被其他测试导入；显式绑定同一隔离存储，不依赖模块导入先后。
+    monkeypatch.setattr(upload_jobs, 'get_state', upload_tasks.get_state)
+    monkeypatch.setattr(upload_jobs, 'update_state', upload_tasks.update_state)
     monkeypatch.setattr(upload_jobs, 'load_llm_config', lambda _: LlmConfig(
         'fixture', 'https://model.invalid/v1', 'fixture', 'isolated'))
     monkeypatch.setattr(model_runtime, 'start_runtime', lambda _: runtime)

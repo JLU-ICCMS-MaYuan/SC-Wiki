@@ -1,0 +1,35 @@
+{
+  "compile": "passed",
+  "bandit": {
+    "findings": 1,
+    "test": "B101",
+    "severity": "LOW",
+    "same_as_head": true
+  },
+  "manifests": {
+    "frontend/package-lock.json": {
+      "unchanged": true,
+      "sha256": "29c2644b38dd6ce5e17d9304a16b0baa6ef8e975cfef3c36c3fabde0ec1f95a6"
+    },
+    "requirements.txt": {
+      "unchanged": true,
+      "sha256": "95ffb268eb254e0ff7889466dcd5bf37d2db46c23b4052e7b394fb359c0449ff"
+    }
+  },
+  "npm": {
+    "info": 0,
+    "low": 4,
+    "moderate": 2,
+    "high": 0,
+    "critical": 0,
+    "total": 6
+  },
+  "pip": {
+    "packages": 254,
+    "affected": 14,
+    "advisories": 108
+  },
+  "dependency_changes": false,
+  "result": "扫描有既有告警，未记为通过或升级依赖",
+  "official_online_docs": "两域HTTP403未核验；SDK类型与实际序列化和真实接口已核验"
+}

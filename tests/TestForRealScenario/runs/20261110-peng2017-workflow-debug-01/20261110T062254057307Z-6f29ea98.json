@@ -1,0 +1,13 @@
+{
+  "time": "2026-11-10T06:22:54.057498+00:00",
+  "kind": "browser",
+  "browser": "safari",
+  "url": "http://127.0.0.1:5173/upload/tasks/02b23f7c5e524f8ba718f48d92a07f75",
+  "window": 7839,
+  "tab": 1,
+  "script": "action-4ed69807a4.js",
+  "result": {
+    "action": "打开本轮正常上传入口",
+    "from": "http://127.0.0.1:5173/upload/tasks/02b23f7c5e524f8ba718f48d92a07f75"
+  }
+}

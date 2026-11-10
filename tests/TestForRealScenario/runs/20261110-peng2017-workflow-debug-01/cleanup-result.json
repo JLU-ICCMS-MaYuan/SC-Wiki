@@ -1,0 +1,9 @@
+{
+  "deleted_task_id": "02b23f7c5e524f8ba718f48d92a07f75",
+  "state_absent": true,
+  "paper_id": null,
+  "existing_formal_papers_preserved": 3,
+  "other_papers_deleted": 0,
+  "input_files_preserved": true,
+  "scope": "通过仓库现有delete_task_record执行用户文档明确允许的开始前后台清理；不是用API/SQL代替业务流程"
+}

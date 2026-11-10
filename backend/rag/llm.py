@@ -22,6 +22,16 @@ _call_phase: ContextVar[str] = ContextVar("llm_call_phase", default="")
 _call_scope: ContextVar[dict] = ContextVar("llm_call_scope", default={})
 _call_stats: ContextVar[dict] = ContextVar("llm_call_stats", default={})
 
+JSON_OUTPUT_INSTRUCTION = (
+    "You must return valid JSON. When calling tools, use the registered tools with JSON arguments."
+)
+
+
+def _json_output_prompt(system_prompt: str) -> str:
+    """JSON mode要求消息明确要求JSON；在归档/预算前补齐，传输边界保持幂等。"""
+    return (system_prompt if 'json' in system_prompt.casefold()
+            else system_prompt + "\n\n" + JSON_OUTPUT_INSTRUCTION)
+
 
 class ModelNoOutputError(RuntimeError):
     """模型连接尚未给出任何内容就结束，不是科学输出的结构错误。"""
@@ -87,7 +97,7 @@ def _stream_json(
     config = get_llm_config()
     deepseek = config.model.startswith("deepseek")
     _call_stats.set({"thinking": "disabled" if deepseek else "provider_default", "output_started": False})
-    messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_content}]
+    messages = [{"role": "system", "content": _json_output_prompt(system_prompt)}, {"role": "user", "content": user_content}]
     if tool_history:
         messages.extend(tool_history)
     client = _client(read_timeout)
@@ -319,6 +329,7 @@ def _complete_json(
 
 def complete_json(system_prompt: str, user_prompt: str, **options) -> dict[str, Any]:
     """上传执行使用持久运行器；其他宿主保留原有调用契约。"""
+    system_prompt = _json_output_prompt(system_prompt)
     from backend.ingest.model_runtime import current_execution
     runtime = current_execution()
     if runtime:
