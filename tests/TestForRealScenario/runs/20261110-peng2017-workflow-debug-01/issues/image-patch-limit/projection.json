@@ -1,0 +1,11 @@
+{
+  "baseline": "45ef52cc531d871924ae6f9afe1f1aa87157510c",
+  "files": {
+    "backend/rag/llm.py": "20e5d7ec814be025aba1d64bb20b4176f226f91f235711c85776c33cbb0f54ef",
+    "backend/rag/image_inputs.py": "27539840b98c308657f086c067a71811db922d20d0681bc7c50d7bf2685f4bee",
+    "backend/tests/test_image_input_tiling.py": "2c502f50134b536b62c225ef7d22a115964c96301ab540ed4253674723853ef5"
+  },
+  "exit_code": 0,
+  "scope": "仅HEAD及本任务3个源码/测试路径，不含#232共享改动",
+  "temp_removed": true
+}

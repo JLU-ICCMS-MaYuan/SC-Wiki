@@ -1,0 +1,58 @@
+{
+  "path": "tests/TestForRealScenario/runs/20261110-peng2017-workflow-debug-01/issues/image-patch-limit/live/runtime/calls/05382bd6c67510e88afb9275cabeebb0fdfd4ce5293c28f5ca102428d09e2b14-0/request.json",
+  "sha256": "1a309f939c22687254533ae8bf8101ab2b1048a6afe30abe94886e291c323d67",
+  "manifest": [
+    {
+      "original_image": 1,
+      "original_size": [
+        5100,
+        6600
+      ],
+      "original_sha256": "e06bc9ac074b8db972adc5abfb1d80167439a721ffea5129e1def5ec267dd011",
+      "attachment": 1,
+      "bbox_pixels": [
+        0,
+        0,
+        5100,
+        3364
+      ],
+      "image_sha256": "306f596087c77c21b7e7b0eb36625dffd8f85504878936bd0ec8250db30fc319",
+      "resized": false
+    },
+    {
+      "original_image": 1,
+      "original_size": [
+        5100,
+        6600
+      ],
+      "original_sha256": "e06bc9ac074b8db972adc5abfb1d80167439a721ffea5129e1def5ec267dd011",
+      "attachment": 2,
+      "bbox_pixels": [
+        0,
+        3236,
+        5100,
+        6600
+      ],
+      "image_sha256": "585d1c319acf3e52115eee24cf5e77dc292754ef42fcdf6ab3af51b3a95eb8da",
+      "resized": false
+    },
+    {
+      "original_image": 2,
+      "original_size": [
+        1960,
+        616
+      ],
+      "original_sha256": "3347e6de9727d665c6aeeaf360a4e28bfb5955c97ddcbd9b2b0f71c785ac6147",
+      "attachment": 3,
+      "bbox_pixels": [
+        0,
+        0,
+        1960,
+        616
+      ],
+      "image_sha256": "3347e6de9727d665c6aeeaf360a4e28bfb5955c97ddcbd9b2b0f71c785ac6147",
+      "resized": false
+    }
+  ],
+  "images": 3
+}

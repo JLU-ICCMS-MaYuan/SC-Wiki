@@ -75,6 +75,8 @@ flowchart TD
 - 返修与发布：`backend/services/paper_revisions.py` 的 `submit_draft`；`backend/api/rag.py` 的 `publish_approved_paper`。
 - 论文可见性：`goserver/handlers/papers.go` 的 `ListPapers`；科学记录读取规则见[混合检索](../05_Retrieval-Augmented_AI_Question_Answering/hybrid-retrieval.md)。
 
+高清直接图片在统一模型入口、请求归档及预算之前检查传输边界：超过本机上游已报告的单图30000个32像素块时，按原像素生成有重叠的无损分片，保留原图编号、尺寸、摘要与像素映射；模型输出坐标仍属于完整原图。小图及有效请求不重采样，模型与科学核对规则不变。已用原PDF正文三个面板的新模型请求和IR保存重读验证；历史工具消息、其他端点更小的能力限制及整篇业务验收另按实际范围记录，见[#227分片验证](../../specs/227-scientific-chart-reading/image-patch-limit.md)。
+
 ## 入口与任务创建
 
 ### 科学图表标量读数（#227）

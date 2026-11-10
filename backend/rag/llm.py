@@ -330,6 +330,8 @@ def _complete_json(
 def complete_json(system_prompt: str, user_prompt: str, **options) -> dict[str, Any]:
     """上传执行使用持久运行器；其他宿主保留原有调用契约。"""
     system_prompt = _json_output_prompt(system_prompt)
+    from .image_inputs import prepare_image_inputs
+    system_prompt, options = prepare_image_inputs(system_prompt, options)
     from backend.ingest.model_runtime import current_execution
     runtime = current_execution()
     if runtime:
