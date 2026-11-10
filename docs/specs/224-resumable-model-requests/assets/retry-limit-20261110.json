@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-10",
+  "timezone": "Asia/Shanghai",
+  "verified_at": "2026-11-10T13:41:49+08:00",
+  "isolated_base": "e521c5264d74b320b4084fafb34a63c22329cdfa",
+  "source_sha256": {
+    "backend/ingest/model_runtime.py": "d048755cfcbf0d1a136ae17feb1c455520a0e2471a8002f406681430517e010c",
+    "backend/tests/test_model_retry_limit.py": "d9e9d982dd4ad86928567c5927ac4603443f085479438766e7503b643f3b4b83"
+  },
+  "regression_before_fix": {
+    "failures": 5,
+    "passed": 6,
+    "output": "FFFFF......                                                              [100%]\n=================================== FAILURES ===================================\n___ test_five_failures_pause_and_manual_resume_gets_five_fresh_attempts[503] ___\nbackend/tests/test_model_retry_limit.py:95: in test_five_failures_pause_and_manual_resume_gets_five_fresh_attempts\n    with pytest.raises(model_runtime.ExecutionStopped, match='5'):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE ExecutionStopped\n___ test_five_failures_pause_and_manual_resume_gets_five_fresh_attempts[429] ___\nbackend/tests/test_model_retry_limit.py:95: in test_five_failures_pause_and_manual_resume_gets_five_fresh_attempts\n    with pytest.raises(model_runtime.ExecutionStopped, match='5'):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE ExecutionStopped\n_ test_five_failures_pause_and_manual_resume_gets_five_fresh_attempts[empty_sse] _\nbackend/tests/test_model_retry_limit.py:95: in test_five_failures_pause_and_manual_resume_gets_five_fresh_attempts\n    with pytest.raises(model_runtime.ExecutionStopped, match='5'):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE ExecutionStopped\n______________ test_worker_wrapper_settles_retry_limit_as_paused _______________\nbackend/tests/test_model_retry_limit.py:149: in test_worker_wrapper_settles_retry_limit_as_paused\n    assert len(failed) == 5\nE   AssertionError: assert 6 == 5\nE    +  where 6 = len([{'messages': [{'role': 'system', 'content': 'contract'}, {'role': 'user', 'content': 'unfinished source'}], 'model': ...'content': 'unfinished source'}], 'model': 'fixture', 'response_format': {'type': 'json_object'}, 'stream': True, ...}])\n----------------------------- Captured stdout call -----------------------------\nwarning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.\n__________ test_parallel_activity_cannot_replace_last_failed_request ___________\nbackend/tests/test_model_retry_limit.py:169: in test_parallel_activity_cannot_replace_last_failed_request\n    with pytest.raises(model_runtime.ExecutionStopped):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   Failed: DID NOT RAISE ExecutionStopped\n=========================== short test summary info ============================\nFAILED backend/tests/test_model_retry_limit.py::test_five_failures_pause_and_manual_resume_gets_five_fresh_attempts[503]\nFAILED backend/tests/test_model_retry_limit.py::test_five_failures_pause_and_manual_resume_gets_five_fresh_attempts[429]\nFAILED backend/tests/test_model_retry_limit.py::test_five_failures_pause_and_manual_resume_gets_five_fresh_attempts[empty_sse]\nFAILED backend/tests/test_model_retry_limit.py::test_worker_wrapper_settles_retry_limit_as_paused\nFAILED backend/tests/test_model_retry_limit.py::test_parallel_activity_cannot_replace_last_failed_request\n5 failed, 6 passed, 535 warnings in 4.26s\nsys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute\n"
+  },
+  "backend": {
+    "passed": 80,
+    "deselected_existing_failure": 1,
+    "summary": "........................................................................ [ 90%]\n........                                                                 [100%]\n80 passed, 1 deselected, 537 warnings in 7.58s\nsys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute\n"
+  },
+  "form_contract": {
+    "passed": 233,
+    "files": 16,
+    "summary": "   ✓ 221 upload 重开详情通过覆盖旧摘要待核对，未保存新值仍提醒 2352ms\n   ✓ 221 revision 重开详情通过覆盖旧摘要待核对，未保存新值仍提醒 2536ms\n   ✓ 221 admin 重开详情通过覆盖旧摘要待核对，未保存新值仍提醒 2716ms\n   ✓ 221 superadmin 重开详情通过覆盖旧摘要待核对，未保存新值仍提醒 2699ms\n\n Test Files  16 passed (16)\n      Tests  233 passed (233)\n   Start at  13:37:29\n   Duration  170.56s (transform 1.94s, setup 0ms, collect 71.85s, tests 573.94s, environment 10.68s, prepare 2.08s)\n"
+  },
+  "mutation": {
+    "detected": 12,
+    "summary": "\n> sc-wiki-frontend@1.0.0 test:form-contract:mutation\n> node ../scripts/check-form-contract.mjs --mutation\n\n通过：8 项完整宿主渲染回退、4 项原免审字段漏红回退均检出；工作树未修改。\n"
+  },
+  "field_contract": {
+    "passed": true,
+    "summary": "\n> sc-wiki-frontend@1.0.0 test:field-contract\n> python3 ../scripts/check-scientific-field-contract.py\n\n科学字段契约v1基线通过：21论文字段、11材料字段、3软件组\n"
+  },
+  "upload_activity_ui": {
+    "passed": 4,
+    "summary": "\u001b[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.\u001b[39m\n\n RUN  v2.1.9 /private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/scwiki224-retry-nnpnxpud\n\n ✓ tests/01_decentralized_uploading/upload-model-activity.test.tsx (4 tests) 837ms\n   ✓ loads older real process records only on explicit request 557ms\n\n Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  13:37:28\n   Duration  3.11s (transform 146ms, setup 0ms, collect 1.13s, tests 837ms, environment 786ms, prepare 73ms)\n\n"
+  },
+  "existing_failure": {
+    "node": "tests/01_decentralized_uploading/test_upload_token_usage.py::test_worker_wrapper_records_main_and_automatic_spectrum_requests",
+    "reason": "MemoryRedis缺少lock接口",
+    "verified_on_unmodified_base": true,
+    "output": "F                                                                        [100%]\n=================================== FAILURES ===================================\n_______ test_worker_wrapper_records_main_and_automatic_spectrum_requests _______\nbackend/ingest/model_runtime.py:352: in call\n    response = self.interruptible(invoke, activity={\nbackend/ingest/model_runtime.py:276: in interruptible\n    raise value\nbackend/ingest/model_runtime.py:253: in run\n    value = (True, context.run(operation))\n                   ^^^^^^^^^^^^^^^^^^^^^^\nbackend/ingest/model_runtime.py:336: in invoke\n    with self.request_slot(self) if self.request_slot else nullcontext():\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/contextlib.py:137: in __enter__\n    return next(self.gen)\n           ^^^^^^^^^^^^^^\nbackend/ingest/request_slots.py:17: in upload_request_slot\n    lock = client.lock(f'upload:model-request-slot:{index}', timeout=120, thread_local=False)\n           ^^^^^^^^^^^\nE   AttributeError: 'MemoryRedis' object has no attribute 'lock'\n\nThe above exception was the direct cause of the following exception:\ntests/01_decentralized_uploading/test_upload_token_usage.py:179: in test_worker_wrapper_records_main_and_automatic_spectrum_requests\n    result = upload_jobs.process_upload_task(task_id)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbackend/ingest/upload_jobs.py:1949: in process_upload_task\n    return _process_upload_task(task_id)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/01_decentralized_uploading/test_upload_token_usage.py:174: in process\n    assert llm.complete_json(\"fixed\", \"main\") == {\"value\": 1}\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbackend/rag/llm.py:325: in complete_json\n    return runtime.call(_complete_json, system_prompt, user_prompt, **options)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nbackend/ingest/model_runtime.py:383: in call\n    raise ModelRequestError(detail[\"message\"]) from exc\nE   backend.ingest.model_runtime.ModelRequestError: 模型请求未完成，请查看错误类型\n----------------------------- Captured stdout call -----------------------------\nwarning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.\n=========================== short test summary info ============================\nFAILED tests/01_decentralized_uploading/test_upload_token_usage.py::test_worker_wrapper_records_main_and_automatic_spectrum_requests\n1 failed, 535 warnings in 1.18s\nsys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute\n"
+  },
+  "external_provider_called": false,
+  "business_draft_modified": false,
+  "five_stage_scientific_acceptance_completed": false
+}

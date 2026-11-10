@@ -7,3 +7,5 @@
 - 错误仅公开允许字段：HTTP状态、稳定类型、脱敏message、request_id、output_started；不公开header/body全文、密钥、原始工具参数或内部思维链。
 
 - GET /api/upload-tasks/{task_id}/model-activity?before=<时间戳>&limit=100：沿任务读取权限分页查看完整安全过程日志，用户主动触发；不读取或公开原始模型请求和凭据。
+
+- 同一模型请求连续5次临时失败自动进入既有paused生命周期，保留草稿与成功检查点；model_activity保留最后HTTP状态、脱敏错误、request_id及停止原因，retry_at为空。手动resume沿既有权限和版本校验，未完成请求本轮计数从1开始，不新建接口或扩大清理范围。

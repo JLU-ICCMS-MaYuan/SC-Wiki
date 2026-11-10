@@ -314,7 +314,8 @@ class ModelRuntime:
         prepared = dict(request)
         # 未知网关上限采用保守请求预算；不据模型名称推断实际服务上下文。
         budget = 96000
-        attempt = max(len(list(directory.glob('attempt-*.json'))), len(list(directory.glob('failure-*.json'))))
+        # 每轮独立计数；历史归档用UUID保留，人工继续不继承旧轮的失败预算。
+        attempt, consecutive_failures = 0, 0
         compacted, prepared_once = False, False
         while True:
             self.check()
@@ -371,9 +372,19 @@ class ModelRuntime:
                         self.event("blocked", error={**detail, "message": str(error)})
                         raise ModelRequestError(str(error)) from exc
                     compacted = True
+                    consecutive_failures = 0
                     continue
                 if transient(exc):
-                    delay = retry_delay(exc, attempt)
+                    consecutive_failures += 1
+                    if consecutive_failures >= 5:
+                        message = '连续5次模型请求失败，已停止自动请求；可稍后继续解析。最后错误：' + detail['message']
+                        activity = dict(phase=phase, attempt=attempt, filename=filename, pages=pages,
+                                        error={**detail, 'message': message}, retry_at=None)
+                        self.event('paused', **activity)
+                        _pause_task_state(self.task_id, activity=activity)
+                        # 控制信号绕过科学提取的Exception兜底，由作业入口收敛暂停。
+                        raise ExecutionStopped(message) from exc
+                    delay = retry_delay(exc, consecutive_failures)
                     self.event("retry_wait", phase=phase, error=detail, retry_at=time.time() + delay)
                     self.wait(delay)
                     continue
@@ -413,7 +424,7 @@ def start_runtime(task_id):
         lambda: upload_task_lock(task_id), identity=identity, request_slot=upload_request_slot)
 
 
-def _pause_task_state(task_id):
+def _pause_task_state(task_id, *, activity=None):
     from .upload_tasks import get_state, get_draft, update_state, upload_task_lock, redis_client, draft_key
     with upload_task_lock(task_id):
         state = get_state(task_id) or {}
@@ -428,6 +439,7 @@ def _pause_task_state(task_id):
             execution_generation=int(state.get("execution_generation") or 0)+1,
             execution_draft_hash=digest(get_draft(task_id)), execution_resumable=True,
             processing_error=None, model_activity={**(state.get("model_activity") or {}),
+                **(activity or {}),
                 "status": "paused" if queued else "pausing", "retry_at": None})
 
 
