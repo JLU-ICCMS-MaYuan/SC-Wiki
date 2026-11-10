@@ -12,6 +12,9 @@ def fail(code, message, status=409):
 
 
 def authorized_draft(session, target, target_id, user, *, lock=False, allow_new_cycle=False):
+    if lock and target in {'paper','revision'}:
+        from backend.services.workdrafts import lock_scope
+        lock_scope(session,target,target_id)
     if target == 'upload':
         from .upload_tasks import get_state, get_draft, authoritative_state
         state = authoritative_state(target_id,session) or get_state(target_id)
@@ -53,7 +56,7 @@ def authorized_draft(session, target, target_id, user, *, lock=False, allow_new_
         if not paper or user.role not in {'admin', 'superadmin'} or paper.uploaded_by_user_id == user.id:
             fail('draft_forbidden', '需要管理员权限且不能审核自己的论文', 403)
         from backend.services.manuscript_handoffs import require_writer
-        require_writer(session,paper,user)
+        require_writer(session,paper,user,lock=lock)
         from backend.services.workdrafts import row, require, cycle
         work = row(session,target,target_id,lock)
         if work is not None:

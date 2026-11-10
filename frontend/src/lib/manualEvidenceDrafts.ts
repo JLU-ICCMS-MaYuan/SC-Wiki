@@ -2,10 +2,12 @@ import type { EvidenceRecord, EvidenceTarget } from '../components/EvidenceWorkf
 
 export interface ManualItem {
   id: string
-  kind: 'text' | 'image' | 'text_file' | 'pdf'
+  kind: 'text' | 'image' | 'text_file' | 'pdf' | 'url'
   text?: string
+  url?: string
   filename?: string
   source_description: string
+  read_error?: string
   ai_read_status?: string
 }
 export interface ManualRecord {
@@ -23,6 +25,8 @@ export interface ManualRecord {
   history?: ManualRecord[]
 }
 export interface ManualDraft {
+  text: string
+  links: string
   reason: string
   absence: string
   choice: 'provide' | 'none' | ''
@@ -61,7 +65,7 @@ export function createManualEvidenceDrafts() {
   const listeners = new Set<() => void>()
   const read = (key: string): ManualDraft => {
     key = aliases.get(key) || key
-    if (!drafts.has(key)) drafts.set(key, { reason: '', absence: '', choice: '', files: [], revision: 0,
+    if (!drafts.has(key)) drafts.set(key, { reason: '', absence: '', text:'', links:'', choice: '', files: [], revision: 0,
       writes: 0, dirty: false, busy: false, saved: null, error: '', notice: '' })
     return drafts.get(key)!
   }
@@ -95,7 +99,7 @@ export function createManualEvidenceDrafts() {
       return [...drafts.entries()].some(([key, draft]) => key.startsWith(prefix)
         && (draft.dirty || draft.files.length > 0 || draft.busy))
     },
-    edit(key: string, changes: Partial<Pick<ManualDraft, 'reason' | 'absence' | 'choice' | 'files'>>) {
+    edit(key: string, changes: Partial<Pick<ManualDraft, 'reason' | 'absence' | 'choice' | 'files' | 'text' | 'links'>>) {
       const current = read(key)
       if (Object.entries(changes).every(([name, value]) => current[name as keyof ManualDraft] === value)) return
       inputRevision += 1
@@ -103,6 +107,8 @@ export function createManualEvidenceDrafts() {
       const originalChoice = current.saved?.items?.length ? 'provide' : current.saved?.no_evidence_reason ? 'none' : ''
       const dirty = next.reason !== (current.saved?.reason || '') || next.absence !== (current.saved?.no_evidence_reason || '')
         || next.choice !== originalChoice || next.files.length > 0
+        || next.text !== (current.saved?.items || []).filter(i=>i.kind==='text').map(i=>i.text || '').join('\n\n')
+        || next.links !== (current.saved?.items || []).filter(i=>i.kind==='url').map(i=>i.url || '').join('\n')
       patch(key, { ...changes, revision: current.revision + 1, dirty, error: '', notice: '' })
     },
     hydrate(key: string, saved: ManualRecord, writes: number) {
@@ -110,6 +116,8 @@ export function createManualEvidenceDrafts() {
       if (current.writes !== writes) return
       patch(key, { saved, ...(!current.dirty && !current.busy ? {
         reason: saved.reason || '', absence: saved.no_evidence_reason || '',
+        text:(saved.items || []).filter(i=>i.kind==='text').map(i=>i.text || '').join('\n\n'),
+        links:(saved.items || []).filter(i=>i.kind==='url').map(i=>i.url || '').join('\n'),
         choice: saved.items?.length ? 'provide' : saved.no_evidence_reason ? 'none' : '',
       } : {}) })
     },
@@ -121,7 +129,11 @@ export function createManualEvidenceDrafts() {
     },
     hasPending: (target?: EvidenceTarget) => [...drafts.entries()].some(([key, draft]) =>
       (!target || key.startsWith(`${target.target}:${target.target_id}:`)) && (draft.dirty || draft.files.length > 0 || draft.busy)),
-    discard(key: string) { drafts.delete(aliases.get(key) || key); listeners.forEach(listener => listener()) },
+    discard(key: string) {
+      const current=read(key)
+      patch(key,{reason:'',absence:'',text:'',links:'',choice:'',files:[],saved:null,dirty:false,busy:false,error:'',notice:'',
+        writes:current.writes+1,revision:current.revision+1})
+    },
     previous(field: string, key: string) {
       return [...drafts.entries()].filter(([entryKey, entry]) => entryKey.startsWith(`${field}|`) && entryKey !== key
         && (entry.dirty || entry.files.length)).map(([entryKey, entry]) => ({ key: entryKey, draft: entry }))

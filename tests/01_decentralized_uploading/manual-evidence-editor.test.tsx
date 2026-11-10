@@ -13,16 +13,18 @@ it('立即打开未保存字段即可填写说明，显式保存先保存主值�
   const calls: string[] = []
   const item = (): EvidenceRecord => ({ key: 'title', item_key: 'a'.repeat(64), field: 'paper.title', label: '标题', current_value: serverValue, status: 'supported', reason: '原文', evidences: [] })
   vi.mocked(api.post).mockImplementation(async (url) => {
-    expect(url).toContain('/preflight')
+    expect(url).toContain('/summary')
     return { version: `v${version}`, needs_check: false, records: [item()] } as never
   })
-  vi.mocked(api.get).mockImplementation(async () => ({ ok: true, data: {
-    changed: serverValue !== '原始标题', reason: '', no_evidence_reason: '', items: [],
-  } }) as never)
+  vi.mocked(api.get).mockImplementation(async url => {
+    if(url.includes('/manual-context'))return {version:'v'+version,record:item()} as never
+    if(url.includes('/field-detail'))return {record:item(),review_token:'v',source_state:'empty',approval_state:'modification_required'} as never
+    return {ok:true,data:{changed:serverValue!=='原始标题',reason:'',no_evidence_reason:'',items:[]}} as never
+  })
   vi.mocked(api.put).mockImplementation(async (_url, body: any) => {
     calls.push('说明')
     expect(serverValue).toBe('人工标题')
-    expect(body).toMatchObject({ expected_version: 'v2', reason: '对照作者稿', no_evidence_reason: '没有电子附件' })
+    expect(body).toMatchObject({ expected_version: 'v2', reason: '对照作者稿', no_evidence_reason: '', text_items: [{text:'没有电子附件',source_description:'人工文字证据'}] })
     return { ok: true, data: { changed: true, status: 'draft', reason: body.reason, no_evidence_reason: body.no_evidence_reason, items: [] } } as never
   })
   function Editor() {
@@ -41,16 +43,19 @@ it('立即打开未保存字段即可填写说明，显式保存先保存主值�
   const reason = await screen.findByLabelText('人工修改判断理由（必填）')
   expect(calls).toEqual([])
   fireEvent.change(reason, { target: { value: '对照作者稿' } })
-  fireEvent.click(screen.getByLabelText('不提供证据'))
-  fireEvent.change(screen.getByLabelText('不提供证据的理由（必填）'), { target: { value: '没有电子附件' } })
-  fireEvent.click(screen.getByText('保存并完成'))
+  fireEvent.change(screen.getByLabelText('文字证据'), { target: { value: '没有电子附件' } })
+  fireEvent.click(screen.getByText('保存'))
   await waitFor(() => expect(calls).toEqual(['主值', '说明']))
 })
 
 it('主表单保存失败保留人工输入且不发送说明请求', async () => {
   const record: EvidenceRecord = { key: 'title', item_key: 'b'.repeat(64), field: 'paper.title', label: '标题', current_value: '旧值', status: 'supported', reason: '', evidences: [] }
   vi.mocked(api.post).mockResolvedValue({ version: 'v1', records: [record] } as never)
-  vi.mocked(api.get).mockResolvedValue({ data: { changed: true, reason: '', no_evidence_reason: '', items: [] } } as never)
+  vi.mocked(api.get).mockImplementation(async url => {
+    if (url.includes('/manual-context')) return { version: 'v1', record } as never
+    if (url.includes('/field-detail')) return { record, review_token: 'v1', source_state: 'empty', approval_state: 'modification_required' } as never
+    return { data: { changed: true, reason: '', no_evidence_reason: '', items: [] } } as never
+  })
   function Editor() {
     const workflow = useEvidenceWorkflow({ target: { target: 'revision', target_id: 'fixture' }, getCurrentValue: () => ({ field: 'paper.title', value: '新值' }), saveCurrent: async () => false })
     return <><button onClick={() => workflow.openIssue('title')}>查看标题</button>{workflow.dialog}</>
@@ -59,9 +64,8 @@ it('主表单保存失败保留人工输入且不发送说明请求', async () =
   await waitFor(() => expect(api.post).toHaveBeenCalled())
   fireEvent.click(screen.getByText('查看标题'))
   fireEvent.change(await screen.findByLabelText('人工修改判断理由（必填）'), { target: { value: '请保留这个理由' } })
-  fireEvent.click(screen.getByLabelText('不提供证据'))
-  fireEvent.change(screen.getByLabelText('不提供证据的理由（必填）'), { target: { value: '暂无附件' } })
-  fireEvent.click(screen.getByText('保存并完成'))
+  fireEvent.change(screen.getByLabelText('文字证据'), { target: { value: '暂无附件' } })
+  fireEvent.click(screen.getByText('保存'))
   await screen.findByText(/请先保存当前编辑|保存当前内容失败|主表单/)
   expect(screen.getByLabelText('人工修改判断理由（必填）')).toHaveValue('请保留这个理由')
   expect(api.put).not.toHaveBeenCalled()

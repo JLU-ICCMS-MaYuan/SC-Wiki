@@ -1,3 +1,4 @@
+import {toTextList} from './paperTextLists'
 // 比较科学编辑值；稳定身份用于数组匹配，排序与纯补证不会使核对失效。
 import type { EvidenceRecord } from '../components/EvidenceWorkflow'
 import { getAtPath } from './formDefinitions'
@@ -59,7 +60,17 @@ export function currentEvidenceField(record: EvidenceRecord, paper: Record<strin
   } else if (!field.startsWith('paper.')) return undefined
   if (record.structure_hash) return undefined
   const relative = field.replace(/^material_states\[\d+\]\./, '').replace(/^paper\./, '')
-  return { value: getAtPath(value, relative) ?? null, field }
+  const raw=getAtPath(value,relative) ?? null
+  if (['structure_families','material_families'].includes(relative) && (raw==null || Array.isArray(raw))) {
+    const names=(raw || []).map((item:any)=>typeof item==='string'?item:item.name || item.name_zh || '').filter(Boolean).sort()
+    return {value:names,manualValue:names,comparisonValue:names,field}
+  }
+  if(['authors','corresponding_authors','co_first_authors','keywords_tags','methodology','research_materials'].includes(relative)){
+    const names=toTextList(raw)
+    return {value:names,comparisonValue:names,manualValue:names,field,
+      ...(['corresponding_authors','co_first_authors'].includes(relative)?{choices:toTextList(paper.authors)}:{})}
+  }
+  return { value: raw, field }
 }
 
 const overlaps = (left: string, right: string) => left === right || left.startsWith(right + '.') || left.startsWith(right + '[')

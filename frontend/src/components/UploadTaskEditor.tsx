@@ -1,3 +1,4 @@
+import {applySingleEvidenceValue} from '../lib/evidenceProposals'
 import { canonicalStructureFromCandidate } from '../lib/canonicalStructure'
 import type { PropertySpectrumListing } from '../lib/propertySpectra'
 import WorkdraftRefresh, { useWorkdraftRefresh } from './WorkdraftRefresh'
@@ -155,6 +156,12 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     frozenRecords:frozenEvidenceRecords,
     frozenManualEvidence,
     getCurrentValue: record => draft ? currentEvidenceField(record, { ...draft.paper }, draft.material_states) : undefined,
+    applyFieldValue: (record,value) => {
+      if(!draft || readOnly)return
+      if(record.field.startsWith('paper.') && !record.record_key){
+        setPaperField(record.field.slice(6) as keyof UploadDraft['paper'],value as never)
+      }else changeDraft(current=>applySingleEvidenceValue(current,{...record,item_key:record.item_key || record.key},value))
+    },
     saveCurrent: () => saveDraft(false, false),
     hasUnsavedFields: () => Boolean(fieldSaver.current?.hasChanges(currentEditor.current.draft)),
     hasUnsavedField: record => {

@@ -46,7 +46,7 @@ def test_manual_empty_has_no_ai_claim_keeps_original_sources_and_passes(context)
     assert row["current_value"]==[] and row["status"]=="supported"
     assert row["field_decision"]["mode"]=="empty" and row["human_confirmed"]
     assert not row.get("review_error") and row["ai_reason"]==""
-    assert row["evidences"]==old["evidences"] and old==original
+    assert row["evidences"]==[] and old==original  # #226：旧值依据不再展示为当前空值依据，原对象保留。
     assert "人工" in row["reason"] and "旧值的AI判断" not in row["reason"]
     assert valid_field_decision(r,row,"approve") and reusable(r,row)
 

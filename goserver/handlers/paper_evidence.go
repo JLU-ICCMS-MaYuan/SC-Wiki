@@ -27,6 +27,7 @@ type evidenceCitation struct {
 type evidenceReviewRecord struct {
 	EmptyAllowed           bool               `json:"empty_allowed,omitempty"`
 	ManualEvidenceHash     string             `json:"manual_evidence_hash,omitempty"`
+	ManualEvidenceProvided bool               `json:"manual_evidence_provided,omitempty"`
 	ManualEvidenceComplete bool               `json:"manual_evidence_complete,omitempty"`
 	HumanConfirmed         bool               `json:"human_confirmed,omitempty"`
 	FieldDecision          json.RawMessage    `json:"field_decision,omitempty"`
@@ -82,6 +83,27 @@ func validFieldDecision(r evidenceReviewRecord) bool {
 	}
 	if json.Unmarshal(r.FieldDecision, &decision) != nil {
 		return false
+	}
+	if decision.Mode == "without_evidence" {
+		if r.ManualEvidenceProvided {
+			return false
+		}
+		var value any
+		if json.Unmarshal(r.CurrentValue, &value) != nil {
+			return false
+		}
+		empty := value == nil
+		switch v := value.(type) {
+		case string:
+			empty = strings.TrimSpace(v) == ""
+		case []any:
+			empty = len(v) == 0
+		case map[string]any:
+			empty = len(v) == 0
+		}
+		if empty && !r.EmptyAllowed {
+			return false
+		}
 	}
 	if decision.Mode == "empty" {
 		var value any

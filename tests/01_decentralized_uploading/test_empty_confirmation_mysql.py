@@ -23,8 +23,8 @@ def test_empty_confirmation_api_reopen_and_material_change(context,monkeypatch):
     view=api.field_detail(target,tid,row["item_key"],user=actor)
     assert view["can_confirm_empty"]
     result=api.save_field_decision(api.FieldDecision(target=target,target_id=tid,item_key=row["item_key"],
-        action="confirm_empty",review_token=view["review_token"]),actor)
-    assert result["record"]["field_decision"]["mode"]=="empty"
+        action="approve_without_evidence",review_token=view["review_token"]),actor)
+    assert result["record"]["field_decision"]["mode"]=="without_evidence"
     assert result["record"]["human_confirmed"] and result["record"]["status"]=="supported"
     reopened=api.field_detail(target,tid,row["item_key"],user=actor)
     assert reopened["record"]["human_confirmed"] and reopened["approval_state"]=="human_approved"
@@ -34,12 +34,12 @@ def test_empty_confirmation_api_reopen_and_material_change(context,monkeypatch):
     assert not blocking(r,cached[r["key"]])
     with factory.begin() as db:
         manual.save_explanation(db,{**current,"records":[r]},{"records":[]},r["item_key"],actor.id,
-            reason="新的留空说明",no_evidence_reason="仍无额外证据",text_items=[])
+            reason="新的留空说明",no_evidence_reason="",text_items=[{"text":"保留可选空值的原文依据","source_description":"隔离资料"}])
     invalid=api.field_detail(target,tid,row["item_key"],user=actor)
     assert not invalid["record"]["human_confirmed"]
     with pytest.raises(HTTPException):
         api.save_field_decision(api.FieldDecision(target=target,target_id=tid,item_key=row["item_key"],
-            action="confirm_empty",review_token=reopened["review_token"]),actor)
+            action="approve_without_evidence",review_token=reopened["review_token"]),actor)
 
 
 def test_empty_confirmation_does_not_expand_actor_permissions(context):
@@ -51,4 +51,4 @@ def test_empty_confirmation_does_not_expand_actor_permissions(context):
     other=SimpleNamespace(id=actor.id+999999,role=actor.role,username="unrelated")
     with pytest.raises(HTTPException):
         api.save_field_decision(api.FieldDecision(target=target,target_id=tid,item_key=row["item_key"],
-            action="confirm_empty",review_token=view["review_token"]),other)
+            action="approve_without_evidence",review_token=view["review_token"]),other)

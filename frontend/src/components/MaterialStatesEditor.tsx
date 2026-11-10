@@ -658,6 +658,30 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
       onClick={() => setAllCollapsed(false)}>{t('common.expandAll')}</Button>
   </>
 
+  useEffect(() => {
+    const apply=(event:Event)=>{
+      const request=(event as CustomEvent<{field:string;state_key?:string;value:unknown;handled:boolean}>).detail
+      if(request.handled || latest.current.readOnly)return
+      const match=request.field.match(/^material_states\[(\d+)\]\.([a-z_]+)$/)
+      if(!match)return
+      const index=request.state_key?statesRef.current.findIndex(s=>s.state_key===request.state_key):Number(match[1])
+      if(index<0 || !statesRef.current[index])return
+      const name=match[2],value=request.value
+      if(name==='structure')return
+      request.handled=true
+      if(name==='element_count')changeElementCount(index,String(value ?? ''))
+      else if(name==='crystal_system')changeCrystalSystem(index,value as CrystalSystem)
+      else if(name==='reported_space_group_number')changeSpaceGroupNumber(index,String(value ?? ''))
+      else if(name==='state_kind')emitStates(statesRef.current.map((s,i)=>i===index?{...s,state_kind:value as DraftMaterialState['state_kind'],structure_optimization:'unknown'}:s))
+      else if(name==='structure_families'){
+        const previous=statesRef.current[index].structure_families || []
+        updateMaterialState(index,'structure_families',(value as string[]).map(name=>previous.find(p=>p.name===name) || pendingSelection(name)).filter(Boolean))
+      }else updateMaterialState(index,name as keyof DraftMaterialState,value)
+    }
+    document.addEventListener('scwiki:apply-field-value',apply)
+    return ()=>document.removeEventListener('scwiki:apply-field-value',apply)
+  })
+
   return (
     <PropertySpectraProvider context={propertySpectra || (spectrumTarget ? { target: spectrumTarget, beforeNavigate: beforeSpectrumEdit } : undefined)}
       stateKeys={states.map((state, index) => state.state_key || 'state-' + (index + 1))} readOnly={readOnly}>

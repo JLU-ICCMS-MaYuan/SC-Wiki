@@ -60,7 +60,7 @@ beforeEach(()=>{
    order.push('job')
    expect(body.retry_keys).toEqual([item]);expect(body.expected_field_token).toBe('field-only')
    expect(body).not.toHaveProperty('expected_draft_version')
-   expect(manual.reason).toBe('最新人工理由');expect(manual.no_evidence_reason).toBe('沿用原文')
+   expect(manual.reason).toBe('最新人工理由');expect(manual.text_items[0].text).toBe('沿用原文')
    return {id:'job',status:'queued',timeout_seconds:60} as never
   }
   return {data:structuredClone(draft),revision_id:'revision177',draft_version:1} as never
@@ -166,8 +166,7 @@ async function open(kind:string,edit=true){
  await screen.findByLabelText('人工修改判断理由（必填）')
  if(!edit)return
  fireEvent.change(await screen.findByLabelText('人工修改判断理由（必填）'),{target:{value:'最新人工理由'}})
- fireEvent.click(screen.getByLabelText('不提供证据'))
- fireEvent.change(screen.getByLabelText('不提供证据的理由（必填）'),{target:{value:'沿用原文'}})
+ fireEvent.change(screen.getByLabelText('文字证据'),{target:{value:'沿用原文'}})
 }
 
 it.each(['upload','revision','admin','superadmin'])('%s 单字段自动保存最新依据、只排一个任务并隔离返回',async kind=>{
@@ -214,7 +213,7 @@ it.each(['upload','revision','admin','superadmin'])('%s 技术失败落在原字
 it.each(['upload','revision','admin','superadmin'])('%s 原文区只显示当前字段相关依据且不显示整包兜底与信息框',async kind=>{
  sourceOverrides={stale:true,pending_review:true,reason:'当前字段的独立核对理由',
   evidences:[],legacy_evidences:[{file_id:'main',quote:'Unrelated Tc and cutoff paragraph'}]}
- await open(kind)
+ await open(kind,false)
  const drawer=document.querySelector('.evidence-review-drawer') as HTMLElement
  const source=within(drawer).getByText('系统找到的原文',{selector:'summary'}).parentElement!
  expect(within(source).queryByText(/Unrelated Tc and cutoff paragraph/)).not.toBeInTheDocument()
@@ -275,7 +274,7 @@ it.each(['upload','revision','admin','superadmin'])('%s 相关反证的长原文
  const quote=('The reported mu-star is 0.13 for this result. ').repeat(16)
  sourceOverrides={status:'unsupported',reason:'原文不支持当前配对',
   source_associations:[{target_path:'payload.parameters.mu_star',stage:'superconductivity',basis_kind:'paper_quote',explanation:'当前结果的适用范围',fact_evidences:[],scope_evidences:[]}],evidences:[{file_id:'main',source_name:'正文',quote}],legacy_evidences:[{file_id:'si',quote:'Unrelated record source'}]}
- await open(kind)
+ await open(kind,false)
  const drawer=document.querySelector('.evidence-review-drawer') as HTMLElement
  const source=within(drawer).getByText('系统找到的原文',{selector:'summary'}).parentElement!
  expect(source).toHaveTextContent(quote.trim())

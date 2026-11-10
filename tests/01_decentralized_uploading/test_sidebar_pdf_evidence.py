@@ -53,9 +53,9 @@ def test_pdf_character_limit_and_full_content(context, lines, expected):
         else:
             assert entry["items"][0]["read_status"] == "not_read"
             assert "content" not in entry["items"][0]
-            assert not entry["pdf_refs"]
+            assert len(entry["pdf_refs"])==1 and entry["pdf_refs"][0]["readable"] is False  # 明确未读回执，不能冒充已读。
         assert saved["items"][0]["ai_read_status"] == "not_read"
-    assert manual.MAX_TEXT_CHARS == 20_000
+    assert manual.MAX_TEXT_CHARS == 100_000  # #226：直接长文字与PDF采用相同正文边界。
     assert manual.MAX_REVIEW_PDF_TEXT_CHARS == 100_000
 
 

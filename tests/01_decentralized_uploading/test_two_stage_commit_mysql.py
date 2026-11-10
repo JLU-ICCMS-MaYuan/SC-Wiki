@@ -13,13 +13,17 @@ from backend.ingest.field_drafts import authorized_draft, draft_version, save_fi
 pytestmark = pytest.mark.skipif(os.environ.get('SCWIKI_CURRENT_MYSQL') != '1', reason='需显式启用MySQL回滚测试')
 
 
-@pytest.mark.parametrize('passed', [True, False, 'human'])
+@pytest.mark.parametrize('passed', [True, False, 'human', 'waived'])
 def test_admin_review_atomic_application_and_blocking(passed):
     asyncio.run(review_case(passed))
 
 
 async def review_case(passed):
-    from backend.rag.database import engine
+    from backend.rag.database import engine as configured_engine
+    from sqlalchemy.ext.asyncio import create_async_engine
+    from sqlalchemy.pool import NullPool
+    from uuid import uuid4
+    engine=create_async_engine(configured_engine.url,poolclass=NullPool)
     from backend.services.field_review_commit import commit_review
     from backend.api.evidence import FieldReviewCommit
     from backend.ingest.field_review import bind_support_versions
@@ -27,11 +31,17 @@ async def review_case(passed):
         transaction = await connection.begin()
         try:
             async with AsyncSession(bind=connection, expire_on_commit=False, join_transaction_mode='create_savepoint') as db:
-                users = list((await db.scalars(select(models.User).where(models.User.account_status == 'active').limit(2))).all())
+                users=[]
+                for role in ('user','admin'):
+                    identity=uuid4().hex
+                    user=models.User(username='atomic'+identity[:10],email=identity+'@isolated.invalid',real_name='隔离审核',
+                        password_hash='test',role=role,is_approved=True)
+                    db.add(user);users.append(user)
+                await db.flush()
                 family = await db.scalar(select(models.MaterialFamily).limit(1))
                 assert family is not None and len(users) == 2
                 actor = SimpleNamespace(id=users[1].id, username=users[1].username, role='admin')
-                paper = models.Paper(title='Before review', year=2026, paper_type='review', superconductor_kind='unknown',
+                paper = models.Paper(title='Before review', summary='Original scientific summary', year=2026, paper_type='review', superconductor_kind='unknown',
                     review_status='pending', content_revision=1, uploaded_by_user_id=users[0].id)
                 db.add(paper); await db.flush()
                 db.add(models.PaperMaterialFamily(paper_id=paper.id, paper_revision=1, material_family_id=family.id))
@@ -48,15 +58,26 @@ async def review_case(passed):
                 await db.run_sync(lambda s: bind_support_versions(snap, s))
                 checks = {r['key']: {'status': 'unsupported' if not passed and r['field'] == 'paper.title' else 'supported',
                                     'reason': '隔离测试预置的核对结果', 'source_kind': 'paper_quote'} for r in snap['records']}
+                if passed=='human':
+                    year=next(r for r in snap['records'] if r['field']=='paper.summary')
+                    checks[year['key']]['status']='uncertain'
                 await db.run_sync(lambda s: science.save_results(s, snap, checks, actor.id))
                 if passed == 'human':
                     from backend.ingest.field_decisions import detail, decide
-                    year = next(r for r in snap['records'] if r['field'] == 'paper.year')
+                    year = next(r for r in snap['records'] if r['field'] == 'paper.summary')
                     one = {**snap, 'records': [year]}
-                    def approve_year(session):
+                    def approve_summary(session):
                         cached = science.load_results(session, one, actor.id)
                         return decide(session, one, cached, actor, 'approve', detail(one, cached)['review_token'])
-                    assert (await db.run_sync(approve_year))['record']['human_confirmed']
+                    assert (await db.run_sync(approve_summary))['record']['human_confirmed']
+                if passed == 'waived':
+                    from backend.ingest.field_decisions import detail,decide
+                    title=next(r for r in snap['records'] if r['field']=='paper.title')
+                    one={**snap,'records':[title]}
+                    def waive(session):
+                        cached=science.load_results(session,one,actor.id,include_stale=True)
+                        return decide(session,one,cached,actor,'approve_without_evidence',detail(one,cached)['review_token'])
+                    assert (await db.run_sync(waive))['record']['field_decision']['mode']=='without_evidence'
                 request = FieldReviewCommit(paper_id=paper.id,status='approved', expected_evidence_version=snap['version'])
                 if not passed:
                     with pytest.raises(Exception) as failure:

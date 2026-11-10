@@ -37,7 +37,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
   const store = drafts || fallback
   const key = manualDraftKey(target, record, value)
   const draft = useSyncExternalStore(store.subscribe, () => store.read(key))
-  const { saved, reason, absence, choice, files, busy, error, notice } = draft
+  const { saved, reason, absence, choice, files, busy, error, notice, text, links } = draft
   useEffect(() => { onRecords?.(record.item_key || record.key, saved ? [...(saved.id ? [saved] : []), ...(saved.history || [])] : []) }, [saved, onRecords, record.item_key, record.key])
   const [loading, setLoading] = useState(true)
   const [reload, setReload] = useState(0)
@@ -74,7 +74,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
     for (const file of incoming) {
       if (!/\.(png|jpe?g|webp|txt|md|pdf)$/i.test(file.name)) failures.push(t('evidence.manualInvalidType', { name: file.name }))
       else if (!file.size || file.size > 10 * 1024 * 1024) failures.push(t('evidence.manualInvalidSize', { name: file.name }))
-      else if ((saved?.items.length || 0) + files.length + accepted.length >= 5) failures.push(t('evidence.manualItemLimit'))
+      else if ([...(saved?.items || []),...files.map(f=>({kind:f.type.startsWith('image/')?'image':f.name.toLowerCase().endsWith('.pdf')?'pdf':'text_file'})),...accepted.map(f=>({kind:f.type.startsWith('image/')?'image':f.name.toLowerCase().endsWith('.pdf')?'pdf':'text_file'}))].filter(i=>i.kind===(file.type.startsWith('image/')?'image':file.name.toLowerCase().endsWith('.pdf')?'pdf':'text_file')).length >= 10) failures.push(t('evidence.manualItemLimit'))
       else accepted.push(file)
     }
     if (accepted.length) store.edit(key, { files: [...files, ...accepted], choice: 'provide' })
@@ -88,8 +88,10 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
   }
   const saveBlockers = (input = draft) => [
     !input.reason.trim() && t('evidence.manualReasonRequired'),
-    !input.choice && t('evidence.manualChoiceRequired'),
-    input.choice === 'provide' && !input.files.length && !input.saved?.items.length && t('evidence.manualEvidenceRequired'),
+    input.text.length>100000 && '文字证据最多100000字符',
+    input.links.split(/\n/).filter(x=>x.trim()).length>10 && '链接最多10条',
+
+
     input.choice === 'none' && Boolean(input.saved?.items.length || input.files.length) && t('evidence.removeEvidenceBeforeNoEvidence'),
     input.choice === 'none' && !input.absence.trim() && t('evidence.manualAbsenceRequired'),
   ].filter((message): message is string => Boolean(message))
@@ -119,12 +121,13 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
         return
       }
       stage = t('evidence.manualStageReason')
-      const direct = (input.saved?.items || []).filter(item => item.kind === 'text' && item.text)
-        .map(item => ({ text: item.text!, source_description: item.source_description }))
+      const direct=input.text.trim()?[{text:input.text.trim(),source_description:(input.saved?.items || []).find(i=>i.kind==='text')?.source_description || '人工文字证据'}]:[]
+      const linkItems=input.links.split(/\n/).map(v=>v.trim()).filter(Boolean)
       const response = await api.put<{ ok: boolean; data: ManualRecord }>(ready.endpoint, {
         expected_version: ready.version, reason: input.reason,
-        no_evidence_reason: input.choice === 'none' ? input.absence : '', text_items: direct,
+        no_evidence_reason: input.choice === 'none' ? input.absence : '', text_items: direct, link_items:linkItems,
         changed_fields: [
+          'text_items', 'link_items',
           ...(input.reason !== (input.saved?.reason || '') ? ['reason'] : []),
           ...((input.choice === 'none' ? input.absence : '') !== (input.saved?.no_evidence_reason || '') ? ['no_evidence_reason'] : []),
         ],
@@ -152,6 +155,11 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
   useEffect(() => {
     if (!saveBeforeReview) return
     const persist = async () => {
+      const entered=store.read(key)
+      if(!entered.reason.trim() || !(entered.text.trim() || entered.links.trim() || entered.files.length || entered.saved?.items.length)){
+        store.patch(key,{error:t('evidence.manualReasonRequired')+'；'+t('evidence.manualEvidenceRequired')})
+        return false
+      }
       if (store.read(key).busy) return false
       if (store.read(key).dirty || store.read(key).files.length || valueDirty) await save(true)
       const current = store.read(key)
@@ -222,14 +230,12 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
         {saved?.no_evidence_reason && <Typography>{t('evidence.noEvidenceReason')}：{saved.no_evidence_reason}</Typography>}
       </> : <>
         <TextField fullWidth multiline minRows={2} label={t('evidence.manualReason')} value={reason} onChange={event => store.edit(key, { reason: event.target.value })} />
-        <RadioGroup aria-label={t('evidence.evidenceChoice')} value={choice} onChange={event => store.edit(key, { choice: event.target.value as 'provide' | 'none' })}>
-          <FormControlLabel value="provide" control={<Radio />} label={t('evidence.provideEvidence')} disabled={busy} />
-          <FormControlLabel value="none" control={<Radio />} label={t('evidence.doNotProvideEvidence')} disabled={busy} />
-        </RadioGroup>
-        {choice === 'none' && <>
-          <TextField fullWidth multiline minRows={2} label={t('evidence.noEvidenceReason')} value={absence} onChange={event => store.edit(key, { absence: event.target.value })} />
-        </>}
-        {choice === 'provide' && <Box tabIndex={0} role="region" aria-label={t('evidence.manualDropZone')}
+        <TextField fullWidth multiline minRows={4} label={t('evidence.manualTextEvidence')} value={text}
+          helperText="一个输入框，最多100000字符" onChange={e=>store.edit(key,{text:e.target.value,choice:'provide'})}/>
+        <TextField fullWidth multiline minRows={2} label={t('evidence.manualLinkEvidence')} value={links}
+          helperText="每行一个HTTP或HTTPS链接，最多10条" onChange={e=>store.edit(key,{links:e.target.value,choice:'provide'})}/>
+        {saved?.no_evidence_reason && <Typography color="text.secondary">原缺证说明：{saved.no_evidence_reason}</Typography>}
+        <Box tabIndex={0} role="region" aria-label={t('evidence.manualDropZone')}
           onDragOver={event => { event.preventDefault(); setDragging(true) }}
           onDragLeave={() => setDragging(false)}
           onDrop={event => { event.preventDefault(); event.stopPropagation(); setDragging(false); addFiles(Array.from(event.dataTransfer.files)) }}
@@ -248,7 +254,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
           <Button component="label" size="small" variant="outlined" disabled={busy}>{t('evidence.chooseManualFile')}
             <input hidden type="file" multiple accept=".png,.jpg,.jpeg,.webp,.txt,.md,.pdf" onChange={event => { addFiles(Array.from(event.target.files || [])); event.target.value = '' }} />
           </Button>
-        </Box>}
+        </Box>
         {files.map((file, index) => <Box key={`${file.name}:${index}`}>
           <Typography variant="caption">{t('evidence.manualPendingFile')}：{file.name}</Typography>
           <PendingImage file={file} alt={t('evidence.manualImage')} />
@@ -265,7 +271,9 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
     </>}
     {(saved?.items || []).map(item => <Box key={item.id} sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1 }}>
       <Typography variant="caption">{t('evidence.humanProvided')} · {item.source_description}</Typography>
+      {item.read_error && <Typography color="error" role="status">{item.read_error}</Typography>}
       {item.kind === 'text' ? <EvidenceReadableValue value={item.text} />
+        : item.kind === 'url' ? <Button component="a" href={item.url} target="_blank" rel="noopener noreferrer">{item.url}</Button>
         : <Button type="button" size="small" onClick={() => void showFile(item)}>{item.filename || t('evidence.manualFile')}</Button>}
       {saved?.status === 'draft' && !readOnly && <Button type="button" size="small" color="error" disabled={busy} onClick={() => void removeItem(item)}>{t('evidence.removeManualItem')}</Button>}
       {(item.kind === 'image' || item.kind === 'pdf') && item.ai_read_status !== 'read' && <Typography variant="caption" display="block">{t('evidence.fileNotRead')}</Typography>}

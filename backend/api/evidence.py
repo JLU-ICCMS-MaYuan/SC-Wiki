@@ -278,7 +278,7 @@ def field_detail(target: str, target_id: str, item_key: str, history: bool = Fal
 
 class FieldDecision(Target):
     item_key: str
-    action: Literal['approve', 'reject', 'confirm_empty']
+    action: Literal['approve', 'reject', 'approve_without_evidence']
     review_token: str
 
 
@@ -395,6 +395,10 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
             decision_current = current_fields.get(record['item_key'])
             decision = {'field_decision': row[6], 'state_review_context': row[10],
                         'review_started_at': row[11], 'state_key': row[12]} if row else {}
+            from backend.ingest.field_waiver import project as waiver_project
+            projected = waiver_project(decision_current, {**decision,'current_value':row[1],
+                'content_hash':row[7],'source_hash':row[8]}) if row and decision_current else None
+            if projected:decision=projected
             valid_decision = bool(decision_current and valid_field_decision(decision_current, decision))
             matches = row is not None and (row[5] != 'human_review' or valid_decision) and science.canonical(row[1]) == science.canonical(record.get('current_value'))
             if row and decision_current:
@@ -405,14 +409,15 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
                     'review_started_at': row[11], 'state_key': row[12], 'field_decision': row[6]})
                 if field_matches(decision_current, {'field_review_binding': {'contract': row[13], 'token': row[14]}}):
                     matches = True
+            if projected:matches=True
             if row and row[6] and not valid_decision:
                 matches = False
             if row and row[13] == CONTRACT and not decision_current:
                 # 无当前来源版本时不能仅凭值相同展示新协议结果已通过。
                 matches = False
             output.append({**record, 'status': row[2] if matches else 'unchecked',
-                'reason': display_reason(row[3]) if row else '', 'ai_reason': display_reason(row[4]) if row else '',
-                'field_decision': row[6] if valid_decision else None,
+                'reason': display_reason(row[3]) if row and matches else '当前值或资料已变化，旧核对结果已失效。' if row else '', 'ai_reason': display_reason(row[4]) if row and matches else '',
+                'field_decision': decision.get('field_decision') if valid_decision else None,
                 'human_confirmed': valid_decision and row[6].get('action') == 'approve',
                 'detail_ref': ev.digest([row[9], row[7], row[8], row[2], row[3], row[6],
                     (decision_current or {}).get('content_hash'), (decision_current or {}).get('source_hash'),
@@ -429,31 +434,34 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
 
 
 
-def snapshot_for(body, user):
+def snapshot_for(body, user, session=None):
+    if session is not None:
+        return _snapshot_in_session(body, user, session)
+    with SessionLocal() as current:
+        return _snapshot_in_session(body, user, current)
+
+
+def _snapshot_in_session(body, user, session):
     if body.target == 'revision':
         from backend.services.paper_revisions import revision_snapshot
-        with SessionLocal() as session:
-            snapshot = revision_snapshot(session, body.target_id, user.id)
-            return snapshot, science.load_results(session, snapshot, user.id, include_stale=True)
+        snapshot = revision_snapshot(session, body.target_id, user.id)
+        return snapshot, science.load_results(session, snapshot, user.id, include_stale=True)
     if body.target == 'upload':
         snapshot = ev.upload_snapshot(body.target_id, user.id)
-        with SessionLocal() as session:
-            return snapshot, science.load_results(session, snapshot, user.id, include_stale=True)
+        return snapshot, science.load_results(session, snapshot, user.id, include_stale=True)
     if body.target != 'paper' or not body.target_id.isdigit():
         raise HTTPException(400, detail='证据目标无效')
-    with SessionLocal() as session:
-        snapshot = ev.paper_snapshot(session, int(body.target_id), user.id, user.role)
-        staged = session.get(models.ScientificReviewDraft, int(body.target_id))
-        if staged:
-            from backend.ingest.field_drafts import authorized_draft
-            draft, _ = authorized_draft(session, body.target, body.target_id, user)
-            snapshot = ev.working_snapshot(snapshot, 'paper', body.target_id, draft,
-                science.origins_for(session, 'paper', body.target_id))
-            snapshot['_field_change_events'] = current_change_events(draft)
-            from backend.ingest.field_review import bind_support_versions
-            bind_support_versions(snapshot, session)
-        return snapshot, science.load_results(session, snapshot, user.id, include_stale=True)
-
+    snapshot = ev.paper_snapshot(session, int(body.target_id), user.id, user.role)
+    staged = session.get(models.ScientificReviewDraft, int(body.target_id))
+    if staged:
+        from backend.ingest.field_drafts import authorized_draft
+        draft, _ = authorized_draft(session, body.target, body.target_id, user)
+        snapshot = ev.working_snapshot(snapshot, 'paper', body.target_id, draft,
+            science.origins_for(session, 'paper', body.target_id))
+        snapshot['_field_change_events'] = current_change_events(draft)
+        from backend.ingest.field_review import bind_support_versions
+        bind_support_versions(snapshot, session)
+    return snapshot, science.load_results(session, snapshot, user.id, include_stale=True)
 
 @router.post('/preflight')
 def preflight(body: Target, user=Depends(get_current_user)):
@@ -557,8 +565,8 @@ def enqueue_review(body, user, snapshot, cached):
                 entry = manual._current(session, snapshot, record)
                 if not entry or not entry.reason.strip():
                     issues.append({'field': record['field'], 'message': '请填写人工修改理由'})
-                elif not entry.items and not entry.no_evidence_reason.strip():
-                    issues.append({'field': record['field'], 'message': '请提供证据，或填写不提供证据的原因'})
+                elif not entry.items:
+                    issues.append({'field': record['field'], 'message': '请提供至少一项人工证据，或选择直接人工通过并标黄'})
             if issues:
                 ev.fail('manual_evidence_incomplete', '人工修改记录尚未填写完整，未启动模型核对', issues=issues)
     if not snapshot.get('chunks') or snapshot.get('condition_source_manifest_complete') is False:
@@ -895,8 +903,9 @@ class ManualExplanation(BaseModel):
     expected_version: str
     reason: str = Field(default="", max_length=4000)
     no_evidence_reason: str = Field(default="", max_length=4000)
-    text_items: list[ManualTextItem] = Field(default_factory=list, max_length=manual.MAX_ITEMS)
-    changed_fields: set[Literal['reason','no_evidence_reason','text_items']] | None = None
+    text_items: list[ManualTextItem] = Field(default_factory=list, max_length=1)
+    link_items: list[str] | None = Field(default=None,max_length=10)
+    changed_fields: set[Literal['reason','no_evidence_reason','text_items','link_items']] | None = None
 
 
 def _manual_error(exc: manual.ManualEvidenceError) -> HTTPException:
@@ -914,7 +923,7 @@ def _manual_snapshots(target: str, target_id: str, user, item_key=None):
             metadata = read(session, target, target_id)
             if metadata is None:
                 # 旧数据首次访问建立来源元数据；以后只读版本，不加载正文和整篇历史。
-                snapshot, _ = snapshot_for(Target(target=target, target_id=target_id), user)
+                snapshot, _ = snapshot_for(Target(target=target, target_id=target_id), user, session=session)
                 remember(session, snapshot, user.id)
                 metadata = read(session, target, target_id)
             return field_snapshot(session, target, target_id, user, item_key, metadata)
@@ -987,7 +996,7 @@ def put_manual_evidence(target: str, target_id: str, item_key: str, body: Manual
             snapshot['_workdraft_current']=claim_manual_work(session,target,target_id,user)
             data = manual.save_explanation(session, snapshot, baseline, _manual_record_key(item_key), user.id,
                 reason=body.reason, no_evidence_reason=body.no_evidence_reason,
-                text_items=[item.model_dump() for item in body.text_items], actor_name=user.username, changed_fields=body.changed_fields)
+                text_items=[item.model_dump() for item in body.text_items], link_items=body.link_items, actor_name=user.username, changed_fields=body.changed_fields)
         return {"ok": True, "data": data}
     except manual.ManualEvidenceError as exc:
         raise _manual_error(exc) from exc

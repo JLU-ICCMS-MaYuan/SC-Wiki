@@ -52,3 +52,39 @@ export function applyEvidencePatches<T extends { paper: Record<string, any>; mat
   return next
 }
 import { normalizeCurrentTcValue, type PropertyRecordDraft } from './propertyModules'
+
+
+/** 普通字段编辑只拷贝实际所属节点；候选批量应用仍使用原入口。 */
+export function applySingleEvidenceValue<T extends {paper:Record<string,any>;material_states:Array<Record<string,any>>}>(draft:T, record:Omit<EvidencePatch,'values'>, value:unknown):T {
+  const patch={...record,values:{'':value}}
+  if(!record.state_key){
+    const key=record.field.split('.').at(-1)!
+    const actual=['material_families','structure_families'].includes(key)
+      ? (value as string[]).map(name=>(draft.paper[key] || []).find((x:any)=>(x.name || x.name_zh)===name)
+        || {name,name_zh:name,status:'pending'}) : value
+    return {...draft,paper:{...draft.paper,[key]:actual}}
+  }
+  const si=draft.material_states.findIndex(s=>s.state_key===record.state_key)
+  if(si<0)throw new Error('当前材料状态已移除')
+  const state=draft.material_states[si]
+  let next:Record<string,any>
+  if(!record.record_key){
+    next=applyEvidencePatches({paper:{},material_states:[{state_key:state.state_key,
+      [record.field.split('.').at(-1)!]:state[record.field.split('.').at(-1)!]}]},[patch]).material_states[0]
+    next={...state,...next}
+  }else{
+    const mi=state.property_modules.findIndex((m:any)=>m.module_key===record.module_key)
+    if(mi<0)throw new Error('当前物性模块已移除')
+    const module=state.property_modules[mi]
+    const affected=record.record_group_key?module.records.filter((r:any)=>r.payload?.tc_group?.group_key===record.record_group_key
+      && (!record.record_method_key || r.payload?.tc_group?.method_key===record.record_method_key))
+      :module.records.filter((r:any)=>r.record_key===record.record_key)
+    if(!affected.length)throw new Error('当前物性记录已移除')
+    const subset={paper:{},material_states:[{state_key:state.state_key,property_modules:[{...module,records:affected}]}]}
+    const changed=applyEvidencePatches(subset,[patch]).material_states[0].property_modules[0].records
+    const replacements=new Map(changed.map((r:any)=>[r.record_key,r]))
+    next={...state,property_modules:state.property_modules.map((m:any,i:number)=>i===mi?{...module,
+      records:module.records.map((r:any)=>replacements.get(r.record_key)||r)}:m)}
+  }
+  return {...draft,material_states:draft.material_states.map((s,i)=>i===si?next:s)}
+}

@@ -1,4 +1,13 @@
 export default {
+  "currentValueChanged": "This field has changed. The previous review does not apply to the current value.",
+
+  "manualTextEvidence": "Text evidence",
+  "manualLinkEvidence": "Evidence links",
+
+  "approveWithoutEvidence": "Approve without manual evidence",
+  "waivedPassed": "Manually approved without evidence (saved)",
+  "waivedReason": "This version was manually approved without evidence or a model review. Saving a reason and evidence returns it to pending review.",
+
   "humanConfirmEmpty": "Confirm empty value",
   "emptyHumanPassed": "Empty value confirmed by human (saved)",
   "emptyHumanReason": "This empty-value confirmation was a human action and did not call a model. See the manual record for the omission reason and evidence or explanation for not providing evidence.",
@@ -139,10 +148,10 @@ export default {
   "manualEditRecords": "Human edits",
   "manualDropZone": "Evidence drop and paste area",
   "manualDropHint": "Drop an image, text file, or PDF, or paste a screenshot here (Cmd/Ctrl+V)",
-  "manualLimits": "PNG/JPEG/WebP, TXT/MD, PDF; up to 10 MiB per file and 5 items per field.",
+  "manualLimits": "PNG/JPEG/WebP, TXT/MD, PDF; up to 10 MiB per file and 10 items per type.",
   "manualInvalidType": "Unsupported file type: {name}",
   "manualInvalidSize": "File must be nonempty and no larger than 10 MiB: {name}",
-  "manualItemLimit": "A field can have up to 5 evidence items.",
+  "manualItemLimit": "A field can have up to 10 items per evidence type.",
   "manualPendingFile": "Not uploaded",
   "manualPendingFiles": "Upload or remove the pending files first; they have not been saved.",
   "manualContextMissing": "The field or version is not synchronized yet. Retry shortly; your input is retained.",

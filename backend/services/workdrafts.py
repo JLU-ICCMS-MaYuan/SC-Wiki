@@ -13,6 +13,23 @@ def row(session, target, target_id, lock=False):
         ScientificWorkDraft.target_id==str(target_id))
     return session.scalar(query.with_for_update().execution_options(populate_existing=True) if lock else query)
 
+def lock_scope(session, target, target_id):
+    if target == 'paper':
+        paper_id = int(target_id)
+    elif target == 'revision':
+        paper_id = session.scalar(select(models.PaperRevisionDraft.paper_id).where(
+            models.PaperRevisionDraft.revision_id == target_id))
+    else:
+        return
+    if paper_id is None:return
+    session.scalar(select(models.Paper).where(models.Paper.id == paper_id).with_for_update().execution_options(populate_existing=True))
+    row(session, target, target_id, True)
+    table = models.ScientificReviewDraft if target == 'paper' else models.PaperRevisionDraft
+    query = select(table).where(table.paper_id == paper_id)
+    session.scalar(query.with_for_update().execution_options(populate_existing=True))
+    session.info.setdefault('workdraft_locked_papers',{})[paper_id]=session.get_transaction()
+
+
 def cycle(session, target, target_id):
     if target=='upload':
         from backend.ingest.upload_tasks import get_state,authoritative_state

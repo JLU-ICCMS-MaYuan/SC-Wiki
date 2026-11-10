@@ -1,13 +1,14 @@
+import UnifiedFieldSettings from './UnifiedFieldSettings'
 import { useEffect, useRef, useState } from 'react'
 import { Box, Typography } from '@mui/material'
 import EvidenceReadableValue from './EvidenceReadableValue'
 import { useLanguage } from '../context/LanguageContext'
 
 /** 将现有字段设置表单挂进审核页签，避免第二份值编辑器或两个重叠侧栏。 */
-export default function ReviewFieldSettings({ identity, field, enabled, onDone, onPendingChange, label, value, settingsField, sourceField }: {
+export default function ReviewFieldSettings({ identity, field, enabled, onDone, onPendingChange, label, value, settingsField, sourceField, schema, readOnly, onApply, choices }: {
   identity: string; field: string; enabled: boolean; onDone: () => void
   onPendingChange?: (pending: boolean) => void; label?: string; value?: unknown
-  settingsField?: string; sourceField?: string
+  settingsField?: string; sourceField?: string; schema?: {type?:string;enum?:unknown[]};readOnly?:boolean;onApply?:(value:unknown)=>void;choices?:string[]
 }) {
   const { t } = useLanguage(), container = useRef<HTMLDivElement>(null), started = useRef(false)
   const [available, setAvailable] = useState(true)
@@ -28,7 +29,10 @@ export default function ReviewFieldSettings({ identity, field, enabled, onDone, 
   }, [enabled, field, identity, settingsField, sourceField])
   return <Box data-evidence-ignore>
     <Box ref={container} />
-    {!available && <Box sx={{ display: 'grid', gap: 1.5 }}>
+    {!available && onApply && <UnifiedFieldSettings key={identity} field={field} label={label || field}
+      value={value} schema={schema} readOnly={readOnly} onApply={onApply} onClose={onDone}
+      choices={choices} onPendingChange={onPendingChange}/>}
+    {!available && !onApply && <Box sx={{ display: 'grid', gap: 1.5 }}>
       <Typography color="text.secondary">{t('evidence.settingsName')}</Typography><Typography>{label || field}</Typography>
       <Typography color="text.secondary">{t('evidence.settingsValue')}</Typography><EvidenceReadableValue value={value} />
       <Typography color="text.secondary">{t('evidence.settingsInForm')}</Typography>

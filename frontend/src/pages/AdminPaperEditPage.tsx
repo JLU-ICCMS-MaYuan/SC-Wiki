@@ -8,7 +8,7 @@ import { createFieldDraftSaver } from '../lib/fieldDrafts'
 import { currentEvidenceField, evidenceFieldsForStates } from '../lib/evidenceFields'
 import { materialIdentityMissing } from '../lib/materialIdentity'
 import { materialStateFromDetail, candidateFromStructureModel, remapScientificIdentities, type ScientificIdentityMap } from '../lib/paperEditing'
-import { applyEvidencePatches, type EvidencePatch } from '../lib/evidenceProposals'
+import { applySingleEvidenceValue, applyEvidencePatches, type EvidencePatch } from '../lib/evidenceProposals'
 import EvidenceFieldMarkers from '../components/EvidenceFieldMarkers'
 import PaperMaterialsSection, { MaterialOutlineLayout } from '../components/PaperMaterialsSection'
 import { researchMaterials } from '../lib/paperMaterials'
@@ -105,6 +105,18 @@ const AdminPaperEditPage: React.FC = () => {
     onAccessError: handleAccessError,
     target: paperId ? { target: 'paper', target_id: String(paperId) } : undefined,
     getCurrentValue: record => currentEvidenceField(record, {...editForm, material_families: editMaterialFamilies}, editMaterialStates),
+    applyFieldValue: (record,value) => {
+      if(accessDenied)return
+      const next=applySingleEvidenceValue<{paper:Record<string,any>;material_states:DraftMaterialState[]}>(editableDraft(),{...record,item_key:record.item_key || record.key},value)
+      if(record.field==='paper.authors'){
+        next.paper.corresponding_authors=(next.paper.corresponding_authors || []).filter((a:string)=>(value as string[]).includes(a))
+        next.paper.co_first_authors=(next.paper.co_first_authors || []).filter((a:string)=>(value as string[]).includes(a))
+      }
+      if(record.field==='paper.paper_type')next.paper.theoretical_subtype=value==='theoretical'?next.paper.theoretical_subtype:null
+      setEditForm(current=>paperEditorFromWorkdraft(current,next.paper,paperId))
+      setEditMaterialFamilies(next.paper.material_families || [])
+      setEditMaterialStates(next.material_states)
+    },
     saveCurrent: () => handleEditSave([], undefined, undefined, false),
     hasUnsavedFields: () => Boolean(fieldSaver.current?.hasChanges(editableDraft())),
     hasUnsavedField: record => {
@@ -469,6 +481,13 @@ const AdminPaperEditPage: React.FC = () => {
                 placeholder={t('upload.authorPlaceholder')} />
             )}
           />
+          <Box sx={{display:'flex',gap:1}}>
+            {(['corresponding_authors','co_first_authors'] as const).map(field=>{
+              const record=evidenceWorkflow.records.find(r=>r.field==='paper.'+field)
+              return record?<Button key={field} onClick={()=>evidenceWorkflow.openIssue(record.key)}>
+                {field==='corresponding_authors'?'通讯作者':'共同第一作者'} · 来源核对</Button>:null
+            })}
+          </Box>
           <PaperMaterialsSection states={editMaterialStates} historicalMaterials={editForm.research_materials} />
           <ReviewPaperTextField label={t('admin.fieldAbstract')} size="small" fullWidth multiline rows={3} disabled={editReviewSaving || accessDenied}
             data-issue-field="paper.abstract" value={editForm.abstract || ''} onValueChange={value => setEditForm(current => ({ ...current, abstract: value }))} />

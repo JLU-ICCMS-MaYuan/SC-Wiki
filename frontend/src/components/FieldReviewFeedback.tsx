@@ -11,6 +11,8 @@ export interface FieldReviewProgress {
 /** 只解释现有资格和本次操作，不在前端产生科学通过结论。 */
 export function fieldReviewVerdict(record: EvidenceRecord) {
   if (record.review_error && record.status !== 'supported') return 'failed'
+  if (record.human_confirmed && record.field_decision?.mode === 'without_evidence' && !record.local_modified
+      && !record.stale && (!record.pending_review || record.manual_pending)) return 'waived'
   if (record.local_modified || record.manual_pending || record.stale) return 'pending'
   if (record.human_confirmed && record.field_decision?.mode === 'empty' && !record.pending_review) return 'passed'
   if (record.required === false && !record.human_modified && record.field_decision?.action !== 'reject') return 'exempt'
@@ -39,9 +41,9 @@ export default function FieldReviewFeedback({record, progress, onCancel, onRetry
     {progress.message && <Typography>{progress.message}</Typography>}
     <Button onClick={onRetry}>{t('evidence.retry')}</Button>
   </Box>
-  const labels={passed:'evidence.reviewPassed',rejected:'evidence.reviewRejected',failed:'evidence.reviewIncomplete',pending:'evidence.reviewPending',exempt:'evidence.reviewExempt'} as const
+  const labels={waived:'evidence.waivedPassed',passed:'evidence.reviewPassed',rejected:'evidence.reviewRejected',failed:'evidence.reviewIncomplete',pending:'evidence.reviewPending',exempt:'evidence.reviewExempt'} as const
   return <Typography role="status" data-field-review-result={verdict} fontWeight={600}
-    color={['failed','rejected'].includes(verdict)?'error.main':verdict==='passed'?'success.main':'text.secondary'} sx={{mb:1}}>
+    color={['failed','rejected'].includes(verdict)?'error.main':verdict==='waived'?'warning.main':verdict==='passed'?'success.main':'text.secondary'} sx={{mb:1}}>
     {t(verdict === 'passed' && record.field_decision?.mode === 'empty' ? 'evidence.emptyHumanPassed' : labels[verdict])}
   </Typography>
 }

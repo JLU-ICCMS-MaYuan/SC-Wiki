@@ -113,6 +113,7 @@ def field_records(identity, path, data, fields, context=None, assessment=None, k
                 value = json.loads(value)
             except (ValueError, TypeError):
                 pass
+        if name in {'material_families','structure_families'} and value is None:value=[]
         if name in {'material_families', 'structure_families'} and isinstance(value, list):
             value = sorted(str(x.get('name') or x.get('name_zh') or '') if isinstance(x, dict) else str(x) for x in value)
         key = item_identity(identity, name)
@@ -477,14 +478,17 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
     if not current:
         return {}
     versions = session.execute(select(table.id, table.item_key, table.content_hash, table.source_hash,
-        table.result['field_review_binding']['token']).where(
+        table.result['field_review_binding']['token'], table.result['field_decision']['mode'],
+        table.result['field_decision']['waiver_source_hash']).where(
         table.target == snapshot['target'], table.target_id == snapshot['target_id'],
         table.item_key.in_(current))).all()
     chosen, exact = {}, set()
-    for row_id, key, content, source, field_token in sorted(versions):
+    for row_id, key, content, source, field_token, decision_mode, waiver_source in sorted(versions):
         record = current[key]
         valid = (content, source) == (record['content_hash'], record['source_hash']) or (
             bool(record.get('field_input_token')) and field_token == record['field_input_token'])
+        valid = valid or (decision_mode == 'without_evidence' and not record.get('manual_evidence_provided')
+            and content == record['content_hash'] and waiver_source == record.get('paper_source_hash',record['source_hash']))
         if valid or (include_stale and key not in exact):
             chosen[key] = row_id
             if valid:
@@ -501,6 +505,8 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
                       stale=row.item_key not in exact, stored_result=True)
         from .field_input import project
         result = project(record, result)
+        from .field_waiver import project as waiver_project
+        result = waiver_project(record,result) or result
         from .state_field_review import scope_matches
         if not scope_matches(record, result):
             result.update(stale=True, pending_review=True)
@@ -516,12 +522,14 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
             record = current[row.item_key]
             if row.item_key in exact:
                 continue
-            if (row.content_hash, row.source_hash) == (record['content_hash'], record['source_hash']):
-                from .field_sources import expand
-                result = expand(session, row.result)
+            from .field_waiver import project as waiver_project
+            from .field_sources import expand
+            candidate = waiver_project(record, expand(session,row.result))
+            if (row.content_hash, row.source_hash) == (record['content_hash'], record['source_hash']) or candidate:
+                result = candidate or expand(session, row.result)
                 result.pop('history', None)
                 result.pop('audit_events', None)
-                result.update(content_hash=row.content_hash, source_hash=row.source_hash, stale=False, stored_result=True)
+                result.update(content_hash=record['content_hash'], source_hash=record['source_hash'], stale=False, stored_result=True)
                 from .state_field_review import scope_matches
                 if not scope_matches(record, result):
                     result.update(stale=True, pending_review=True)
@@ -616,6 +624,9 @@ def _review_time(value):
 
 
 def save_results(session, snapshot, results, actor_id, *, update_decision=False):
+    if snapshot['target'] in {'paper','revision'}:
+        from backend.services.workdrafts import lock_scope
+        lock_scope(session,snapshot['target'],snapshot['target_id'])
     # 现有目标行串行化JSON事件追加；不创建新的审计表，也不覆盖并发事件。
     if snapshot['target'] == 'upload':
         from backend.services.workdrafts import row as work_row

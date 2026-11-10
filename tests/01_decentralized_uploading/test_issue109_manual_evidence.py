@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from backend.ingest import manual_evidence as manual
 from backend.manual_evidence_models import ScientificManualEvidence
 from backend.models import PaperHistoryEvent
+from backend import models
 
 
 def snapshot(value_hash="new", source_hash="source"):
@@ -39,6 +40,8 @@ def test_legacy_form_normalization_is_not_a_human_edit():
 def session():
     engine = create_engine("sqlite:///:memory:")
     ScientificManualEvidence.__table__.create(engine)
+    models.ScientificEvidenceCheck.__table__.create(engine)
+    models.ScientificEvidenceSource.__table__.create(engine)
     with Session(engine) as db:
         yield db
     engine.dispose()
@@ -61,13 +64,17 @@ def test_reason_is_required_even_with_text_evidence(session):
     assert changed["evidence_version"] > prepared["version"]
 
 
-def test_no_evidence_needs_separate_absence_reason_and_reverting_needs_no_explanation(session):
+def test_absence_reason_does_not_replace_evidence_and_reverting_needs_no_explanation(session):
     before, current = snapshot("old"), snapshot()
     manual.save_explanation(session, current, before, "stable-field", 7,
                             reason="依据专业判断", no_evidence_reason="", text_items=[])
     assert manual.validate_submission(session, current, before)[0]["code"] == "manual_evidence_absence_reason_required"
     manual.save_explanation(session, current, before, "stable-field", 7,
                             reason="依据专业判断", no_evidence_reason="原始实验记录已遗失", text_items=[])
+    assert manual.validate_submission(session, current, before)[0]["code"] == "manual_evidence_absence_reason_required"
+    manual.save_explanation(session, current, before, "stable-field", 7,
+                            reason="依据专业判断", no_evidence_reason="",
+                            text_items=[{"text": "可核对的原文记录", "source_description": "实验日志"}])
     assert manual.validate_submission(session, current, before) == []
     assert manual.validate_submission(session, before, before) == []
 
@@ -97,7 +104,8 @@ def test_review_version_includes_reason_without_attachments_and_only_its_own_fie
 def test_transfer_rechecks_explanation_after_preflight(session):
     before, current = snapshot("old"), snapshot()
     manual.save_explanation(session, current, before, "stable-field", 7,
-                            reason="人工核验", no_evidence_reason="无可共享文件", text_items=[])
+                            reason="人工核验", no_evidence_reason="",
+                            text_items=[{"text": "可核对的原文记录", "source_description": "实验日志"}])
     assert manual.validate_submission(session, current, before) == []
     manual.save_explanation(session, current, before, "stable-field", 7,
                             reason="", no_evidence_reason="", text_items=[])
@@ -254,7 +262,7 @@ def test_file_limits_and_checksum_protect_private_preview(session, tmp_path, mon
         manual.add_file(session, current, before, "stable-field", 7,
                         filename="page.png", raw=b"plain text", source_description="实验记录")
     assert wrong_type.value.code == "manual_file_invalid"
-    for index in range(manual.MAX_ITEMS):
+    for index in range(manual.MAX_PER_TYPE):
         saved = manual.add_file(session, current, before, "stable-field", 7,
                                 filename=f"note-{index}.txt", raw=b"source", source_description="实验记录")
     with pytest.raises(manual.ManualEvidenceError) as too_many:

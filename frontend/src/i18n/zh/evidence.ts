@@ -1,4 +1,13 @@
 export default {
+  "currentValueChanged": "当前字段已修改，旧值的核对理由已失效，请处理当前内容。",
+
+  "manualTextEvidence": "文字证据",
+  "manualLinkEvidence": "链接证据",
+
+  "approveWithoutEvidence": "不提交人工证据直接人工通过审核",
+  "waivedPassed": "已人工通过，未提供证据（结果已保存）",
+  "waivedReason": "当前字段由人工直接通过，未提交人工理由和证据，本次未调用大模型。补齐并保存理由与证据后转为待核对。",
+
   "humanConfirmEmpty": "人工确认留空",
   "emptyHumanPassed": "已人工确认留空（结果已保存）",
   "emptyHumanReason": "当前空值由人工确认，此项人工操作未调用大模型；留空理由及证据／缺证说明见人工修改记录。",
@@ -139,10 +148,10 @@ export default {
   "manualEditRecords": "人工修改记录",
   "manualDropZone": "人工证据拖拽与粘贴区域",
   "manualDropHint": "拖入图片、文本或 PDF，或在此处粘贴截图（Cmd/Ctrl+V）",
-  "manualLimits": "PNG/JPEG/WebP、TXT/MD、PDF；每份最大 10 MiB，每字段最多 5 项。",
+  "manualLimits": "PNG/JPEG/WebP、TXT/MD、PDF；每份最大 10 MiB，每字段每类最多 10 项。",
   "manualInvalidType": "不支持的文件类型：{name}",
   "manualInvalidSize": "文件不能为空且不能超过 10 MiB：{name}",
-  "manualItemLimit": "单个字段最多 5 项人工证据。",
+  "manualItemLimit": "单个字段每类最多 10 项人工证据。",
   "manualPendingFile": "待上传",
   "manualPendingFiles": "请先上传或移除待上传文件；这些文件尚未保存。",
   "manualContextMissing": "当前字段或版本尚未同步，请稍后重试；输入已保留。",

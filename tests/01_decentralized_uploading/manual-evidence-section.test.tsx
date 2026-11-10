@@ -11,7 +11,7 @@ afterEach(() => { cleanup(); vi.clearAllMocks(); vi.unstubAllGlobals() })
 it('主动核对前保存当前人工说明，缺少必要理由时不允许静默使用旧说明', async () => {
   const saved = {changed: true, reason: '', no_evidence_reason: '', items: []}
   vi.mocked(api.get).mockResolvedValue({ok: true, data: saved} as never)
-  vi.mocked(api.put).mockResolvedValue({ok: true, data: {...saved, reason: '按定义换算', no_evidence_reason: '等价表示无需新增附件'}} as never)
+  vi.mocked(api.put).mockResolvedValue({ok: true, data: {...saved, reason: '按定义换算', no_evidence_reason: '', text_items: [{text:'等价表示无需新增附件',source_description:'人工文字证据'}]}} as never)
   const trigger = {current: null as (() => Promise<boolean>) | null}
   render(<ManualEvidenceSection target={{target: 'upload', target_id: 'task'}} version="field-v1"
     saveBeforeReview={trigger} record={{key: 'field', item_key: 'a'.repeat(64), field: 'paper.title', label: '标题', status: 'missing', reason: '', evidences: []}} />)
@@ -21,15 +21,14 @@ it('主动核对前保存当前人工说明，缺少必要理由时不允许静�
   await act(async () => { ready = await trigger.current!() })
   expect(ready).toBe(false)
   expect(api.put).not.toHaveBeenCalled()
-  fireEvent.click(screen.getByLabelText('不提供证据'))
-  fireEvent.change(screen.getByLabelText('不提供证据的理由（必填）'), {target: {value: '等价表示无需新增附件'}})
+  fireEvent.change(screen.getByLabelText('文字证据'), {target: {value: '等价表示无需新增附件'}})
   await act(async () => { ready = await trigger.current!() })
   expect(ready).toBe(true)
   expect(api.put).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
-    expected_version: 'field-v1', reason: '按定义换算', no_evidence_reason: '等价表示无需新增附件'}))
+    expected_version: 'field-v1', reason: '按定义换算', no_evidence_reason: '', text_items: [{text:'等价表示无需新增附件',source_description:'人工文字证据'}]}))
 })
 
-it('人工修改只显示判断理由和证据二选一，缺证路径保存独立理由', async () => {
+it('人工修改提供一个长文字框和链接框，文字作为实际证据保存', async () => {
   const itemKey = 'a'.repeat(64)
   vi.mocked(api.get).mockResolvedValue({ ok: true, data: {
     changed: true, before_value: ['Defang Duan'], after_value: ['Defang Duan', 'Tian Cui'],
@@ -46,13 +45,12 @@ it('人工修改只显示判断理由和证据二选一，缺证路径保存独�
   expect(document.body.textContent).not.toContain('["Defang Duan"')
   expect(screen.queryByLabelText('不提供证据的理由（必填）')).not.toBeInTheDocument()
   fireEvent.change(screen.getByLabelText('人工修改判断理由（必填）'), { target: { value: '对照作者页' } })
-  fireEvent.click(screen.getByLabelText('不提供证据'))
-  fireEvent.change(screen.getByLabelText('不提供证据的理由（必填）'), { target: { value: '暂无截图' } })
-  expect(screen.queryByText('选择图片、文本或 PDF')).not.toBeInTheDocument()
+  fireEvent.change(screen.getByLabelText('文字证据'), { target: { value: '暂无截图' } })
+  expect(screen.getByText('选择图片、文本或 PDF')).toBeInTheDocument()
   fireEvent.click(screen.getByText('保存'))
   await waitFor(() => expect(api.put).toHaveBeenCalledWith(
     `/api/rag/evidence/upload/task/manual/${itemKey}`,
-    expect.objectContaining({ expected_version: 'v1', reason: '对照作者页', no_evidence_reason: '暂无截图' }),
+    expect.objectContaining({ expected_version: 'v1', reason: '对照作者页', no_evidence_reason: '', text_items: [{text:'暂无截图',source_description:'人工文字证据'}] }),
   ))
 })
 
@@ -72,7 +70,6 @@ it('提供证据路径上传 PDF，不要求填写来源说明', async () => {
     record={{ key: 'field', item_key: itemKey, field: 'paper.summary', label: '总结', status: 'missing', reason: '', evidences: [] }} />)
   await waitFor(() => expect(screen.getByLabelText('人工修改判断理由（必填）')).toBeInTheDocument())
   fireEvent.change(screen.getByLabelText('人工修改判断理由（必填）'), { target: { value: '查看原始报告' } })
-  fireEvent.click(screen.getByLabelText('提供证据'))
   expect(api.put).not.toHaveBeenCalled()
   expect(screen.queryByLabelText('不提供证据的理由（必填）')).not.toBeInTheDocument()
   const file = new File(['%PDF-1.4'], 'report.pdf', { type: 'application/pdf' })
@@ -86,7 +83,7 @@ it('提供证据路径上传 PDF，不要求填写来源说明', async () => {
   expect(api.put).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ no_evidence_reason: '' }))
 })
 
-it('已有待提交附件时不能直接切到无证据路径保存', async () => {
+it('已有附件和长文字证据可以同时保留', async () => {
   const itemKey = 'f'.repeat(64)
   vi.mocked(api.get).mockResolvedValue({ ok: true, data: {
     changed: true, status: 'draft', reason: '核对报告', no_evidence_reason: '',
@@ -95,9 +92,9 @@ it('已有待提交附件时不能直接切到无证据路径保存', async () =
   render(<ManualEvidenceSection target={{ target: 'upload', target_id: 'task' }} version="v1"
     record={{ key: 'field', item_key: itemKey, field: 'paper.summary', label: '总结', status: 'missing', reason: '', evidences: [] }} />)
   await waitFor(() => expect(screen.getAllByText('report.pdf').length).toBeGreaterThan(0))
-  fireEvent.click(screen.getByLabelText('不提供证据'))
-  expect(screen.getByText('请先移除当前待提交的证据，再选择不提供证据。')).toBeInTheDocument()
-  expect(screen.getByText('保存')).toBeDisabled()
+  fireEvent.change(screen.getByLabelText('文字证据'),{target:{value:'报告的补充说明'}})
+  expect(screen.getAllByText('report.pdf').length).toBeGreaterThan(0)
+  expect(screen.getByText('保存')).toBeEnabled()
   expect(api.put).not.toHaveBeenCalled()
 })
 

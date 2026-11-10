@@ -41,6 +41,13 @@ def detail(snapshot, cached):
                  'stale': bool(previous) and not exact,
                  'evidences': deepcopy(previous.get('evidences') or record.get('evidences') or []),
                  'reason': previous.get('reason') or '', 'ai_reason': previous.get('ai_reason') or previous.get('reason') or ''}
+    outdated = bool(previous) and (not same_value
+        or previous.get('content_hash') != record.get('content_hash')
+        or previous.get('source_hash') != record.get('source_hash')
+        or not scope_matches(record, previous))
+    if outdated:
+        displayed.update(status='unchecked', reason='当前字段已变化，旧值的核对结果已失效，请处理当前内容。',
+                         ai_reason='', evidences=[], proposal=None, proposal_review=None, source_associations=[])
     displayed['empty_allowed'] = allowed(record)
     displayed['human_confirmed'] = valid_field_decision(record, previous, 'approve')
     if displayed['human_confirmed']:
@@ -53,7 +60,7 @@ def detail(snapshot, cached):
     # 处理日志不作为科学解释；原始文字仍留在数据库与历史。
     displayed['ai_reason'] = display_reason(displayed['ai_reason'])
     displayed['reason'] = display_reason(displayed['reason'])
-    if (previous.get('field_decision') or {}).get('mode')=='empty':
+    if (previous.get('field_decision') or {}).get('mode') in {'empty','without_evidence'}:
         displayed['ai_reason']=''  # 人工决定不改写为AI科学判断。
     invalid_derived = record.get('kind') == 'derived' and not (record.get('provenance') or {}).get('verified')
     if displayed['human_confirmed']:
@@ -73,7 +80,14 @@ def detail(snapshot, cached):
         approval_state, message = 'ready', '当前内容尚待确认；认可后可直接人工审核通过，无需修改理由。'
     if empty_allowed and approval_state=='modification_required':
         message='当前字段允许留空；请保存人工理由及证据或缺证说明，可人工确认留空，也可使用大模型核对。'
-    return {'record': displayed, 'can_confirm_empty': bool(empty_allowed and record.get('manual_evidence_complete')),
+    from .field_waiver import allowed as waiver_allowed, active as waiver_active
+    if (previous.get('field_decision') or {}).get('mode') == 'without_evidence':
+        if waiver_active(record, previous):
+            displayed.update(ai_reason='', reason='未提交人工证据，已人工通过审核。', evidences=[], source_associations=[])
+        else:
+            displayed.update(status='unchecked', ai_reason='', reason='当前内容或资料已变化，请按当前版本重新核对。',
+                human_modified=True, stale=True, pending_review=True)
+    return {'record': displayed, 'can_approve_without_evidence': waiver_allowed(record), 'can_confirm_empty': bool(empty_allowed and record.get('manual_evidence_complete')),
             'review_token': review_token(snapshot, record, previous),
             'can_approve': approval_state == 'ready', 'approval_state': approval_state, 'approval_message': message,
             'source_state': 'historical' if previous and not exact else 'available' if displayed['evidences'] else 'empty'}
@@ -84,9 +98,12 @@ def decide(session, snapshot, cached, actor, action, expected_token):
     record = snapshot['records'][0]
     previous = cached.get(record['key']) or {}
     confirm_empty=action=='confirm_empty'
-    stored_action='approve' if confirm_empty else action
-    if valid_field_decision(record, previous, stored_action) and (not confirm_empty or (previous.get('field_decision') or {}).get('mode')=='empty'):
+    waive=action=='approve_without_evidence'
+    stored_action='approve' if confirm_empty or waive else action
+    if valid_field_decision(record, previous, stored_action) and (not waive or (previous.get('field_decision') or {}).get('mode')=='without_evidence') and (not confirm_empty or (previous.get('field_decision') or {}).get('mode')=='empty'):
         return view  # 同一版本重复点击不追加决定、不重新保存科学数据。
+    if waive and not view['can_approve_without_evidence']:
+        ev.fail('evidence_invalid_value','当前字段必填、格式或程序检查未通过，不能人工免证放行')
     if expected_token != view['review_token']:
         ev.fail('evidence_stale', '当前字段或依据已变化，请重新打开后审核；输入已保留')
     if confirm_empty and not view['can_confirm_empty']:
@@ -97,6 +114,14 @@ def decide(session, snapshot, cached, actor, action, expected_token):
         from .evidence_proposals import valid_value
         if record.get('field_schema') and not valid_value(record.get('current_value'), record['field_schema']):
             ev.fail('evidence_invalid_value', '程序检查：当前字段格式不合法，请先修正输入')
+    if waive:
+        from .field_input import current_manual
+        prior_materials=current_manual(session,snapshot,record,for_update=True)
+        if prior_materials is not None:
+            prior_materials.status='historical'
+            session.flush()
+            from .field_review import bind_support_versions
+            bind_support_versions(snapshot,session)
     now = datetime.now(timezone.utc).isoformat()
     decision = {'contract': 'field-review-v2', 'action': stored_action, 'actor_user_id': actor.id,
                 'actor_name': getattr(actor, 'username', ''), 'occurred_at': now,
@@ -112,6 +137,13 @@ def decide(session, snapshot, cached, actor, action, expected_token):
               'evidences': view['record']['evidences'],
               'source_kind': previous.get('source_kind') or 'unknown',
               'resolved_generation_issue': deepcopy(record.get('generation_issue')) if stored_action == 'approve' else None}
+    if waive:
+        decision.update(mode='without_evidence',waiver_source_hash=record.get('paper_source_hash',record['source_hash']))
+        result.update(reason='未提交人工证据，已人工通过审核。', ai_reason='', evidences=[],
+            supplemental_evidences=[], source_associations=[], source_kind='human_review', machine_status='unchecked', not_reported=False)
+        for key in ('review_error','review_failure_message','review_followup','review_started_at',
+                    'model_review','model','manual_reason_review','association_review','rule_review','_model_reviewed','auto_filled','auto_corrected','proposal','proposal_draft','proposal_review','adopted_basis'):
+            result.pop(key,None)
     if confirm_empty:
         from .field_input import current_manual
         row=current_manual(session,snapshot,record,for_update=True)
@@ -127,7 +159,7 @@ def decide(session, snapshot, cached, actor, action, expected_token):
     result['audit_events'] = [*previous.get('audit_events', []), {
         'id': uuid4().hex, 'kind': 'human_review', 'occurred_at': now,
         'actor': {'kind': 'human', 'user_id': actor.id, 'name': getattr(actor, 'username', '')},
-        'summary': '人工确认留空' if confirm_empty else '人工审核通过，保留现有值及依据' if action == 'approve' else '人工审核不通过，待修改',
+        'summary': '未提交人工证据直接人工通过审核' if waive else '人工确认留空' if confirm_empty else '人工审核通过，保留现有值及依据' if action == 'approve' else '人工审核不通过，待修改',
         'content_hash': record['content_hash'], 'source_hash': record['source_hash'], 'decision': decision}]
     science.save_results(session, snapshot, {record['key']: result}, actor.id, update_decision=True)
     return detail(snapshot, {record['key']: {**record, **result, 'stored_result': True}})

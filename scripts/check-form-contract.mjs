@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
 const vitest = join(root, 'frontend/node_modules/vitest/vitest.mjs')
 const suites = ['form-contract', 'physical-method-hosts', 'graph-title-form', 'paper-field-settings', 'two-stage-review', 'state-review-convergence', 'parsing-triage-removal',
-  'sidebar-field-save', 'sidebar-field-workflow', 'sidebar-field-hosts', 'field-sidebar-ownership', 'field-red-marking', 'sidebar-feedback', 'empty-confirmation-hosts', 'review-actions']
+  'sidebar-field-save', 'sidebar-field-workflow', 'sidebar-field-hosts', 'field-sidebar-ownership', 'field-red-marking', 'sidebar-feedback', 'empty-confirmation-hosts', 'review-actions', 'field-workflow-226']
 const paths = suites.map(name => `tests/01_decentralized_uploading/${name}.test.tsx`)
 if (!process.argv.includes('--mutation')) {
   const result = spawnSync(process.execPath, [vitest, 'run', '--config', join(root, 'vitest.config.ts'), ...paths], { cwd: root, stdio: 'inherit' })
@@ -35,7 +35,7 @@ return code.replace(${JSON.stringify(marker)},${JSON.stringify(marker.replace('l
     throw new Error('未证明八项完整宿主检查拦住已知渲染回退；环境或编译失败不算检出。')
   }
   const colorReport = join(temporary, 'color-result.json')
-  const colorMarker = "  if (record.local_modified || record.manual_pending) return 'attention'"
+  const colorMarker = "  if (record.local_modified || record.manual_pending) return waived ? 'waived' : 'attention'"
   const colorSource = readFileSync(join(root, 'frontend/src/lib/evidenceStatus.ts'), 'utf8')
   if (!colorSource.includes(colorMarker)) throw new Error('标红回退注入位置变化；请更新注入器。')
   writeFileSync(config, `import config from ${JSON.stringify(join(root, 'vitest.config.ts'))};

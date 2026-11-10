@@ -39,7 +39,7 @@ def content_hash(content):
     def comparison(value,path=()):
         if isinstance(value,dict):
             return {k:comparison(v,(*path,k)) for k,v in value.items() if v is not None and not (
-                len(path)==2 and path[0]=='records' and k in {'content_hash','source_hash','paper_source_hash','state_review_context','empty_allowed','manual_evidence_hash','manual_evidence_complete'})}
+                len(path)==2 and path[0]=='records' and k in {'content_hash','source_hash','paper_source_hash','state_review_context','empty_allowed','manual_evidence_hash','manual_evidence_complete','manual_evidence_provided'})}
         if isinstance(value,list):return [comparison(v,(*path,index)) for index,v in enumerate(value)]
         return value
     encoded = json.dumps(comparison(current_content(content)), sort_keys=True, ensure_ascii=False,
@@ -74,8 +74,12 @@ def readable(paper, user):
         error('handoff_forbidden', '无权查看这份稿件的交接记录', 403)
 
 
-def require_writer(session, paper, user, *, author=False):
-    state = latest(session, paper.id,current_read=True)
+def require_writer(session, paper, user, *, author=False, lock=False):
+    if lock:
+        from backend.services.workdrafts import lock_scope
+        lock_scope(session, 'paper', str(paper.id))
+    locked=lock or session.info.get('workdraft_locked_papers',{}).get(paper.id) is session.get_transaction() and session.get_transaction() is not None
+    state = latest(session, paper.id,current_read=locked)
     if state is None:
         return  # 存量稿件沿原权限读取；只有正式交接才建立新合同，不在读页面时迁移。
     if author:
@@ -84,10 +88,10 @@ def require_writer(session, paper, user, *, author=False):
         allowed = state['holder'] == 'review' and user.role in {'admin', 'superadmin'} and user.id != paper.uploaded_by_user_id
         if allowed:
             # 权限只读取属主，不为判断可编辑权加载整份科学稿。
-            staged_owner = session.scalar(select(models.ScientificReviewDraft.owner_id).where(
-                models.ScientificReviewDraft.paper_id == paper.id).with_for_update(read=True))
             from backend.services.workdrafts import row
-            work = row(session, 'paper', str(paper.id), True)
+            work = row(session, 'paper', str(paper.id), locked)
+            owner_query=select(models.ScientificReviewDraft.owner_id).where(models.ScientificReviewDraft.paper_id == paper.id)
+            staged_owner = session.scalar(owner_query.with_for_update(read=True) if locked else owner_query)
             # 旧forward保留原经手人私稿；不再把已接手稿开放给下一审核员。
             legacy_owner = (state.get('action') == 'forward' and staged_owner is not None and work is not None
                 and staged_owner == work.owner_id == state['actor_user_id'] == user.id)
@@ -150,7 +154,7 @@ def record_handoff(session, paper, user, *, action, draft, records, operation_id
         return h
     previous = latest(session, paper.id,current_read=True)
     if not initial:
-        require_writer(session, paper, user, author=action == 'submit')
+        require_writer(session, paper, user, author=action == 'submit', lock=True)
     from backend.ingest.tc_contexts import map_draft
     content = current_content({'draft': map_draft(draft,compact=True), 'records': records, 'manual': list(manual),
         'files': [{k: v for k, v in f.items() if k != 'stored_path'} for f in files], 'spectra':spectra})
@@ -214,7 +218,7 @@ def capture(session, paper, draft, snapshot, checks):
         'record_field','record_field_key','record_group_key','state_key','module_key','record_key',
         'structure_hash','structure_field','settings_field','settings_part','owner_label','check_mode','field_decision',
         'claim','state_review_context','paper_source_hash','association_review','rule_review',
-        'manual_reason_review','manual_evidence_hash','manual_evidence_complete','empty_allowed','point_binding','condition_window','dependency_policy_version','record_dependencies','state_dependencies'}
+        'manual_reason_review','manual_evidence_hash','manual_evidence_complete','manual_evidence_provided','empty_allowed','point_binding','condition_window','dependency_policy_version','record_dependencies','state_dependencies'}
     records = [{k:v for k,v in row.items() if k in keys} for row in checks]
     files, manual = paper_files(session,paper), []
     from backend.ingest.manual_evidence import ScientificManualEvidence, table_available
@@ -235,6 +239,16 @@ def capture(session, paper, draft, snapshot, checks):
             items=deepcopy(row.items or [])
             for item in items:
                 item.setdefault('submitted_by_user_id',row.actor_user_id)
+                if item.get('kind')=='url':
+                    cached=item.get('link_snapshot')
+                    if cached:
+                        source_id='manual-link-'+cached['sha256']
+                        if not any(f['file_id']==source_id for f in files):
+                            files.append(dict(file_id=source_id,original_filename='链接正文快照.txt',role='manual',
+                                kind='text_file',stored_path=cached['storage_key'],sha256=cached['sha256'],
+                                size=cached['size'],media_type='text/plain'))
+                        item['file_id']=source_id
+                    continue
                 storage_key=item.pop('storage_key',None) or (f"manual_evidence/{row.id}/{item['id']}" if item.get('kind')!='text' else None)
                 if storage_key:
                     source_id='manual-file-'+item['sha256']
@@ -293,7 +307,7 @@ def review_handoff(session, paper, user, *, status, operation_id, comment=''):
         cached = science.load_results(session, snapshot, user.id, include_stale=True)
         content = capture(session, paper, current_draft(session, paper), snapshot, ev.public_snapshot(snapshot, cached)['records'])
     else:
-        require_writer(session, paper, user)
+        require_writer(session, paper, user, lock=True)
         content = current_review_content(session, paper, user)
     result = record_handoff(session, paper, user, action=action, holder='author' if status == 'rejected' else 'review',
         operation_id=operation_id, comment=comment, initial=published, **content)

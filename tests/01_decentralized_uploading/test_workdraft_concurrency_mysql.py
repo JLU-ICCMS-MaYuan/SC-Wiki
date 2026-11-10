@@ -59,4 +59,4 @@ def test_old_repeatable_read_view_cannot_hide_new_handoff(data):
             p=current.get(models.Paper,paper_id)
             h.record_handoff(current,p,actor,action='return',holder='author',operation_id=uuid.uuid4().hex,
                 draft={'paper':{'title':'Before','year':2026},'material_states':[]},records=[])
-        with pytest.raises(HTTPException):h.require_writer(old,paper,actor)
+        with pytest.raises(HTTPException):h.require_writer(old,paper,actor,lock=True)  # #226：保存前写门禁必须取当前行，普通读不抢写锁。

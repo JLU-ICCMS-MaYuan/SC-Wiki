@@ -537,15 +537,17 @@ def cached_results(session, snapshot: dict) -> dict:
 def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     from .scientific_evidence import populated
     from .model_review import current_result
-    if (result.get('field_decision') or {}).get('mode')=='empty':
+    if (result.get('field_decision') or {}).get('mode') in {'empty','without_evidence'}:
         from .field_review import valid_field_decision
         valid=valid_field_decision(record,result,'approve')
         return {**record,**result,'field':record['field'],'fields':record['fields'],
             'current_value':record.get('current_value'),'empty_allowed':record.get('empty_allowed',False),
             'manual_evidence_hash':record.get('manual_evidence_hash'),
             'manual_evidence_complete':record.get('manual_evidence_complete',False),
+            'manual_evidence_provided':record.get('manual_evidence_provided',False),
             'status':'supported' if valid else 'unchecked','stale':not valid,'pending_review':not valid,
             'human_confirmed':valid,'source_kind':'human_review','ai_reason':'',
+            **({'model':None,'model_review':None,'manual_reason_review':None,'machine_status':'unchecked'} if (result.get('field_decision') or {}).get('mode')=='without_evidence' else {}),
             'reason':result.get('reason','') if valid else '之前的人工留空确认已失效，请按当前内容与资料重新核对。'}
     if not result.get('field_decision') and current_result(record, result, chunks):
         # 模型已核实最终内容，程序只接受绑定本字段和实际来源版本的结论。
@@ -1411,7 +1413,10 @@ def run_evidence_job(job_id: str):
     except Exception as exc:
         logging.getLogger(__name__).warning('证据任务失败 id=%s type=%s http_status=%s', job_id, type(exc).__name__, getattr(exc, 'status_code', None))
         from openai import AuthenticationError, PermissionDeniedError, APITimeoutError
-        if isinstance(exc, (AuthenticationError, PermissionDeniedError)):
+        from sqlalchemy.exc import OperationalError
+        if isinstance(exc, OperationalError):
+            error = dict(code='evidence_database_busy', message='数据库读取或保存失败，本次核对未完成；输入已保留，请重试')
+        elif isinstance(exc, (AuthenticationError, PermissionDeniedError)):
             error = dict(code='evidence_model_config', message='模型凭据或权限无效，请检查模型配置后重试')
         elif isinstance(exc, (TimeoutError, APITimeoutError)):
             error = dict(code='evidence_model_timeout', message='模型核对超时，原操作未继续，请重试')
@@ -1613,7 +1618,7 @@ def persist_completed_results(snapshot, results, owner):
             if user is None:
                 fail('evidence_forbidden', '当前核对用户不存在')
             authorized_draft(session, snapshot['target'], snapshot['target_id'], user, lock=True)
-            current, current_cached = snapshot_for(Target(target=snapshot['target'], target_id=snapshot['target_id']), user)
+            current, current_cached = snapshot_for(Target(target=snapshot['target'], target_id=snapshot['target_id']), user, session=session)
             current = select_field(current, snapshot['field_review_input']['item_key'])
             bind(current, session)
             if current['records'][0]['field_input_token'] != snapshot['field_review_input']['token']:

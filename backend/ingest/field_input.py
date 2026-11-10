@@ -25,7 +25,7 @@ def matching_rows(record, rows, *, working=False):
     from .manual_evidence import _semantic_value
     source = record.get('paper_source_hash', record['source_hash'])
     matched=[r for r in rows if r.item_key == record['item_key'] and r.source_hash == source
-            and (working and r.status=='draft' or canonical(r.after_value) == canonical(_semantic_value(record)))]
+            and (r.value_hash == record.get('content_hash') or canonical(_semantic_value({**record,'current_value':r.after_value})) == canonical(_semantic_value(record)))]
     drafts=[r for r in matched if r.status=='draft']
     return drafts[-1:] if drafts else matched
 
@@ -53,6 +53,7 @@ def bind(snapshot, session):
         else:record.pop('manual_evidence_hash',None)
         record['manual_evidence_complete']=bool(manual and all(r.reason.strip()
             and (r.items or r.no_evidence_reason.strip()) for r in current_materials))
+        record['manual_evidence_provided']=bool(current_materials and current_materials[-1].reason.strip() and current_materials[-1].items)
         inputs=[CONTRACT, snapshot['target'], snapshot['target_id'],record['item_key'],
             canonical(record.get('current_value')),record.get('paper_source_hash',record['source_hash']),evidence]
         context=(record.get('claim') or {}).get('context') or {}

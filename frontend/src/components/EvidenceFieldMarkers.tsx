@@ -60,7 +60,7 @@ const FieldTrigger = memo(function FieldTrigger({ records, node, onOpen }: { rec
   const label = `${names}：查看来源核对（${records.length}）`
   const hasProblem = records.some(evidenceProblem)
   const status = records.some(r => evidenceStatus(r) === 'failed') ? 'failed'
-    : records.some(r => evidenceStatus(r) === 'processing') ? 'processing' : hasProblem ? 'attention' : 'passed'
+    : records.some(r => evidenceStatus(r) === 'processing') ? 'processing' : hasProblem ? 'attention' : records.some(r=>evidenceStatus(r)==='waived') ? 'waived' : 'passed'
   useEffect(() => {
     if (node.hasAttribute('data-scientific-field')) {
       host.style.cssText = 'position:absolute;right:4px;top:4px;line-height:1'
@@ -104,7 +104,7 @@ const FieldTrigger = memo(function FieldTrigger({ records, node, onOpen }: { rec
       }
     }
   }, [host, node, records, onOpen, label, names, hasProblem, status])
-  return caption ? null : createPortal(<Button data-evidence-status={status} data-evidence-key={records[0].key} color={records.some(evidenceProblem) ? 'error' : 'primary'} size="small" sx={node.hasAttribute('data-scientific-field') ? { minWidth: 20, p: 0 } : undefined} aria-label={label} title={label} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); if (records[0].placeholder) onOpen(records[0].key, [records[0].key], currentPlaceholder(records[0], node)); else onOpen(records[0].key, records.map(r => r.key)) }}>{node.hasAttribute('data-scientific-field') ? '•' : names}</Button>, host)
+  return caption ? null : createPortal(<Button data-evidence-status={status} data-evidence-key={records[0].key} color={records.some(evidenceProblem) ? 'error' : status==='waived'?'warning':'primary'} size="small" sx={node.hasAttribute('data-scientific-field') ? { minWidth: 20, p: 0 } : undefined} aria-label={label} title={label} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); if (records[0].placeholder) onOpen(records[0].key, [records[0].key], currentPlaceholder(records[0], node)); else onOpen(records[0].key, records.map(r => r.key)) }}>{node.hasAttribute('data-scientific-field') ? '•' : names}</Button>, host)
 })
 
 /** 在现有表单的字段锚点附加标记，避免复制动态表单和科学校验。 */
@@ -346,6 +346,9 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen: openCallb
       [data-evidence-problem="true"].MuiOutlinedInput-root > .MuiOutlinedInput-notchedOutline {border-color: #d32f2f; border-width: 2px;}
       [data-evidence-caption="true"] {color: ${theme.palette.primary.main} !important; cursor: pointer; pointer-events: auto !important;}
       [data-evidence-caption-problem="true"] {color: #d32f2f !important;}
+      [data-evidence-caption][data-evidence-status="waived"] {color: #ed9a00 !important;}
+      [data-issue-field]:has([data-evidence-status="waived"]) > .MuiOutlinedInput-root > fieldset {border-color:#ed9a00;}
+      .MuiFormControl-root:has(> [data-evidence-status="waived"]) > .MuiOutlinedInput-root > fieldset {border-color:#ed9a00;}
       [data-evidence-caption="true"]:hover {text-decoration: underline;}
       [data-evidence-caption="true"]:focus-visible {outline: 2px solid ${theme.palette.primary.main}; outline-offset: 2px; border-radius: 2px;}
       [data-evidence-caption-problem="true"]:focus-visible {outline-color: #d32f2f;}
