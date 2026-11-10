@@ -1,0 +1,13 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "job_id": "073d351d-afb7-4ad8-9ab7-c04695f8b6a3",
+  "source_commit": "9619fd054cbe875800fe599c1489ca82d4427f4c",
+  "source_hashes": {
+    "backend/rag/llm.py": "e07421b9a88188eb36e71b2c271077832723a76db72000bfdd16016404e0dc00",
+    "backend/ingest/model_runtime.py": "2ab01f7ea4ede22dce0024401bfb2f4a59537abac7b271f7224a7aa418f3babe",
+    "backend/ingest/chart_reading.py": "aa4faef6c6a3aeedb16a343a81a16376a9e159525386142d4c8298bc0eb0f023",
+    "backend/ingest/structure_reading.py": "7fc60b38320c24c04dc82da4c6b475f2278059cfecbad24020b0e5ce07991c5e"
+  },
+  "worktree": " M backend/api/manuscript_handoffs.py\n M backend/api/spectra.py\n M backend/ingest/chart_reading.py\n M backend/ingest/document_regions.py\n M backend/ingest/model_review.py\n M backend/ingest/pdf_evidence_crops.py\n M backend/ingest/review_tool_contract.py\n M backend/ingest/structure_reading.py\n M backend/main.py\n M backend/rag/agent/mentor.py\n M backend/rag/agent/tools.py\n M backend/rag/llm.py\n M backend/rag/llm_client.py\n M backend/services/manuscript_handoffs.py\n M backend/spectra/discovery.py\n M backend/spectra/jobs.py\n M backend/spectra/manual.py\n M backend/spectra/vision.py\n M backend/tests/test_chart_cache_recovery.py\n M backend/tests/test_spectra.py\n M docs/specs/232-complete-pdf-regions/plan.md\n M docs/specs/232-complete-pdf-regions/spec.md\n M docs/specs/232-complete-pdf-regions/tasks.md\n M docs/specs/233-unified-image-tool/plan.md\n M docs/specs/233-unified-image-tool/spec.md\n M docs/specs/233-unified-image-tool/tasks.md\n M docs/specs/234-image-feedback-repair/plan.md\n M docs/specs/234-image-feedback-repair/spec.md\n M docs/specs/234-image-feedback-repair/tasks.md\n M docs/specs/235-rebuildable-visual-sources/plan.md\n M docs/specs/235-rebuildable-visual-sources/spec.md\n M docs/specs/235-rebuildable-visual-sources/tasks.md\n M tests/01_decentralized_uploading/test_issue114_storage_regions.py\n M tests/TestForRealScenario/runs/20261110-peng2017-workflow-debug-01/CONTINUATION.md\n M tests/TestForRealScenario/runs/20261110-peng2017-workflow-debug-01/active-task.json\n M tests/TestForRealScenario/runs/20261110-peng2017-workflow-debug-01/case.json\n?? backend/api/visual_sources.py\n?? backend/ingest/image_feedback.py\n?? backend/ingest/image_reading.py\n?? backend/ingest/pdf_regions.py\n?? backend/rag/responses_json.py\n?? backend/rag/visual_sources.py\n?? backend/tests/test_image_feedback.py\n?? backend/tests/test_image_reading.py\n?? backend/tests/test_pdf_regions.py\n?? backend/tests/test_responses_image_tools.py\n?? backend/tests/test_visual_source_reuse.py\n",
+  "operation": "重新网页核验用户及原任务，正常点击继续；未重复上传或业务回填"
+}

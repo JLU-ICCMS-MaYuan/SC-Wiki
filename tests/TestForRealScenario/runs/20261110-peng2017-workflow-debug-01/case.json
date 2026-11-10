@@ -103,12 +103,12 @@
   "pre_upload_note": "旧选择状态已空且未发任务；新建隔离Safari17122，角色邮箱核验后重新装入原文件",
   "source_commit_at_upload": "9e58ca05fe3a1d235064d85c91ddc82209c06519",
   "task_id": "d789acceee124022b3257f84780d1156",
-  "job_id": "4fbb0c76-4fee-45a9-8936-5ac2d44eebba",
+  "job_id": "073d351d-afb7-4ad8-9ab7-c04695f8b6a3",
   "upload_helper": {
     "method": "正常拖放入口",
     "sha256": "4faa51d1225cccdda7c6ea7e286784db4bb2b5bcc87d08c87acbbd00b1817e27",
     "note": "仅测试辅助修改，服务器已验证同原文件哈希"
   },
-  "latest_resume_commit": "4adc30d1f8894af3292adc6008741549f253c0ee",
-  "latest_verified_step": "v7正文三个新请求全部完成/零失败，38条当前来源，YH10 mu=.13约287K精度8K；继续SI，尚无正式论文"
+  "latest_resume_commit": "9619fd054cbe875800fe599c1489ca82d4427f4c",
+  "latest_verified_step": "新Job073d351d generation10实际加载v8（磁盘后来v9）；图表复读结束，结构读取中，暂无错误；26/29为上轮完整分段数，当前输入变化后实际复用待核验"
 }

@@ -1,3 +1,25 @@
+## 最新实际版本说明：当前Job加载v8，磁盘已变v9
+
+最新Job仍073d351d-afb7-4ad8-9ab7-c04695f8b6a3。9619fd05后真实网页继续，运行器重新加载了并行#232—235的未提交新图像/反馈代码，实际请求reader_version=scientific-chart-reading-v8（generation10），磁盘随后已v9；不能把当前磁盘版本当作已运行版本。原26/29候选未删，但新图源会使部分签名失效；实际复用/重跑必须据请求账本和新候选统计，不能宣称只补3段。
+
+生产v8正文38条/3未读说明（PrH9两不可辨点+同一限制说明），YH10 mu=.13约287K精度8K，另两个YH9图约267/252及YH10绿色309均约数，原文精确276/253/303/287应由既有整理/科学核对处理。SI图复读已结束，当前重新结构读取正文1—3页；暂无processing_error，仍阶段1无PaperID。最新观察observe-20261110T124630702442Z.json。完整共享工作区补丁只保留本地issues/stream-incomplete/shared-worktree-at-resume.patch.gz，不提交他人源码；实际模型请求本身及原PDF来源均保留。
+
+后续仍须原任务继续完整排障五阶段，再精确ID清理并同原文件最终无调试五阶段。复用信息见下文，原用户Safari17885、超管Chrome1758018018；每次按URL重新枚举账号/任务，勿重复续跑或上传。#224已更新评论6767489951，本轮EOF修复不含并行Responses/原生图片适配。
+
+## 最新：26/29断流误判已修复，正常网页继续同一任务
+
+Task仍d789acceee124022b3257f84780d1156，最新Job 073d351d-afb7-4ad8-9ab7-c04695f8b6a3；Safari隔离17885，account标签被切换过，已新开/account重新核验myth620137018@163.com用户；Chrome1758018018超管待后续使用前重核。所有动作重新按URL枚举，别复用标签号。
+
+旧Job4fbb0c76完成26/29后，SI32—34页响应4367字符在row_index字段名中间结束，SDK finish_reason=None，被旧JSON兜底当完整严格结构错误。原失败a841dc4b…留model-runtime，夹具backend/tests/fixtures/model_stream_incomplete/。9619fd05补ModelIncompleteStreamError（HTTP协议错误），只在上传Chat路径已输出但无正常完成原因时按现有5次恢复；正常stop非法JSON/字段、length/content_filter仍停止，半截绝不补写。用户后来已明确5次上限，原话见224spec，本次不改。
+
+最终原HEAD夹具3失败/4通过；修复独立本次hunk投影56、共享56、四宿主233、12变异、字段契约通过；原失败窗口同模型/同端点/同输入/schema新请求一次成功并严格校验/JSON保存重读，无业务回填。最初全复制llm入口混入并行#233未提交Responses导入导致独立22失败，已单列；正确投影按本次hunk构建，不纳入他人代码。提交仅2生产文件4处小hunk+测试/224/205/Overview/证据。其余#232—235已有大量共享接线（包括llm.py中Responses/能力、原生图像工具/谱/RAG）仍未提交，完整保留，后续检查git状态勿混入。
+
+已真实Safari点击继续：新Job073d351d…，仍原文件/角色/模型、26个完整分段保留。先observe当前状态及实际新job消费，从未完成部分继续；不要重复点击、上传或清理。完整五阶段尚未送审，无PaperID，DB之前按DOI无本轮论文。
+
+本轮仍排障轮，最终必须全部五阶段→留证精确ID清理→同原文件最终无调试五阶段，不能以局部修复结束。图谱标题返修目标High-throughput Study on Rare-earth Clathrate Hydride High-temperature Superconductors；用户指定五类笼型结构，现有目录ID1笼状结构。部分当前提取已识别clathrate，最后草稿若都正确不能故意造改，届时需实事求是审查真实返修项。CeH10@200GPa Tc/DOS按用户确认Fm-3m，声子R-3m独立保留。
+
+前两修复b62b3946保600DPI无损分片、4adc30d1柱边亮度，正文生产v7已38条、YH10蓝~287K±8K、旧199K退出当前来源；SI生产31条，2未读说明是S14 YH9/YH10 DOS未直接给pressure/spacegroup，留空，不自编。正文/完整来源、新重提、固定回放及隔离证据各自保留。运行记录fd38249d已提交。
+
 ## 最新：柱边亮度故障已修复，v7正文真实读取已通过，继续SI
 
 同Task d789acceee124022b3257f84780d1156，最新Job 4fbb0c76-4fee-45a9-8936-5ac2d44eebba，Safari17885/Chrome1758018018。先observe实际状态；不要重复上传。4adc30d1修复bar_edge同色像素亮度高于内部样本时被误断：实际YH10 μ*=.13旧模型定位y269正确，程序误停网格为~199K。故障先4失败，修复后独立源码及共享各75项、四宿主233/12变异/字段契约通过。原PDF同失败Tc面板全新模型18条标定及IR保存重读，YH10蓝约287K精度7K；PrH9两未读保留，绿约309±6K与正文303K由既有科学核对处理，不能把约数当精确原值。未回填旧AI答案。
