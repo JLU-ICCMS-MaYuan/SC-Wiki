@@ -359,6 +359,44 @@ def get_parsing_chunks(
     }
 
 
+@router.get('/{task_id}/citation-matching')
+def get_citation_matching(task_id: str, current_user: User = Depends(get_current_user)):
+    """只读已保存决定；刷新或表单输入不能在此触发匹配。"""
+    from backend.ingest.upload_tasks import get_draft
+    from backend.services.citation_matching import read_matching_snapshot
+
+    try:
+        _owned_state(task_id, current_user)
+        draft = get_draft(task_id) or {}
+    except HTTPException as error:
+        if error.status_code != 404:
+            raise
+        # 提交后任务已归档，按正式论文归属读取同一份持久快照。
+        from sqlalchemy import select
+        from backend.database import SessionLocal
+        from backend.models import Paper, PaperReference, PaperReferenceExtraction
+        from backend.services.citation_matching import BOOK_FIELDS, REFERENCE_FIELDS
+        with SessionLocal() as session:
+            columns = [getattr(Paper, k) for k in (*BOOK_FIELDS, 'id', 'content_revision', 'uploaded_by_user_id')]
+            saved = session.execute(select(*columns).where(Paper.upload_task_id == task_id)).first()
+            if saved is None:
+                raise error
+            paper = dict(saved._mapping)
+            admin = current_user.role in ('admin', 'superadmin') and current_user.is_approved
+            if paper['uploaded_by_user_id'] != current_user.id and not admin:
+                raise _error(403, 'UPLOAD_TASK_FORBIDDEN', '无权访问该论文的解析匹配结果')
+            extraction = session.get(PaperReferenceExtraction, (paper['id'], paper['content_revision']))
+            refs = session.execute(select(*(getattr(PaperReference, k) for k in REFERENCE_FIELDS)).where(
+                PaperReference.paper_id == paper['id'], PaperReference.paper_revision == paper['content_revision']
+            ).order_by(PaperReference.reference_index))
+            draft = {'paper': paper, 'citation_extraction': {'references': [dict(r._mapping) for r in refs]},
+                     'citation_matching': extraction.matching_snapshot if extraction else None}
+    snapshot = read_matching_snapshot(task_id, draft)
+    if not isinstance(snapshot, dict):
+        raise _error(409, 'citation_matching_not_ready', '参考文献匹配结果尚未生成')
+    return {'ok': True, 'data': snapshot}
+
+
 @router.post("/{task_id}/retry")
 def retry_upload_task(task_id: str, current_user: User = Depends(get_current_user)):
     from backend.ingest.upload_tasks import enqueue_processing, update_state
@@ -500,41 +538,3 @@ def cleanup_upload_tasks(current_user: User = Depends(get_current_user)):
         cleanup_task_files(task_id)
         deleted.append(task_id)
     return {"ok": True, "deleted": deleted, "skipped": skipped, "deferred": deferred}
-
-
-@router.get('/{task_id}/citation-matching')
-def get_citation_matching(task_id: str, current_user: User = Depends(get_current_user)):
-    """只读已保存决定；刷新或表单输入不能在此触发匹配。"""
-    from backend.ingest.upload_tasks import get_draft
-    from backend.services.citation_matching import read_matching_snapshot
-
-    try:
-        _owned_state(task_id, current_user)
-        draft = get_draft(task_id) or {}
-    except HTTPException as error:
-        if error.status_code != 404:
-            raise
-        # 提交后任务已归档，按正式论文归属读取同一份持久快照。
-        from sqlalchemy import select
-        from backend.database import SessionLocal
-        from backend.models import Paper, PaperReference, PaperReferenceExtraction
-        from backend.services.citation_matching import BOOK_FIELDS, REFERENCE_FIELDS
-        with SessionLocal() as session:
-            columns = [getattr(Paper, k) for k in (*BOOK_FIELDS, 'id', 'content_revision', 'uploaded_by_user_id')]
-            saved = session.execute(select(*columns).where(Paper.upload_task_id == task_id)).first()
-            if saved is None:
-                raise error
-            paper = dict(saved._mapping)
-            admin = current_user.role in ('admin', 'superadmin') and current_user.is_approved
-            if paper['uploaded_by_user_id'] != current_user.id and not admin:
-                raise _error(403, 'UPLOAD_TASK_FORBIDDEN', '无权访问该论文的解析匹配结果')
-            extraction = session.get(PaperReferenceExtraction, (paper['id'], paper['content_revision']))
-            refs = session.execute(select(*(getattr(PaperReference, k) for k in REFERENCE_FIELDS)).where(
-                PaperReference.paper_id == paper['id'], PaperReference.paper_revision == paper['content_revision']
-            ).order_by(PaperReference.reference_index))
-            draft = {'paper': paper, 'citation_extraction': {'references': [dict(r._mapping) for r in refs]},
-                     'citation_matching': extraction.matching_snapshot if extraction else None}
-    snapshot = read_matching_snapshot(task_id, draft)
-    if not isinstance(snapshot, dict):
-        raise _error(409, 'citation_matching_not_ready', '参考文献匹配结果尚未生成')
-    return {'ok': True, 'data': snapshot}
