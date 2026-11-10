@@ -1,0 +1,25 @@
+[
+  {
+    "id": "IMG-001",
+    "order": 1,
+    "original_filename": "codex-clipboard-174e414e-33f1-40e8-a237-21efa018dc29.png",
+    "path": "assets/IMG-001-model-selection.png",
+    "status": "local_verified",
+    "sha256": "f8dcfb1fdfe6be4269b5250d996a1bafb2d02224ffdcb1f2420c097fc4beab0a",
+    "size": [
+      552,
+      246
+    ],
+    "user_text": "找到具体问题之后，再次使用主模型去读取文字调整看图工具，这里不需要再设置模型，都用和起初一样的模型。看不懂这里图 1 是什么意思？",
+    "related": "主模型选择仅发生在任务起始，反馈不新增选择步骤",
+    "upload_order": 1,
+    "original_name": "codex-clipboard-174e414e-33f1-40e8-a237-21efa018dc29.png",
+    "locator": "assets/IMG-001-model-selection.png",
+    "media_type": "image/png",
+    "dimensions_px": [
+      552,
+      246
+    ],
+    "verification": "2026-11-10按字节读取、PNG解码、尺寸与SHA256核对；仅本地已验证，远程附件未推送。"
+  }
+]

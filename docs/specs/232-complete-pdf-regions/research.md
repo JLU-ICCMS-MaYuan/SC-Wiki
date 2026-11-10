@@ -1,0 +1,60 @@
+# 研究与设计取舍：可靠定位PDF区域并生成含完整图注的高清裁剪
+
+依据：[spec.md](spec.md)、[对话留档](../232-complete-pdf-regions/conversation.md)。下列为设计及外部文档调查，不是本轮代码或模型接口验收。
+
+## 当前采用与替代历史
+
+首次图与图注分开提供的早期建议已撤回；现行首次裁剪必须含完整图注。pdffigures2仅借鉴定位方法，保留逐页图像盘点；不能用规则候选替代科学判断。
+
+现行共同结论：支持图片的单一主模型；结构化回执与实际图片同时交给原模型；工具只提供实际取源/识别/计算能力。图文适用范围、首次完整图含完整图注、300/600 DPI、原PDF/定位/结果长期保存及可清理图片缓存保持。
+
+## 决策、理由与备选
+
+### 候选定位
+
+决策：复用现有IR/PDF文字及绘图信息，结合图注构建多个候选，使用正文约束、切断/重叠检查辅助选择；保持原模型逐页盘点。
+
+理由与备选：直接引入整个pdffigures2 Scala服务不是已采纳要求；只使用最近图注会误配。
+
+### 规范坐标
+
+决策：以明确的页面坐标空间为共同基准，解析器/归一化/旋转坐标经矩阵映射；输出像素取整后的实际原点和尺寸参与反变换。
+
+理由与备选：不把0..1000整数框当无损真值，也不把72 DPI坐标参照当输出清晰度。
+
+### 图像生成
+
+决策：原PDF固定区域一次渲染；首次完整图含图注，随后局部直接按原坐标取图；原始位图清晰度单列。
+
+理由与备选：从派生PNG反复截屏放大或直接取原位图而漏矢量轴均不采用。
+
+## 官方资料与调查边界
+
+| 材料 | 支持的结论与限制 |
+| --- | --- |
+| [DeepSeek模型表](https://api-docs.deepseek.com/quick_start/pricing) | 2026-11-10读取：deepseek-flash映射DeepSeek-V4.1-Flash-1017并支持Vision；deepseek-v4-pro不支持。适用官方服务，不推断所有网关。 |
+| [DeepSeek视觉接口](https://api-docs.deepseek.com/guides/vision) | 2026-11-10读取：支持图片及图表，Chat Completions/Responses字段不同；大图自动缩放到约1300×1300像素量，600 DPI文件仍可能需要局部精读。 |
+| [DeepSeek版本发布](https://api-docs.deepseek.com/news/news261017) | 2026-11-10读取：V4.1-Flash-1017发布并提及对WorkBuddy/CodeBuddy优化；不能据此断言WorkBuddy内部工具如何传图。 |
+| [GPT-6.1 sol官方模型页](https://developers.openai.com/api/docs/models/gpt-6.1-sol) | 2026-11-10读取：支持Text/Image输入，工具调用要求Responses API。当前本机LLM2第三方网关的实际能力尚未实测。 |
+| [PaddleOCR结果结构](https://github.com/PaddlePaddle/PaddleOCR/blob/main/docs/version3.x/pipeline_usage/OCR.en.md) | 可提供rec_texts/rec_boxes/rec_polys/rec_scores等文字、位置和识别分数；分数不等于科学准确率。 |
+| [PyMuPDF绘图提取](https://pymupdf.readthedocs.io/en/latest/recipes-drawing-and-graphics.html) | get_drawings可提供线/曲线/矩形/颜色及位置；返回路径不自动证明可见元素或科学语义。 |
+| [pdffigures2](https://github.com/allenai/pdffigures2) | 主要定位有图注图表；图注构建、候选框、正文约束、切断/重叠评分值得借鉴，领域与复杂版式边界需真实验证。 |
+| [PP-Chart2Table](https://github.com/PaddlePaddle/PaddleOCR/blob/main/docs/version3.x/module_usage/chart_parsing.en.md) | 官方示例返回图表转文字表，不保证具备本方案全部像素标定事实。未选择其作为必须部署依赖。 |
+
+本机只读配置调查在本次侧边对话中曾确认LLM1为deepseek-v4-pro、LLM2为gpt-6.1-sol（第三方网关）、LLM3为deepseek-flash（官方端点）。这些是当时配置事实，不固定未来编号，也不在文档保存密钥/完整私有端点。未进行本轮付费模型请求，官方声明与实际网关效果仍须分开验证。
+
+## WorkBuddy建议的采用边界
+
+采用可定位回执、原图像素复核、程序标定、元素级失败原因与定向动作、版本留存。拒绝“自然语言绝对不可校验”“自检检出率接近0”“必须换模型”“固定两轮/DPI翻倍”“回执唯一真值”的绝对结论。换裁剪不自动构成独立正确证据，置信度也不等于科学准确率。
+
+数字标签是原图报告值，可以识别后核验；坐标/色标估读由程序算并保留约数与精度；其他原文/表格证据有效。正文已知值不能无条件反推图轴，否则可能把应保留的分歧强行消掉。读图能力探针不证明整篇准确率。
+
+## 代码调查与未知项
+- `backend/ingest/pdf_regions.py`：拟完善的区域定位、候选/配对、页面几何与渲染入口；此前未提交试改不是完成基线。
+- `backend/ingest/chart_reading.py`：把发现页和首次完整图/后续精读串起，保留已实现轴边界和目标/上下文区分。
+- `backend/ingest/structured_pdf.py`：复用解析器来源、图/图注/表格/公式原块及坐标。
+- `backend/ingest/pdf_evidence_crops.py`：来源展示的按需渲染和标记坐标，与精读最低分辨率一致。
+- `backend/ingest/document_regions.py`：在授权原件中取得对应区域，复用现有权限和失败语义。
+- `backend/spectra/discovery.py`：谱图首次完整上下文与局部精读，保留独立谱数字化职责。
+
+当前已有部分代码/测试试改出现在共享工作区，未由本次文档验证为完整交付。复杂跨页/旋转/遮挡、模型实际缩放、第三方API、真实专用字段/历史/RAG权限仍由未来测试给出结果。未选取新的部署模型或供应商，未授权软件安装/数据迁移。
