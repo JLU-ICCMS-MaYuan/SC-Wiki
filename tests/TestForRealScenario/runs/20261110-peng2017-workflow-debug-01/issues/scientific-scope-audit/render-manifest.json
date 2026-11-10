@@ -1,0 +1,23 @@
+[
+  {
+    "pdf_page": 21,
+    "dpi": 600,
+    "sha256": "83db2d67b85d4d407c7e4d819ea90f277cd76e89b207c551d54018086b17811d",
+    "image": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261110-peng2017-workflow-debug-01/issues/scientific-scope-audit/si-page-21-600dpi.png",
+    "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93"
+  },
+  {
+    "pdf_page": 23,
+    "dpi": 600,
+    "sha256": "2bb7f89d225543a6e7945ad67d304f26e75ba56489ee894d84bec8f37e880f9a",
+    "image": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261110-peng2017-workflow-debug-01/issues/scientific-scope-audit/si-page-23-600dpi.png",
+    "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93"
+  },
+  {
+    "pdf_page": 26,
+    "dpi": 600,
+    "sha256": "cfcdcc9a04eebc3bda6c7f05629c4e1decb3a121c89d6cf3c7878e6011c7b258",
+    "image": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261110-peng2017-workflow-debug-01/issues/scientific-scope-audit/si-page-26-600dpi.png",
+    "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93"
+  }
+]

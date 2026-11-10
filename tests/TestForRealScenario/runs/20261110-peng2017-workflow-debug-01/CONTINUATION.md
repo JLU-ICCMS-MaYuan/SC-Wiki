@@ -1,3 +1,21 @@
+## 最新：第5组已越过旧图读阻塞并真实保存，继续第6/26组；ScH6科学返修选项待用户答复
+
+Task d789acceee124022b3257f84780d1156，现Job862cbf40-6dab-4c37-9b5e-50fd29c7c18f，代码5d400eab，LLM2/gpt-6.1-sol及原文件/端点/hash保持，正常Safari18044继续，无重传。29/29和覆盖通过；正文最后窗口首次规范值与value_kind不符，由既有一次纠正通过，未加新轮次。新规划52状态26组（原54/27）；全稿输入签名因原页/来源变化未直接复用旧整组检查点，重新处理有实际新模型调用。前8持久快照和旧核对记录均保留，新旧按相同材料/压力/相对照主要Tc、DOS、μ配对、方法原名一致；LaH9@50状态内部key有变化，整树并不一致，不声称完整复用。原/新快照及实际调用账本见issues/retired-chart-scope/。按#230实际持久表ScientificUploadDraft和tc_contexts.map_draft重读，Redis旧缓存不能验收解析中间保存。
+
+第5组两轮新填写、5个原候选完整去向、实际原Claim门通过、8批字段核对与持久保存重读已通过，现累计10状态且第6组reviewing。CeH10@200 Fm-3m，Tc58/49 K为Fig.4读图约数；DOS现主值仍空，Fig.4 H贡献及S33未标相同投影的两个原记录约.0228各归档，不当相同物理量也不随机选首条。核对结果67 supported、23 missing、6 uncertain，零技术错误；有待人校对并不假称均科学通过。旧v8未出现在当前记录，实际保存与检查点一致，bbox序列化微差披露。见live-group-0004-filling.json/live-group-0004-persisted-reread.json。
+
+科学人工QA见issues/scientific-scope-audit/scope-audit.md：原图实际看过正文Fig1(c)及SI21/23/26。当前IR有效Fig.4 38图读、ScH6@300持久Tc/DOS/λ/μ和约数/原图来源通过独立像素参照（非物相验收）。现ScH6@300自动稿Im-3m不合Fig1(c)具体压力P63/mmc及SI S28(f)P63/mmc@300，已用request_user_input_async询问是否按P63/mmc修并作为真实材料返修项（若最终稿仍错），未获答复；不要假定推荐已批准，不依赖此决策的解析继续。原计划图谱标题High-throughput Study on Rare-earth Clathrate Hydride High-temperature Superconductors及指定笼型标签仍核验，已正确不可改坏。LaH6@100图1(c)R-3m（S1R-3c是150），LaH9@50图1(c)P63/mmc与S1 Cc结构不能按同压合并，YH9@150图1(c)P63/m与高压P63/mmc不同，待最终稿核查并按既有科学人审处理；不加产品规则/单篇特例。正文Fig.4 H贡献DOS和SI S33 200GPa电子DOS不同口径。
+
+#136评论6779252569、#233评论6779253338，均OPEN、未push/部署。watch_current.py只读进度，当前session6047可继续等；watch-progress.jsonl保留状态变化。最终仍须所有26组、谱/引用、ready普通网页重读和人工校对/保存/送审，再超管真实拒绝、原用户两项返修重提、日志批准、YH10探索与正式库核验；完整排障轮之后精确ID留证清理重传同原文件，完成无需debug的完整五阶段。当前无正式PaperID，阶段二至五未执行，不能宣布完成。
+
+## 最新：5d400eab已提交，原任务正常网页续跑新Job862cbf40
+
+当前Task d789acceee124022b3257f84780d1156、Job862cbf40-6dab-4c37-9b5e-50fd29c7c18f（不要再跟踪已失败90a96895）。Safari18044重核myth620137018@163.com/用户/gpt-6.1-sol/同Task+文件后正常点击继续，无重传。observe-20261110T210344985344Z.json reading 4/29、chunk_extraction正文3/4页receiving、无processing_error，provider/input/endpoint hash不变。必要新图片/上下文窗口实际重提，其他签名复用，统计应按新Job开始时间区分。后续核验前8持久状态及有效结果与persisted-prefix-before.json.gz保持，不直接替换引用编号或回填隔离答案。
+
+源码修复5d400eab、首组保存记录0c48b473、原备用文段74b56bae、结构预算/38→1完整报告214ee6ef。当前backend代码已提交且复核同隔离真实模型指纹。旧图读v8已从scope发现及旧检查点恢复过滤；共享/独立120、原SI带完整tc_material_scope新Gpt提取/normalize/定位/保存重读及5原页600DPI通过。四宿主初次232+1失败保留，单例及完整233重跑通过，12变异/字段契约通过；未改超时/断言、未改科学字段/模型/96k/10Worker。相关docs/specs/136-complementary-pdf-parsing/retired-chart-scope.md。
+
+只读观察watch_current.py可重新运行（上个session30661已在90a96895失败后退出）；它只get_state、5秒检查/45秒心跳，日志watch-progress.jsonl。下一步继续全29分段与整理/组处理，不能只看到ready就结束。仍阶段一，无正式PaperID，阶段二至五全未执行；完整排障轮五阶段后要精确ID清理重传一轮无需debug完整五阶段，保留最终正式论文。Safari旧17885多同URL不要用，Chrome1758018018账号mayuan_mark@163.com需操作前重核。所有业务变更走网页。
+
 ## 最新：第5组旧图读回灌已修复，独立120/真实SI新提通过，待提交并原任务继续
 
 业务Task d789acceee124022b3257f84780d1156，Job90a96895-4f0d-40a7-8cee-5f77beace08d已failed/summarizing/material_filling，第5/27组“原候选来源未读取或不存在”；前4组8状态已持久保存，前8状态快照/阶段检查点和失败报告保留issues/retired-chart-scope/。新Job尚未点击继续，无正式PaperID，阶段二至五全未执行。observer最后observe-20261110T202353806180Z.json。

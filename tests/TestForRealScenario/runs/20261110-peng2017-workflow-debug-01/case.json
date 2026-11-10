@@ -32,7 +32,7 @@
   "started": "2026-11-10T06:21:03.520496+00:00",
   "source_commit": "2b06d1f18033f73bd40a6c54ac288fb52a776a15",
   "worktree_status": " M backend/rag/llm.py\n?? backend/tests/test_json_mode_request.py\n",
-  "status": "parsing_after_cited_original_handoff_fix",
+  "status": "parsing_after_retired_chart_scope_fix",
   "phases": [
     {
       "id": "1",
@@ -111,7 +111,7 @@
   },
   "latest_resume_commit": "3d0802112edd0e6b4476767f2b8e9432f00c8481",
   "latest_verified_step": "Flash全38数据/原图像素参照/Sc后处理前置通过，MySQL79零skip和旧失败16通过；代码3d080211已提交，原gpt任务真实Safari18044续跑新Job29ef38d7…已越SI13预算拦截",
-  "latest_source_commit": "74b56bae",
-  "latest_job_id": "90a96895-4f0d-40a7-8cee-5f77beace08d",
-  "latest_observation": "observe-20261110T184714227046Z.json"
+  "latest_source_commit": "5d400eab",
+  "latest_job_id": "862cbf40-6dab-4c37-9b5e-50fd29c7c18f",
+  "latest_observation": "observe-20261110T210344985344Z.json"
 }

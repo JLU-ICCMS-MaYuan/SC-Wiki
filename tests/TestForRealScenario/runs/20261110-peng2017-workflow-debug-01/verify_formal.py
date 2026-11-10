@@ -30,7 +30,7 @@ with Session(engine, autoflush=False) as session:
         active = json.loads((ROOT / 'active-task.json').read_text())
         assert paper.upload_task_id == active['task_id'], '论文并非本轮任务'
         result['paper'] = {key: getattr(paper, key) for key in (
-            'id', 'title', 'doi', 'upload_task_id', 'review_status', 'content_revision',
+            'id', 'title', 'knowledge_graph_title', 'doi', 'upload_task_id', 'review_status', 'content_revision',
             'approved_revision', 'reviewed_by_user_id', 'reviewed_at', 'review_comment')}
         reviewer = session.get(models.User, paper.reviewed_by_user_id) if paper.reviewed_by_user_id else None
         result['reviewer_email'] = reviewer.email if reviewer else None
@@ -53,7 +53,16 @@ with Session(engine, autoflush=False) as session:
                 'cell_parameters', 'atom_count', 'calculation_code', 'method_parameters', 'metadata_json', 'source_locator')}
                 for row in session.scalars(select(models.StructureModel).where(
                     models.StructureModel.material_state_id == state.id))]
+            item['structure_family_ids'] = sorted(session.scalars(
+                select(models.MaterialStateStructureFamily.structure_family_id).where(
+                    models.MaterialStateStructureFamily.material_state_id == state.id)))
             result['states'].append(item)
+        result['evidence_locators'] = [{key: getattr(row, key) for key in (
+            'paper_evidence_id', 'paper_file_id', 'paper_revision', 'document_block_id',
+            'pdf_page', 'bbox_json', 'figure_id', 'quote', 'source_kind', 'source_version',
+            'parser_name', 'parser_version', 'locator_hash')}
+            for row in session.scalars(select(models.PaperEvidenceLocator).where(
+                models.PaperEvidenceLocator.paper_id == paper.id).order_by(models.PaperEvidenceLocator.id))]
         result['history'] = [{key: getattr(row, key) for key in (
             'id', 'paper_revision', 'event_type', 'actor_user_id', 'actor_username_snapshot',
             'review_status', 'review_comment', 'occurred_at')}

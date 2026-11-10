@@ -1,0 +1,272 @@
+{
+  "job_id": "862cbf40-6dab-4c37-9b5e-50fd29c7c18f",
+  "completed_group": 5,
+  "scientific_values_match": true,
+  "sources_match_except_bbox_serialization": true,
+  "retired_source_absent": true,
+  "review": {
+    "supported": 67,
+    "missing": 23,
+    "uncertain": 6
+  },
+  "review_errors": 0,
+  "material": "CeH10",
+  "pressure_gpa": 200,
+  "space_group": "Fm-3m",
+  "records": [
+    {
+      "property": "dos_fermi",
+      "value_number": null,
+      "name_raw": "Hydrogen-derived DOS at the Fermi level per volume",
+      "value_raw": "",
+      "sources": [
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "chart-reading-c1add8b820ab1d073df0dbdb3ed2bde5e6b151e4",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "9e9bf0046c6da010117e2b58284cd294f5e436936265e8886e74f51c1203fbe4",
+          "pdf_page": 33
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "3e9c615e99141292c94b1223d8a3dfc0c96d983ead1021b962de2fb169fdd177",
+          "pdf_page": 33
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "63d56398d96bbf2727e66c3c028ab6944348bfcd7f1561cebab21499d420ae9e",
+          "pdf_page": 33
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "678eb75e60a0cf061aaac21bf5e4c7e3cafa26f57787c105ddc0567b37683480",
+          "pdf_page": 24
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "chart-reading-7b6b128e0dcd9cf7a42c03d781edb835b8136ece",
+          "pdf_page": 26
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "51084159d6fdeb513d79722b4e3c3c0f9c6f3ca8b7fc900eccf85b63dffbb91b",
+          "pdf_page": 26
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "013f6d45791c06ef1bdd2debaeca9c9a70e2ec9bde0b1282b858b8c070a9603b",
+          "pdf_page": 26
+        }
+      ],
+      "dos_source_archive": [
+        {
+          "property": "dos_fermi",
+          "value_number": 0.0228,
+          "name_raw": "Hydrogen-derived DOS at the Fermi level per volume",
+          "value_raw": "~0.0228 states/(eV Å³)",
+          "sources": [
+            {
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-c1add8b820ab1d073df0dbdb3ed2bde5e6b151e4",
+              "pdf_page": 4
+            },
+            {
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4
+            },
+            {
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e9bf0046c6da010117e2b58284cd294f5e436936265e8886e74f51c1203fbe4",
+              "pdf_page": 33
+            },
+            {
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "3e9c615e99141292c94b1223d8a3dfc0c96d983ead1021b962de2fb169fdd177",
+              "pdf_page": 33
+            },
+            {
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "63d56398d96bbf2727e66c3c028ab6944348bfcd7f1561cebab21499d420ae9e",
+              "pdf_page": 33
+            },
+            {
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "678eb75e60a0cf061aaac21bf5e4c7e3cafa26f57787c105ddc0567b37683480",
+              "pdf_page": 24
+            }
+          ]
+        },
+        {
+          "property": "dos_fermi",
+          "value_number": 0.0228,
+          "name_raw": "Electronic density of states at the Fermi level N_Ef",
+          "value_raw": "~0.0228 states/(eV Å³)",
+          "sources": [
+            {
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "chart-reading-7b6b128e0dcd9cf7a42c03d781edb835b8136ece",
+              "pdf_page": 26
+            },
+            {
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "51084159d6fdeb513d79722b4e3c3c0f9c6f3ca8b7fc900eccf85b63dffbb91b",
+              "pdf_page": 26
+            },
+            {
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "013f6d45791c06ef1bdd2debaeca9c9a70e2ec9bde0b1282b858b8c070a9603b",
+              "pdf_page": 26
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "property": "tc",
+      "value_number": 58,
+      "name_raw": "Superconducting transition temperature",
+      "value_raw": "~58",
+      "sources": [
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "chart-reading-66f14e29423028c0ae92ce9ce767ca03a77617bd",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "chart-reading-36cc39e3dbf05ee6bf0f04aa0ac63dea5ecaa265",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "chart-reading-fa979af3fc0e6cbbacfb4c68c5927690e2807f4f",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "fc15867541110e319d0a31ac9c5ceda651ede83fd9ee3c6f4ab26bb260b72fc5",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "d4668b93e6215d4f55c524238044e34462fc9e6b1027dbc2412156472a43aeb5",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "620fb1b2d15525a05e94aa4f8a0c4614210837e2af9baeace948b662d4be6499",
+          "pdf_page": 3
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+          "pdf_page": 3
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "678eb75e60a0cf061aaac21bf5e4c7e3cafa26f57787c105ddc0567b37683480",
+          "pdf_page": 24
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "9e9bf0046c6da010117e2b58284cd294f5e436936265e8886e74f51c1203fbe4",
+          "pdf_page": 33
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "3e9c615e99141292c94b1223d8a3dfc0c96d983ead1021b962de2fb169fdd177",
+          "pdf_page": 33
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "63d56398d96bbf2727e66c3c028ab6944348bfcd7f1561cebab21499d420ae9e",
+          "pdf_page": 33
+        }
+      ],
+      "dos_source_archive": []
+    },
+    {
+      "property": "tc",
+      "value_number": 49,
+      "name_raw": "Superconducting transition temperature",
+      "value_raw": "~49",
+      "sources": [
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "chart-reading-36cc39e3dbf05ee6bf0f04aa0ac63dea5ecaa265",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "chart-reading-66f14e29423028c0ae92ce9ce767ca03a77617bd",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "chart-reading-fa979af3fc0e6cbbacfb4c68c5927690e2807f4f",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "fc15867541110e319d0a31ac9c5ceda651ede83fd9ee3c6f4ab26bb260b72fc5",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+          "block_id": "d4668b93e6215d4f55c524238044e34462fc9e6b1027dbc2412156472a43aeb5",
+          "pdf_page": 4
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "620fb1b2d15525a05e94aa4f8a0c4614210837e2af9baeace948b662d4be6499",
+          "pdf_page": 3
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+          "pdf_page": 3
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "678eb75e60a0cf061aaac21bf5e4c7e3cafa26f57787c105ddc0567b37683480",
+          "pdf_page": 24
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "9e9bf0046c6da010117e2b58284cd294f5e436936265e8886e74f51c1203fbe4",
+          "pdf_page": 33
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "3e9c615e99141292c94b1223d8a3dfc0c96d983ead1021b962de2fb169fdd177",
+          "pdf_page": 33
+        },
+        {
+          "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+          "block_id": "63d56398d96bbf2727e66c3c028ab6944348bfcd7f1561cebab21499d420ae9e",
+          "pdf_page": 33
+        }
+      ],
+      "dos_source_archive": []
+    }
+  ]
+}

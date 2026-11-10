@@ -1,0 +1,52 @@
+{
+  "job_id": "862cbf40-6dab-4c37-9b5e-50fd29c7c18f",
+  "started_utc": "2026-11-10T21:01:43.456269+00:00",
+  "counts": [
+    {
+      "phase": "chunk_extraction",
+      "status": "completed",
+      "events": 3
+    },
+    {
+      "phase": "claims_ready",
+      "status": "completed",
+      "events": 2
+    },
+    {
+      "phase": "field_evidence_and_suggestions",
+      "status": "completed",
+      "events": 161
+    },
+    {
+      "phase": "material_state_inventory",
+      "status": "completed",
+      "events": 1
+    },
+    {
+      "phase": "scientific_form_filling",
+      "status": "completed",
+      "events": 15
+    },
+    {
+      "phase": "structure_assignment",
+      "status": "completed",
+      "events": 2
+    },
+    {
+      "phase": "structure_optimization",
+      "status": "completed",
+      "events": 1
+    },
+    {
+      "phase": "structure_reading",
+      "status": "reused",
+      "events": 9
+    },
+    {
+      "phase": "workflow_selection",
+      "status": "reused",
+      "events": 4
+    }
+  ],
+  "scope": "当前作业截至本次观察，不把reused计新HTTP调用"
+}
