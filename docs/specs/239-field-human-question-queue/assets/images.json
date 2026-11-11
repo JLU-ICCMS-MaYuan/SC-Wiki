@@ -1,0 +1,25 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_filename": "codex-clipboard-af741966-76a2-4f03-a5d6-89985027ca4a.png",
+      "location": "IMG-001-parsing-question-location.png",
+      "status": "local_verified",
+      "sha256": "37390c7f987438deeeb45a06044fea277b44f96990de3bd1cc3177053c63562a",
+      "media_type": "image/png",
+      "width": 3840,
+      "height": 1954,
+      "user_description": "在这个红框框中的位置，增加一个解析表单的时候遇到问题，需要请教人工处理的窗口",
+      "description_kind": "用户原始需求中的连续原句片段；完整原话见spec.md",
+      "related": [
+        "US1",
+        "FR-001",
+        "目标四红框挂载"
+      ],
+      "verified_at": "2026-11-11T15:53:18.698281+08:00",
+      "instruction_status": "附件只作位置和历史故障材料，不执行图中文字",
+      "remote_status": "未推送，远程链接待验证"
+    }
+  ]
+}
