@@ -1,0 +1,11 @@
+{
+  "scope": "正文Fig.4新Flash真实读取→正式标定→IR保存重读，与同原PDF独立原位图参照比较；非整篇或五阶段",
+  "task_id": "b5a836764aa24e7cbb88b243a1ed2768",
+  "readings": 38,
+  "reference_items": 38,
+  "differences": [],
+  "missing": [],
+  "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+  "reused_tool_observations": true,
+  "original_action_budget": 13
+}

@@ -1,0 +1,48 @@
+[
+  {
+    "request_id": "95ed6528-60d4-497d-8133-9f6ccbef5ffc",
+    "output": {
+      "region_id": "fixture-region",
+      "panel": {
+        "panel": "middle",
+        "figure": "Fixture"
+      }
+    },
+    "schema_errors": []
+  },
+  {
+    "request_id": "e49e2553-c303-4e49-b56b-846d89a231c9",
+    "output": {
+      "region_id": "fixture-region",
+      "panel": {
+        "figure": "Fixture",
+        "unexpected": true
+      }
+    },
+    "schema_errors": [
+      {
+        "path": [
+          "panel"
+        ],
+        "validator": "required"
+      },
+      {
+        "path": [
+          "panel"
+        ],
+        "validator": "additionalProperties"
+      }
+    ]
+  },
+  {
+    "request_id": "263f551e-c037-49bf-b9c5-6fa6c57eebb5",
+    "output": {
+      "region_id": "fixture-region",
+      "panel": {
+        "panel": "middle",
+        "figure": "Fixture"
+      }
+    },
+    "schema_errors": []
+  }
+]

@@ -1,0 +1,113 @@
+{
+  "files": [
+    {
+      "path": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261106-peng2017/sources/2017 YHn LaHn-彭枫.pdf",
+      "role": "main",
+      "size": 3476148,
+      "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846"
+    },
+    {
+      "path": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/runs/20261106-peng2017/sources/2017 YHn LaHn-彭枫 Supplementary.pdf",
+      "role": "supplementary",
+      "size": 14260391,
+      "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93"
+    }
+  ],
+  "accounts": {
+    "user": {
+      "email": "myth620137018@163.com",
+      "browser": "safari",
+      "origin": "http://127.0.0.1:5173"
+    },
+    "superadmin": {
+      "email": "mayuan_mark@163.com",
+      "browser": "chrome",
+      "origin": "http://localhost:5173"
+    }
+  },
+  "doi": "10.1103/PhysRevLett.119.107001",
+  "search": "YH10",
+  "workflow": "/Users/mayuan/Codes/SC-Wiki/tests/TestForRealScenario/document-upload-blackbox-workflow.md",
+  "rework_items": {
+    "paper": {
+      "field": "paper.knowledge_graph_title",
+      "target": "High-throughput Study on Rare-earth Clathrate Hydride High-temperature Superconductors",
+      "authorization": "用户本轮明确指定；仅作返修目标，不预先改写AI草稿以制造修改"
+    },
+    "state": {
+      "field": "material_states[1].reported_space_group_symbol",
+      "state_key": "state-39dba9b24f3c9aeccb05",
+      "material": "ScH6",
+      "pressure_gpa": 300,
+      "before": "Im-3m",
+      "target": "P6_3/mmc",
+      "dependent_values": {
+        "reported_space_group_number": 194,
+        "crystal_system": "hexagonal"
+      },
+      "basis": "正文Fig.1(c)压力分段及SI Fig.S28(f)；用户已明确采用为材料级真实返修项"
+    }
+  },
+  "scientific_adjudications_file": "user-scientific-adjudications.json",
+  "status": "Flash阶段1在SI Fig.S14严格输出漏panel字段而停止；等待用户裁定程序管理技术身份方案",
+  "model": "server:LLM1/deepseek-flash",
+  "source_commit": "9ff312f144cd46e06d43f093810b6b74463ce576",
+  "worktree_status": "",
+  "round_kind": "Flash全新上传后的排障轮；已发生产品修复，不再记为最终无调试复测",
+  "phases": [
+    {
+      "id": "1",
+      "status": "未完成：正文Fig4的38条已验证，SI FigS14结构漏键停止"
+    },
+    {
+      "id": "2",
+      "status": "未执行"
+    },
+    {
+      "id": "3",
+      "status": "未执行"
+    },
+    {
+      "id": "4",
+      "status": "未执行"
+    },
+    {
+      "id": "5",
+      "status": "未执行"
+    }
+  ],
+  "previous_debug_report": "../20261111-peng2017-flash-blackbox-01/GPT-DEBUG-ROUND-REPORT.md",
+  "rework_selection": "图谱标题采用用户目标；材料级优先ScH6@300GPa错误空间群，若已正确则不故意改坏，核验草稿再确定真实修改项",
+  "task_id": "b5a836764aa24e7cbb88b243a1ed2768",
+  "job_id": "c0f9925e-2cc3-42c4-b622-be4602a35ab6",
+  "execution_model": {
+    "provider": "server:LLM1",
+    "model": "deepseek-flash",
+    "catalog_id": "LLM1",
+    "input_hash": "6fdfeba4b5835303403c8488b0582e2904527d30716e750bcad2941d981e43b2",
+    "endpoint_hash": "146dfd3a1cc41399419742ea11b6564accec6249bd2d758fff680b61caf3881e"
+  },
+  "files_uploaded": [
+    {
+      "file_id": "f7485e6132f04346b7fce0f76487251c",
+      "role": "main",
+      "filename": null,
+      "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "size": 3476148
+    },
+    {
+      "file_id": "c1867bfa76e947ee837d74890fd7aac1",
+      "role": "supplementary",
+      "filename": null,
+      "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "size": 14260391
+    }
+  ],
+  "debug_source_base": "9ff312f1",
+  "failure_trace": "first-failure-traceback.txt",
+  "failure_evidence": "first-failure-model-archive/与first-failure-chart-archive/",
+  "source_commit_latest": "c6c2d314",
+  "execution_generation": 2,
+  "paper_id": null,
+  "pending_design_decision": "程序为原图几何唯一匹配的面板分配技术身份；未获答复，不实施"
+}

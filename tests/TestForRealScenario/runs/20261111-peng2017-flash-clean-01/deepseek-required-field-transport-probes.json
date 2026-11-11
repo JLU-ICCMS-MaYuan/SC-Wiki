@@ -1,0 +1,44 @@
+[
+  {
+    "mode": "json_object",
+    "request_id": "5f250703-c9b2-4113-b9fd-f9e8900ccc52",
+    "model": "deepseek-flash",
+    "finish_reason": "tool_calls",
+    "arguments": {
+      "region_id": "fixture-region",
+      "panel": {
+        "figure": "Fixture"
+      }
+    },
+    "schema_errors": [
+      {
+        "path": [
+          "panel"
+        ],
+        "validator": "required",
+        "message": "'panel' is a required property"
+      }
+    ]
+  },
+  {
+    "mode": "tools_only",
+    "request_id": "b87dcda6-a7a6-4ae9-8817-c676fe570ada",
+    "model": "deepseek-flash",
+    "finish_reason": "tool_calls",
+    "arguments": {
+      "region_id": "fixture-region",
+      "panel": {
+        "figure": "Fixture"
+      }
+    },
+    "schema_errors": [
+      {
+        "path": [
+          "panel"
+        ],
+        "validator": "required",
+        "message": "'panel' is a required property"
+      }
+    ]
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "mode": "native_function",
+    "request_id": "f448d247-11a0-4efc-9441-29239149225b",
+    "arguments": {
+      "panel": {
+        "figure": "Fixture"
+      },
+      "region_id": "fixture-region"
+    },
+    "schema_errors": [
+      {
+        "path": [
+          "panel"
+        ],
+        "message": "'panel' is a required property"
+      }
+    ]
+  },
+  {
+    "mode": "text_json_schema",
+    "request_id": "e738e033-8321-4735-9b81-7a73ff609a12",
+    "arguments": {
+      "region_id": "fixture-region",
+      "panel": {
+        "panel": "middle",
+        "figure": "Fixture"
+      }
+    },
+    "schema_errors": []
+  }
+]

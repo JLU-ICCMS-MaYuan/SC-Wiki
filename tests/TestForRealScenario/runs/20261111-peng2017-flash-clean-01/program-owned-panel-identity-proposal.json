@@ -1,0 +1,24 @@
+{
+  "scope": "只读方案原型；没有执行图片动作，没有写业务草稿或数据库，不作为科学结果",
+  "figure": "Fig. S14",
+  "matched_frame": {
+    "bbox": [
+      0.0,
+      344.598,
+      1000.0,
+      611.367
+    ],
+    "basis": "相邻长水平线的跨度一致；是否为独立面板仍须看图判断"
+  },
+  "observed_axis_bounds": [
+    344.6,
+    611.4
+  ],
+  "identity_localization_resolution": 0.5120327700972862,
+  "unique_match": true,
+  "proposed_program_panel_id": "panel-geometry-f27a865c2ba0c9aa",
+  "all_other_values_and_sources_unchanged": true,
+  "canonical_schema_valid": true,
+  "scientific_validation_performed": false,
+  "requires_user_design_approval": true
+}
