@@ -43,6 +43,7 @@ def test_official_request_uses_beta_and_supported_references_without_changing_co
     try:assert llm.complete_json("JSON","measurement 42",response_schema=SCHEMA)=={"measurement":{"value":42,"uncertainty":None}}
     finally:close()
     assert sent[0][0].path=="/beta/chat/completions"
+    assert 'response_format' not in sent[0][1]  # 强制原生函数使用函数Schema，避免叠加文本JSON模式。
     wire=sent[0][1]["tools"][0]["function"]["parameters"]
     assert "$defs"not in wire
     assert wire["properties"]["measurement"]["anyOf"][0]["properties"]==SCHEMA["$defs"]["Measurement"]["properties"]

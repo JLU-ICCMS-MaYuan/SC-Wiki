@@ -5,7 +5,7 @@ import json
 
 from .structured_output import StructuredOutputError
 
-MODE = "deepseek-strict-beta-def-v4"
+MODE = "deepseek-strict-beta-def-v5"
 MARKER = "_strict_transport"
 ID_FIELDS = {'file_id','block_id','quote_id','source_id','table_id','region_id'}
 ID_LISTS = {'source_ids','read_source_ids','contribution_source_ids','quote_ids','read_pages'}

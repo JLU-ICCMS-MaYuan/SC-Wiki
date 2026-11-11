@@ -110,3 +110,10 @@
 ## 2026-11-12 下一次请求的历史计数入口
 
 第5代真实任务尚未发出模型请求便在model_memory._messages失败：已合法恢复并实际执行的原生回执保留多余闭合符原串，但历史计数仍用旧json.loads。原失败请求、堆栈及完整历史在本轮history-json-failure；新回归先重现Extra data。修复将历史解析接到同一有界解码器，只用于LangChain/LangMem计数/旧过程表示，传给下一请求和归档的原始history字节、工具ID及科学值不变；不增加模型请求或扩大修复范围。模型记忆、编码、严格传输和运行器相关后端验证见native-history-after.log；真实业务继续由同Task网页恢复。
+
+
+## 2026-11-12 强制原生工具请求不叠加文本JSON格式
+
+第6代上游正常tool_calls回执在notes处混入XML样式片段，完整源响应/请求存于native-json-failure-generation6；不能当尾随闭合符恢复，本机保持拒绝。核验发现官方DeepSeek强制report/repair函数仍附加文本response_format。已按原生工具调用格式移除这个冗余模式，保留function.strict与原Schema、引用/类型/科学检查；普通JSON和auto工具/最终JSON输出仍保留JSON模式与消息JSON提示，第三方网关协议不变。并未证明这一冗余是上游XML错误的唯一原因，恢复效果继续由真实业务验证，不因一次合法输出宣称服务稳定。
+
+SDK请求回归先检出冗余，普通JSON、native/严格结构、历史交接、预算及运行器相邻回归结果见native-mode-after.log；没有改写不合法内容、放宽Schema或提高科学动作预算。

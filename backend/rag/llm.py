@@ -152,10 +152,13 @@ def _stream_json(
                          'source_reference_codec':'sref-v1' if source_ids else None,
                          'source_reference_count':len(source_ids)})
     with token_request() as receive_usage:
+        native_only=bool(_strict_transport and any(
+            d['function']['name'].startswith(('report_','repair_')) for d in tool_definitions or []))
+        _call_stats.set({**_call_stats.get(),'output_mode':'strict_native_function' if native_only else 'json_text_or_auto_tools'})
         stream = client.chat.completions.create(
             model=config.model,
             messages=messages,
-            response_format=response_format or {"type": "json_object"},
+            **({} if native_only else {'response_format':response_format or {"type":"json_object"}}),
             temperature=0.1,
             extra_body=({"thinking": {"type": "disabled"}} if deepseek else {}),
             **({"max_tokens": 65536} if deepseek else {}),
