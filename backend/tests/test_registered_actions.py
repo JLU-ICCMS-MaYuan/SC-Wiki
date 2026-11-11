@@ -59,3 +59,25 @@ def test_atomic_incomplete_response_never_uses_even_complete_looking_json():
     with pytest.raises(StructuredOutputError,match='完成标记'):
         call(client,NS(model='deepseek-flash'),'JSON','source',images=[],definitions=None,history=[],
             response_format=None,on_partial=None,on_usage=lambda _:None,on_started=lambda:None,atomic=True)
+
+
+def test_actual_complete_action_value_does_not_require_model_to_complete_host_envelope():
+    from pathlib import Path
+    from backend.rag.registered_actions import decode_response
+    fixture=json.loads((Path(__file__).parent/'fixtures/complete-action-missing-envelope.json').read_text())
+    raw=fixture['raw_response'];source=raw.strip();at=source.index(':')+1
+    while source[at].isspace():at+=1
+    expected,end=json.JSONDecoder().raw_decode(source,at)
+    assert not source[end:].strip()
+    value,audit=decode_response(raw,completed=True)
+    assert value=={'action':expected}and audit['raw_response']==raw
+    with pytest.raises(StructuredOutputError):decode_response(raw,completed=False)
+
+
+@pytest.mark.parametrize('raw',['{"action":{"name":"x","arguments":{',
+    '{"action":{"name":"x","arguments":{}} , "extra":1',
+    '{"action":{"name":"x","name":"y","arguments":{}}',
+    '{"action":{"name":"x","arguments":{"x" string="true">1}}'])
+def test_envelope_never_recovers_partial_or_ambiguous_action_content(raw):
+    from backend.rag.registered_actions import decode_response
+    with pytest.raises(StructuredOutputError):decode_response(raw,completed=True)

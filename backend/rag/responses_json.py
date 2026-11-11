@@ -13,7 +13,7 @@ def protocol_for(config):
 
 
 def call(client, config, system, prompt, *, images, definitions, history, response_format,
-         on_partial, on_usage, on_started, argument_context=None, atomic=False):
+         on_partial, on_usage, on_started, argument_context=None, atomic=False, raw_text=False):
     from .structured_output import validate_tool_action, StructuredOutputError, decode_tool_arguments
     content = [{'type':'input_text','text':prompt}]
     content += [{'type':'input_image','image_url':url,'detail':'high'} for url in images or []]
@@ -46,7 +46,7 @@ def call(client, config, system, prompt, *, images, definitions, history, respon
             if on_partial:on_partial(text)
         if response.usage:on_usage(response.usage.model_dump())
         from .llm import _extract_json
-        return _extract_json(text)
+        return text if raw_text else _extract_json(text)
     stream = client.responses.create(**options)
     output=[];actions={};completed=False
     try:

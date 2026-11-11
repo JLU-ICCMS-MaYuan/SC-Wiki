@@ -121,16 +121,17 @@ def _stream_json(
         runtime.check()
         runtime.register_client(client)
     if _json_action_transport:
-        from .registered_actions import action_schema,conversation,VERSION
+        from .registered_actions import action_schema,conversation,decode_response,VERSION
         from .structured_output import output_format,validate_tool_action,validate_output,StructuredOutputError
         from .responses_json import call as responses_call
         schema=action_schema(tool_definitions)
         _call_stats.set({**_call_stats.get(),'api_protocol':'responses','tool_transport':VERSION})
         with token_request() as receive_usage:
-            result=responses_call(client,config,system_prompt,user_prompt,images=images,definitions=None,
+            text=responses_call(client,config,system_prompt,user_prompt,images=images,definitions=None,
                 history=conversation(tool_history),response_format=output_format(schema),on_partial=on_partial,
                 on_usage=lambda value: (receive_usage(value),_call_stats.set({**_call_stats.get(),'usage':value})),
-                on_started=lambda:_call_stats.set({**_call_stats.get(),'output_started':True}),atomic=True)
+                on_started=lambda:_call_stats.set({**_call_stats.get(),'output_started':True}),atomic=True,raw_text=True)
+        result,encoding=decode_response(text,completed=True)
         if not isinstance(result,dict) or set(result)!={'action'}:
             raise StructuredOutputError('受限JSON动作必须只有action，不接受伪造的工具结果或原生ID')
         original=json.loads(json.dumps(result,ensure_ascii=False))
@@ -139,7 +140,7 @@ def _stream_json(
         _call_stats.set({**_call_stats.get(),'finish_reason':'response.completed',
             'tool_names':[action['name']],'host_action_count':1})
         return {**result,'_tool_transport':VERSION,'_host_action_raw':original,
-            **({'_panel_bindings':bindings}if bindings else{})}
+            **({'_panel_bindings':bindings}if bindings else{}),**({'_host_envelope_encoding':encoding}if encoding else{})}
     from .responses_json import protocol_for, call as responses_call
     protocol = protocol_for(config)
     _call_stats.set({**_call_stats.get(), 'api_protocol': protocol})
