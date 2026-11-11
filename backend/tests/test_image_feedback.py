@@ -7,6 +7,76 @@ from backend.ingest.chart_reading import enrich_document
 from backend.ingest.image_feedback import FeedbackProgress,issue_signature
 
 
+def test_successful_current_target_digitization_is_reused_by_final_report(tmp_path):
+    """真实取图／像素标定成功后，最终局部报告不应丢掉已完成的原观察。"""
+    path, ir, source = original(tmp_path)
+    calls = []
+    observed = panel()
+    def model(prompt, content, **options):
+        request = json.loads(content); calls.append(request)
+        if 'image_pages' in request:
+            return {'pages': [{'page': 1, 'figures': [{'bbox': [100, 100, 900, 900],
+                'label': 'Fig. 1', 'target': True, 'reason': 'Tc bars'}]}]}
+        if len(calls) == 2:
+            return {'action': {'name': 'digitize_image_elements', 'arguments': {
+                'region_id': request['region_id'], 'panel': deepcopy(observed)}}}
+        assert request['retained_tool_observations'][0] == observed
+        assert len(request['repair_inventory'][0]['verified_points']) == 2
+        return {'panels': [], 'notes': []}  # 明确提交完成：已验证观察全部原样复用。
+    result = enrich_document(ir, path, source, model)
+    assert result['readings'] == 2 and len(calls) == 3
+    from backend.ingest.document_ir import DocumentIR
+    restored = DocumentIR.model_validate_json(ir.model_dump_json())
+    facts = [b for b in restored.blocks if b.block_id.startswith('chart-reading-')]
+    assert len(facts) == 2
+    assert all('YH10' in b.text for b in facts)
+
+
+def test_tool_reuse_protects_only_verified_points_and_repairs_the_failed_neighbor(tmp_path):
+    path, ir, source = original(tmp_path)
+    calls = []
+    observed = panel(); broken = deepcopy(observed); broken['points'][1]['x'] = 5
+    def model(prompt, content, **options):
+        request = json.loads(content); calls.append(request)
+        if 'image_pages' in request:
+            return {'pages': [{'page': 1, 'figures': [{'bbox': [100, 100, 900, 900],
+                'label': 'Fig. 1', 'target': True, 'reason': 'Tc bars'}]}]}
+        if len(calls) == 2:
+            return {'action': {'name': 'digitize_image_elements', 'arguments': {
+                'region_id': request['region_id'], 'panel': broken}}}
+        assert request['repair_inventory'][0]['verified_points'] == [{'category': 'YH10', 'series': 'blue'}]
+        patch = deepcopy(observed); patch['points'] = [patch['points'][1]]
+        return {'panels': [patch], 'notes': []}
+    assert enrich_document(ir, path, source, model)['readings'] == 2
+    assert len(calls) == 3
+
+
+def test_detail_tool_observations_are_not_merged_into_target_coordinates(tmp_path):
+    path, ir, source = original(tmp_path)
+    calls = []; target = []
+    def model(prompt, content, **options):
+        request = json.loads(content); calls.append(request)
+        if 'image_pages' in request:
+            return {'pages': [{'page': 1, 'figures': [{'bbox': [100, 100, 900, 900],
+                'label': 'Fig. 1', 'target': True, 'reason': 'Tc bars'}]}]}
+        if len(calls) == 2:
+            target.append(request['region_id'])
+            return {'action': {'name': 'adjust_image_region', 'arguments': {
+                'region_id': target[0], 'bbox_page': request['crop_bbox'], 'dpi': 900,
+                'reason': '同区域高分辨率精读，保留其独立图片身份'}}}
+        if len(calls) == 3:
+            detail = request['additional_image_regions'][0]['region_id']
+            assert detail != target[0]
+            return {'action': {'name': 'digitize_image_elements', 'arguments': {
+                'region_id': detail, 'panel': panel()}}}
+        assert request['observation']['readings']
+        assert 'retained_tool_observations' not in request
+        assert 'repair_inventory' not in request
+        return {'panels': [panel()], 'notes': []}
+    assert enrich_document(ir, path, source, model)['readings'] == 2
+    assert len(calls) == 4
+
+
 def test_progress_requires_new_evidence_and_survives_restore():
     progress = FeedbackProgress()
     assert progress.observe('crop', {'region':'a'}, {'sha':'one'})

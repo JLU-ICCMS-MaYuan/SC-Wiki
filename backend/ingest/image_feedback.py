@@ -170,6 +170,9 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
             'Geometry in tool receipts belongs to its region_id, never copy detail coordinates into target coordinates. '
             'For bar-chart feedback, report ONLY corrected points or axis observations in the SAME figure/panel/quantity. '
             'The host retains verified points and their conditions; do not repeat or rewrite them. '
+            'retained_tool_observations also preserve your earlier digitization of THIS target; '
+            'repair_inventory identifies its verified points. Reuse them and report only pending changes, '
+            'while still accounting for every other panel visible in the target. '
             'If an axis changes, the program recalculates its genuine dependents from retained image observations. '
             'retained_panels are already verified source panels OUTSIDE this repair scope: do not re-read them. '
             'required_repair_panels lists the original pending identities: preserve their exact figure/panel names '
@@ -198,6 +201,25 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
             if not progress.observe(name, semantic_arguments, evidence):
                 receipt = {**receipt, 'previous_error':'相同动作没有新依据，请选择另一项具体动作或说明来源缺失。'}
                 exhausted.add(name)
+            panel = (action.get('arguments') or {}).get('panel')
+            protected = {_chart_panel_key(p) for p in payload.get('retained_panels', [])}
+            if (name in {'digitize_image_elements', 'verify_image_reading'}
+                    and receipt['locator']['region_id'] == locator['region_id']
+                    and panel.get('kind') == 'bar' and receipt.get('readings')
+                    and _chart_panel_key(panel) not in protected):
+                # 同一模型已在当前原图取到且通过实际像素校验的观察，也属于有效步骤。
+                # 精读图的不同坐标系不在这里合并；最终仍由模型提交完成报告及原有校验收口。
+                previous_answer, _ = _merge_chart_repair(previous_answer,
+                    {'panels': [panel], 'notes': []}, verified)
+                verified.update((*_chart_panel_key(panel), row['point']['category'], row['point']['series'])
+                                for row in receipt['readings'])
+                calibration_cache[content_hash(panel, locator['region_id'])] = (
+                    deepcopy(receipt['readings']), deepcopy(receipt['unresolved']))
+                payload['retained_tool_observations'] = deepcopy(previous_answer['panels'])
+                on_event({'stage': 'feedback', 'status': 'retained-tool-observation',
+                    'iteration': iteration, 'region_id': locator['region_id'],
+                    'receipt_id': receipt['receipt_id'],
+                    'verified_observation_ids': [list(key) for key in sorted(verified)]})
             new = receipt['locator']
             if name == 'adjust_image_region':
                 width,height = current_crop[2]-current_crop[0],current_crop[3]-current_crop[1]

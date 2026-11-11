@@ -125,7 +125,11 @@ def coordinate_value(axis, position, *, pixel_error=1.0):
         raise ChartReadingError('坐标刻度重复或不单调，不能猜测轴变换')
     bounds = axis_bounds(axis)
     if not bounds[0] <= x[0] <= x[-1] <= bounds[1]:
-        raise ChartReadingError('坐标刻度超出声明的图像边界')
+        raise ChartReadingError('坐标刻度超出声明的图像边界', {
+            'reason_code': 'TICK_OUTSIDE_AXIS_BOUNDS', 'axis_bounds': bounds,
+            'outside_ticks': [dict(tick) for tick in ticks
+                              if not bounds[0] <= tick['position'] <= bounds[1]],
+            'correction': '对照当前原图核对这几条刻度位置及轴边界；保持实际标签数值，不能删除刻度或从目标数据反推。'})
     if not bounds[0] <= position <= bounds[1]:
         raise ChartReadingError('数据位置超出已标定坐标，未外推')
     logarithmic = axis['scale'] == 'log10'

@@ -5,6 +5,19 @@ from backend.tests.test_chart_reading import panel
 from backend.ingest.image_feedback import _merge_chart_repair
 
 
+def test_outside_tick_feedback_names_exact_boundary_without_relaxing_it():
+    from backend.ingest.chart_calibration import coordinate_value, ChartReadingError
+    axis = {'scale': 'linear', 'bounds': [351.4, 606.9], 'ticks': [
+        {'position': 402.49, 'value': 4}, {'position': 504.03, 'value': 2},
+        {'position': 606.93, 'value': 0}]}
+    with pytest.raises(ChartReadingError) as failure:
+        coordinate_value(axis, 538, pixel_error=1.5)
+    assert failure.value.details['reason_code'] == 'TICK_OUTSIDE_AXIS_BOUNDS'
+    assert failure.value.details['axis_bounds'] == [351.4, 606.9]
+    assert failure.value.details['outside_ticks'] == [{'position': 606.93, 'value': 0}]
+    assert axis['bounds'] == [351.4, 606.9] and axis['ticks'][-1]['position'] == 606.93
+
+
 def test_partial_point_repair_keeps_valid_neighbor_conditions_and_absent_panel():
     tc=panel();dos={**deepcopy(tc),'panel':'DOS','quantity':'dos_fermi','unit':'states/eV'}
     previous={'panels':[tc,dos],'notes':[]}
