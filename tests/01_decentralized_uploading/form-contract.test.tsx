@@ -47,6 +47,55 @@ beforeEach(() => {
   vi.mocked(api.patch).mockResolvedValue({ changed: true, version: 'v2' })
 })
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.clearAllMocks() })
+it.each(['upload','revision','admin','superadmin'])('236 %s 拆分预览取消零写入，确认保留物性身份与晶胞来源',async kind=>{
+  const seed=states[0] as any
+  const old=structuredClone(seed)
+  const structure={structure_text:'original source coordinates',structure_format:'cif',structure_hash:'source-geometry',
+    review_key:'source-geometry-review',validation:{structure_hash:'source-geometry'},representations:{},sources:[{file_id:'si',pdf_page:30,block_id:'table-s1',quote:'LaH9 50 GPa Cc'}]}
+  const modules=[{module_key:'kept-module',module_code:'electronic_properties',definition_key:'module.electronic_properties',definition_version:1,
+    records:[{record_key:'kept-record',record_type:'property',module_code:'electronic_properties',property_code:'dos_fermi',
+      definition_key:'record.electronic_properties.dos_fermi',definition_version:1,value_kind:'number',value_number:.01,
+      evidences:[{file_id:'main',pdf_page:4,block_id:'figure-4',quote:'LaH9 50 GPa'}],payload:{}}]}]
+  Object.assign(seed,{material:'LaH9',pressure_value_gpa:50,reported_space_group_symbol:'Cc',reported_space_group_number:9,
+    crystal_system:'monoclinic',structure,property_modules:modules})
+  const get=vi.mocked(api.get).getMockImplementation()!
+  vi.mocked(api.get).mockImplementation(async(...args)=>args[0].includes('space-groups')
+    ?{space_groups:[{number:9,symbol:'Cc'},{number:194,symbol:'P6_3/mmc'}]}as never:get(...args))
+  try{
+    await host(kind)
+    const card=document.querySelector('[data-state-key="s0"]')as HTMLElement
+    fireEvent.click(within(card).getByRole('button',{name:'拆分结构与物性'}))
+    const dialog=await screen.findByRole('dialog',{name:'拆分结构与物性'})
+    expect(within(dialog).getByText(/结构来源完整保留/)).toBeVisible()
+    expect(within(dialog).getByText('物性记录 1 条')).toBeVisible()
+    fireEvent.click(within(dialog).getByRole('button',{name:'取消',exact:true}))
+    expect(api.patch).not.toHaveBeenCalled()
+    expect(document.querySelectorAll('[data-state-key]')).toHaveLength(5)
+    fireEvent.click(within(card).getByRole('button',{name:'拆分结构与物性'}))
+    fireEvent.change(await screen.findByLabelText('物性状态空间群号'),{target:{value:'194'}})
+    const beforePosts=vi.mocked(api.post).mock.calls.length
+    counters.cards=[]
+    fireEvent.click(screen.getByRole('button',{name:'确认拆分',exact:true}))
+    await waitFor(()=>expect(document.querySelectorAll('[data-material-state-index]')).toHaveLength(6))
+    expect(new Set(counters.cards)).toEqual(new Set([0,5]))
+    const first=document.querySelector('[data-state-key="s0"]')as HTMLElement
+    expect(within(first).getByLabelText('空间群号')).toHaveValue(194)
+    expect(first.querySelector('[data-structure-hash="source-geometry"]')).toBeNull()
+    const added=document.querySelector('[data-material-state-index="5"]')as HTMLElement
+    expect(added.dataset.stateKey).toBeTruthy()
+    expect(added.querySelector('[data-structure-hash="source-geometry"]')).not.toBeNull()
+    expect(vi.mocked(api.post).mock.calls.slice(beforePosts).some(([p])=>/jobs|preflight|submit-check/.test(p))).toBe(false)
+    fireEvent.click(screen.getByRole('button',{name:['admin','superadmin'].includes(kind)?'保存修改':'立即保存',exact:true}))
+    await waitFor(()=>expect(api.patch).toHaveBeenCalled())
+    const changes=(vi.mocked(api.patch).mock.calls.at(-1)![1]as any).changes
+    const inserted=changes.find((x:any)=>x.op==='insert'&&x.path[0]==='material_states').value
+    expect(inserted.structure).toEqual(structure)
+    expect(inserted.property_modules).toEqual([])
+    expect(changes.some((x:any)=>JSON.stringify(x.path).includes('kept-module')||JSON.stringify(x.path).includes('kept-record'))).toBe(false)
+  }finally{
+    Object.keys(seed).forEach(k=>delete seed[k]);Object.assign(seed,old)
+  }
+})
 it.each(['upload', 'revision', 'admin', 'superadmin'])('191 四类宿主：%s 未完成字段可见并从自身侧栏恢复', async kind => {
   const record = { key: 'graph-review', item_key: 'graph-review', field: 'paper.knowledge_graph_title',
     label: '图谱科学标题', current_value: 'Graph title', required: true,

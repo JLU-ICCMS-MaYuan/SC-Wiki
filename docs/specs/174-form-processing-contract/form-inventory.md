@@ -9,6 +9,8 @@
 #219：四类科学宿主共享 PaperMaterialsSection 右侧大纲、稳定身份定位；本次全高及4px留白已重跑150项表单门、8项变异检出及生产构建浏览器测量，见[材料大纲验收](../219-material-state-outline/validation.md)。禁止写入但保留查看，见[权限提示验收](../218-workdraft-permission-feedback/validation.md)。 科学字段右侧栏功能设计、原话及历史已迁移至 [#221](../221-scientific-field-sidebar/spec.md)，本处不再独立维护。
 #216的个人页检查区和独立工作区只改变列表分页与导航，不新增科学值输入入口。初始三项沿用53c32542的实际宿主/浏览器结果；#219后续全高布局的新运行另记，不冒称其他子项重新验收。
 
+#236：共享材料卡增加结构/物性拆分预览及一次确认；四宿主取消、保存、稳定身份与来源保持已通过，完整表单237、变异12项、字段契约通过。5项额外覆盖陈旧预览/权限和邻卡保护；GPT原任务普通网页确认保存重开及其他51状态不变已留证。见[拆分验收](../236-split-structure-property-state/validation.md)。本项不新增科学标准字段或审批步骤。
+
 | 用户入口 | 主要代码 | 本轮覆盖状态 |
 | --- | --- | --- |
 | `/upload/tasks/:taskId` 上传校对 | UploadTaskPage、UploadTaskEditor、MaterialStatesEditor、PropertyModuleEditor | 完整宿主及大草稿浏览器验证通过 |

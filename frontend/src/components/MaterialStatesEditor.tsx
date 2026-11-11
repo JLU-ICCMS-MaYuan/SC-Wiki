@@ -25,6 +25,8 @@ import {
 } from '../lib/classifications'
 import { useLanguage } from '../context/LanguageContext'
 import StructureCandidatePanel from './StructureCandidatePanel'
+import MaterialStateSplitDialog from './MaterialStateSplitDialog'
+import { splitMaterialState, type MaterialStateSplitPreview } from '../lib/splitMaterialState'
 import StructureCandidateSource from './StructureCandidateSource'
 import PropertyModuleEditor from './PropertyModuleEditor'
 import type { PropertySpectrumTarget as SpectrumTarget } from '../lib/propertySpectra'
@@ -268,6 +270,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   latest.current = { onChange, onScientificEdit, onUploadStructure, onStructureCandidatesChange, onError, structureCandidates, taskId, readOnly, beforeStructureUpload }
   // 折叠状态与元素种类数编辑仅存在于浏览器会话内，不写入草稿、不参与自动保存
   const [collapsedStates, setCollapsedStates] = useState<Record<number, boolean>>({})
+  const [splitPreview, setSplitPreview] = useState<MaterialStateSplitPreview | null>(null)
+  const splitConfirmed = useRef(false)
   const restoredSpectrumAnchor = useRef('')
   useEffect(() => {
     let frame = 0
@@ -325,6 +329,14 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   const updateMaterialState = (index: number, field: keyof DraftMaterialState, value: unknown) => {
     emitStates(statesRef.current.map((item, itemIndex) =>
       itemIndex === index ? { ...item, [field]: value } : item))
+  }
+
+  const openSplitPreview = (key: string) => {
+    if (latest.current.readOnly) return
+    const state = statesRef.current.find(item => item.state_key === key)
+    if (!state) return
+    splitConfirmed.current = false
+    setSplitPreview({ stateKey: key, snapshot: JSON.stringify(state), state })
   }
 
   const changeCrystalSystem = (index: number, value: CrystalSystem) => {
@@ -686,6 +698,19 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     <PropertySpectraProvider context={propertySpectra || (spectrumTarget ? { target: spectrumTarget, beforeNavigate: beforeSpectrumEdit } : undefined)}
       stateKeys={states.map((state, index) => state.state_key || 'state-' + (index + 1))} readOnly={readOnly}>
     <Box ref={editorRef} sx={readOnly ? readOnlyEvidenceFormSx : undefined}>
+      {splitPreview && <MaterialStateSplitDialog preview={splitPreview} groups={spaceGroups} readOnly={readOnly}
+        onCancel={() => setSplitPreview(null)} onConfirm={number => {
+          const group = spaceGroups.find(item => item.number === number)
+          if (!group || splitConfirmed.current) return false
+          try {
+            const next = splitMaterialState(statesRef.current, splitPreview,
+              { ...group, crystalSystem: crystalSystemForNumber(number) }, Boolean(latest.current.readOnly))
+            splitConfirmed.current = true
+            emitStates(next)
+            setSplitPreview(null)
+            return true
+          } catch { return false }
+        }} />}
       <PropertySpectrumControls />
       <Box sx={{ mt: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
@@ -741,6 +766,10 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                       {pendingCount > 0 && <Chip size="small" color="error" label={pendingCount} />}
                       <Typography variant="body2" color="text.secondary" sx={{ overflowWrap: 'anywhere' }}>{materialStateSummary(state)}</Typography>
                     </Box>
+                    {!readOnly && state.state_key && Boolean(state.structure?.structure_text)
+                      && state.property_modules?.some(module => module.records.length) && <Button size="small"
+                        onClick={event => { event.stopPropagation(); openSplitPreview(state.state_key!) }}>
+                        {t('upload.splitStructureAndProperties')}</Button>}
                     <Button size="small" color="error" startIcon={<DeleteIcon />}
                       onClick={event => {
                         event.stopPropagation()

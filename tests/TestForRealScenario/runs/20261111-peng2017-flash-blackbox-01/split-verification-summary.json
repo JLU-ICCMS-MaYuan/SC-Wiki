@@ -1,0 +1,21 @@
+{
+  "files": {
+    "frontend/src/components/MaterialStatesEditor.tsx": "652e9ef7aca27927f73eb5190ac38ee997b23155d0036e5acfc25e02fbb77ce9",
+    "frontend/src/components/MaterialStateSplitDialog.tsx": "9e0dc682d52c2cc40f47a87728cc1e5c3db9d93fbb31d0a30c4e6f43ef581db2",
+    "frontend/src/lib/splitMaterialState.ts": "33831dd6b16fb2ce0860be3666834cf521d03577e1a85b866273717ed9a63b61",
+    "frontend/src/i18n/zh/upload.ts": "6ce38da1573b239b07a3ae16f1f6ae94fd34221dd2047d27ef18c9d2fe75dd24",
+    "frontend/src/i18n/en/upload.ts": "5f4a1e86eb2be760efc59f913bf5646b7ba126c2e4e076d17d5e5d40dfdc362f",
+    "tests/01_decentralized_uploading/form-contract.test.tsx": "c8584b9831432e242763390bb5cc61541a3a1a0eb1ea9716475a458e5a9254fb",
+    "tests/01_decentralized_uploading/split-material-state.test.tsx": "2acc73bde980e14c58a0fa4205674277239a09b4cc44eafa891802a9b6bff70c"
+  },
+  "form_contract": 237,
+  "mutations": 12,
+  "field_contract": "passed",
+  "new_host_tests": 4,
+  "localized_host_retest": 4,
+  "concurrency_and_ownership_tests": 5,
+  "typescript": "passed",
+  "build": "passed",
+  "gpt_browser_split_saved_and_reopened": true,
+  "blackbox_complete": false
+}

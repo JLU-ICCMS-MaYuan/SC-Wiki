@@ -1,0 +1,19 @@
+{
+  "count": 53,
+  "lah9": [
+    {
+      "key": "state-d3a7ec5c19fad5b56094",
+      "material": "LaH9",
+      "pressure": "50",
+      "group": "P6_3/mmc"
+    },
+    {
+      "key": "structure-state-4125a619-d9d3-416c-860a-4733bbe336b3",
+      "material": "LaH9",
+      "pressure": "50",
+      "group": "Cc",
+      "structure": "31192e2f9c28533275df7e50237f5b39f58ba0ab82ad3c12fc03c4d3132c976c"
+    }
+  ],
+  "model": true
+}

@@ -1,0 +1,14 @@
+{
+  "task_id": "d789acceee124022b3257f84780d1156",
+  "before_states": 52,
+  "after_states": 53,
+  "original_key": "state-d3a7ec5c19fad5b56094",
+  "new_structure_key": "structure-state-4125a619-d9d3-416c-860a-4733bbe336b3",
+  "property_group": "P6_3/mmc",
+  "structure_group": "Cc",
+  "unchanged_structure_and_sources": true,
+  "unchanged_property_modules_and_sources": true,
+  "other_state_differences": [],
+  "original_unrelated_field_differences": [],
+  "paper_unchanged": true
+}
