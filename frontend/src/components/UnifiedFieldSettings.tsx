@@ -34,6 +34,7 @@ export default function UnifiedFieldSettings({field,label,value,schema,readOnly,
    if(!Number.isFinite(Number(current)) || (kind==='integer'&&!Number.isInteger(Number(current)))){setError('请输入完整有效的数值');return}
    next=Number(current)
   }else if(numeric)next=null
+  if(enumValues&&current==='')next=null
   if(manualValueIdentity(next)!==identity)onApply(next)
   close()
  }

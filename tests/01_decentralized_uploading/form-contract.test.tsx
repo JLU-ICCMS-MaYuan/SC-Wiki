@@ -444,3 +444,31 @@ it.each(["upload","revision","admin","superadmin"])("174 %s 人工新增材料�
   expect(insert.value.material).toBe("PrH9")
   expect(changes.filter((c:any)=>c.path[0]==="material_states")).toEqual([insert])
 })
+
+
+it.each(["upload","revision","admin","superadmin"])("226 %s 枚举设置选择未填写保存为空值，保留未改卡片",async kind=>{
+  const record={key:"d".repeat(64),item_key:"d".repeat(64),field:"material_states[0].material_dimensionality",
+    state_key:"s0",label:"材料维度",current_value:"unknown",status:"unchecked",reason:"",evidences:[],empty_allowed:true}
+  const get=vi.mocked(api.get).getMockImplementation()!,post=vi.mocked(api.post).getMockImplementation()!
+  vi.mocked(api.get).mockImplementation(async(...args)=>args[0].includes("/field-detail")
+    ?{record,review_token:"fixture-token",source_state:"empty",can_approve:false}as never:
+    args[0].includes("/manual-context")?{record,version:"fixture-manual"}as never:get(...args))
+  vi.mocked(api.post).mockImplementation(async(...args)=>args[0].endsWith("/summary")
+    ?{version:"v1",records:[record],needs_check:true}as never:post(...args))
+  await host(kind)
+  const card=document.querySelector('[data-state-key="s0"]')as HTMLElement
+  const field=card.querySelector('[data-issue-field="material_states[0].material_dimensionality"]')as HTMLElement
+  fireEvent.click(field.querySelector("[data-evidence-key]")!)
+  await screen.findByRole("dialog")
+  fireEvent.click(screen.getByRole("tab",{name:"字段设置",exact:true}))
+  const select=await screen.findByRole("combobox",{name:"当前值",exact:true})
+  fireEvent.mouseDown(select)
+  fireEvent.click(screen.getByRole("option",{name:"未填写",exact:true}))
+  fireEvent.click(screen.getByRole("button",{name:"应用修改",exact:true}))
+  fireEvent.click(await screen.findByRole("button",{name:["admin","superadmin"].includes(kind)?"保存修改":"立即保存",exact:true}))
+  await waitFor(()=>expect(api.patch).toHaveBeenCalled())
+  const changes=(vi.mocked(api.patch).mock.calls.at(-1)![1]as any).changes
+  expect(changes).toHaveLength(1)
+  expect(changes[0].path).toEqual(["material_states",{key:"state_key",value:"s0"},"material_dimensionality"])
+  expect(changes[0].value).toBeNull()
+})

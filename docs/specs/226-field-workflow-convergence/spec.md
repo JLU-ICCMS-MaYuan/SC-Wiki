@@ -67,3 +67,8 @@ Issue：[#226](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/226)，type:fe
 ## Documentation Impact
 
 更新本目录完整产物、#220/#221现行入口、#100锁约束与#174表单清单；实现后由Overview技能回写已验证事实及使用说明。Issue/Spec远程双向链接待独立推送授权核验，未验证保持OPEN。
+
+
+## 2026-11-11 原统一设置要求的实现补齐
+
+FR-001/SC-001中的枚举“未填写”必须沿既有契约存为合法空值null，不能发送未登记的空字符串；unknown仍是有内容的既有选项，只有用户明确清空才改变。实际失败、四宿主保存和网页重读见validation.md。现行交互仍只引用#221，颜色仍只引用#220。
