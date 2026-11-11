@@ -9,6 +9,27 @@ from .document_ir import content_hash
 VERSION = 'image-feedback-v2'
 
 
+def _axis_label_detail(raw, issues):
+    """失败横轴的原像素条保持目标全宽；只提供图像，不提供数字答案。"""
+    import io, math, base64, hashlib
+    from PIL import Image
+    boxes = [issue.get('suggested_crop_bbox_normalized') for issue in issues
+             if issue.get('reason_code') == 'HORIZONTAL_TICK_LABEL_POSITION_UNSUPPORTED'
+             and issue.get('suggested_crop_bbox_normalized')]
+    if not boxes: return None
+    image = Image.open(io.BytesIO(raw))
+    top = max(0, math.floor(min(box[1] for box in boxes)*image.height/1000))
+    bottom = min(image.height, math.ceil(max(box[3] for box in boxes)*image.height/1000))
+    if bottom <= top: return None
+    stream = io.BytesIO(); image.crop((0,top,image.width,bottom)).save(stream,format='PNG')
+    pixels = stream.getvalue()
+    return 'data:image/png;base64,'+base64.b64encode(pixels).decode(), {
+        'role': 'actual_axis_text_pixels_only_no_tick_values', 'original_size': list(image.size),
+        'bbox_pixels_in_image_2': [0,top,image.width,bottom], 'image_sha256': hashlib.sha256(pixels).hexdigest(),
+        'resized': False, 'coordinate_transform': {'x_offset':0,'x_scale':1,
+            'y_offset':1000*top/image.height,'y_scale':(bottom-top)/image.height}}
+
+
 def issue_signature(issues):
     """模型措辞不作为新证据；真实程序位置/错误变化仍参与进展判断。"""
     import re
@@ -148,6 +169,24 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
                 'panel_identity_bindings': deepcopy(identity_bindings), **extra}
     answer = None
     previous_answer, verified, reuse_events, calibration_cache = None, set(), [], {}
+    axis_detail = None
+    def attach_axis_detail(issues):
+        nonlocal axis_detail, images
+        result = _axis_label_detail(current_rendered['png'], issues)
+        if result is None: return
+        old_images = list(images)
+        previous_url = axis_detail[0] if axis_detail else None
+        axis_detail = result
+        url, metadata = result
+        images = images[:2] + [url] + [value for value in images[2:] if value not in {url,previous_url}]
+        for region in payload.get('additional_image_regions') or []:
+            index = region.get('image_index')
+            if index and index <= len(old_images) and old_images[index-1] in images:
+                region['image_index'] = images.index(old_images[index-1])+1
+        payload['program_axis_label_detail'] = {**metadata, 'image_index':3,
+            'source_region_id':locator['region_id'], 'source_sha256':source['sha256'],
+            'instruction':'Image 3 contains actual horizontal tick glyphs with the SAME full width and x coordinates as image 2. Read their actual numbers; do not reuse a rejected axis. Never use this strip for point y coordinates.'}
+        on_event({'stage':'feedback','status':'axis-text-detail-attached','metadata':payload['program_axis_label_detail']})
     objects = visual_objects(ir)
     for iteration in range(13):  # 复用文档工具已有动作预算，不另设无限循环。
         if cancelled(): raise InterruptedError('图像反馈已取消')
@@ -246,7 +285,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
                     'receipt_id': receipt['receipt_id'],
                     'verified_observation_ids': [list(key) for key in sorted(verified)]})
             new = receipt['locator']
-            if name == 'adjust_image_region':
+            if new['region_id'] != locator['region_id']:
                 width,height = current_crop[2]-current_crop[0],current_crop[3]-current_crop[1]
                 new = {**new, 'coordinate_transform': {
                     'kind':'detail_normalized_to_target_normalized', 'to_region_id':locator['region_id'],
@@ -255,12 +294,15 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
                     'scale':[(new['bbox_page'][2]-new['bbox_page'][0])/width,
                              (new['bbox_page'][3]-new['bbox_page'][1])/height]}}
             # 精读图只补充证据；原目标、原图2及所有待读面板的坐标系保持。
-            images = images[:2] + [url for url in actual_images if url not in images[:2]]
-            payload['additional_image_regions'] = [new]
+            images = images[:2] + ([axis_detail[0]] if axis_detail else []) + [url for url in actual_images
+                if url not in images[:2] and (not axis_detail or url != axis_detail[0])]
+            payload['additional_image_regions'] = [{**new, 'image_index': images.index(actual_images[0])+1}]
             payload['observation'] = receipt
             argument_context['regions'][new['region_id']] = {
                 **receipt['geometry_observations'], 'source_sha256': source['sha256'],
                 'pdf_page': request['pdf_page']}
+            if receipt['locator']['region_id'] == locator['region_id']:
+                attach_axis_detail(receipt.get('unresolved') or [])
             on_event({'stage':'feedback','status':'completed','iteration':iteration,
                 'action':name,'arguments':action.get('arguments'), 'receipt':receipt,'progress':progress.state()})
             if native:
@@ -337,6 +379,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
                     for issue in issues if issue.get('reason_code')=='INVALID_PANEL_OBSERVATION')
             return answer, current_crop, feedback_state()
         payload['verification_issues'] = issues
+        attach_axis_detail(issues)
         from .image_geometry import geometry_observations
         payload['current_crop_geometry'] = geometry_observations(Image.open(io.BytesIO(rendered['png'])))
         payload['current_crop_geometry']['region_id'] = locator['region_id']

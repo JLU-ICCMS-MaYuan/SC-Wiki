@@ -8,13 +8,14 @@ from .document_ir import DocumentIR
 
 
 def bar_calibration_upgrade(ir, path, source):
-    """v10仅柱几何升级：确定性复核原像素，只重提失败面板，保留有效来源块。"""
+    """v10柱几何及v11轴一致性升级；只重提失败面板，复用有效原来源。"""
     import io
     import pymupdf
     from PIL import Image
-    from .chart_calibration import bar_edge, align_value_ticks, ChartReadingError
+    from .chart_calibration import bar_edge, align_value_ticks, coordinate_value, verify_horizontal_tick_labels, ChartReadingError
     old = ir.coverage.get('chart_reading') or {}
-    if (old.get('version') != 'scientific-chart-reading-v10' or old.get('status') != 'completed'
+    legacy = {'scientific-chart-reading-v10', 'scientific-chart-reading-v11'}
+    if (old.get('version') not in legacy or old.get('status') != 'completed'
             or old.get('source_sha256') != source['sha256']
             or sorted(old.get('scanned_pages', [])) != sorted(p.pdf_page for p in ir.pages)):
         return None
@@ -28,11 +29,10 @@ def bar_calibration_upgrade(ir, path, source):
     with pymupdf.open(path) as pdf:
         for block in blocks:
             fact = block.metadata['chart_reading']
-            if (fact.get('source_sha256') != source['sha256'] or fact.get('version') != old['version']
+            inherited = (block.block_id in old.get('reused_reading_block_ids', []) and fact.get('version') in legacy)
+            if (fact.get('source_sha256') != source['sha256'] or not (fact.get('version') == old['version'] or inherited)
                     or str(fact.get('source_file_id')) != str(source['file_id'])):
                 raise ValueError('旧读图记录来源或版本冲突，未混入当前结果')
-            if fact['kind'] != 'bar' or fact['point']['reading'] != 'position':
-                continue  # 本次柱基线算法没有改变线图、标签和色标。
             image_key = (fact['pdf_page'], tuple(fact['crop_bbox']))
             if image_key not in images:
                 png = pdf[fact['pdf_page']-1].get_pixmap(dpi=600,alpha=False,
@@ -49,6 +49,15 @@ def bar_calibration_upgrade(ir, path, source):
                     if box.intersects(crop):
                         error=max(error,box.width/embedded['width']/crop.width*1000,
                                   box.height/embedded['height']/crop.height*1000)
+                axes = [fact.get('calibrated_axis') or fact['axis']] if fact['point']['reading'] != 'label' else []
+                if fact.get('x_reading', {}).get('axis'):
+                    axes.append(fact['x_reading']['axis'])
+                    verify_horizontal_tick_labels(image, fact['x_reading']['axis'], localization_error=error)
+                for axis in axes:
+                    coordinate_value(axis, axis['ticks'][0]['position'], pixel_error=2 * error)
+                if (old['version'] != 'scientific-chart-reading-v10'
+                        or fact['kind'] != 'bar' or fact['point']['reading'] != 'position'):
+                    continue
                 axis,_=align_value_ticks(image,fact['axis'],localization_error=error,verify_label_positions=True)
                 previous_axis=fact.get('calibrated_axis') or fact['axis']
                 previous_ticks={tick['value']:tick['position']for tick in previous_axis['ticks']}

@@ -70,6 +70,8 @@ def test_detail_tool_observations_are_not_merged_into_target_coordinates(tmp_pat
             return {'action': {'name': 'digitize_image_elements', 'arguments': {
                 'region_id': detail, 'panel': panel()}}}
         assert request['observation']['readings']
+        assert 'coordinate_transform' in request['additional_image_regions'][0]
+        assert request['additional_image_regions'][0]['image_index'] == 3
         assert 'retained_tool_observations' not in request
         assert 'repair_inventory' not in request
         return {'panels': [panel()], 'notes': []}

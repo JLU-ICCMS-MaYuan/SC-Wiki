@@ -6,6 +6,50 @@ from PIL import Image, ImageDraw
 from backend.ingest.chart_calibration import coordinate_value, approximate, heatmap_position, bar_edge, ChartReadingError
 
 
+def test_real_s14_wrong_energy_labels_cannot_hide_in_fitted_reading_precision():
+    import json
+    from pathlib import Path
+    failure = json.loads((Path(__file__).parent/'fixtures/native-tool-extra-closer.json').read_text())
+    raw = json.loads(failure['partial_response'])['tool_calls'][0]['arguments']
+    answer, _ = json.JSONDecoder().raw_decode(raw)
+    axis = answer['panels'][0]['x_axis']
+    with pytest.raises(ChartReadingError) as error:
+        coordinate_value(axis, 679.3, pixel_error=6)
+    assert error.value.details['reason_code'] == 'TICK_CALIBRATION_INCONSISTENT'
+
+
+def test_ticks_within_declared_localization_band_remain_calibratable():
+    axis = {'scale': 'linear', 'bounds': [100, 500], 'ticks': [
+        {'position': x, 'value': y} for x, y in zip([100, 202, 298, 402, 500], range(5))]}
+    value, precision, _ = coordinate_value(axis, 300, pixel_error=2)
+    assert abs(value - 2) < .1 and precision > 0
+
+
+def test_real_horizontal_labels_reject_self_consistent_wrong_positions():
+    from pathlib import Path
+    from PIL import Image
+    from backend.ingest.chart_calibration import verify_horizontal_tick_labels
+    image = Image.open(Path(__file__).parent/'fixtures/s14-original-energy-axis.png')
+    axis = {'scale': 'linear', 'bounds': [144.6, 942.5], 'ticks': [
+        {'position': x, 'value': y} for x, y in zip([144.6,244.1,343.5,443,542.5,642,741.5], [-20,-15,-10,-5,0,5,10])]}
+    with pytest.raises(ChartReadingError) as error:
+        verify_horizontal_tick_labels(image, axis, localization_error=3)
+    assert error.value.details['reason_code'] == 'HORIZONTAL_TICK_LABEL_POSITION_UNSUPPORTED'
+    assert axis['ticks'][4] == {'position': 542.5, 'value': 0}
+
+
+def test_real_horizontal_printed_positions_are_accepted_without_changing_values():
+    from pathlib import Path
+    from PIL import Image
+    from backend.ingest.chart_calibration import verify_horizontal_tick_labels
+    image = Image.open(Path(__file__).parent/'fixtures/s14-original-energy-axis.png')
+    axis = {'scale': 'linear', 'bounds': [149, 945], 'ticks': [
+        {'position': x, 'value': y} for x,y in zip([150.1,282.3,414.5,546.7,678.9,811.1,943.3], [-20,-15,-10,-5,0,5,10])]}
+    facts = verify_horizontal_tick_labels(image, axis, localization_error=3)
+    assert facts['checked']
+    assert [tick['value'] for tick in axis['ticks']] == [-20,-15,-10,-5,0,5,10]
+
+
 @pytest.mark.parametrize('scale,ticks,expected', [
     ('linear', [{'position': 100, 'value': 200}, {'position': 900, 'value': 0}], 100),
     ('linear', [{'position': 100, 'value': 0}, {'position': 900, 'value': 200}], 100),

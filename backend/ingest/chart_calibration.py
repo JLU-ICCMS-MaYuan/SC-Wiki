@@ -136,6 +136,24 @@ def coordinate_value(axis, position, *, pixel_error=1.0):
     if logarithmic and np.any(y <= 0):
         raise ChartReadingError('对数刻度必须为正值')
     transformed = np.log10(y) if logarithmic else y
+    # 各刻度的真实位置须能落在同一条仿射轴的定位带内。反向写成x=a*y+b，
+    # 每对刻度给a一个区间；所有区间相交等价于存在共同截距的定位带。
+    # 不能用错误刻度本身造成的拟合残差无限放大精度；两点仍不独立证明标签正确。
+    direction = 1 if transformed[-1] > transformed[0] else -1
+    increasing = direction * transformed
+    minimum, maximum = 0.0, math.inf
+    for i in range(len(x)):
+        for j in range(i + 1, len(x)):
+            dy, dx = float(increasing[j] - increasing[i]), float(x[j] - x[i])
+            if not math.isfinite(dy) or dy <= 0:
+                raise ChartReadingError('坐标刻度的物理范围无效')
+            minimum = max(minimum, (dx - 2 * pixel_error) / dy)
+            maximum = min(maximum, (dx + 2 * pixel_error) / dy)
+    if minimum > np.nextafter(maximum, math.inf):
+        raise ChartReadingError('所读刻度不能在当前定位精度内共用同一条轴；请补读实际印刷标签，不能用拟合残差放大误差或删除刻度。', {
+            'reason_code': 'TICK_CALIBRATION_INCONSISTENT', 'ticks': [dict(tick) for tick in ticks],
+            'localization_error': pixel_error,
+            'correction': '在同一原图核对刻度数字、位置及线性/对数类型；保留未解决项，不从目标数据反推。'})
     slope, intercept = np.polyfit(x, transformed, 1)
     residual = float(np.max(np.abs(slope * x + intercept - transformed)))
     middle = float(slope * position + intercept)
@@ -147,6 +165,44 @@ def coordinate_value(axis, position, *, pixel_error=1.0):
         raise ChartReadingError('坐标标定未得到有限读数与精度')
     return value, precision, {'slope': float(slope), 'intercept': float(intercept),
                               'residual': residual, 'scale': axis['scale']}
+
+
+def verify_horizontal_tick_labels(image, axis, *, localization_error=1.0):
+    """用原像素核实横轴声明位置有印刷文字；不识字、不分配刻度值。"""
+    from .image_geometry import horizontal_axis_text_regions
+    bounds = axis_bounds(axis)
+    rgb = np.asarray(image.convert('RGB'), dtype=float)
+    height, width = rgb.shape[:2]
+    left, right = max(0, round(bounds[0]*(width-1)/1000)), min(width-1, round(bounds[1]*(width-1)/1000))
+    if right <= left: return {'checked': False}
+    dark = (np.ptp(rgb, axis=2) < 8) & (np.mean(rgb, axis=2) < 128)
+    profile = dark[:, left:right+1].sum(axis=1)
+    rows = np.flatnonzero(profile > (right-left)/2)
+    if not len(rows): return {'checked': False}
+    groups = np.split(rows, np.flatnonzero(np.diff(rows) > 1)+1)
+    candidates = []
+    for group in groups:
+        spine = round(float(np.mean(group)))
+        regions = horizontal_axis_text_regions(image, spine, bounds)
+        supported = [any(box[0]-localization_error <= tick['position'] <= box[2]+localization_error
+                         for box in regions) for tick in axis['ticks']]
+        if len(regions) >= 2 and sum(supported) >= 2:
+            candidates.append((len(regions), sum(supported), spine, regions, supported))
+    if not candidates: return {'checked': False}
+    ranked = sorted(candidates, key=lambda item: item[:2], reverse=True)
+    if len(ranked)>1 and ranked[0][:2] == ranked[1][:2]:
+        return {'checked': False, 'reason': '多个原图文字行，未猜测其归属'}
+    _, _, spine, regions, supported = ranked[0]
+    original_boxes = regions
+    facts = {'checked': True, 'horizontal_spine_pixel': spine, 'axis_text_regions': original_boxes}
+    if not all(supported):
+        raise ChartReadingError('横轴声明的刻度位置没有对应印刷文字；请在当前原图补读数字和位置，不能把数学上自洽的坐标当成已看见的标签。', {
+            'reason_code': 'HORIZONTAL_TICK_LABEL_POSITION_UNSUPPORTED', **facts,
+            'unsupported_ticks': [dict(tick) for tick, ok in zip(axis['ticks'], supported) if not ok],
+            'suggested_crop_bbox_normalized': [max(0,bounds[0]-2*localization_error),
+                max(0,spine*1000/(height-1)-2*localization_error), min(1000,bounds[1]+2*localization_error),
+                min(1000,max(box[3] for box in original_boxes)+2*localization_error)]})
+    return facts
 
 
 def bar_edge(image, point, axis):

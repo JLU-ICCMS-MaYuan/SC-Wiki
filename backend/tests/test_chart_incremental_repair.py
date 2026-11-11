@@ -18,6 +18,33 @@ def test_outside_tick_feedback_names_exact_boundary_without_relaxing_it():
     assert axis['bounds'] == [351.4, 606.9] and axis['ticks'][-1]['position'] == 606.93
 
 
+def test_v11_cache_rechecks_new_axis_guard_without_reextracting_valid_neighbors(tmp_path, monkeypatch):
+    import json
+    from pathlib import Path
+    from backend.tests.test_chart_reading import original, fake_model
+    from backend.ingest import chart_reading as reader
+    from backend.ingest.chart_cache import bar_calibration_upgrade
+    path, ir, source = original(tmp_path)
+    with monkeypatch.context() as old:
+        old.setattr(reader, 'VERSION', 'scientific-chart-reading-v11')
+        reader.enrich_document(ir, path, source, fake_model([]))
+        kept = {b.block_id for b in ir.blocks if b.metadata.get('chart_reading')}
+        facts = [deepcopy(b.metadata['chart_reading']) for b in ir.blocks if b.block_id in kept]
+        fixture = json.loads((Path(__file__).parent/'fixtures/native-tool-extra-closer.json').read_text())
+        raw = json.loads(fixture['partial_response'])['tool_calls'][0]['arguments']
+        answer, _ = json.JSONDecoder().raw_decode(raw)
+        for fact in facts:
+            fact.update(kind='line', panel='BadDOS', quantity='dos_fermi', unit='states/eV',
+                        x_reading={'axis': answer['panels'][0]['x_axis']})
+        reader.append_readings(ir, facts)
+        ir.coverage['chart_reading']['readings'] = 4
+    upgrade = bar_calibration_upgrade(ir, path, source)
+    assert upgrade is not None and len(upgrade['repair_targets']) == 1
+    assert set(upgrade['reused_reading_block_ids']) == kept
+    assert upgrade['retained_panels'][upgrade['repair_targets'][0]['region_id']] == [
+        {'figure': 'Fig. 1', 'panel': 'Tc', 'quantity': 'tc'}]
+
+
 def test_partial_point_repair_keeps_valid_neighbor_conditions_and_absent_panel():
     tc=panel();dos={**deepcopy(tc),'panel':'DOS','quantity':'dos_fermi','unit':'states/eV'}
     previous={'panels':[tc,dos],'notes':[]}

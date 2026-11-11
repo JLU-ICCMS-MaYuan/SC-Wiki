@@ -47,6 +47,39 @@ def axis_text_regions(image, spine_pixel, bounds):
             or any(y0<=boundary<=y1 for boundary in frame_boundaries)]
 
 
+def horizontal_axis_text_regions(image, spine_pixel, bounds):
+    """横轴外的同一行文字像素，按字高合并邻接字形；不OCR或分配科学值。"""
+    rgb = np.asarray(image.convert('RGB'))
+    height, width = rgb.shape[:2]
+    top = min(height, spine_pixel+6)
+    below = rgb[top:]
+    if not below.size: return []
+    dark = (np.ptp(below.astype(float), axis=2)<8) & (below.mean(axis=2)<128)
+    components, _ = label(dark, structure=np.ones((3,3)))
+    low, high = [value*(width-1)/1000 for value in sorted(bounds)]
+    glyphs = []
+    for box in find_objects(components):
+        if box is None: continue
+        y, x = box; h, w = y.stop-y.start, x.stop-x.start
+        if h<3 or h>(height-top)/2 or w>(high-low)/2 or x.stop<low-100 or x.start>high+100: continue
+        glyphs.append((x.start,y.start+top,x.stop,y.stop+top))
+    if not glyphs: return []
+    text_height = float(np.percentile([box[3]-box[1] for box in glyphs],90))
+    letters = [box for box in glyphs if box[3]-box[1]>=text_height/2]
+    if not letters: return []
+    row_top = min(box[1] for box in letters)
+    # 确定数字行后保留该行的小点/负号，不因窄“1”或两位数间隙误拒绝真实刻度。
+    row = [box for box in glyphs if row_top <= (box[1]+box[3])/2 <= row_top+text_height
+           and box[2]>=low-text_height and box[0]<=high+text_height]
+    words = []
+    for box in sorted(row):
+        if words and box[0]-words[-1][2]<=text_height/2:
+            old=words[-1];words[-1]=(old[0],min(old[1],box[1]),max(old[2],box[2]),max(old[3],box[3]))
+        else: words.append(box)
+    return [[x0*1000/(width-1),y0*1000/(height-1),x1*1000/(width-1),y1*1000/(height-1)]
+            for x0,y0,x1,y1 in words if x1>=low and x0<=high]
+
+
 def geometry_observations(image):
     original_size = image.size
     view = image.convert('RGB').copy()
@@ -78,6 +111,13 @@ def geometry_observations(image):
         else:lines.append([(int(span[0]),int(span[-1]),y)])
     frames=[(int(np.median([r[0] for r in line])),int(np.median([r[1] for r in line])),float(np.mean([r[2] for r in line]))) for line in lines]
     result['horizontal_frames']=[{'x0':x0*1000/(width-1),'x1':x1*1000/(width-1),'y':y*1000/(height-1)} for x0,x1,y in frames]
+    result['horizontal_axis_text_regions'] = []
+    for x0, x1, y in frames:
+        bounds = [x0*1000/(width-1), x1*1000/(width-1)]
+        regions = horizontal_axis_text_regions(view, round(y), bounds)
+        if len(regions) >= 2:
+            result['horizontal_axis_text_regions'].append({'frame_y': y*1000/(height-1),
+                'bounds': bounds, 'regions': regions, 'role': 'printed_text_geometry_only_not_tick_values'})
     for first,second in zip(frames,frames[1:]):
         if (abs(first[0]-second[0])<=width*.025 and abs(first[1]-second[1])<=width*.025
                 and second[2]-first[2]>=max(8,height*.025)):

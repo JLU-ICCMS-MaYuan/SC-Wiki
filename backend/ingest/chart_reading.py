@@ -11,11 +11,11 @@ import re
 
 from PIL import Image
 
-from .chart_calibration import ChartReadingError, approximate, coordinate_value, heatmap_position, bar_edge, align_value_ticks
+from .chart_calibration import ChartReadingError, approximate, coordinate_value, heatmap_position, bar_edge, align_value_ticks, verify_horizontal_tick_labels
 from .document_ir import DocumentBlock, content_hash
 from .scientific_output_schema import obj, array, nullable, TEXT, NUMBER
 
-VERSION = 'scientific-chart-reading-v11'
+VERSION = 'scientific-chart-reading-v12'
 QUANTITIES = ['tc', 'lambda_ep', 'omega_log', 'dos_fermi']
 
 DISCOVERY_PROMPT = '''Inventory EVERY attached PDF page and EVERY figure visible on it, including SI.
@@ -245,6 +245,8 @@ def calibrate_panel(panel, image, source, crop_bbox):
                  'point': deepcopy(point), 'axis': deepcopy(panel['axis']), 'colorbar': deepcopy(panel['colorbar'])}
         try:
             if panel.get('x_axis'):
+                facts['x_axis_label_geometry'] = verify_horizontal_tick_labels(image, panel['x_axis'],
+                    localization_error=max(point['pixel_error'], 1000/image.width, source.get('native_pixel_error', 0)))
                 xv, xp, transform = coordinate_value(panel['x_axis'], point['x'],
                     pixel_error=2 * max(point['pixel_error'], 1000 / image.width, source.get('native_pixel_error', 0)))
                 facts['x_reading'] = {'quantity': panel.get('x_quantity'), 'unit': panel.get('x_unit'),
