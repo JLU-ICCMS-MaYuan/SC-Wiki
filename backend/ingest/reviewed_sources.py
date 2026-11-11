@@ -53,7 +53,7 @@ def rebind_references(value, chunks, file_ids):
     result = {}
     for key, item in value.items():
         if key in {'history', 'legacy_evidences', 'legacy_source_history', 'validation_record', 'audit_events',
-                   'claim', 'current_value'}:
+                   'claim', 'prior_claim', 'current_value'}:
             # 科学值与核对输入由当前稿件持有；其中的提取背景不是本字段选定引用。
             # finish会使用正式快照的当前值；不能递归改写或对这些背景另设来源门禁。
             result[key] = deepcopy(item)

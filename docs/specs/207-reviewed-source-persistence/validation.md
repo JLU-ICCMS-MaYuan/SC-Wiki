@@ -52,3 +52,8 @@
 
 
 后续网页已实际送审为论文1485；代理30秒返回502，后端随后成功，先查状态避免重复提交。超级管理员首次拒绝因转接Tc核对输入中的lambda提取背景而500，事务回滚；修复收敛为不递归改写 `claim/current_value` 科学值与核对输入，仅对采用引用转接。真实重试拒绝成功，原用户读到同论文返修入口与完整意见。证据为 `gpt-paper-submission-reread.json`、`gpt-rejection-reread.json`、`claim-input-rebind-before.log`、`handoff-selected-current.log`。最终来源、方法、关联回归64通过、2项MySQL环境跳过；表单250通过、mutation12检出、字段契约通过。旧人工证据／建议组以独立HEAD06503b53验证：当前与基线均8失败36通过，失败集相同，单列而未计通过。尚未完成返修重提、批准、探索及无调试新上传轮。
+
+
+2026-11-11返修正式重提补齐：`prepare_submission`按既有局部依赖规则生成的 `prior_claim` 是原核对输入历史，其中λ读图来源仍为原提取身份。真实重提500已保留，源级只读回放精确定位2处 `prior_claim.context.direct_inputs.payload.parameters.lambda_ep.evidences`，当前选定引用零缺失。先检出回归，再将该历史输入与claim同样原样保留，当前引用继续严格定位；64通过、2环境跳过。不是丢弃λ来源、重跑整篇或重新提取PDF。真实网页重提须另读实际结果。
+
+修复后真实网页重提返回200（27.42秒），论文1485仍为同一ID、状态pending。交接事件449、快照3，图谱标题和ScH6@300 GPa的P6_3/mmc/194/hexagonal重读一致，53状态保留；返修稿已交出，正式实体依照现有#192流程待批准后切换。尚未批准或完成探索。

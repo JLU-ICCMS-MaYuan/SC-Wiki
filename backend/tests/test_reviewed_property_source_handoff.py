@@ -50,12 +50,14 @@ def test_dos_candidate_archive_is_preserved_without_becoming_current_selected_so
         "claim": {"context": {"record": {"payload": {"dos_fermi_sources": archive}},
             "direct_inputs": {"payload.parameters.lambda_ep": {"value_number": 1.2, "evidences": [deepcopy(BACKGROUND)]}},
             "method_observations": [{"method_raw": "Eliashberg", "evidences": [deepcopy(BACKGROUND)]}]}}}
+    value["prior_claim"] = deepcopy(value["claim"])
     formal = [{**c, "file_id": "42"} for c in CHUNKS]
     moved = rebind_references(value, formal, {"main": 42})
     assert moved["evidences"][0]["file_id"] == "42"
     assert moved["claim"]["context"]["record"]["payload"]["dos_fermi_sources"] == archive
     assert moved["claim"]["context"]["method_observations"] == value["claim"]["context"]["method_observations"]
     assert moved["claim"] == value["claim"]
+    assert moved["prior_claim"] == value["prior_claim"]
     invalid = deepcopy(value); invalid["evidences"] = [deepcopy(BACKGROUND)]
     with pytest.raises(SourceReferenceError): rebind_references(invalid, formal, {"main": 42})
 
