@@ -1,0 +1,335 @@
+{
+  "task": "d789acceee124022b3257f84780d1156",
+  "job": "e7f9b20c-7799-4e6e-bce9-a033cb0e343d",
+  "job_status": "JobStatus.FINISHED",
+  "paper_id": null,
+  "material_batch": {
+    "index": 26,
+    "total": 26,
+    "action": "completed",
+    "state_count": 2,
+    "completed_states": 52
+  },
+  "citation_status": "completed",
+  "citations": 69,
+  "spectra": [
+    {
+      "panel": "__discovery__",
+      "page": null,
+      "state_key": null,
+      "run": "3fbd8275b41042b397a9484e629fabb7",
+      "status": "needs_review",
+      "parent": "e7f9b20c-7799-4e6e-bce9-a033cb0e343d",
+      "curves": 0,
+      "summary": {
+        "status": "needs_review",
+        "technical_errors": [],
+        "image_capability_verified": true,
+        "issues": [
+          {
+            "page": 14,
+            "reason": "左列为声子色散，跳过；仅借用其同排 cm⁻¹ 频率刻度。下排右侧蓝色边框的无数字纵向刻度与共享刻度位置不同，未用于频率定标。",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce"
+          },
+          {
+            "page": 14,
+            "reason": "图注确认 (a) 为 YH9、(b) 为 YH10，但图内及图注未标压力。暂选 YH9 300 GPa 和 YH10 400 GPa；YH9 的 100、150、200 GPa 及 YH10 的 200 GPa 候选不能仅据此图排除。",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce"
+          },
+          {
+            "page": 14,
+            "reason": "两排绿色曲线图内标 α²F(ω)，图注写 α²F(ω)/ω，故保留顶轴原读数，不确认其为标准 α²F，也不改换量纲。",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce"
+          },
+          {
+            "page": 14,
+            "reason": "PDOS 保留图印 eV⁻¹ 幅值刻度；Y、H 共用数值轴，但图文未明确按元素合计全部原子和方向的归一化约定。",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce"
+          },
+          {
+            "page": 14,
+            "reason": "贴着零轴或与图框、刻度或另一轨迹不可分辨的像素不视为曲线，保留缺口；两点幅值轴未独立验证线性。",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce"
+          }
+        ],
+        "skipped": [
+          {
+            "page": 1,
+            "reason": "原始目标图为论文第 1 页（107001-1），仅含题名、摘要和引言等文字；未见声子 DOS、α²F 或累计 λ 谱图，无可标定面板。",
+            "file_id": "418df5b86f64460d95c52e754c2f7bfb"
+          },
+          {
+            "page": 5,
+            "reason": "目标原图（第 107001-5 页）仅包含结论末段、致谢和参考文献，未见声子 DOS、α²F 或累计 λ 谱图，因此无可标定面板。",
+            "file_id": "418df5b86f64460d95c52e754c2f7bfb"
+          }
+        ],
+        "collections": 4,
+        "extracted_collections": 4,
+        "curve_count": 8
+      }
+    },
+    {
+      "panel": "spectrum-128680e014df93fcb781c747002bc79ca668587aa5fca2ed",
+      "page": 14,
+      "state_key": "state-54938bcd652b89fb860d",
+      "run": "bd0dd1e40d47441e8486f77dc041e1b0",
+      "status": "needs_review",
+      "parent": null,
+      "curves": 2,
+      "summary": {
+        "status": "needs_review"
+      }
+    },
+    {
+      "panel": "spectrum-8e0338605c3a11072162ecc4fb634ba596cd169ff5ef31a7",
+      "page": 14,
+      "state_key": "state-54938bcd652b89fb860d",
+      "run": "df0a2fb2b8ba4c2dbf2435172e931cb7",
+      "status": "needs_review",
+      "parent": null,
+      "curves": 2,
+      "summary": {
+        "status": "needs_review"
+      }
+    },
+    {
+      "panel": "spectrum-c1923d4f8035469d1a7b841f572bf0f25c09d834264b544b",
+      "page": 14,
+      "state_key": "state-5a863d54ce1156aba53f",
+      "run": "3f6cfc406c3342c08246c9d4a3abda97",
+      "status": "needs_review",
+      "parent": null,
+      "curves": 2,
+      "summary": {
+        "status": "needs_review"
+      }
+    },
+    {
+      "panel": "spectrum-fa62008de29999d0a3fe32f6ca6e18ab1b0b2d8f07d110c3",
+      "page": 14,
+      "state_key": "state-5a863d54ce1156aba53f",
+      "run": "509dcdc7d6ac4dcc9a8689318bfd5864",
+      "status": "needs_review",
+      "parent": null,
+      "curves": 2,
+      "summary": {
+        "status": "needs_review"
+      }
+    }
+  ],
+  "original_pages": [
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "pdf_page": 13,
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93"
+    },
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "pdf_page": 14,
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93"
+    },
+    {
+      "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+      "pdf_page": 4,
+      "source_sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846"
+    }
+  ],
+  "reused_original_pages": [
+    {
+      "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+      "pdf_page": 26,
+      "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "source_ids": [
+        "inventory-source-280",
+        "inventory-source-281",
+        "inventory-source-282",
+        "inventory-source-283",
+        "inventory-source-284",
+        "inventory-source-285",
+        "inventory-source-286",
+        "inventory-source-287",
+        "inventory-source-288",
+        "inventory-source-289",
+        "inventory-source-290",
+        "inventory-source-291",
+        "inventory-source-292",
+        "inventory-source-293",
+        "inventory-source-294",
+        "inventory-source-295"
+      ],
+      "prior_reader": "scientific-chart-reading-v10"
+    }
+  ],
+  "conflicting_plan": {
+    "reason": "图4与表S1共同支持50 GPa的LaH9结果及Cc结构；表中列出完整坐标，La系几何采用CASTEP/OTF静态优化。",
+    "source_ids": [
+      "inventory-source-44",
+      "inventory-source-83",
+      "inventory-source-187",
+      "inventory-source-806",
+      "inventory-source-807",
+      "inventory-source-808",
+      "inventory-source-853"
+    ],
+    "values": {
+      "material": "LaH9",
+      "material_name": null,
+      "pressure_value_gpa": 50,
+      "reported_space_group_number": 9,
+      "reported_space_group_symbol": "Cc",
+      "state_kind": "theoretical",
+      "structure_optimization": "classical_static"
+    }
+  },
+  "structure_assignment": [
+    {
+      "candidate_id": "pdf-structure-33dd4e573bed399ab7510ab0",
+      "geometry_evidence": {
+        "cell_parameters": {
+          "a": 5.5182,
+          "b": 5.4801,
+          "c": 8.7836
+        },
+        "source_id": "structure-source-809"
+      },
+      "new_state": null,
+      "reason": "Table S1 identifies Cc LaH9 at 50 GPa with this cell in the static DFT optimization workflow.",
+      "source_ids": [
+        "structure-source-806",
+        "structure-source-807",
+        "structure-source-808",
+        "structure-source-809",
+        "structure-source-810",
+        "structure-source-819",
+        "structure-source-185",
+        "structure-source-187"
+      ],
+      "state_key": "state-d3a7ec5c19fad5b56094",
+      "structure_optimization": "classical_static"
+    }
+  ],
+  "browser": [
+    {
+      "file": "20261111T000927136641Z-4f725cd4.json",
+      "time": "2026-11-11T00:09:27.136707+00:00",
+      "window": 18044,
+      "result": {
+        "action": "继续解析",
+        "url": "http://127.0.0.1:5173/upload/tasks/d789acceee124022b3257f84780d1156"
+      }
+    },
+    {
+      "file": "20261111T001823610270Z-dc5cdaf7.json",
+      "time": "2026-11-11T00:18:23.610397+00:00",
+      "window": 18044,
+      "result": {
+        "formula": "YH9",
+        "pressure": "150",
+        "before": "",
+        "number": "176",
+        "symbol": "P6_3/m"
+      }
+    },
+    {
+      "file": "20261111T001823965336Z-db02d5fb.json",
+      "time": "2026-11-11T00:18:23.965415+00:00",
+      "window": 18044,
+      "result": {
+        "formula": "LaH6",
+        "pressure": "100",
+        "before": "229",
+        "number": "166",
+        "symbol": "R-3m"
+      }
+    },
+    {
+      "file": "20261111T001848742202Z-90bbaeda.json",
+      "time": "2026-11-11T00:18:48.742277+00:00",
+      "window": 18044,
+      "result": {
+        "saved": "clicked",
+        "changes": [
+          [
+            4,
+            "YH9",
+            "150",
+            "176"
+          ],
+          [
+            5,
+            "LaH6",
+            "100",
+            "166"
+          ]
+        ]
+      }
+    },
+    {
+      "file": "20261111T002159659200Z-6fb63fef.json",
+      "time": "2026-11-11T00:21:59.659353+00:00",
+      "window": 18044,
+      "result": {
+        "state": "LaH9",
+        "structure": "31192e2f9c28533275df7e50237f5b39f58ba0ab82ad3c12fc03c4d3132c976c",
+        "actions": [
+          "晶体结构已采用",
+          "分数坐标",
+          "直角坐标 (Å)",
+          "下载结构",
+          "恢复为待确认"
+        ]
+      }
+    },
+    {
+      "file": "20261111T002438134522Z-28c7d50e.json",
+      "time": "2026-11-11T00:24:38.134601+00:00",
+      "window": 18044,
+      "result": {
+        "action": "保存后重开同一草稿"
+      }
+    },
+    {
+      "file": "20261111T002517507730Z-1b995ca2.json",
+      "time": "2026-11-11T00:25:17.508264+00:00",
+      "window": 18044,
+      "result": {
+        "task": "/upload/tasks/d789acceee124022b3257f84780d1156",
+        "doi": "10.1103/physrevlett.119.107001",
+        "states": [
+          [
+            "ScH6",
+            "300",
+            "Im-3m",
+            "229"
+          ],
+          [
+            "YH9",
+            "150",
+            "P6_3/m",
+            "176"
+          ],
+          [
+            "LaH6",
+            "100",
+            "R-3m",
+            "166"
+          ],
+          [
+            "LaH9",
+            "50",
+            "Cc",
+            "9"
+          ],
+          [
+            "CeH10",
+            "200",
+            "Fm-3m",
+            "225"
+          ]
+        ],
+        "submit": true
+      }
+    }
+  ]
+}

@@ -1,3 +1,13 @@
+## 最新：自动谱与引用已完成，Safari 已保存重读，待 LaH₉ 同压物相拆分
+
+任务 `d789acceee124022b3257f84780d1156`，Job `e7f9b20c-7799-4e6e-bce9-a033cb0e343d` 已 FINISHED。Safari 18044 核验原用户邮箱和模型后正常继续；实际同一自动谱运行 `3fbd8275b41042b397a9484e629fabb7` 由新 Job 接手。29/29 分段和 26/26 组共 52 状态保留，原模型和文件不变。谱数据库重读为 SI 第 14 页 4 面板、8 曲线、零技术错误；图注与坐标的 α²F 定义及两排压力归属仍待核对。引用匹配 completed，69 条。网页普通读稿、实际保存和再次打开均已留证。
+
+按正文 Fig.1(c)，网页补填 YH₉@150 GPa 的 P6₃/m（176），更正 LaH₆@100 GPa 为 R-3m（166）；只读库和网页重开一致。CeH₁₀@200 GPa 仍 Fm-3m，用户指定的 ScH₆@300 GPa 确实仍 Im-3m（229），留作退回后的真实返修项。图谱标题现为 Predicted Room-Temperature Superconductivity in YH10 and Hydrogen Clathrates of Rare-Earth Hydrides，保留待退回的用户指定标题更改。
+
+送审前阻塞：用户明确确认 LaH₉@50 GPa 拆成 P6₃/mmc 正文物性（Fig.4 Tc/DOS 及同组 λ、μ*）与 Cc 的 SI 表 S1 结构。现有草稿一张 Cc 卡同时持有两组数据。真实状态规划响应已把 Fig.4 和 S1 合到 Cc，正式请求原页未带正文 Fig.1(c) 所在第 2 页；随后结构归属按 Cc 挂表 S1，不是保存把两张状态合在一起。#136、#227、#204 已要求物相和来源隔离。现有界面证实当前 Cc 结构只有下载、恢复待确认等入口，物性表单无保留身份和来源的跨卡移动；当前 canonical 结构的恢复动作也不产生可重新分配的候选。不用手抄、改库或替换来源来拆分。
+
+[合并证据与网页重读](ready-and-phase-audit.json)。当前仍阶段一，DOI 10.1103/PhysRevLett.119.107001，未送审、无正式 Paper ID。阶段二至五未执行，未清理重传，未推送或部署。应从本草稿继续，完成正确拆分并核对受影响字段，再进五阶段和最终无调试复测。
+
 ## 最新：谱声明修复f1dbb583后续跑发现旧running，已补恢复逻辑
 
 原Task d789acceee124022b3257f84780d1156，上一Job2692ef85-d839-4007-b08e-bb4403648ad3 failed/automatic_spectra_incomplete，observe-20261110T235604582175Z.json。旧谱运行3fbd8275b41042b397a9484e629fabb7 running，实查其父Job862cbf40 FINISHED，非真实执行。补同Task当前自动谱只恢复已核实结束父Job、暂停控制信号结清本父谱，不接管运行中/未知父任务或手动谱。旧回归先检出，114通过1个MySQL竞争条件在SQLite跳过、3定向通过。下一步提交后通过Safari继续实际消费谱，不改DB状态、不重传；52状态已保存，仍无正式PaperID，阶段二至五未执行。用户已确认ScH6条件式返修，详下文。
