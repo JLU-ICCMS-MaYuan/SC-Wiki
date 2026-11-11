@@ -18,6 +18,27 @@ def test_outside_tick_feedback_names_exact_boundary_without_relaxing_it():
     assert axis['bounds'] == [351.4, 606.9] and axis['ticks'][-1]['position'] == 606.93
 
 
+def test_cached_calibration_rejection_is_repaired_without_reextracting_valid_readings(tmp_path, monkeypatch):
+    from backend.tests.test_chart_reading import original, fake_model
+    from backend.ingest import chart_reading as reader
+    from backend.ingest.chart_cache import bar_calibration_upgrade
+    path, ir, source = original(tmp_path)
+    with monkeypatch.context() as old:
+        old.setattr(reader, 'VERSION', 'scientific-chart-reading-v13')
+        reader.enrich_document(ir, path, source, fake_model([]))
+    previous = ir.coverage['chart_reading']
+    ids = {b.block_id for b in ir.blocks if b.metadata.get('chart_reading')}
+    target = previous['targets'][0]
+    previous['unresolved'].append({'region_id':target['region_id'],'page':target['page'],
+        'figure':'Fig. 1','panel':'Failed axis','quantity':'dos_fermi','category':'Total','series':'Total',
+        'reason':'Printed horizontal tick position unsupported','reason_code':'HORIZONTAL_TICK_LABEL_POSITION_UNSUPPORTED',
+        'checked':True})
+    upgrade = bar_calibration_upgrade(ir, path, source)
+    assert upgrade is not None and len(upgrade['repair_targets']) == 1
+    assert set(upgrade['reused_reading_block_ids']) == ids
+    assert upgrade['required_panels'][target['region_id']][0]['panel'] == 'Failed axis'
+
+
 def test_v11_cache_rechecks_new_axis_guard_without_reextracting_valid_neighbors(tmp_path, monkeypatch):
     import json
     from pathlib import Path

@@ -112,6 +112,26 @@ def closed_plot_frames(image):
              'source':'closed_ink_frame'}for x0,y0,x1,y1 in boxes]
 
 
+def horizontal_tick_anchors(image, spine_pixel, boxes):
+    """原像素中数字文字框对应的唯一竖短线位置；不识别或返回任何刻度数字。"""
+    import math
+    rgb=np.asarray(image.convert('RGB'));height,width=rgb.shape[:2];dark=rgb.mean(axis=2)<128
+    result=[]
+    for box in boxes:
+        left=max(0,math.floor(box[0]*(width-1)/1000));right=min(width-1,math.ceil(box[2]*(width-1)/1000))
+        bottom=min(height,math.floor(box[1]*(height-1)/1000)-2)
+        groups=[]
+        if bottom>spine_pixel+4:
+            counts=dark[spine_pixel+2:bottom,left:right+1].sum(axis=0)
+            columns=np.flatnonzero(counts>=3)+left
+            groups=np.split(columns,np.flatnonzero(np.diff(columns)>1)+1) if len(columns) else []
+            groups=[g for g in groups if int(np.max(counts[g-left]))>=len(g)]
+        result.append({'label_bbox':box,'unique':len(groups)==1,
+            **({'position':float(np.mean(groups[0]))*1000/(width-1),
+                'tick_pixels':[int(groups[0][0]),int(groups[0][-1])]} if len(groups)==1 else {})})
+    return result
+
+
 def geometry_observations(image):
     original_size = image.size
     view = image.convert('RGB').copy()
@@ -152,7 +172,9 @@ def geometry_observations(image):
         regions = horizontal_axis_text_regions(view, round(y), bounds)
         if len(regions) >= 2:
             result['horizontal_axis_text_regions'].append({'frame_y': y*1000/(height-1),
-                'bounds': bounds, 'regions': regions, 'role': 'printed_text_geometry_only_not_tick_values'})
+                'bounds': bounds, 'regions': regions,
+                'label_tick_anchors':horizontal_tick_anchors(view,round(y),regions),
+                'role': 'printed_text_geometry_only_not_tick_values'})
     for first,second in zip(frames,frames[1:]):
         if (abs(first[0]-second[0])<=width*.025 and abs(first[1]-second[1])<=width*.025
                 and second[2]-first[2]>=max(8,height*.025)):

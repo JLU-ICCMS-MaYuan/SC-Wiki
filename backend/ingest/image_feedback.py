@@ -30,6 +30,22 @@ def _axis_label_detail(raw, issues):
             'y_offset':1000*top/image.height,'y_scale':(bottom-top)/image.height}}
 
 
+def _axis_label_focus(raw, issues):
+    """分离不同轴文字带，不把多行之间的大段曲线重新塞入同一精读图。"""
+    bands=[]
+    for issue in issues:
+        box=issue.get('suggested_crop_bbox_normalized')
+        if issue.get('reason_code')=='HORIZONTAL_TICK_LABEL_POSITION_UNSUPPORTED' and box:
+            bands.append([box[1],box[3]])
+    merged=[]
+    for top,bottom in sorted(bands):
+        if merged and top<=merged[-1][1]:merged[-1][1]=max(merged[-1][1],bottom)
+        else:merged.append([top,bottom])
+    if len(merged)<2:return []
+    return [_axis_label_detail(raw,[{'reason_code':'HORIZONTAL_TICK_LABEL_POSITION_UNSUPPORTED',
+        'suggested_crop_bbox_normalized':[0,top,1000,bottom]}]) for top,bottom in merged]
+
+
 def _action_history(action, response, native, transport):
     if native:
         return [{'role':'assistant','content':None,'tool_calls':[native]},
@@ -180,15 +196,19 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
     answer = None
     previous_answer, verified, reuse_events, calibration_cache = None, set(), [], {}
     axis_detail = None
+    axis_focus_urls=[]
     def attach_axis_detail(issues):
-        nonlocal axis_detail, images
+        nonlocal axis_detail, images, axis_focus_urls
         result = _axis_label_detail(current_rendered['png'], issues)
         if result is None: return
         old_images = list(images)
         previous_url = axis_detail[0] if axis_detail else None
         axis_detail = result
         url, metadata = result
-        images = images[:2] + [url] + [value for value in images[2:] if value not in {url,previous_url}]
+        focus=_axis_label_focus(current_rendered['png'],issues)
+        removed={url,previous_url,*axis_focus_urls}
+        axis_focus_urls=[entry[0] for entry in focus]
+        images = images[:2] + [url] + axis_focus_urls + [value for value in images[2:] if value not in removed]
         for region in payload.get('additional_image_regions') or []:
             index = region.get('image_index')
             if index and index <= len(old_images) and old_images[index-1] in images:
@@ -196,6 +216,10 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
         payload['program_axis_label_detail'] = {**metadata, 'image_index':3,
             'source_region_id':locator['region_id'], 'source_sha256':source['sha256'],
             'instruction':'Image 3 contains actual horizontal tick glyphs with the SAME full width and x coordinates as image 2. Read their actual numbers; do not reuse a rejected axis. Never use this strip for point y coordinates.'}
+        payload['program_axis_label_focus']=[{**entry[1],'image_index':4+i,
+            'source_region_id':locator['region_id'],'source_sha256':source['sha256'],
+            'instruction':'One separate actual axis-label band; same full width/x coordinates as image 2. Identify its own panel or a genuinely shared axis from image 2; never borrow another axis.'}
+            for i,entry in enumerate(focus)]
         on_event({'stage':'feedback','status':'axis-text-detail-attached','metadata':payload['program_axis_label_detail']})
     objects = visual_objects(ir)
     for iteration in range(13):  # 复用文档工具已有动作预算，不另设无限循环。
@@ -232,6 +256,9 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
             'Image 2 and crop_bbox are the FIXED target coordinate frame. Detail images are supplementary; '
             'use additional_image_regions.coordinate_transform to map any detail coordinates back to image 2. '
             'Geometry in tool receipts belongs to its region_id, never copy detail coordinates into target coordinates. '
+            'horizontal_axis_text_regions.label_tick_anchors give measured positions of unique actual tick marks. '
+            'Read each number from its label_bbox, then copy its unique tick position; never use a glyph left edge '
+            'or the frame endpoint as the tick position. These observations contain no numeric tick values. '
             'For bar-chart feedback, report ONLY corrected points or axis observations in the SAME figure/panel/quantity. '
             'The host retains verified points and their conditions; do not repeat or rewrite them. '
             'retained_tool_observations also preserve your earlier digitization of THIS target; '
@@ -383,6 +410,8 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
         if not fresh:
             if coverage_issues:
                 raise ValueError('图读局部修订未保留原面板或候选，失败回执已保留，未以局部数据替换完整范围')
+            if any(issue.get('reason_code') and not source_unread(issue) for issue in issues):
+                raise ValueError('图读坐标或标定修复未完成，原回执保留，未冒充科学未报告')
             if invalid:
                 answer = deepcopy(answer)
                 answer['panels'] = [panel for i,panel in enumerate(answer['panels']) if i not in invalid]

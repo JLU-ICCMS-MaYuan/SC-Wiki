@@ -50,6 +50,41 @@ def test_real_horizontal_printed_positions_are_accepted_without_changing_values(
     assert [tick['value'] for tick in axis['ticks']] == [-20,-15,-10,-5,0,5,10]
 
 
+@pytest.mark.parametrize('correct', [True, False])
+def test_stacked_original_shared_axis_is_not_replaced_by_sibling_panel_annotation(correct):
+    from pathlib import Path
+    from backend.ingest.chart_calibration import verify_horizontal_tick_labels
+    image=Image.open(Path(__file__).parent/'fixtures/s14-stacked-dos.png')
+    positions=([150.1,282.3,414.5,546.7,678.9,811.1,943.3] if correct else
+               [144.6,244.1,343.5,443,542.5,642,741.5])
+    axis={'scale':'linear','bounds':[144,946],
+          'ticks':[{'position':x,'value':v}for x,v in zip(positions,[-20,-15,-10,-5,0,5,10])]}
+    options={'localization_error':3,'panel_bounds':[76.5,344.6],'point':{'x':678.9,'y':210}}
+    if correct:
+        result=verify_horizontal_tick_labels(image,axis,**options)
+        assert result['horizontal_spine_pixel']>2000
+    else:
+        with pytest.raises(ChartReadingError):verify_horizontal_tick_labels(image,axis,**options)
+
+
+def test_actual_text_left_edges_resolve_only_to_unique_visible_ticks():
+    from pathlib import Path
+    from copy import deepcopy
+    from backend.ingest.chart_calibration import align_horizontal_ticks
+    image=Image.open(Path(__file__).parent/'fixtures/s14-stacked-dos.png')
+    axis={'scale':'linear','bounds':[144,946],'ticks':[{'position':x,'value':v}for x,v in zip(
+        [144.6,260.4,392.4,533.1,678.3,802.6,927.6],[-20,-15,-10,-5,0,5,10])]}
+    before=deepcopy(axis)
+    with pytest.raises(ChartReadingError):coordinate_value(axis,678.3,pixel_error=4)
+    aligned,facts=align_horizontal_ticks(image,axis,localization_error=3,
+        panel_bounds=[76.5,344.6],point={'x':678.3,'y':210})
+    value,precision,_=coordinate_value(aligned,678.3,pixel_error=4)
+    assert abs(value)<=precision
+    assert facts['tick_alignment']=='unique_original_tick_pixels'
+    assert [t['value']for t in aligned['ticks']]==[t['value']for t in axis['ticks']]
+    assert axis==before and facts['raw_axis']==before
+
+
 def test_real_top_material_cannot_borrow_bottom_material_tick_positions():
     import json
     from pathlib import Path

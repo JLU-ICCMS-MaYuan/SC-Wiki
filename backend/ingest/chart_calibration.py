@@ -188,16 +188,41 @@ def verify_horizontal_tick_labels(image, axis, *, localization_error=1.0, panel_
     rows = np.flatnonzero(profile > (right-left)/2)
     if not len(rows): return {'checked': False}
     groups = np.split(rows, np.flatnonzero(np.diff(rows) > 1)+1)
-    candidates = [];rows_with_text=[]
+    candidates = [];rows_with_text=[];panel_annotations=[]
     for group in groups:
         spine = round(float(np.mean(group)))
         regions = horizontal_axis_text_regions(image, spine, bounds)
+        # 堆叠图下一幅的标题/曲线位于持续向下的双侧图框内，不是本幅轴外刻度。
+        # 只判断墨迹几何，不识字或替模型分配数值；真正的轴外数字仍走原位置检查。
+        band=dark[max(0,int(group[0])-2):min(height,int(group[-1])+3),left:right+1]
+        xs=np.flatnonzero(np.any(band,axis=0))+left
+        runs=np.split(xs,np.flatnonzero(np.diff(xs)>1)+1) if len(xs) else []
+        span=max(runs,key=len) if runs else []
+        margin=max(2,math.ceil(localization_error*width/1000))
+        filtered=[]
+        for box in regions:
+            center=round((box[1]+box[3])/2*(height-1)/1000)
+            inside=False
+            if len(span) and center>spine+8:
+                continuity=[]
+                for start,end in ((int(span[0])-2,int(span[0])+3*margin+3),
+                                  (int(span[-1])-3*margin-2,int(span[-1])+3)):
+                    strip=dark[spine+6:center+1,max(0,start):min(width,end)]
+                    continuity.append(bool(strip.size and float(np.max(np.mean(strip,axis=0)))>.8))
+                inside=all(continuity)
+            if inside:panel_annotations.append({'spine_pixel':spine,'bbox':box,'role':'inside_following_plot_not_axis_labels'})
+            else:filtered.append(box)
+        regions=filtered
         supported = [any(box[0]-localization_error <= tick['position'] <= box[2]+localization_error
                          for box in regions) for tick in axis['ticks']]
         entry=(len(regions),sum(supported),spine,regions,supported)
         candidates.append(entry)
         if len(regions)>=2:rows_with_text.append(entry)
-    if not rows_with_text:return {'checked':False}
+    if not rows_with_text:
+        if panel_annotations:
+            raise ChartReadingError('当前可见文字位于下一绘图区内部，未找到可归属的轴外刻度。',
+                {'reason_code':'HORIZONTAL_AXIS_SCOPE_AMBIGUOUS','panel_annotations':panel_annotations})
+        return {'checked':False}
     chosen=None
     if panel_bounds:
         expected=max(panel_bounds)*(height-1)/1000
@@ -213,7 +238,7 @@ def verify_horizontal_tick_labels(image, axis, *, localization_error=1.0, panel_
     _, _, spine, regions, supported = chosen
     original_boxes = regions
     facts = {'checked': True, 'horizontal_spine_pixel': spine, 'axis_text_regions': original_boxes,
-             'panel_bounds':panel_bounds,'owner_frame':owner}
+             'panel_bounds':panel_bounds,'owner_frame':owner,'excluded_panel_annotations':panel_annotations}
     if not all(supported):
         raise ChartReadingError('横轴声明的刻度位置没有对应印刷文字；请在当前原图补读数字和位置，不能把数学上自洽的坐标当成已看见的标签。', {
             'reason_code': 'HORIZONTAL_TICK_LABEL_POSITION_UNSUPPORTED', **facts,
@@ -222,6 +247,30 @@ def verify_horizontal_tick_labels(image, axis, *, localization_error=1.0, panel_
                 max(0,spine*1000/(height-1)-2*localization_error), min(1000,bounds[1]+2*localization_error),
                 min(1000,max(box[3] for box in original_boxes)+2*localization_error)]})
     return facts
+
+
+def align_horizontal_ticks(image, axis, *, localization_error, panel_bounds=None, point=None):
+    """将已读数字所属的唯一原像素短刻度作为技术位置，不更改数字。"""
+    from copy import deepcopy
+    facts=verify_horizontal_tick_labels(image,axis,localization_error=localization_error,
+        panel_bounds=panel_bounds,point=point)
+    if not facts.get('checked'):return deepcopy(axis),facts
+    from .image_geometry import horizontal_tick_anchors
+    candidates=horizontal_tick_anchors(image,facts['horizontal_spine_pixel'],facts['axis_text_regions'])
+    anchored=[];anchors=[]
+    for tick in axis['ticks']:
+        boxes=[b for b in facts['axis_text_regions'] if b[0]-localization_error<=tick['position']<=b[2]+localization_error]
+        if len(boxes)!=1:return deepcopy(axis),{**facts,'tick_alignment':'not_unique_label'}
+        box=boxes[0];anchor=next(c for c in candidates if c['label_bbox']==box)
+        if not anchor['unique']:return deepcopy(axis),{**facts,'tick_alignment':'not_unique_visible_tick'}
+        position=anchor['position']
+        anchored.append({'position':position,'value':tick['value']})
+        anchors.append({'label_bbox':box,'tick_pixels':anchor['tick_pixels'],
+            'raw_position':tick['position'],'position':position})
+    if len({t['position'] for t in anchored})!=len(anchored):
+        raise ChartReadingError('多个数字指向同一刻度，未猜测对应关系')
+    result=deepcopy(axis);result['ticks']=anchored
+    return result,{**facts,'tick_alignment':'unique_original_tick_pixels','raw_axis':deepcopy(axis),'anchors':anchors}
 
 
 def verify_line_point_support(image, point, frame, *, localization_error):

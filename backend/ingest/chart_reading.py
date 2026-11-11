@@ -11,11 +11,11 @@ import re
 
 from PIL import Image
 
-from .chart_calibration import ChartReadingError, approximate, coordinate_value, heatmap_position, bar_edge, align_value_ticks, verify_horizontal_tick_labels, verify_line_point_support
+from .chart_calibration import ChartReadingError, approximate, coordinate_value, heatmap_position, bar_edge, align_value_ticks, align_horizontal_ticks, verify_horizontal_tick_labels, verify_line_point_support
 from .document_ir import DocumentBlock, content_hash
 from .scientific_output_schema import obj, array, nullable, TEXT, NUMBER
 
-VERSION = 'scientific-chart-reading-v13'
+VERSION = 'scientific-chart-reading-v14'
 QUANTITIES = ['tc', 'lambda_ep', 'omega_log', 'dos_fermi']
 
 DISCOVERY_PROMPT = '''Inventory EVERY attached PDF page and EVERY figure visible on it, including SI.
@@ -229,6 +229,7 @@ def calibrate_panel(panel, image, source, crop_bbox):
     seen, identities, readings, unresolved = set(), set(), [], deepcopy(panel['unresolved'])
     coordinate=panel.get('value_coordinate','x' if panel.get('x_quantity')==panel.get('quantity')=='lambda_ep' else 'y')
     horizontal_value=coordinate=='x'
+    horizontal_cache={}
     for point in [*panel['points'], *unresolved]:
         pair = point['category'], point['series']
         if panel['kind'] == 'line' and panel['layout'] == 'sparse':
@@ -261,16 +262,20 @@ def calibrate_panel(panel, image, source, crop_bbox):
             if point['reading']=='position' and coordinate not in {'x','y'}:
                 raise ChartReadingError('坐标读数未明确声明主值沿横轴还是纵轴，未猜测或计算')
             if panel.get('x_axis'):
-                facts['x_axis_label_geometry'] = verify_horizontal_tick_labels(image, panel['x_axis'],
-                    localization_error=max(point['pixel_error'], 1000/image.width, source.get('native_pixel_error', 0)),
-                    panel_bounds=panel['axis']['bounds'],point=point)
+                horizontal_error=max(point['pixel_error'],1000/image.width,source.get('native_pixel_error',0))
+                cache_key=(horizontal_error,point['x'])
+                if cache_key not in horizontal_cache:
+                    horizontal_cache[cache_key]=align_horizontal_ticks(image,panel['x_axis'],
+                        localization_error=horizontal_error,panel_bounds=panel['axis']['bounds'],point=point)
+                horizontal_axis,horizontal_facts=deepcopy(horizontal_cache[cache_key])
+                facts['x_axis_label_geometry']=horizontal_facts
                 if panel['kind']=='line' and point['reading']=='position' and facts['x_axis_label_geometry'].get('owner_frame'):
                     facts['line_pixel_support']=verify_line_point_support(image,point,
                         facts['x_axis_label_geometry']['owner_frame'],localization_error=max(point['pixel_error'],1000/image.width,1000/image.height))
-                xv, xp, transform = coordinate_value(panel['x_axis'], point['x'],
+                xv, xp, transform = coordinate_value(horizontal_axis, point['x'],
                     pixel_error=2 * max(point['pixel_error'], 1000 / image.width, source.get('native_pixel_error', 0)))
                 facts['x_reading'] = {'quantity': panel['quantity'] if horizontal_value else panel.get('x_quantity'), 'unit': panel.get('x_unit'),
-                    'value': xv, 'reading_precision': xp, 'calibration': transform, 'axis': deepcopy(panel['x_axis'])}
+                    'value': xv, 'reading_precision': xp, 'calibration': transform, 'axis': deepcopy(horizontal_axis)}
                 if not horizontal_value and panel.get('x_quantity') == 'pressure':
                     from .scientific_evidence import converted_state_value
                     converted = converted_state_value({'pressure_raw': str(xv), 'pressure_unit_raw': panel.get('x_unit')}, 'pressure_value_gpa')
@@ -306,7 +311,7 @@ def calibrate_panel(panel, image, source, crop_bbox):
                 if horizontal_value:
                     if panel['kind']!='line' or not panel.get('x_axis'):
                         raise ChartReadingError('横向耦合常数读数需要原线图及其实际横轴')
-                    value_axis=panel['x_axis'];position=point['x']
+                    value_axis=horizontal_axis;position=point['x']
                     facts['value_coordinate']='x'
                     facts['calibrated_axis']=deepcopy(value_axis)
                 elif point['reading'] == 'position':

@@ -14,7 +14,7 @@ def bar_calibration_upgrade(ir, path, source):
     from PIL import Image
     from .chart_calibration import bar_edge, align_value_ticks, coordinate_value, verify_horizontal_tick_labels, ChartReadingError
     old = ir.coverage.get('chart_reading') or {}
-    legacy = {'scientific-chart-reading-v10', 'scientific-chart-reading-v11', 'scientific-chart-reading-v12'}
+    legacy = {'scientific-chart-reading-v10', 'scientific-chart-reading-v11', 'scientific-chart-reading-v12', 'scientific-chart-reading-v13'}
     if (old.get('version') not in legacy or old.get('status') != 'completed'
             or old.get('source_sha256') != source['sha256']
             or sorted(old.get('scanned_pages', [])) != sorted(p.pdf_page for p in ir.pages)):
@@ -85,6 +85,17 @@ def bar_calibration_upgrade(ir, path, source):
             raise ValueError('旧失败图读不能唯一归属原目标，未猜测或全篇重提')
         return matches[0]['region_id']
     repair_ids = {owner(b.metadata['chart_reading']) for b in blocks if panel_key(b.metadata['chart_reading']) in failures}
+    # v13有些失败观察从未生成读数，不能只复核已经成功的读数而冻结失败轴。
+    technical = {'TICK_LABEL_POSITION_UNSUPPORTED', 'TICK_OUTSIDE_AXIS_BOUNDS',
+        'TICK_CALIBRATION_INCONSISTENT', 'HORIZONTAL_AXIS_SCOPE_AMBIGUOUS',
+        'HORIZONTAL_TICK_LABEL_POSITION_UNSUPPORTED'}
+    target_ids = {t['region_id'] for t in targets}
+    for issue in old.get('unresolved', []):
+        if issue.get('reason_code') not in technical:
+            continue
+        if issue.get('region_id') not in target_ids:
+            raise ValueError('失败标定没有对应原图目标，未猜测恢复范围')
+        repair_ids.add(issue['region_id'])
     kept = [b for b in blocks if panel_key(b.metadata['chart_reading']) not in failures]
     retained_panels = {}
     required = {}

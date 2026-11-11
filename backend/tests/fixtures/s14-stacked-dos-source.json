@@ -1,0 +1,28 @@
+{
+  "说明": "从本轮真实原SI渲染的完整三层DOS图；测试只验证刻度与版面归属，不冒充整篇科学验收。",
+  "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+  "pdf_page": 13,
+  "printed_page": "S13",
+  "figure": "Fig. S14",
+  "render_dpi": 600,
+  "crop_bbox": [
+    148.65,
+    434.26,
+    440.4,
+    719.28
+  ],
+  "image_size": [
+    2432,
+    2376
+  ],
+  "image_sha256": "ce16f27986dc4000d512e548da037b1503222ee325da9f5a980758cb56540aa6",
+  "axis_labels": [
+    -20,
+    -15,
+    -10,
+    -5,
+    0,
+    5,
+    10
+  ]
+}

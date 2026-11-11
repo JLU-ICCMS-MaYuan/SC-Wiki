@@ -119,6 +119,24 @@ def test_reworded_real_missing_prh9_is_not_new_evidence():
     assert not progress.observe('program_verification','original-tc-panel',issue_signature(after))
 
 
+def test_separate_axis_bands_preserve_exact_original_pixels_and_mapping():
+    import io,base64
+    from PIL import Image,ImageDraw
+    from backend.ingest.image_feedback import _axis_label_focus
+    image=Image.new('RGB',(400,900),'white');draw=ImageDraw.Draw(image)
+    for y in (100,400,700):draw.text((30,y),'-20  -10   0   10',fill='black')
+    stream=io.BytesIO();image.save(stream,format='PNG')
+    issues=[{'reason_code':'HORIZONTAL_TICK_LABEL_POSITION_UNSUPPORTED',
+        'suggested_crop_bbox_normalized':[10,y,990,y+50]}for y in (100,430,770)]
+    strips=_axis_label_focus(stream.getvalue(),issues)
+    assert len(strips)==3
+    for url,metadata in strips:
+        actual=Image.open(io.BytesIO(base64.b64decode(url.split(',',1)[1])))
+        box=metadata['bbox_pixels_in_image_2']
+        assert actual.width==400 and actual.tobytes()==image.crop(box).tobytes()
+        assert metadata['coordinate_transform']['y_offset']==1000*box[1]/900
+
+
 def test_program_failure_returns_to_same_model_and_executes_real_crop(tmp_path):
     path, ir, source = original(tmp_path)
     calls = []
@@ -183,16 +201,18 @@ def test_discovery_hints_and_output_share_normalized_page_coordinates(tmp_path):
     assert enrich_document(ir,path,source,model)['readings']==2
 
 
-def test_repeated_unreadable_panel_is_not_saved_as_a_value(tmp_path):
+def test_repeated_invalid_coordinates_stop_without_claiming_original_is_unreadable(tmp_path):
     path, ir, source=original(tmp_path)
+    previous = ir.model_dump(mode='json')
     def model(prompt,content,**options):
         if 'image_pages' in json.loads(content):
             return {'pages':[{'page':1,'figures':[{'bbox':[100,100,900,900],
                 'label':'Fig. 1','target':True,'reason':'Tc bars'}]}]}
         reading=panel();reading['points'][0]['x']=1453
         return {'panels':[reading],'notes':[]}
-    report=enrich_document(ir,path,source,model)
-    assert not report['readings'] and report['unresolved']
+    with pytest.raises(ValueError, match='坐标或标定修复未完成'):
+        enrich_document(ir,path,source,model)
+    assert ir.model_dump(mode='json') == previous
 
 
 def test_feedback_checkpoint_resumes_with_pixels_and_without_reasking_successes(tmp_path,monkeypatch):
