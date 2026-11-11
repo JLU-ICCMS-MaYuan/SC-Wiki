@@ -1,0 +1,19 @@
+{
+  "document": {
+    "file_id": "c19cfd4759f241ed840293637bbf2666",
+    "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+    "filename": "2017 YHn LaHn-彭枫.pdf",
+    "role": "main"
+  },
+  "crop_bbox": [
+    55.932,
+    33.144,
+    291.072,
+    211.584
+  ],
+  "image_size": [
+    1960,
+    1488
+  ],
+  "png_sha256": "162ad7a6da64f03fb79d9a75cbad222100f10221d79cd2a1bafaddc648b4863f"
+}

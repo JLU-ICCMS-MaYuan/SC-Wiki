@@ -7,6 +7,118 @@ from pathlib import Path
 from .document_ir import DocumentIR
 
 
+def bar_calibration_upgrade(ir, path, source):
+    """v10仅柱几何升级：确定性复核原像素，只重提失败面板，保留有效来源块。"""
+    import io
+    import pymupdf
+    from PIL import Image
+    from .chart_calibration import bar_edge, align_value_ticks, ChartReadingError
+    old = ir.coverage.get('chart_reading') or {}
+    if (old.get('version') != 'scientific-chart-reading-v10' or old.get('status') != 'completed'
+            or old.get('source_sha256') != source['sha256']
+            or sorted(old.get('scanned_pages', [])) != sorted(p.pdf_page for p in ir.pages)):
+        return None
+    blocks = [b for b in ir.blocks if b.metadata.get('selected_for_reading') is not False
+              and isinstance(b.metadata.get('chart_reading'), dict)]
+    if len(blocks) != old.get('readings'):
+        raise ValueError('原读图检查点数量与实际来源不一致，未复用不完整记录')
+    images, failures = {}, set()
+    def panel_key(fact):
+        return (fact['pdf_page'], tuple(fact['crop_bbox']), fact['figure'], fact['panel'], fact['quantity'])
+    with pymupdf.open(path) as pdf:
+        for block in blocks:
+            fact = block.metadata['chart_reading']
+            if (fact.get('source_sha256') != source['sha256'] or fact.get('version') != old['version']
+                    or str(fact.get('source_file_id')) != str(source['file_id'])):
+                raise ValueError('旧读图记录来源或版本冲突，未混入当前结果')
+            if fact['kind'] != 'bar' or fact['point']['reading'] != 'position':
+                continue  # 本次柱基线算法没有改变线图、标签和色标。
+            image_key = (fact['pdf_page'], tuple(fact['crop_bbox']))
+            if image_key not in images:
+                png = pdf[fact['pdf_page']-1].get_pixmap(dpi=600,alpha=False,
+                    clip=pymupdf.Rect(fact['crop_bbox'])).tobytes('png')
+                images[image_key] = Image.open(io.BytesIO(png)).convert('RGB')
+            image = images[image_key]
+            try:
+                if list(image.size) != fact['image_size']:
+                    raise ChartReadingError('旧图像坐标系与原PDF渲染不一致')
+                error=max(fact['point']['pixel_error'],1000/image.width,1000/image.height)
+                crop=pymupdf.Rect(fact['crop_bbox'])
+                for embedded in pdf[fact['pdf_page']-1].get_image_info():
+                    box=pymupdf.Rect(embedded['bbox'])
+                    if box.intersects(crop):
+                        error=max(error,box.width/embedded['width']/crop.width*1000,
+                                  box.height/embedded['height']/crop.height*1000)
+                axis,_=align_value_ticks(image,fact['axis'],localization_error=error,verify_label_positions=True)
+                previous_axis=fact.get('calibrated_axis') or fact['axis']
+                previous_ticks={tick['value']:tick['position']for tick in previous_axis['ticks']}
+                if (len(previous_ticks)!=len(axis['ticks']) or any(
+                        tick['value'] not in previous_ticks
+                        or abs(tick['position']-previous_ticks[tick['value']])>error
+                        for tick in axis['ticks'])):
+                    raise ChartReadingError('共享坐标轴修正超出原定位精度，需要重读依赖该轴的面板')
+                edge, _ = bar_edge(image, fact['point'], axis)
+                if abs(edge - fact['snapped_y']) > 1e-9:
+                    raise ChartReadingError('柱几何观察已变化，需要重读当前面板')
+            except ChartReadingError:
+                failures.add(panel_key(fact))
+    targets = old.get('targets') or []
+    def owner(fact):
+        page = ir.pages[fact['pdf_page']-1]
+        crop = list(fact['crop_bbox'])
+        options = [t for t in targets if t['page'] == fact['pdf_page']]
+        exact = [t for t in options if all(abs(a-b)<1e-6 for a,b in zip(crop,[
+            max(0,t['bbox'][0]-12), max(0,t['bbox'][1]-12),
+            min(page.width,t['bbox'][2]+12), min(page.height,t['bbox'][3]+12)]))]
+        matches = exact or [t for t in options if pymupdf.Rect(crop).intersects(pymupdf.Rect(t['bbox']))]
+        if len(matches) != 1:
+            raise ValueError('旧失败图读不能唯一归属原目标，未猜测或全篇重提')
+        return matches[0]['region_id']
+    repair_ids = {owner(b.metadata['chart_reading']) for b in blocks if panel_key(b.metadata['chart_reading']) in failures}
+    kept = [b for b in blocks if panel_key(b.metadata['chart_reading']) not in failures]
+    retained_panels = {}
+    required = {}
+    def require(rid, figure, panel, quantity, pair):
+        entries = required.setdefault(rid, [])
+        matches = [entry for entry in entries if entry['figure']==figure and entry['panel']==panel
+                   and (quantity is None or entry['quantity']==quantity)]
+        if len(matches)==1:
+            entry=matches[0]
+        else:
+            entry={'figure':figure,'panel':panel,'quantity':quantity,'points':[]}
+            entries.append(entry)
+        if pair not in entry['points']:
+            entry['points'].append(pair)
+    for block in blocks:
+        fact=block.metadata['chart_reading']
+        if panel_key(fact) in failures:
+            require(owner(fact),fact['figure'],fact['panel'],fact['quantity'],
+                {key:fact['point'][key]for key in ('category','series')})
+    for issue in old.get('unresolved',[]):
+        if (issue.get('region_id')in repair_ids and all(issue.get(k) for k in ('figure','panel','category','series'))):
+            require(issue['region_id'],issue['figure'],issue['panel'],issue.get('quantity'),
+                {key:issue[key]for key in ('category','series')})
+    for block in kept:
+        fact = block.metadata['chart_reading']
+        # 不修复的文件/目标不必为了面板展示重新定位；其中的原记录整体复用。
+        if not any(t['page'] == fact['pdf_page'] and t['region_id'] in repair_ids for t in targets):
+            continue
+        rid = owner(fact)
+        entry = {key:fact[key] for key in ('figure','panel','quantity')}
+        if entry not in retained_panels.setdefault(rid, []):
+            retained_panels[rid].append(entry)
+    preserved_issues = [deepcopy(issue) for issue in old.get('unresolved', []) if issue.get('region_id') not in repair_ids]
+    keep_ids = {b.block_id for b in kept}
+    keep_ids.update(b.block_id for b in ir.blocks if b.metadata.get('selected_for_reading') is not False
+        and isinstance(b.metadata.get('chart_unresolved'),dict)
+        and b.metadata['chart_unresolved'].get('region_id') not in repair_ids)
+    return {'targets':deepcopy(targets),'repair_targets':[deepcopy(t)for t in targets if t['region_id']in repair_ids],
+        'excluded':deepcopy(old.get('excluded',[])),'regions':deepcopy(old.get('regions',[])),
+        'unresolved':preserved_issues,'context_notes':deepcopy(old.get('context_notes',[])),
+        'keep_block_ids':keep_ids,'reused_reading_block_ids':[b.block_id for b in kept],
+        'retained_panels':retained_panels,'required_panels':required,'previous_version':old['version']}
+
+
 def load_document_ir(path):
     path = Path(path)
     raw = path.read_bytes()

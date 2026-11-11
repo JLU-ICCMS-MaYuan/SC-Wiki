@@ -16,6 +16,28 @@ def test_progress_requires_new_evidence_and_survives_restore():
     assert restored.observe('crop', {'region':'a'}, {'sha':'two'})
 
 
+def test_detail_crop_does_not_replace_requested_target_or_its_coordinate_frame(tmp_path):
+    path,ir,source=original(tmp_path)
+    requests=[];initial=[]
+    def model(prompt,content,**options):
+        request=json.loads(content);requests.append(request)
+        if 'image_pages'in request:
+            return {'pages':[{'page':1,'figures':[{'bbox':[100,100,900,900],
+                'label':'Fig. 1','target':True,'reason':'Tc bars'}]}]}
+        if len(requests)==2:
+            initial.append((request['crop_bbox'],request['crop_sha256'],options['images'][1]))
+            return {'action':{'name':'adjust_image_region','arguments':{'region_id':request['region_id'],
+                'bbox_page':[60,60,150,180],'dpi':600,'reason':'只看一个柱端及其邻近刻度'}}}
+        assert request['crop_bbox']==initial[0][0]
+        assert request['crop_sha256']==initial[0][1] and options['images'][1]==initial[0][2]
+        assert len(options['images'])==3
+        detail=request['additional_image_regions'][0]
+        assert detail['coordinate_transform']['to_region_id']==request['region_id']
+        return {'panels':[panel()],'notes':[]}
+    report=enrich_document(ir,path,source,model)
+    assert report['readings']==2 and len(requests)==3
+
+
 def test_reworded_real_missing_prh9_is_not_new_evidence():
     before=[{'category':'PrH₉','series':'μ* = 0.1','reason':'No visible green bar; not zero.'}]
     after=[{'category':'PrH9','series':'μ*=0.1','reason':'No distinguishable bar above baseline after inspecting crop.'}]
@@ -196,3 +218,22 @@ def test_spectrum_feedback_uses_new_crop_as_evidence_and_keeps_original_coordina
         return {'action':{'name':'report_spectrum_calibration','arguments':{'panels':[correct],'issues':[]}}}
     result=read_spectrum(model,'spectrum',{},figure,[{'state_key':'s1'}],[original])
     assert len(calls)==3 and result['panels'][0]['curves'][0]['roi']==correct['curves'][0]['roi']
+
+
+def test_real_source_unread_is_retained_after_actual_crop_without_extra_model_rounds(tmp_path):
+    path,ir,source=original(tmp_path)
+    calls=[]
+    def model(prompt,content,**options):
+        request=json.loads(content);calls.append(request)
+        if "image_pages" in request:
+            return {"pages":[{"page":1,"figures":[{"bbox":[100,100,900,900],"label":"Fig. 1","target":True,"reason":"Tc bars"}]}]}
+        if len(calls)==2:
+            return {"action":{"name":"adjust_image_region","arguments":{"region_id":request["region_id"],
+                "bbox_page":request["crop_bbox"],"dpi":600,"reason":"实际检查柱与原刻度"}}}
+        reading=panel();missing=reading["points"].pop()
+        reading["unresolved"]=[{"category":missing["category"],"series":missing["series"],"reason":"原像素无法独立辨认该柱，保留未读。"}]
+        return {"panels":[reading],"notes":[{"scope":"target","reason":"同一条柱的未读限制，不能改写为零。"}]}
+    result=enrich_document(ir,path,source,model)
+    assert len(calls)==3
+    assert result["readings"]==1 and result["unresolved"]
+    assert not any(b.metadata.get("chart_reading",{}).get("value_number")==0 for b in ir.blocks)

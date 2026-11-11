@@ -6,7 +6,9 @@ import numpy as np
 
 
 class ChartReadingError(ValueError):
-    pass
+    def __init__(self,message,details=None):
+        super().__init__(message)
+        self.details=details or {}
 
 
 def axis_bounds(axis):
@@ -27,7 +29,7 @@ def axis_bounds(axis):
     return [low, high]
 
 
-def align_value_ticks(image, axis, *, localization_error=1.0):
+def align_value_ticks(image, axis, *, localization_error=1.0, verify_label_positions=False):
     """在实际轴线附近对齐刻度短线；没有唯一像素信号时保留原定位，不从科学值反推。"""
     from copy import deepcopy
     axis = {**axis, 'bounds': axis_bounds(axis)}
@@ -47,8 +49,13 @@ def align_value_ticks(image, axis, *, localization_error=1.0):
     best = continuity[xs].max()
     if best < (high - low) / 2: return axis, {'ticks_aligned': False}
     candidates = xs[continuity[xs] == best]; x = int(candidates[0])
-    # 只取轴外窄条，避免柱顶/数据线冒充刻度短线。
-    strip = dark[:, max(0, x - 6):max(0, x - 1)]
+    # 同一粗轴线的抗锯齿边缘可能少几个像素；先定位完整轴宽，再观察两侧短线。
+    # 刻度可朝内或朝外，不能只在轴外找。窄条不进入远处的数据柱。
+    left, right = x, x
+    while left > 0 and continuity[left - 1] >= best * .99: left -= 1
+    while right + 1 < width and continuity[right + 1] >= best * .99: right += 1
+    strip = np.concatenate((dark[:, max(0, left - 6):max(0, left - 1)],
+                            dark[:, min(width, right + 2):min(width, right + 7)]), axis=1)
     if not strip.shape[1]: return axis, {'ticks_aligned': False}
     profile = strip.sum(axis=1)
     result = deepcopy(axis); changes = []
@@ -65,7 +72,42 @@ def align_value_ticks(image, axis, *, localization_error=1.0):
         if bounds[0] <= position <= bounds[1]:
             changes.append({'value': tick['value'], 'original_position': tick['position'], 'position': position})
             tick['position'] = position
-    return result, {'ticks_aligned': bool(changes), 'axis_spine_pixel': x, 'tick_positions': changes}
+    facts = {'ticks_aligned': bool(changes), 'axis_spine_pixel': x, 'tick_positions': changes}
+    if verify_label_positions:
+        from .image_geometry import axis_text_regions
+        regions = axis_text_regions(image,x,bounds)
+        facts['axis_text_regions'] = regions
+        for tick in result['ticks']:
+            matches=[box for box in regions if box[1]-localization_error<=tick['position']<=box[3]+localization_error]
+            if len(matches)!=1:continue
+            box=matches[0]
+            a=max(0,math.floor(box[1]*(height-1)/1000));b=min(height,math.ceil(box[3]*(height-1)/1000)+1)
+            levels=profile[a:b]
+            if not len(levels)or levels.max()<2 or levels.max()<=np.median(levels):continue
+            rows=np.flatnonzero(levels==levels.max())+a
+            groups=np.split(rows,np.flatnonzero(np.diff(rows)>1)+1)
+            if len(groups)!=1:continue  # 文字附近多条刻度时不猜配对。
+            position=float(np.mean(groups[0]))*1000/(height-1)
+            if bounds[0]<=position<=bounds[1]:
+                changes.append({'value':tick['value'],'original_position':tick['position'],'position':position,
+                                'method':'unique_tick_within_printed_text_row'})
+                tick['position']=position
+        facts['ticks_aligned']=bool(changes)
+        supported = [any(box[1]-localization_error <= tick['position'] <= box[3]+localization_error
+                         for box in regions) for tick in result['ticks']]
+        # 只在原图确有多行相邻轴外文字且至少一条声明刻度与文字对应时检出错配。
+        # 此处不识字、不赋数字值；不能把无字短刻度声明成原文的数值标签。
+        if len(regions)>=2 and any(supported) and not all(supported):
+            unsupported = [round(tick['position']*(height-1)/1000)
+                           for tick,ok in zip(result['ticks'],supported) if not ok]
+            detail = {'reason_code':'TICK_LABEL_POSITION_UNSUPPORTED','axis_text_regions':regions,
+                'unsupported_tick_rows':unsupported,
+                'suggested_crop_bbox_normalized':[0,max(0,bounds[0]-2*localization_error),
+                    min(1000,(x+max(2,math.ceil(localization_error*width/1000)))*1000/(width-1)),
+                    min(1000,bounds[1]+2*localization_error)]}
+            raise ChartReadingError('所声明刻度没有对应的印刷文字行，可能把无字短刻度当成数字标签；'
+                f'未对应的原图像素行{unsupported}，请精读实际轴外文字，不删除标签来猜标定。',detail)
+    return result, facts
 
 
 def coordinate_value(axis, position, *, pixel_error=1.0):
@@ -163,6 +205,21 @@ def bar_edge(image, point, axis):
             break
         return position
     a, b = end(-1), end(1)
+    edge_resolution = 2 * max(point.get('pixel_error', 0), 1000 / (height - 1))
+    if np.ptp(color)<=tolerance and (b-a)*1000/(height-1)<=edge_resolution:
+        raise ChartReadingError('柱基线附近仅有黑灰图框/刻度宽度的像素，没有可分辨的独立柱高，未填零值',
+                                {'reason_code':'BAR_HEIGHT_BELOW_IMAGE_RESOLUTION'})
+    zero = next((tick for tick in ticks if tick['value'] == 0), None)
+    if zero is not None:
+        endpoints = [value * 1000 / (height - 1) for value in (a, b)]
+        # 现有算法按零基线取柱；零线穿过连续填色内部时不能据此标定柱高。
+        # 轴线会遮住柱末端，不能要求填色必须精确触及零刻度中心。
+        other = next((tick for tick in ticks if tick['value'] != 0 and tick['position'] != zero['position']), None)
+        positive_direction = (1 if other['value'] / (other['position'] - zero['position']) > 0 else -1) if other else 0
+        baseline_end = endpoints[0] if positive_direction > 0 else endpoints[1]
+        if positive_direction * (zero['position'] - baseline_end) > edge_resolution:
+            raise ChartReadingError(f"柱基线与声明零刻度不一致：柱端位置{endpoints[0]:.3f}/{endpoints[1]:.3f}，"
+                f"零刻度位置{zero['position']:.3f}（均为当前图0—1000坐标）；请核对原刻度或柱类型，未改轴或猜值")
     initial = point['y'] * (height - 1) / 1000
     inner = min((a, b), key=lambda y: abs(y - initial)); outer = inner
     direction = -1 if inner == a else 1

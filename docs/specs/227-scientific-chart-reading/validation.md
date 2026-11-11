@@ -120,3 +120,19 @@ v5限定所请求目标，notes按固定scope=target/context与reason区分：�
 新增6项及相邻71项通过（固定空面板和说明范围先失败），四宿主233、字段契约和12变异通过，静态编译及Bandit无发现；依赖未改，使用本轮已留证的依赖扫描告警。独立补丁投影结果另留。
 
 未改盘点复用，原PDF图4三原裁剪真实新server:LLM2/gpt-6.1-sol读取、正式标定及IR保存重读完成：36有效读数、3条上下文说明、4条真实未读（PrH9两点及ScH6两点模型定位失败），如实保留，不把该轮当整图38点通过。真实未读保护未放宽；新请求未使用旧数字答案。末次完整性保护复验复用同输入成功响应，不计新模型。此隔离不是实际完整提取/整理/科学核对/五阶段通过，后续必须同任务网页继续验收。
+
+
+## 2026-11-11 双模型黑盒排障专项
+
+真实来源保持原正文SHA-256 bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846、SI SHA-256 361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93。原模型身份Flash为server:LLM1/deepseek-flash，GPT为server:LLM2/gpt-6.1-sol；不多模型互审。源码提交、运行差异、原响应和失败原因保留于测试run及各live目录source.json/source.patch。
+
+固定回放先证明错误基线、未标数字的小刻度、文字框角点、SI跨界端点文字、内向刻度、轴变但柱顶未变的缓存、明确未读仍反复请求等故障。原始失败均保留；模型非法工具JSON、动作预算耗尽、第一次缺SQLite隔离配置及旧基线失败分别记录，不算通过。
+
+真实正文原PDF/原IR→Flash新读取失败Tc/lambda→正式标定→IR保存重读，38条有效读数，10条有效DOS原块逐字节复用，9次新请求，独立原位图参照零问题，见本run issues/flash-fig4/live-main-unread-exit/result.json。两个PrH9零点不在这38条自动读数内，按用户人工裁定另录，不能伪称模型自动识别0K。
+
+真实SI原PDF/原IR→Flash新读取S33的16根柱→正式标定/来源/保存重读，4次新请求，5条线图全文复用；独立原位图逐项核对材料、200GPa、柱身份和读数零问题。见issues/flash-fig4/live-si-inward-ticks/result.json和si-s33-independent-reference.json。S33是200GPa总DOS，正文Fig4是各自压力下H贡献DOS，二者不混用。第一次仅检查柱顶而错误复用21条的验证保留为失败调查，不冒充最终验证。
+
+测试run：tests/TestForRealScenario/runs/20261111-peng2017-flash-blackbox-01。上述为固定回放、隔离/真实模型专项，GPT与Flash两轮完整五阶段黑盒仍在进行，均不能据此宣称完成。最终完整回归和隔离源码日志另列在同run。
+
+
+最终共享回归134通过（chart-verified-final.log）；独立HEAD归档叠加明确任务源码及测试后133通过、1来源渲染失败，原因为隔离副本未设置SC_WIKI_DATA_DIR；指定独立数据目录后该项通过（chart-isolated-render-retry.log），失败原记录保留。前端246表单/12变异/字段契约和构建通过；低分辨率历史回放明确锁定新估读精度，原历史回执仍不变。没有读取或修改业务库来代替网页动作。

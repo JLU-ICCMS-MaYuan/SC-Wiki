@@ -15,7 +15,7 @@ from .chart_calibration import ChartReadingError, approximate, coordinate_value,
 from .document_ir import DocumentBlock, content_hash
 from .scientific_output_schema import obj, array, nullable, TEXT, NUMBER
 
-VERSION = 'scientific-chart-reading-v10'
+VERSION = 'scientific-chart-reading-v11'
 QUANTITIES = ['tc', 'lambda_ep', 'omega_log', 'dos_fermi']
 
 DISCOVERY_PROMPT = '''Inventory EVERY attached PDF page and EVERY figure visible on it, including SI.
@@ -51,6 +51,9 @@ context; do not emit their points or unresolved entries. Return ALL scalar-resul
 series/categories/points WITHIN the requested target. Copy numerical tick labels and their
 positions; the PROGRAM calculates values from coordinates/colorbar, so do not guess a value from body text.
 Separate Tc, lambda, omega_log and DOS definitions/units, materials, phases, pressures, methods and series.
+panel.unit MUST be a JSON string, never null. For a dimensionless quantity such as lambda, use
+"dimensionless" or "1"; for an unreported unit use "" and explain the absence. Only x_unit and
+conditions[].unit are nullable where their schema permits null. Do not invent a physical unit.
 Copy mu* and pressure ONLY when supported by the legend/caption/body mapping for that exact point.
 A shared statement 'as high as ~150 K' is NOT a 150 K value for every material. Detailed plotted points
 are distinct from that summary. Do not guess an Eliashberg variant or broadcast software parameters.
@@ -280,7 +283,7 @@ def calibrate_panel(panel, image, source, crop_bbox):
                 value_axis = panel['axis']
                 if point['reading'] == 'position':
                     value_axis, axis_facts = align_value_ticks(image, value_axis,
-                        localization_error=max(point['pixel_error'], resolution))
+                        localization_error=max(point['pixel_error'], resolution), verify_label_positions=panel['kind']=='bar')
                     facts.update(axis_alignment=axis_facts, calibrated_axis=value_axis)
                 if panel['kind'] == 'bar' and point['reading'] == 'position':
                     position, bar_facts = bar_edge(image, point, value_axis)
@@ -302,7 +305,7 @@ def calibrate_panel(panel, image, source, crop_bbox):
             readings.append(facts)
         except ChartReadingError as error:
             unresolved.append({'category': point['category'], 'series': point['series'],
-                               'point': deepcopy(point), 'reason': str(error)})
+                               'point': deepcopy(point), 'reason': str(error), **getattr(error,'details',{})})
     return readings, unresolved
 
 
@@ -351,15 +354,20 @@ def enrich_document(ir, pdf_path, source, model, *, cancelled=lambda: False, on_
     previous = ir.coverage.get('chart_reading') or {}
     if previous.get('version') == VERSION and previous.get('status') == 'completed':
         return previous
+    from .chart_cache import bar_calibration_upgrade
+    upgrade = bar_calibration_upgrade(ir,path,source)
     texts = [{'page': p.pdf_page, 'text': '\n'.join(b.text for b in ir.blocks
         if b.pdf_page == p.pdf_page and b.text and b.metadata.get('selected_for_reading') is not False
         and 'chart_reading' not in b.metadata and 'chart_unresolved' not in b.metadata)} for p in ir.pages]
     pages = sorted(p.pdf_page for p in ir.pages)
     targets, excluded, all_readings, unresolved, context_notes = [], [], [], [], []
+    if upgrade:
+        targets,excluded = upgrade['targets'],upgrade['excluded']
+        unresolved,context_notes = upgrade['unresolved'],upgrade['context_notes']
     with pymupdf.open(path) as pdf:
-        regions = chart_regions(ir,pdf)
+        regions = upgrade['regions'] if upgrade else chart_regions(ir,pdf)
         # 分批是图像传输预算，不是文献/图表数量限制；每页及每个原图区域均有去向。
-        for start in range(0, len(pages), 6):
+        for start in ([] if upgrade else range(0, len(pages), 6)):
             if cancelled(): raise InterruptedError('图表读取已取消')
             batch_pages = pages[start:start + 6]
             batch = [r for r in regions if r['page'] in batch_pages]
@@ -381,7 +389,7 @@ def enrich_document(ir, pdf_path, source, model, *, cancelled=lambda: False, on_
                                       for p in batch_pages}, cancelled=cancelled, on_event=on_event)
             on_event({'stage': 'discovery', 'status': 'completed', 'pages': batch_pages, 'response': answer})
             targets.extend(found); excluded.extend(skipped)
-        for target in targets:
+        for target in (upgrade['repair_targets'] if upgrade else targets):
             page, selected = target['page'], [target]
             if cancelled(): raise InterruptedError('图表读取已取消')
             original = pdf[page - 1]; rect = original.rect
@@ -407,6 +415,9 @@ def enrich_document(ir, pdf_path, source, model, *, cancelled=lambda: False, on_
                        'source_pages': texts, 'crop_sha256': hashlib.sha256(crop_png).hexdigest(),
                        'image_origin': image_origin, 'complete_figure': full_locator,
                        'context_image_size': [context_image['width'], context_image['height']]}
+            if upgrade:
+                request['retained_panels'] = upgrade['retained_panels'].get(target['region_id'],[])
+                request['required_repair_panels'] = upgrade['required_panels'].get(target['region_id'],[])
             on_event({'stage': 'reading', 'status': 'started', 'pages': [page], 'request': request})
             with call_phase('chart_reading', filename=source['filename'], pages=[page]):
                 from .image_feedback import read_chart
@@ -444,6 +455,7 @@ def enrich_document(ir, pdf_path, source, model, *, cancelled=lambda: False, on_
                 all_readings.extend(readings)
                 unresolved.extend({'page': page, 'region_id': target['region_id'],
                                    'figure': panel['figure'], 'panel': panel['panel'],
+                                   'quantity': panel['quantity'],
                                    'crop_bbox': crop, **m} for m in missing)
             for note in answer['notes']:
                 destination = unresolved if note['scope']=='target' else context_notes
@@ -454,6 +466,10 @@ def enrich_document(ir, pdf_path, source, model, *, cancelled=lambda: False, on_
     # 新版本成功前不改旧块；原读数保留供既有来源引用，但不再作为本轮提取事实。
     candidate = ir.model_copy(deep=True)
     for block in candidate.blocks:
+        if block.metadata.get('selected_for_reading') is False:
+            continue  # 历史失败/退役记录保留其原先的替代关系，不改写成当前版本。
+        if upgrade and block.block_id in upgrade['keep_block_ids']:
+            continue
         if (block.metadata.get('parser', '').startswith('scientific-chart-reading-')
                 and block.metadata.get('parser') != VERSION
                 and ('chart_reading' in block.metadata or 'chart_unresolved' in block.metadata)):
@@ -467,6 +483,8 @@ def enrich_document(ir, pdf_path, source, model, *, cancelled=lambda: False, on_
             if (previous_block.text != block.text or previous_block.content_hash != block.content_hash
                     or previous_block.metadata.get('chart_unresolved') != issue):
                 raise ChartReadingError('同一未读来源身份存在冲突')
+            if upgrade and block.block_id in upgrade['keep_block_ids']:
+                continue  # 旧未读原因及来源版本原样保留，不冒充新读取。
             previous_block.metadata.update(block.metadata)
             previous_block.metadata.pop('selected_for_reading', None)
             previous_block.metadata.pop('superseded_by', None)
@@ -475,7 +493,12 @@ def enrich_document(ir, pdf_path, source, model, *, cancelled=lambda: False, on_
             existing[block.block_id] = block
     report = {'version': VERSION, 'status': 'completed', 'source_sha256': source['sha256'],
               'regions': regions, 'scanned_pages': pages, 'targets': targets, 'excluded': excluded,
-              'readings': len(all_readings), 'unresolved': unresolved, 'context_notes': context_notes}
+              'readings': len(all_readings) + (len(upgrade['reused_reading_block_ids']) if upgrade else 0),
+              'new_readings': len(all_readings),
+              'reused_reading_block_ids': upgrade['reused_reading_block_ids'] if upgrade else [],
+              'unresolved': unresolved, 'context_notes': context_notes}
+    if upgrade:
+        report['reused_from_version'] = upgrade['previous_version']
     candidate.coverage['chart_reading'] = report
     from .document_ir import DocumentIR
     validated = DocumentIR.model_validate(candidate.model_dump(mode='json'))

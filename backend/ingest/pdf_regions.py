@@ -50,7 +50,8 @@ def _box(value, rect):
 
 
 def region_locator(path, file_id, source_sha256, page, bbox, *, kind='figure', dpi=READING_DPI,
-                   parent_region_id=None, caption_boxes=(), caption_text='', caption_status='not_requested', related_regions=()):
+                   parent_region_id=None, caption_boxes=(), caption_text='', caption_status='not_requested', related_regions=(),
+                   caption_variants=()):
     path = _source(path, source_sha256)
     if type(page) is not int or page < 1 or kind not in {'figure', 'table', 'formula', 'text', 'page'}:
         raise RegionError('区域页码或对象类型无效')
@@ -67,6 +68,9 @@ def region_locator(path, file_id, source_sha256, page, bbox, *, kind='figure', d
             'caption_boxes': [_box(list(b), original.rect) for b in caption_boxes],
             'caption_text': caption_text, 'caption_status': caption_status,
             'related_regions': deepcopy(list(related_regions))}
+        if caption_variants:
+            value['caption_variants'] = deepcopy(list(caption_variants))
+            value['caption_variant_relation'] = 'overlapping_same_figure_id'
     value['region_id'] = 'pdf-region-' + _digest(value)
     return value
 
@@ -134,7 +138,17 @@ def complete_figure(ir, path, target, *, related_targets=()):
         for gap, caption in candidates:
             key = (' '.join(caption['text'].split()), tuple(caption['bbox']))
             unique[key] = (gap, caption)
-        related = []
+        # 同页、同图号且物理框重叠的文字层/OCR是同一可视区域的不同提取。
+        # 不合并科学文字或挑一个值：原框、原文本和块身份全部保留。
+        groups = []
+        for gap, caption in unique.values():
+            caption_number = _number(caption['text'])
+            matches = [group for group in groups if caption_number and any(
+                _number(item['text']) == caption_number
+                and pymupdf.Rect(item['bbox']).intersects(pymupdf.Rect(caption['bbox'])) for item in group)]
+            merged = [caption] + [item for group in matches for item in group]
+            groups = [group for group in groups if not any(group is hit for hit in matches)] + [merged]
+        related, variants = [], []
         if not unique and number:
             elsewhere = [(p.number+1,c) for p in pdf if p.number != page.number
                 for c in caption_candidates(ir,p,target.get('label',''))]
@@ -142,17 +156,23 @@ def complete_figure(ir, path, target, *, related_targets=()):
                 other_page,caption=elsewhere[0]
                 related=[region_locator(path,ir.source_file_id,ir.source_sha256,other_page,
                     caption['bbox'],kind='text',caption_text=caption['text'])]
-        if len(unique) == 1:
-            caption = next(iter(unique.values()))[1]
-            rect = (body | pymupdf.Rect(caption['bbox'])) + (-2, -2, 2, 2)
+        if len(groups) == 1:
+            group = groups[0]
+            caption = group[0]
+            rect = pymupdf.Rect(body)
+            for item in group:
+                rect |= pymupdf.Rect(item['bbox'])
+            rect += (-2, -2, 2, 2)
             bbox = list(rect & page.rect)
-            boxes, text, status = [caption['bbox']], caption['text'], 'located'
+            boxes = [item['bbox'] for item in group]
+            text, status = '\n\n'.join(dict.fromkeys(item['text'] for item in group)), 'located'
+            variants = group if len(group) > 1 else []
         elif related:
             bbox,boxes,text,status=list(body),[],caption['text'],'located_across_pages'
         else:
             bbox, boxes, text, status = list(page.rect), [], '', 'ambiguous' if unique else 'unlocated'
     return region_locator(path, ir.source_file_id, ir.source_sha256, target['page'], bbox,
-        caption_boxes=boxes, caption_text=text, caption_status=status,related_regions=related)
+        caption_boxes=boxes, caption_text=text, caption_status=status,related_regions=related,caption_variants=variants)
 
 
 def object_region(ir, path, block_id):

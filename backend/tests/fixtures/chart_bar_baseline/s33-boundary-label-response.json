@@ -1,0 +1,509 @@
+{
+  "panel": {
+    "figure": "Fig. S33",
+    "panel": "Fig. S33",
+    "kind": "bar",
+    "quantity": "dos_fermi",
+    "quantity_name": "N_Ef (electronic density of states at Fermi level)",
+    "unit": "states/eV/Å^3",
+    "layout": "matrix",
+    "categories": [
+      "LiH6",
+      "NaH9",
+      "MgH12",
+      "GeH4",
+      "SrH6",
+      "YH13",
+      "YH9",
+      "YH10",
+      "YH6",
+      "YH24",
+      "ScH6",
+      "ScH9",
+      "LaH6",
+      "CeH9",
+      "CeH10",
+      "PrH9"
+    ],
+    "series": [
+      "N_Ef at 200 GPa"
+    ],
+    "axis": {
+      "scale": "linear",
+      "bounds": [
+        86.2,
+        820.8
+      ],
+      "ticks": [
+        {
+          "position": 820.8,
+          "value": 0.0
+        },
+        {
+          "position": 729.0,
+          "value": 0.005
+        },
+        {
+          "position": 637.2,
+          "value": 0.01
+        },
+        {
+          "position": 545.4,
+          "value": 0.015
+        },
+        {
+          "position": 453.6,
+          "value": 0.02
+        },
+        {
+          "position": 361.8,
+          "value": 0.025
+        },
+        {
+          "position": 270.0,
+          "value": 0.03
+        },
+        {
+          "position": 178.2,
+          "value": 0.035
+        },
+        {
+          "position": 86.2,
+          "value": 0.04
+        }
+      ]
+    },
+    "x_axis": null,
+    "x_quantity": null,
+    "x_unit": null,
+    "colorbar": null,
+    "points": [
+      {
+        "category": "LiH6",
+        "series": "N_Ef at 200 GPa",
+        "material": "LiH6",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 179.8,
+        "y": 592.6,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for LiH6, first bar from left."
+      },
+      {
+        "category": "NaH9",
+        "series": "N_Ef at 200 GPa",
+        "material": "NaH9",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 228.9,
+        "y": 803.1,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for NaH9, second bar; very small N_Ef."
+      },
+      {
+        "category": "MgH12",
+        "series": "N_Ef at 200 GPa",
+        "material": "MgH12",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 278.4,
+        "y": 652.5,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for MgH12, third bar."
+      },
+      {
+        "category": "GeH4",
+        "series": "N_Ef at 200 GPa",
+        "material": "GeH4",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 327.4,
+        "y": 623.4,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for GeH4, fourth bar."
+      },
+      {
+        "category": "SrH6",
+        "series": "N_Ef at 200 GPa",
+        "material": "SrH6",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 376.7,
+        "y": 761.3,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for SrH6, fifth bar."
+      },
+      {
+        "category": "YH13",
+        "series": "N_Ef at 200 GPa",
+        "material": "YH13",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 425.5,
+        "y": 538.1,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for YH13, sixth bar."
+      },
+      {
+        "category": "YH9",
+        "series": "N_Ef at 200 GPa",
+        "material": "YH9",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 475.0,
+        "y": 482.8,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for YH9, seventh bar."
+      },
+      {
+        "category": "YH10",
+        "series": "N_Ef at 200 GPa",
+        "material": "YH10",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 523.8,
+        "y": 451.9,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for YH10, eighth bar."
+      },
+      {
+        "category": "YH6",
+        "series": "N_Ef at 200 GPa",
+        "material": "YH6",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 572.5,
+        "y": 504.5,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for YH6, ninth bar."
+      },
+      {
+        "category": "YH24",
+        "series": "N_Ef at 200 GPa",
+        "material": "YH24",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 622.1,
+        "y": 616.2,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for YH24, tenth bar."
+      },
+      {
+        "category": "ScH6",
+        "series": "N_Ef at 200 GPa",
+        "material": "ScH6",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 671.6,
+        "y": 532.7,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for ScH6, eleventh bar."
+      },
+      {
+        "category": "ScH9",
+        "series": "N_Ef at 200 GPa",
+        "material": "ScH9",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 720.4,
+        "y": 530.9,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for ScH9, twelfth bar."
+      },
+      {
+        "category": "LaH6",
+        "series": "N_Ef at 200 GPa",
+        "material": "LaH6",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 769.1,
+        "y": 473.7,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for LaH6, thirteenth bar."
+      },
+      {
+        "category": "CeH9",
+        "series": "N_Ef at 200 GPa",
+        "material": "CeH9",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 818.7,
+        "y": 397.5,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for CeH9, fourteenth bar."
+      },
+      {
+        "category": "CeH10",
+        "series": "N_Ef at 200 GPa",
+        "material": "CeH10",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 867.9,
+        "y": 401.1,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for CeH10, fifteenth bar."
+      },
+      {
+        "category": "PrH9",
+        "series": "N_Ef at 200 GPa",
+        "material": "PrH9",
+        "pressure_value_gpa": 200,
+        "space_group_symbol": null,
+        "mu_star": null,
+        "method_raw": null,
+        "reading": "position",
+        "x": 916.7,
+        "y": 131.6,
+        "label_value": null,
+        "label_text": null,
+        "pixel_error": 2.0,
+        "conditions": [
+          {
+            "label": "pressure",
+            "value": "200",
+            "unit": "GPa"
+          }
+        ],
+        "reason": "Bar top for PrH9, sixteenth bar; tallest bar."
+      }
+    ],
+    "unresolved": [],
+    "reason": "Single-series bar chart of N_Ef at 200 GPa for 16 binary hydrides; y-axis linear 0.000-0.040 states/eV/Å^3 with labeled major ticks every 0.005 and unlabeled minor ticks at 0.0025."
+  },
+  "crop_bbox": [
+    106.405,
+    67.148,
+    513.585,
+    291.544
+  ],
+  "source": {
+    "file_id": "198c74c2e81c44f5bcea24a85de1cd0b",
+    "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+    "role": "supplementary"
+  },
+  "previous_axis": {
+    "scale": "linear",
+    "bounds": [
+      86.2,
+      820.8
+    ],
+    "ticks": [
+      {
+        "position": 820.8,
+        "value": 0.0
+      },
+      {
+        "position": 736.8,
+        "value": 0.005
+      },
+      {
+        "position": 621.6,
+        "value": 0.01
+      },
+      {
+        "position": 529.0,
+        "value": 0.015
+      },
+      {
+        "position": 439.2,
+        "value": 0.02
+      },
+      {
+        "position": 345.7,
+        "value": 0.025
+      },
+      {
+        "position": 277.7,
+        "value": 0.03
+      },
+      {
+        "position": 173.3,
+        "value": 0.035
+      },
+      {
+        "position": 86.2,
+        "value": 0.04
+      }
+    ]
+  }
+}

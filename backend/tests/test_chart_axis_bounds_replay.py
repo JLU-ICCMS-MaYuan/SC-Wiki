@@ -38,7 +38,10 @@ def test_real_reversed_axis_keeps_values_conditions_and_original_response(filena
         assert reading['reading_precision'] > 0 and reading['value_raw'].startswith('~')
     sc = {r['point']['mu_star']: r for r in readings if r['point']['material'] == 'ScH6'}
     assert sc[0.1]['value_number'] == 99
-    assert sc[0.13]['value_number'] == 85
+    assert sc[0.13]['calculated_value'] == pytest.approx(85, abs=3)
+    # v11保留原位图边缘分辨率；粗图显示约90K、精度20K，不能伪装成精确85K。
+    assert sc[0.13]['value_number'] == 90
+    assert sc[0.13]['reading_precision'] == 20
     assert all(r['point']['pressure_value_gpa'] == 300 for r in sc.values())
     ir = DocumentIR(document_id='axis-replay', source_file_id=SOURCE['file_id'],
         source_sha256=SOURCE['sha256'], parse_profile='complementary',

@@ -68,6 +68,24 @@ def test_complete_figure_keeps_full_caption_then_child_keeps_parent(tmp_path):
     assert 'Second line' in locator['caption_text']
     assert locator['bbox_page'][0] <= 30 and locator['bbox_page'][3] >= 218
     assert locator['dpi'] >= 600
+
+
+def test_overlapping_caption_variants_keep_one_physical_context_and_all_provenance(tmp_path):
+    path,ir=source(tmp_path)
+    variant=ir.blocks[1].model_copy(deep=True)
+    variant.block_id='ocr-caption'
+    variant.text='Fig. 1. Complete caption, first line. Second line: \\mathrm{ScH6} at 300 GPa.'
+    variant.bbox=(31,193,210,217)
+    variant.content_hash=content_hash(variant.text)
+    variant.reading_order=2
+    ir.blocks.append(variant)
+    before=ir.model_dump(mode='json')
+    locator=complete_figure(ir,path,{'page':1,'bbox':[30,35,210,180],'label':'Fig. 1'})
+    assert locator['caption_status']=='located'
+    assert locator['bbox_page'][3]<300
+    assert {v['block_id']for v in locator['caption_variants']} >= {'caption','ocr-caption'}
+    assert all(v['text']for v in locator['caption_variants'])
+    assert ir.model_dump(mode='json')==before
     child = region_locator(path, ir.source_file_id, ir.source_sha256, 1, [55, 80, 90, 175],
         kind='figure', parent_region_id=locator['region_id'])
     assert child['parent_region_id'] == locator['region_id']

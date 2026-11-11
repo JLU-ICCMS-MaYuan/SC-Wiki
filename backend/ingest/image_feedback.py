@@ -37,6 +37,70 @@ class FeedbackProgress:
         return {'history': deepcopy(self.history)}
 
 
+def _chart_panel_key(panel):
+    return (panel['figure'], panel['panel'], panel['quantity'])
+
+
+def _merge_chart_repair(previous, incoming, verified):
+    """同一原图中只替换失败柱观察；已验证柱坐标与归属复用，不当成新提取。"""
+    if previous is None:
+        return deepcopy(incoming), []
+    result = deepcopy(previous)
+    result['notes'] = deepcopy(incoming['notes'])
+    by_key = {_chart_panel_key(panel): index for index, panel in enumerate(result['panels'])}
+    reused = [list(key) for key in sorted(verified)]
+    for panel in incoming['panels']:
+        key = _chart_panel_key(panel)
+        if key not in by_key:
+            # 新发现的物理量可以加入；同量改面板名不能伪装成另一份独立结果。
+            if any(p['figure'] == panel['figure'] and p['quantity'] == panel['quantity'] for p in result['panels']):
+                raise ValueError('局部图读修订须保留原面板身份，未猜测合并不同面板')
+            by_key[key] = len(result['panels'])
+            result['panels'].append(deepcopy(panel))
+            continue
+        index = by_key[key]
+        old = result['panels'][index]
+        if old['kind'] != 'bar' or panel['kind'] != 'bar':
+            result['panels'][index] = deepcopy(panel)
+            continue
+        old_points = {(p['category'], p['series']): p for p in old['points']}
+        incoming_ids = [(p['category'], p['series']) for p in panel['points']]
+        if len(set(incoming_ids)) != len(incoming_ids):
+            raise ValueError('图读局部修订包含重复柱身份')
+        for point in panel['points']:
+            point_key = (point['category'], point['series'])
+            if (*key, *point_key) not in verified:
+                old_points[point_key] = deepcopy(point)
+        for item in panel['unresolved']:
+            point_key=(item['category'],item['series'])
+            if (*key,*point_key)not in verified:
+                old_points.pop(point_key,None)  # 明确未读接替原失败观察，不能反复保留旧的错误坐标。
+        revised = deepcopy(panel)
+        revised['categories'] = list(dict.fromkeys(old['categories'] + panel['categories']))
+        revised['series'] = list(dict.fromkeys(old['series'] + panel['series']))
+        revised['points'] = list(old_points.values())
+        # 没有修订的旧失败点仍留在观察中；真正补齐的点改走本轮正常校验。
+        missing = {(u['category'], u['series']): deepcopy(u) for u in old['unresolved'] + panel['unresolved']}
+        revised['unresolved'] = [u for pair, u in missing.items() if pair not in old_points]
+        result['panels'][index] = revised
+    return result, reused
+
+
+def _chart_repair_coverage(answer, required):
+    issues=[]
+    for entry in required:
+        panels=[p for p in answer['panels'] if p['figure']==entry['figure'] and p['panel']==entry['panel']
+                and (entry['quantity'] is None or p['quantity']==entry['quantity'])]
+        present={(v['category'],v['series'])for p in panels for v in p['points']+p['unresolved']}
+        missing=[pair for pair in entry['points'] if (pair['category'],pair['series'])not in present]
+        if not panels or missing:
+            issues.append({'scope':'panel','category':entry['figure']+' '+entry['panel'],
+                'series':entry['quantity'] or 'legacy_quantity_unresolved', 'reason_code':'MISSING_REPAIR_CANDIDATES',
+                'reason':'局部图读遗漏原待读面板或候选身份；请按原图补读或逐项保留真实未读原因，不能因精读其他面板而删除。',
+                'missing_points':missing})
+    return issues
+
+
 def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancelled, on_event):
     """图意由原模型识读；程序问题回到具体元素，可执行工具改变下一轮图片。"""
     import base64
@@ -74,6 +138,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
     payload['current_crop_geometry'] = geometry_observations(Image.open(io.BytesIO(current_rendered['png'])))
     payload['current_crop_geometry']['region_id'] = locator['region_id']
     answer = None
+    previous_answer, verified, reuse_events, calibration_cache = None, set(), [], {}
     objects = visual_objects(ir)
     for iteration in range(13):  # 复用文档工具已有动作预算，不另设无限循环。
         if cancelled(): raise InterruptedError('图像反馈已取消')
@@ -87,6 +152,10 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
         payload['available_objects'] = [{'block_id':b.block_id,'kind':str(b.block_type),
             'pdf_page':b.pdf_page,'bbox':b.bbox,'text':b.text[:200]} for b in objects]
         payload['available_actions'] = [d['function']['name'] for d in available]
+        if previous_answer:
+            payload['repair_inventory'] = [{'figure':p['figure'], 'panel':p['panel'], 'quantity':p['quantity'],
+                'verified_points':[{'category':a, 'series':b} for f,n,q,a,b in sorted(verified)
+                                   if (f,n,q)==_chart_panel_key(p)]} for p in previous_answer['panels']]
         options = {'images': images, 'tool_definitions': available}
         if history: options['tool_history'] = history
         result = model(prompt + '\nUse the registered tools to inspect or repair a concrete issue. '
@@ -96,7 +165,15 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
             'rectangles may include legends, so identify material/series and read actual tick labels yourself. '
             'Use measured center_x and rectangle endpoints after identifying the actual bar; band_index and '
             'frame contact describe geometry only. Map materials by their printed x-axis labels, not list order. '
-            'Geometry in other tool receipts belongs to their region_id and is context until the crop changes. '
+            'Image 2 and crop_bbox are the FIXED target coordinate frame. Detail images are supplementary; '
+            'use additional_image_regions.coordinate_transform to map any detail coordinates back to image 2. '
+            'Geometry in tool receipts belongs to its region_id, never copy detail coordinates into target coordinates. '
+            'For bar-chart feedback, report ONLY corrected points or axis observations in the SAME figure/panel/quantity. '
+            'The host retains verified points and their conditions; do not repeat or rewrite them. '
+            'If an axis changes, the program recalculates its genuine dependents from retained image observations. '
+            'retained_panels are already verified source panels OUTSIDE this repair scope: do not re-read them. '
+            'required_repair_panels lists the original pending identities: preserve their exact figure/panel names '
+            'and account for every category/series in points or unresolved. A detail crop never removes another target. '
             'No unsupported zero values or extra scientific fields.',
             json.dumps(payload, ensure_ascii=False), **options)
         action = result.get('action') or {}
@@ -123,16 +200,16 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
                 exhausted.add(name)
             new = receipt['locator']
             if name == 'adjust_image_region':
-                current_crop = list(new['bbox_page'])
-                payload.update(region_id=new['region_id'], crop_bbox=current_crop,
-                    crop_image_size=[receipt['images'][0]['width'],receipt['images'][0]['height']],
-                    crop_sha256=receipt['images'][0]['image_sha256'])
-                images = [images[0], actual_images[0]]
-                locator = new
-                payload['current_crop_geometry'] = deepcopy(receipt['geometry_observations'])
-            if name != 'adjust_image_region':
-                images = images[:2] + [url for url in actual_images if url not in images[:2]]
-                payload['additional_image_regions'] = [receipt['locator']]
+                width,height = current_crop[2]-current_crop[0],current_crop[3]-current_crop[1]
+                new = {**new, 'coordinate_transform': {
+                    'kind':'detail_normalized_to_target_normalized', 'to_region_id':locator['region_id'],
+                    'offset':[1000*(new['bbox_page'][0]-current_crop[0])/width,
+                              1000*(new['bbox_page'][1]-current_crop[1])/height],
+                    'scale':[(new['bbox_page'][2]-new['bbox_page'][0])/width,
+                             (new['bbox_page'][3]-new['bbox_page'][1])/height]}}
+            # 精读图只补充证据；原目标、原图2及所有待读面板的坐标系保持。
+            images = images[:2] + [url for url in actual_images if url not in images[:2]]
+            payload['additional_image_regions'] = [new]
             payload['observation'] = receipt
             on_event({'stage':'feedback','status':'completed','iteration':iteration,
                 'action':name,'arguments':action.get('arguments'), 'receipt':receipt,'progress':progress.state()})
@@ -142,13 +219,33 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
             continue
         answer = action.get('arguments') if name == 'report_chart_reading' else result
         validate_output(answer, reading_schema())
+        protected = {_chart_panel_key(p) for p in payload.get('retained_panels',[])}
+        repeated = [p for p in answer['panels'] if _chart_panel_key(p) in protected]
+        if repeated:
+            answer = deepcopy(answer)
+            answer['panels'] = [p for p in answer['panels'] if _chart_panel_key(p) not in protected]
+            rejected = [{k:p[k]for k in ('figure','panel','quantity')}for p in repeated]
+            answer['notes'].append({'scope':'context','reason':'模型重复回答已核实的只读面板；新回答未采用，原来源保持：'+json.dumps(rejected,ensure_ascii=False)})
+            on_event({'stage':'feedback','status':'scope-rejected','iteration':iteration,
+                'rejected_panels':rejected,'reason':'当前修复范围之外的有效原记录只复用，不接受覆盖'})
+        answer, reused = _merge_chart_repair(previous_answer, answer, verified)
+        if reused:
+            reuse_events.append({'iteration':iteration, 'region_id':locator['region_id'], 'reused_observation_ids':reused})
+            on_event({'stage':'feedback','status':'reuse','iteration':iteration,
+                'region_id':locator['region_id'],'reused_observation_ids':reused})
         rendered = render_region_image(path, locator)
         issues = []
         invalid = []
         for index, panel in enumerate(answer['panels']):
             try:
-                _, missing = calibrate_panel(panel, Image.open(io.BytesIO(rendered['png'])),
-                    {**source,'page':request['pdf_page']},current_crop)
+                check_key = content_hash(panel, locator['region_id'])
+                if check_key not in calibration_cache:
+                    calibration_cache[check_key] = calibrate_panel(panel, Image.open(io.BytesIO(rendered['png'])),
+                        {**source,'page':request['pdf_page']},current_crop)
+                found, missing = deepcopy(calibration_cache[check_key])
+                if panel['kind'] == 'bar':
+                    verified = {key for key in verified if key[:3] != _chart_panel_key(panel)}
+                    verified.update((*_chart_panel_key(panel), r['point']['category'], r['point']['series']) for r in found)
             except ChartReadingError as error:
                 invalid.append(index)
                 missing = [{'scope':'panel','category':panel['figure']+' '+panel['panel'],
@@ -160,22 +257,54 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
             # 程序定位失败才发出具体修复；模型明确申报的真实缺失仍保留原语义。
             issues.extend(missing)
         issues.extend({'reason':note['reason'],'scope':'target'} for note in answer['notes'] if note['scope']=='target')
-        if not issues: return answer, current_crop, progress.state()
+        coverage_issues = _chart_repair_coverage(answer,payload.get('required_repair_panels',[]))
+        issues.extend(coverage_issues)
+        previous_answer = deepcopy(answer)
+        if not issues: return answer, current_crop, {**progress.state(), 'reuse':reuse_events}
+        declared_unread = {(u['category'],u['series'],u['reason'])
+                           for p in answer['panels'] for u in p['unresolved']}
+        def source_unread(issue):
+            return (issue.get('reason_code') == 'BAR_HEIGHT_BELOW_IMAGE_RESOLUTION'
+                    or (not issue.get('point') and not issue.get('reason_code')
+                        and (issue.get('category'),issue.get('series'),issue['reason']) in declared_unread))
+        inspected = any(row['action'] in ACTIONS for row in progress.history)
+        # 实际取图后，诚实未读是应保留的来源限制；坐标、轴或范围错误仍须修复。
+        # 不因无法读出的柱或其说明反复要求模型改写，更不能将其写成0。
+        if (inspected and any(source_unread(issue) for issue in issues)
+                and all(source_unread(issue) or (issue.get('scope') == 'target'
+                        and not issue.get('reason_code')) for issue in issues)):
+            return answer, current_crop, {**progress.state(), 'reuse':reuse_events, 'source_unresolved':True}
         fresh = progress.observe('program_verification', request['selected_regions'][0]['region_id'], issue_signature(issues))
         on_event({'stage':'feedback','status':'verification','iteration':iteration,
             'issues':issues,'progress':progress.state()})
         if not fresh:
+            if coverage_issues:
+                raise ValueError('图读局部修订未保留原面板或候选，失败回执已保留，未以局部数据替换完整范围')
             if invalid:
                 answer = deepcopy(answer)
                 answer['panels'] = [panel for i,panel in enumerate(answer['panels']) if i not in invalid]
                 answer['notes'].extend({'scope':'target','reason':issue['category']+': '+issue['reason']}
                     for issue in issues if issue.get('reason_code')=='INVALID_PANEL_OBSERVATION')
-            return answer, current_crop, progress.state()
+            return answer, current_crop, {**progress.state(), 'reuse':reuse_events}
         payload['verification_issues'] = issues
         from .image_geometry import geometry_observations
         payload['current_crop_geometry'] = geometry_observations(Image.open(io.BytesIO(rendered['png'])))
         payload['current_crop_geometry']['region_id'] = locator['region_id']
         payload['required_next_step'] = '定位到上述元素，选择实际重裁/读刻度/复算动作；来源确实不足则保留明确未读。'
+        suggestions=[]
+        for issue in issues:
+            box=issue.get('suggested_crop_bbox_normalized')
+            if box:
+                physical=[current_crop[0]+box[0]*(current_crop[2]-current_crop[0])/1000,
+                    current_crop[1]+box[1]*(current_crop[3]-current_crop[1])/1000,
+                    current_crop[0]+box[2]*(current_crop[2]-current_crop[0])/1000,
+                    current_crop[1]+box[3]*(current_crop[3]-current_crop[1])/1000]
+                action={'name':'adjust_image_region','arguments':{'region_id':locator['region_id'],
+                    'bbox_page':physical,'dpi':600,'reason':'核对轴外印刷数字及其真实刻度位置，避免将无字短刻度当作数字标签'}}
+                if action not in suggestions:suggestions.append(action)
+        if suggestions:
+            payload['suggested_detail_actions']=suggestions
+            payload['required_next_step']='优先实际查看建议的轴外文字精读图，自己识别原数字及对应刻度；不要只删除有问题的刻度，也不要用正文目标值反推。'
         if native:
             history = [{'role':'assistant','content':None,'tool_calls':[native]},
                 {'role':'tool','tool_call_id':native['id'],'content':json.dumps({'issues':issues},ensure_ascii=False)}]

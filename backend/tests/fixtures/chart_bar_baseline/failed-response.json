@@ -1,0 +1,1063 @@
+{
+  "panels": [
+    {
+      "figure": "Fig. 4",
+      "panel": "top",
+      "kind": "bar",
+      "quantity": "dos_fermi",
+      "quantity_name": "H-derived DOS at Fermi level N_Ef",
+      "unit": "states/eV/Å^3",
+      "layout": "sparse",
+      "categories": [
+        "ScH6",
+        "ScH9",
+        "YH6",
+        "YH9",
+        "YH10",
+        "LaH6",
+        "LaH9",
+        "CeH9",
+        "CeH10",
+        "PrH9"
+      ],
+      "series": [
+        "N_Ef"
+      ],
+      "axis": {
+        "scale": "linear",
+        "bounds": [
+          96.5,
+          351.4
+        ],
+        "ticks": [
+          {
+            "position": 111.97,
+            "value": 0.04
+          },
+          {
+            "position": 231.67,
+            "value": 0.02
+          },
+          {
+            "position": 351.38,
+            "value": 0.0
+          }
+        ]
+      },
+      "x_axis": null,
+      "x_quantity": null,
+      "x_unit": null,
+      "colorbar": null,
+      "points": [
+        {
+          "category": "ScH6",
+          "series": "N_Ef",
+          "material": "ScH6",
+          "pressure_value_gpa": 300,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 249.36,
+          "y": 256.89,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "300",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Red bar top y=256.9; caption pressure 300 GPa."
+        },
+        {
+          "category": "ScH9",
+          "series": "N_Ef",
+          "material": "ScH9",
+          "pressure_value_gpa": 400,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 322.36,
+          "y": 256.89,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "400",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Red bar top y=256.9; caption pressure 400 GPa."
+        },
+        {
+          "category": "YH6",
+          "series": "N_Ef",
+          "material": "YH6",
+          "pressure_value_gpa": 120,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 394.84,
+          "y": 247.48,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "120",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Red bar top y=247.5; caption pressure 120 GPa."
+        },
+        {
+          "category": "YH9",
+          "series": "N_Ef",
+          "material": "YH9",
+          "pressure_value_gpa": 150,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 467.59,
+          "y": 259.58,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "150",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Red bar top y=259.6; caption pressure 150 GPa."
+        },
+        {
+          "category": "YH10",
+          "series": "N_Ef",
+          "material": "YH10",
+          "pressure_value_gpa": 400,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 540.33,
+          "y": 229.99,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "400",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Red bar top y=230.0; caption pressure 400 GPa."
+        },
+        {
+          "category": "LaH6",
+          "series": "N_Ef",
+          "material": "LaH6",
+          "pressure_value_gpa": 100,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 612.81,
+          "y": 238.06,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "100",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Red bar top y=238.1; caption pressure 100 GPa."
+        },
+        {
+          "category": "LaH9",
+          "series": "N_Ef",
+          "material": "LaH9",
+          "pressure_value_gpa": 50,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 685.3,
+          "y": 318.76,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "50",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Red bar top y=318.8; caption pressure 50 GPa."
+        },
+        {
+          "category": "CeH9",
+          "series": "N_Ef",
+          "material": "CeH9",
+          "pressure_value_gpa": 100,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 757.78,
+          "y": 212.51,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "100",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Red bar top y=212.5; caption pressure 100 GPa."
+        },
+        {
+          "category": "CeH10",
+          "series": "N_Ef",
+          "material": "CeH10",
+          "pressure_value_gpa": 200,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 830.27,
+          "y": 213.85,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "200",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Red bar top y=213.9; caption pressure 200 GPa."
+        },
+        {
+          "category": "PrH9",
+          "series": "N_Ef",
+          "material": "PrH9",
+          "pressure_value_gpa": 100,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 903.27,
+          "y": 126.43,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "100",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Red bar top y=126.4; caption pressure 100 GPa."
+        }
+      ],
+      "unresolved": [],
+      "reason": "Top panel red bars: H-derived DOS at E_F; pressures from caption."
+    },
+    {
+      "figure": "Fig. 4",
+      "panel": "middle",
+      "kind": "bar",
+      "quantity": "lambda_ep",
+      "quantity_name": "EPC parameter lambda",
+      "unit": "dimensionless",
+      "layout": "sparse",
+      "categories": [
+        "ScH6",
+        "ScH9",
+        "YH6",
+        "YH9",
+        "YH10",
+        "LaH6",
+        "LaH9",
+        "CeH9",
+        "CeH10",
+        "PrH9"
+      ],
+      "series": [
+        "lambda"
+      ],
+      "axis": {
+        "scale": "linear",
+        "bounds": [
+          351.4,
+          606.9
+        ],
+        "ticks": [
+          {
+            "position": 402.49,
+            "value": 4
+          },
+          {
+            "position": 504.03,
+            "value": 2
+          },
+          {
+            "position": 606.93,
+            "value": 0
+          }
+        ]
+      },
+      "x_axis": null,
+      "x_quantity": null,
+      "x_unit": null,
+      "colorbar": null,
+      "points": [
+        {
+          "category": "ScH6",
+          "series": "lambda",
+          "material": "ScH6",
+          "pressure_value_gpa": 300,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 249.36,
+          "y": 537.996,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "300",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Blue bar top y=538.0; caption pressure 300 GPa."
+        },
+        {
+          "category": "ScH9",
+          "series": "lambda",
+          "material": "ScH9",
+          "pressure_value_gpa": 400,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 322.36,
+          "y": 535.31,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "400",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Blue bar top y=535.3; caption pressure 400 GPa."
+        },
+        {
+          "category": "YH6",
+          "series": "lambda",
+          "material": "YH6",
+          "pressure_value_gpa": 120,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 394.84,
+          "y": 457.3,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "120",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Blue bar top y=457.3; caption pressure 120 GPa."
+        },
+        {
+          "category": "YH9",
+          "series": "lambda",
+          "material": "YH9",
+          "pressure_value_gpa": 150,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 467.59,
+          "y": 386.01,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "150",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Blue bar top y=386.0; caption pressure 150 GPa."
+        },
+        {
+          "category": "YH10",
+          "series": "lambda",
+          "material": "YH10",
+          "pressure_value_gpa": 400,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 540.33,
+          "y": 482.85,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "400",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Blue bar top y=482.9; caption pressure 400 GPa."
+        },
+        {
+          "category": "LaH6",
+          "series": "lambda",
+          "material": "LaH6",
+          "pressure_value_gpa": 100,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 612.81,
+          "y": 513.79,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "100",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Blue bar top y=513.8; caption pressure 100 GPa."
+        },
+        {
+          "category": "LaH9",
+          "series": "lambda",
+          "material": "LaH9",
+          "pressure_value_gpa": 50,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 685.3,
+          "y": 560.86,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "50",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Blue bar top y=560.9; caption pressure 50 GPa."
+        },
+        {
+          "category": "CeH9",
+          "series": "lambda",
+          "material": "CeH9",
+          "pressure_value_gpa": 100,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 757.78,
+          "y": 566.24,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "100",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Blue bar top y=566.2; caption pressure 100 GPa."
+        },
+        {
+          "category": "CeH10",
+          "series": "lambda",
+          "material": "CeH10",
+          "pressure_value_gpa": 200,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 830.27,
+          "y": 566.24,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "200",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Blue bar top y=566.2; caption pressure 200 GPa."
+        },
+        {
+          "category": "PrH9",
+          "series": "lambda",
+          "material": "PrH9",
+          "pressure_value_gpa": 100,
+          "space_group_symbol": null,
+          "mu_star": null,
+          "method_raw": null,
+          "reading": "position",
+          "x": 903.27,
+          "y": 591.8,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "100",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Blue bar top y=591.8; caption pressure 100 GPa."
+        }
+      ],
+      "unresolved": [],
+      "reason": "Middle panel blue bars: EPC lambda; pressures from caption."
+    },
+    {
+      "figure": "Fig. 4",
+      "panel": "bottom",
+      "kind": "bar",
+      "quantity": "tc",
+      "quantity_name": "Superconducting Tc",
+      "unit": "K",
+      "layout": "matrix",
+      "categories": [
+        "ScH6",
+        "ScH9",
+        "YH6",
+        "YH9",
+        "YH10",
+        "LaH6",
+        "LaH9",
+        "CeH9",
+        "CeH10",
+        "PrH9"
+      ],
+      "series": [
+        "mu*=0.1",
+        "mu*=0.13"
+      ],
+      "axis": {
+        "scale": "linear",
+        "bounds": [
+          606.9,
+          861.8
+        ],
+        "ticks": [
+          {
+            "position": 620.38,
+            "value": 300
+          },
+          {
+            "position": 688.97,
+            "value": 200
+          },
+          {
+            "position": 758.24,
+            "value": 100
+          },
+          {
+            "position": 827.51,
+            "value": 0
+          }
+        ]
+      },
+      "x_axis": null,
+      "x_quantity": null,
+      "x_unit": null,
+      "colorbar": null,
+      "points": [
+        {
+          "category": "ScH6",
+          "series": "mu*=0.1",
+          "material": "ScH6",
+          "pressure_value_gpa": 300,
+          "space_group_symbol": null,
+          "mu_star": 0.1,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 244.26,
+          "y": 792.2,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "300",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Green bar top y=792.2; mu*=0.1 legend; caption pressure 300 GPa."
+        },
+        {
+          "category": "ScH6",
+          "series": "mu*=0.13",
+          "material": "ScH6",
+          "pressure_value_gpa": 300,
+          "space_group_symbol": null,
+          "mu_star": 0.13,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 255.49,
+          "y": 801.61,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "300",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Dark blue bar top y=801.6; mu*=0.13 legend; caption pressure 300 GPa."
+        },
+        {
+          "category": "ScH9",
+          "series": "mu*=0.1",
+          "material": "ScH9",
+          "pressure_value_gpa": 400,
+          "space_group_symbol": null,
+          "mu_star": 0.1,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 316.74,
+          "y": 737.05,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "400",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Green bar top y=737.1; mu*=0.1 legend; caption pressure 400 GPa."
+        },
+        {
+          "category": "ScH9",
+          "series": "mu*=0.13",
+          "material": "ScH9",
+          "pressure_value_gpa": 400,
+          "space_group_symbol": null,
+          "mu_star": 0.13,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 327.97,
+          "y": 746.47,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "400",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Dark blue bar top y=746.5; mu*=0.13 legend; caption pressure 400 GPa."
+        },
+        {
+          "category": "YH6",
+          "series": "mu*=0.1",
+          "material": "YH6",
+          "pressure_value_gpa": 120,
+          "space_group_symbol": null,
+          "mu_star": 0.1,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 389.23,
+          "y": 679.22,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "120",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Green bar top y=679.2; mu*=0.1 legend; caption pressure 120 GPa."
+        },
+        {
+          "category": "YH6",
+          "series": "mu*=0.13",
+          "material": "YH6",
+          "pressure_value_gpa": 120,
+          "space_group_symbol": null,
+          "mu_star": 0.13,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 400.46,
+          "y": 688.64,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "120",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Dark blue bar top y=688.6; mu*=0.13 legend; caption pressure 120 GPa."
+        },
+        {
+          "category": "YH9",
+          "series": "mu*=0.1",
+          "material": "YH9",
+          "pressure_value_gpa": 150,
+          "space_group_symbol": null,
+          "mu_star": 0.1,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 461.72,
+          "y": 677.88,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "150",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Green bar top y=677.9; mu*=0.1 legend; caption pressure 150 GPa."
+        },
+        {
+          "category": "YH9",
+          "series": "mu*=0.13",
+          "material": "YH9",
+          "pressure_value_gpa": 150,
+          "space_group_symbol": null,
+          "mu_star": 0.13,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 473.2,
+          "y": 687.29,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "150",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Dark blue bar top y=687.3; mu*=0.13 legend; caption pressure 150 GPa."
+        },
+        {
+          "category": "YH10",
+          "series": "mu*=0.1",
+          "material": "YH10",
+          "pressure_value_gpa": 400,
+          "space_group_symbol": null,
+          "mu_star": 0.1,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 534.71,
+          "y": 648.29,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "400",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Green bar top y=648.3; mu*=0.1 legend; caption pressure 400 GPa."
+        },
+        {
+          "category": "YH10",
+          "series": "mu*=0.13",
+          "material": "YH10",
+          "pressure_value_gpa": 400,
+          "space_group_symbol": null,
+          "mu_star": 0.13,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 545.94,
+          "y": 663.08,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "400",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Dark blue bar top y=663.1; mu*=0.13 legend; caption pressure 400 GPa."
+        },
+        {
+          "category": "LaH6",
+          "series": "mu*=0.1",
+          "material": "LaH6",
+          "pressure_value_gpa": 100,
+          "space_group_symbol": null,
+          "mu_star": 0.1,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 607.2,
+          "y": 743.78,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "100",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Green bar top y=743.8; mu*=0.1 legend; caption pressure 100 GPa."
+        },
+        {
+          "category": "LaH6",
+          "series": "mu*=0.13",
+          "material": "LaH6",
+          "pressure_value_gpa": 100,
+          "space_group_symbol": null,
+          "mu_star": 0.13,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 618.94,
+          "y": 754.54,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "100",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Dark blue bar top y=754.5; mu*=0.13 legend; caption pressure 100 GPa."
+        },
+        {
+          "category": "LaH9",
+          "series": "mu*=0.1",
+          "material": "LaH9",
+          "pressure_value_gpa": 50,
+          "space_group_symbol": null,
+          "mu_star": 0.1,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 679.68,
+          "y": 841.96,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "50",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Green bar top y=842.0; mu*=0.1 legend; caption pressure 50 GPa."
+        },
+        {
+          "category": "LaH9",
+          "series": "mu*=0.13",
+          "material": "LaH9",
+          "pressure_value_gpa": 50,
+          "space_group_symbol": null,
+          "mu_star": 0.13,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 691.42,
+          "y": 847.34,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "50",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Dark blue bar top y=847.3; mu*=0.13 legend; caption pressure 50 GPa."
+        },
+        {
+          "category": "CeH9",
+          "series": "mu*=0.1",
+          "material": "CeH9",
+          "pressure_value_gpa": 100,
+          "space_group_symbol": null,
+          "mu_star": 0.1,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 752.17,
+          "y": 824.48,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "100",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Green bar top y=824.5; mu*=0.1 legend; caption pressure 100 GPa."
+        },
+        {
+          "category": "CeH9",
+          "series": "mu*=0.13",
+          "material": "CeH9",
+          "pressure_value_gpa": 100,
+          "space_group_symbol": null,
+          "mu_star": 0.13,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 763.91,
+          "y": 828.51,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "100",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Dark blue bar top y=828.5; mu*=0.13 legend; caption pressure 100 GPa."
+        },
+        {
+          "category": "CeH10",
+          "series": "mu*=0.1",
+          "material": "CeH10",
+          "pressure_value_gpa": 200,
+          "space_group_symbol": null,
+          "mu_star": 0.1,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 824.66,
+          "y": 820.44,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "200",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Green bar top y=820.4; mu*=0.1 legend; caption pressure 200 GPa."
+        },
+        {
+          "category": "CeH10",
+          "series": "mu*=0.13",
+          "material": "CeH10",
+          "pressure_value_gpa": 200,
+          "space_group_symbol": null,
+          "mu_star": 0.13,
+          "method_raw": "Eliashberg",
+          "reading": "position",
+          "x": 836.4,
+          "y": 827.17,
+          "label_value": null,
+          "label_text": null,
+          "pixel_error": 3.0,
+          "conditions": [
+            {
+              "label": "pressure",
+              "value": "200",
+              "unit": "GPa"
+            }
+          ],
+          "reason": "Dark blue bar top y=827.2; mu*=0.13 legend; caption pressure 200 GPa."
+        }
+      ],
+      "unresolved": [
+        {
+          "category": "PrH9",
+          "series": "mu*=0.1",
+          "reason": "PrH9 Tc bars are very short and partly adjacent to the legend box, so their exact heights are only approximate."
+        },
+        {
+          "category": "PrH9",
+          "series": "mu*=0.13",
+          "reason": "PrH9 Tc bars are very short and partly adjacent to the legend box, so their exact heights are only approximate."
+        }
+      ],
+      "reason": "Bottom panel paired bars: Tc for mu*=0.1 (green) and mu*=0.13 (dark blue) per legend; pressures from caption."
+    }
+  ],
+  "notes": [
+    {
+      "scope": "target",
+      "reason": "PrH9 Tc bars are very short and partly adjacent to the legend box, so their exact heights are only approximate."
+    },
+    {
+      "scope": "context",
+      "reason": "Body text gives specific Tc values (e.g., YH9 276 K, YH10 303 K at mu*=0.1) but these are not plotted numeric labels; plotted bars are read by position only."
+    }
+  ]
+}

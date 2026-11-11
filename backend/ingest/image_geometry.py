@@ -9,6 +9,44 @@ from scipy.ndimage import binary_closing, label, find_objects
 VERSION = 'image-geometry-v1'
 
 
+def axis_text_regions(image, spine_pixel, bounds):
+    """只定位轴外文字像素行，不识别字符、数字值、单位或科学含义。"""
+    rgb=np.asarray(image.convert('RGB'))
+    height,width=rgb.shape[:2]
+    left=rgb[:,:max(0,spine_pixel-6)]
+    if not left.size:return []
+    dark=(np.ptp(left.astype(float),axis=2)<8)&(left.mean(axis=2)<128)
+    components,_=label(dark,structure=np.ones((3,3)))
+    low,high=[v*(height-1)/1000 for v in sorted(bounds)]
+    # 端点标签中心可能略在框外；只有原像素确有横向图框边线时承认跨界文字。
+    # 没有边线的相邻面板文字仍不能借到当前轴上。
+    frame_boundaries=[]
+    for boundary in (low,high):
+        strip=rgb[max(0,round(boundary)-1):min(height,round(boundary)+2),spine_pixel:]
+        if strip.size:
+            ink=(np.ptp(strip.astype(float),axis=2)<8)&(strip.mean(axis=2)<128)
+            if np.any(ink.mean(axis=1)>.5):frame_boundaries.append(boundary)
+    glyphs=[]
+    for box in find_objects(components):
+        if box is None:continue
+        y,x=box;h,w=y.stop-y.start,x.stop-x.start
+        if y.start>high or y.stop<low or h<3 or h>(high-low)/2 or w>2*h:continue
+        glyphs.append((x.start,y.start,x.stop,y.stop))
+    if not glyphs:return []
+    text_height=float(np.percentile([b[3]-b[1]for b in glyphs],90))
+    glyphs=[b for b in glyphs if b[3]-b[1]>=text_height/2]
+    right=max(b[2]for b in glyphs)
+    column=[b for b in glyphs if right-b[2]<=text_height]
+    rows=[]
+    for box in sorted(column,key=lambda b:b[1]):
+        if rows and box[1]<=rows[-1][3]+1:
+            old=rows[-1];rows[-1]=(min(old[0],box[0]),min(old[1],box[1]),max(old[2],box[2]),max(old[3],box[3]))
+        else:rows.append(box)
+    return [[x0*1000/(width-1),y0*1000/(height-1),x1*1000/(width-1),y1*1000/(height-1)]
+            for x0,y0,x1,y1 in rows if low<=(y0+y1)/2<=high
+            or any(y0<=boundary<=y1 for boundary in frame_boundaries)]
+
+
 def geometry_observations(image):
     original_size = image.size
     view = image.convert('RGB').copy()
