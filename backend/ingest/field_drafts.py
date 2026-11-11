@@ -121,6 +121,9 @@ def changed_leaves(before, after, path):
         for key in dict.fromkeys([*previous, *after]):
             if key not in after:
                 changes.append({"path": [*path, key], "remove": True})
+            elif key not in previous and after[key] is None:
+                # 新对象明确携带的空字段也是当前值，不能因 get 返回 None 而丢失。
+                changes.append({"path": [*path, key], "value": None})
             else:
                 changes.extend(changed_leaves(previous.get(key), after[key], [*path, key]))
         return changes
@@ -146,7 +149,7 @@ def changed_leaves(before, after, path):
 
 def _node(updated, path):
     node, owner = updated, None
-    for part in path:
+    for index, part in enumerate(path):
         if isinstance(part, dict):
             if set(part) != {"key", "value"} or part["key"] not in IDENTITY_KEYS:
                 fail("draft_field_invalid", "字段身份无效", 400)
@@ -157,6 +160,12 @@ def _node(updated, path):
             if part["key"] == "record_key":
                 owner = node
         elif isinstance(part, str) and part not in FORBIDDEN and not part.startswith("_") and isinstance(node, dict):
+            # 规范晶胞是已登记的可空对象；首次填写仍按子字段局部保存。
+            # 不将其他空标量或未知路径提升为对象。
+            if (index == 2 and path[0] == "material_states" and part == "structure"
+                    and isinstance(path[1], dict) and path[1].get("key") == "state_key"
+                    and node.get(part) is None):
+                node[part] = {}
             node = node.setdefault(part, {})
         else:
             fail("draft_field_invalid", "字段路径无效", 400)

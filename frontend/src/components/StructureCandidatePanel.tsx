@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
-import { Alert, Box, Button, ButtonBase, Chip, CircularProgress, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, ButtonBase, Chip, CircularProgress, Divider, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import DownloadIcon from '@mui/icons-material/Download'
@@ -146,6 +146,9 @@ const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, readO
                 )
               : <Alert severity="info" sx={{ mt: 1.5 }}>{t('upload.missingRepresentation', { cell: cellLabel, format: formatLabel })}</Alert>}
 
+          {(!readOnly || candidate.user_note) && <TextField data-evidence-ignore fullWidth multiline minRows={2} sx={{ mt: 1.5 }}
+            label={t('upload.structureNote')} value={candidate.user_note || ''} slotProps={{ htmlInput: { readOnly } }}
+            onChange={readOnly ? undefined : event => onChange(candidate.candidate_id,{user_note:event.target.value})} />}
           {!blocked && (
             <>
               <Divider sx={{ my: 1.5 }} />

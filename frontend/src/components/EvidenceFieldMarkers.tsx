@@ -280,6 +280,7 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen: openCallb
     })
     observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-issue-field', 'data-state-key', 'data-state-label', 'data-module-key', 'data-record-key', 'data-structure-hash'] })
     const changed = (event: Event) => {
+      if ((event.target as HTMLElement).closest('[data-evidence-ignore],.evidence-review-drawer')) return
       // 文本在 input 时已通知；失焦后的 change 不能再次使刚保存的版本失效。
       if (event.type === 'change' && (event.target as HTMLElement).matches('textarea,input:not([type="checkbox"]):not([type="radio"])')) return
       const node = (event.target as HTMLElement).closest<HTMLElement>('[data-issue-field]')

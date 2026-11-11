@@ -26,7 +26,8 @@ import {
 import { useLanguage } from '../context/LanguageContext'
 import StructureCandidatePanel from './StructureCandidatePanel'
 import MaterialStateSplitDialog from './MaterialStateSplitDialog'
-import { splitMaterialState, type MaterialStateSplitPreview } from '../lib/splitMaterialState'
+import MaterialStateMergeDialog from './MaterialStateMergeDialog'
+import { splitMaterialState, isStructureOnlyState, canMergeStructureState, mergeStructureState, type MaterialStateSnapshot, type MaterialStateSplitPreview } from '../lib/splitMaterialState'
 import StructureCandidateSource from './StructureCandidateSource'
 import PropertyModuleEditor from './PropertyModuleEditor'
 import type { PropertySpectrumTarget as SpectrumTarget } from '../lib/propertySpectra'
@@ -272,6 +273,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   const [collapsedStates, setCollapsedStates] = useState<Record<number, boolean>>({})
   const [splitPreview, setSplitPreview] = useState<MaterialStateSplitPreview | null>(null)
   const splitConfirmed = useRef(false)
+  const [mergePreview, setMergePreview] = useState<{ source: MaterialStateSnapshot; targets: MaterialStateSnapshot[] } | null>(null)
+  const mergeConfirmed = useRef(false)
   const restoredSpectrumAnchor = useRef('')
   useEffect(() => {
     let frame = 0
@@ -337,6 +340,16 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     if (!state) return
     splitConfirmed.current = false
     setSplitPreview({ stateKey: key, snapshot: JSON.stringify(state), state })
+  }
+
+  const openMergePreview = (key: string) => {
+    if (latest.current.readOnly) return
+    const source = statesRef.current.find(state => state.state_key === key)
+    if (!source) return
+    const targets = statesRef.current.filter((target,index) => canMergeStructureState(source,target) && !structureUploading[index])
+      .map(state => ({ state, snapshot: JSON.stringify(state) }))
+    mergeConfirmed.current = false
+    setMergePreview({ source: { state: source, snapshot: JSON.stringify(source) }, targets })
   }
 
   const changeCrystalSystem = (index: number, value: CrystalSystem) => {
@@ -540,7 +553,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     } : item))
   }
 
-  const deleteState = (index: number) => {
+  const reconcileRemovedState = (index: number) => {
     // 删除导致位置前移时，会话内提示与折叠状态跟随原材料，不留在旧行号。
     const shift = <T,>(values: Record<number, T>): Record<number, T> => Object.fromEntries(
       Object.entries(values).filter(([key]) => Number(key) !== index).map(([key, value]) => [Number(key) > index ? Number(key) - 1 : Number(key), value]),
@@ -548,6 +561,9 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     setElementCountEdits(shift)
     setCollapsedStates(shift)
     setStructureUploading(shift)
+  }
+  const deleteState = (index: number) => {
+    reconcileRemovedState(index)
     emitStates(statesRef.current.filter((_, itemIndex) => itemIndex !== index))
   }
 
@@ -711,6 +727,22 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
             return true
           } catch { return false }
         }} />}
+      {mergePreview && <MaterialStateMergeDialog source={mergePreview.source} targets={mergePreview.targets} readOnly={readOnly}
+        onCancel={() => setMergePreview(null)} onConfirm={(target,note) => {
+          const si=statesRef.current.findIndex(state=>state.state_key===mergePreview.source.state.state_key)
+          const ti=statesRef.current.findIndex(state=>state.state_key===target.state.state_key)
+          if(mergeConfirmed.current || si<0 || ti<0 || structureUploading[si] || structureUploading[ti])return false
+          try {
+            const merged=mergeStructureState(statesRef.current,mergePreview.source,target,note,Boolean(latest.current.readOnly))
+            const next=merged.map(state=>state.state_key===target.state.state_key
+              ?{...state,crystal_system:crystalSystemForNumber(state.reported_space_group_number!)}:state)
+            mergeConfirmed.current=true
+            reconcileRemovedState(si)
+            emitStates(next)
+            setMergePreview(null)
+            return true
+          } catch { return false }
+        }} />}
       <PropertySpectrumControls />
       <Box sx={{ mt: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
@@ -770,6 +802,9 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                       && state.property_modules?.some(module => module.records.length) && <Button size="small"
                         onClick={event => { event.stopPropagation(); openSplitPreview(state.state_key!) }}>
                         {t('upload.splitStructureAndProperties')}</Button>}
+                    {!readOnly && state.state_key && !uploading && isStructureOnlyState(state) && <Button size="small"
+                        onClick={event=>{event.stopPropagation();openMergePreview(state.state_key!)}}>
+                        {t('upload.mergeStructureAndProperties')}</Button>}
                     <Button size="small" color="error" startIcon={<DeleteIcon />}
                       onClick={event => {
                         event.stopPropagation()

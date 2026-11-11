@@ -114,3 +114,61 @@ def test_first_changed_save_keeps_authoritative_body_and_edit_baseline(target):
         assert saved.draft['paper']['title']=='First changed save'
         assert any(change['after_value']=='First changed save' for change in saved.state['_field_baselines'].values())
     assert tasks.get_state(task)['_field_baselines']
+
+
+@pytest.fixture
+def nullable_structure_merge():
+    from pathlib import Path
+    return json.loads((Path(__file__).parent / "fixtures/nullable_structure_merge.json").read_text())
+
+
+def test_real_browser_nullable_structure_merge_preserves_identity_and_neighbours(nullable_structure_merge):
+    case = nullable_structure_merge
+    original = deepcopy(case["draft"])
+    neighbour = deepcopy(draft()["material_states"][0])
+    original["material_states"].append(neighbour)
+    before = deepcopy(original)
+    updated = apply_changes(original, case["changes"])
+    assert original == before
+    assert len(updated["material_states"]) == 2
+    merged = updated["material_states"][0]
+    assert merged["state_key"] == before["material_states"][0]["state_key"]
+    assert merged["reported_space_group_symbol"] == "Cc"
+    assert merged["structure"] == case["changes"][1]["value"]
+    assert merged["property_modules"] == before["material_states"][0]["property_modules"]
+    assert updated["material_states"][1] == neighbour
+
+
+def test_nullable_structure_real_save_and_reread(target, nullable_structure_merge):
+    from backend.services.workdrafts import open_draft, row
+    factory, task, user = target
+    value = {**draft(), **deepcopy(nullable_structure_merge["draft"])}
+    tasks.redis_client().set(tasks.draft_key(task), json.dumps(value))
+    with factory.begin() as session:
+        lease = open_draft(session, "upload", task, user)
+        version = lease.write_epoch + ":" + draft_version(value)
+    with factory.begin() as session:
+        result = save_fields(session, "upload", task, user, version, nullable_structure_merge["changes"])
+        assert result["changed"]
+    with factory() as session:
+        body = row(session, "upload", task).body
+        assert len(body["material_states"]) == 1
+        assert body["material_states"][0]["structure"] == nullable_structure_merge["changes"][1]["value"]
+    assert tasks.get_draft(task)["material_states"][0]["reported_space_group_symbol"] == "Cc"
+
+
+@pytest.mark.parametrize("field", ["pressure_value_gpa", "material", "structure_optimization"])
+def test_null_scalar_is_not_promoted_to_object(field):
+    from fastapi import HTTPException
+    value = {"material_states": [{"state_key": "s", field: None}]}
+    with pytest.raises(HTTPException):
+        apply_changes(value, [{"path": ["material_states", {"key": "state_key", "value": "s"}, field, "unregistered"], "value": 1}])
+
+
+@pytest.mark.parametrize("field", ["evidence", "source_associations", "constructor", "unregistered"])
+def test_nullable_structure_still_rejects_forbidden_or_unregistered_fields(field):
+    from fastapi import HTTPException
+    value = {"material_states": [{"state_key": "s", "structure": None}]}
+    with pytest.raises(HTTPException):
+        apply_changes(value, [{"path": ["material_states", {"key": "state_key", "value": "s"}, "structure", field], "value": "bad"}])
+    assert value["material_states"][0]["structure"] is None

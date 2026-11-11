@@ -47,6 +47,66 @@ beforeEach(() => {
   vi.mocked(api.patch).mockResolvedValue({ changed: true, version: 'v2' })
 })
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.clearAllMocks() })
+it('结构备注忽略区不冒充CIF输入，真实结构字段仍通知自身核对',async()=>{
+  const changed=vi.fn()
+  const record={key:'geometry',item_key:'geometry',state_key:'s',field:'material_states[0].structure.structure_text',
+    label:'结构原文',current_value:'original geometry',status:'supported' as const,reason:'原来源已核实',evidences:[]}
+  render(<div data-evidence-scope="notes-ignore"><div data-state-key="s">
+    <BoxForNoteTest><TextField label="结构原文" defaultValue="original geometry" />
+      <div data-evidence-ignore><TextField label="人工结构备注" defaultValue="" /></div></BoxForNoteTest>
+    </div><EvidenceFieldMarkers scope="notes-ignore" records={[record]} onOpen={()=>{}} onChange={changed}/></div>)
+  await screen.findByRole('button',{name:'结构原文'})
+  fireEvent.input(screen.getByLabelText('人工结构备注'),{target:{value:'本轮采用Cc'}})
+  await act(async()=>{await new Promise(r=>setTimeout(r,20))})
+  expect(changed).not.toHaveBeenCalled()
+  fireEvent.input(screen.getByLabelText('结构原文'),{target:{value:'real geometry edit'}})
+  await waitFor(()=>expect(changed).toHaveBeenCalledWith('material_states[0].structure.structure_text','snapshot'))
+})
+function BoxForNoteTest({children}:React.PropsWithChildren){return <div data-issue-field="material_states[0].structure.structure_text">{children}</div>}
+it.each(['upload','revision','admin','superadmin'])('236 %s 归并晶胞保留原物性身份与人工裁定说明',async kind=>{
+  const src=states[0]as any,dst=states[1]as any
+  const before=[structuredClone(src),structuredClone(dst)]
+  const geometry={structure_text:'source coordinates',structure_format:'cif',structure_hash:'merge-geometry',
+    validation:{structure_hash:'merge-geometry'},representations:{},sources:[{file_id:'si',block_id:'table-s1',pdf_page:30}],user_note:'原结构来源说明'}
+  const modules=[{module_key:'merge-kept-module',module_code:'electronic_properties',definition_key:'module.electronic_properties',definition_version:1,
+    records:[{record_key:'merge-kept-record',module_code:'electronic_properties',record_type:'property',property_code:'dos_fermi',
+      definition_key:'record.electronic_properties.dos_fermi',definition_version:1,value_kind:'number',value_number:.01,payload:{}}]}]
+  Object.assign(src,{material:'LaH9',pressure_value_gpa:50,state_kind:'theoretical',structure_optimization:'classical_static',
+    reported_space_group_number:9,reported_space_group_symbol:'Cc',crystal_system:'monoclinic',structure:geometry,property_modules:[]})
+  Object.assign(dst,{material:'LaH9',pressure_value_gpa:50,state_kind:'theoretical',structure_optimization:'classical_static',
+    reported_space_group_number:194,reported_space_group_symbol:'P6_3/mmc',crystal_system:'hexagonal',structure:null,property_modules:modules})
+  try{
+    await host(kind)
+    const card=document.querySelector('[data-state-key="s0"]')as HTMLElement
+    fireEvent.click(within(card).getByRole('button',{name:'归并结构与物性',exact:true}))
+    let dialog=await screen.findByRole('dialog',{name:'归并结构与物性'})
+    expect(within(dialog).getByText(/空结构卡将移除/)).toBeVisible()
+    fireEvent.click(within(dialog).getByRole('button',{name:'取消',exact:true}))
+    expect(api.patch).not.toHaveBeenCalled()
+    expect(document.querySelectorAll('[data-material-state-index]')).toHaveLength(5)
+    fireEvent.click(within(card).getByRole('button',{name:'归并结构与物性',exact:true}))
+    dialog=await screen.findByRole('dialog',{name:'归并结构与物性'})
+    fireEvent.change(within(dialog).getByLabelText('补充结构备注'),{target:{value:'Fig.1(c)与附件冲突；人工采用Cc，原标注保留'}})
+    expect(api.patch).not.toHaveBeenCalled()
+    fireEvent.click(within(dialog).getByRole('button',{name:'确认归并',exact:true}))
+    await waitFor(()=>expect(document.querySelectorAll('[data-material-state-index]')).toHaveLength(4))
+    expect(document.querySelector('[data-state-key="s0"]')).toBeNull()
+    const retained=document.querySelector('[data-state-key="s1"]')as HTMLElement
+    expect(within(retained).getByLabelText('空间群号')).toHaveValue(9)
+    expect(retained.querySelector('[data-structure-hash="merge-geometry"]')).not.toBeNull()
+    fireEvent.click(screen.getByRole('button',{name:['admin','superadmin'].includes(kind)?'保存修改':'立即保存',exact:true}))
+    await waitFor(()=>expect(api.patch).toHaveBeenCalled())
+    const changes=(vi.mocked(api.patch).mock.calls.at(-1)![1]as any).changes
+    expect(changes.some((c:any)=>c.op==='remove_item'&&c.identity.value==='s0')).toBe(true)
+    const moved=changes.find((c:any)=>c.path.at(-1)==='structure'&&c.value?.structure_hash==='merge-geometry').value
+    expect(moved.sources).toEqual(geometry.sources)
+    expect(moved.user_note).toBe('原结构来源说明\n\nFig.1(c)与附件冲突；人工采用Cc，原标注保留')
+    expect(changes.some((c:any)=>JSON.stringify(c.path).includes('merge-kept-module'))).toBe(false)
+    expect(vi.mocked(api.post).mock.calls.some(([p])=>/jobs|submit-check|preflight/.test(p))).toBe(false)
+  }finally{
+    for(const [state,old]of [[src,before[0]],[dst,before[1]]]){Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,old)}
+  }
+})
 it.each(['upload','revision','admin','superadmin'])('236 %s 拆分预览取消零写入，确认保留物性身份与晶胞来源',async kind=>{
   const seed=states[0] as any
   const old=structuredClone(seed)

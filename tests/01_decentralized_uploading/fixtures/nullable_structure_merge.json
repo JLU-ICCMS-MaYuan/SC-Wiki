@@ -1,0 +1,2244 @@
+{
+  "source": "Safari真实PATCH；2026-11-11；仅裁剪无关状态",
+  "draft": {
+    "material_states": [
+      {
+        "material": "LaH9",
+        "evidences": [
+          {
+            "bbox": [
+              48.96,
+              208.296,
+              298.656,
+              289.08
+            ],
+            "page": 4,
+            "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+            "parser": "complementary",
+            "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+            "polygon": null,
+            "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+            "pdf_page": 4,
+            "table_id": null,
+            "figure_id": null,
+            "source_kind": "ocr",
+            "printed_page": null,
+            "parser_version": "1",
+            "source_version": 1
+          },
+          {
+            "bbox": [
+              57.156,
+              141.0,
+              280.908,
+              199.584
+            ],
+            "page": 4,
+            "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+            "parser": "complementary",
+            "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+            "polygon": null,
+            "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+            "pdf_page": 4,
+            "table_id": null,
+            "figure_id": "Figure 4",
+            "source_kind": "vision",
+            "printed_page": null,
+            "parser_version": "1",
+            "source_version": 1
+          },
+          {
+            "bbox": [
+              55.93,
+              72.41199999999999,
+              539.07,
+              254.284
+            ],
+            "page": 3,
+            "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+            "parser": "complementary",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "polygon": null,
+            "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+            "pdf_page": 3,
+            "table_id": null,
+            "figure_id": null,
+            "source_kind": "ocr",
+            "printed_page": null,
+            "parser_version": "1",
+            "source_version": 1
+          },
+          {
+            "bbox": [
+              59.773,
+              457.41892,
+              82.46123999999999,
+              466.41284181818185
+            ],
+            "page": 32,
+            "quote": "LaH9",
+            "parser": "complementary",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "polygon": null,
+            "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+            "pdf_page": 32,
+            "table_id": "af2e13d1c462a340473cb3c8675dd43fd809f3645f9fafd6c63ea489a12ce39e",
+            "figure_id": null,
+            "source_kind": "text_layer",
+            "printed_page": null,
+            "parser_version": "1",
+            "source_version": 1
+          },
+          {
+            "bbox": [
+              59.773,
+              474.45892,
+              97.76767,
+              482.55217090909093
+            ],
+            "page": 32,
+            "quote": "(50 GPa)",
+            "parser": "complementary",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "polygon": null,
+            "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+            "pdf_page": 32,
+            "table_id": "af2e13d1c462a340473cb3c8675dd43fd809f3645f9fafd6c63ea489a12ce39e",
+            "figure_id": null,
+            "source_kind": "text_layer",
+            "printed_page": null,
+            "parser_version": "1",
+            "source_version": 1
+          },
+          {
+            "bbox": [
+              116.653,
+              457.41892,
+              127.691512,
+              465.5121709090909
+            ],
+            "page": 32,
+            "quote": "Cc",
+            "parser": "complementary",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "polygon": null,
+            "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+            "pdf_page": 32,
+            "table_id": "af2e13d1c462a340473cb3c8675dd43fd809f3645f9fafd6c63ea489a12ce39e",
+            "figure_id": null,
+            "source_kind": "text_layer",
+            "printed_page": null,
+            "parser_version": "1",
+            "source_version": 1
+          },
+          {
+            "bbox": [
+              416.173,
+              612.45892,
+              451.921964,
+              620.5521709090909
+            ],
+            "page": 32,
+            "quote": "-0.30173",
+            "parser": "complementary",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "polygon": null,
+            "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+            "pdf_page": 32,
+            "table_id": "af2e13d1c462a340473cb3c8675dd43fd809f3645f9fafd6c63ea489a12ce39e",
+            "figure_id": null,
+            "source_kind": "text_layer",
+            "printed_page": null,
+            "parser_version": "1",
+            "source_version": 1
+          }
+        ],
+        "state_key": "state-d3a7ec5c19fad5b56094",
+        "structure": null,
+        "state_kind": "theoretical",
+        "element_count": 2,
+        "crystal_system": "hexagonal",
+        "field_evidence": {
+          "material": [
+            {
+              "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "pdf_page": 3,
+              "source_version": 1
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "-0.30173",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+              "pdf_page": 32,
+              "source_version": 1
+            }
+          ],
+          "state_kind": [
+            {
+              "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "pdf_page": 3,
+              "source_version": 1
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "-0.30173",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+              "pdf_page": 32,
+              "source_version": 1
+            }
+          ],
+          "pressure_value_gpa": [
+            {
+              "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "pdf_page": 3,
+              "source_version": 1
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "-0.30173",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+              "pdf_page": 32,
+              "source_version": 1
+            }
+          ],
+          "structure_optimization": [
+            {
+              "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "pdf_page": 3,
+              "source_version": 1
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "-0.30173",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+              "pdf_page": 32,
+              "source_version": 1
+            }
+          ],
+          "reported_space_group_number": [
+            {
+              "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "pdf_page": 3,
+              "source_version": 1
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "-0.30173",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+              "pdf_page": 32,
+              "source_version": 1
+            }
+          ],
+          "reported_space_group_symbol": [
+            {
+              "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "pdf_page": 3,
+              "source_version": 1
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "-0.30173",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+              "pdf_page": 32,
+              "source_version": 1
+            }
+          ]
+        },
+        "schema_version": 2,
+        "property_modules": [
+          {
+            "records": [
+              {
+                "payload": {
+                  "method_variant_status": null
+                },
+                "name_raw": "Hydrogen-derived DOS at the Fermi level per volume",
+                "unit_raw": "states/(eV Å³)",
+                "evidences": [
+                  {
+                    "bbox": [
+                      55.932,
+                      33.936,
+                      291.072,
+                      108.624
+                    ],
+                    "page": 4,
+                    "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"top\", \"quantity\": \"dos_fermi\", \"quantity_name\": \"Hydrogen-derived electronic density of states at the Fermi level per volume, N_Ef\", \"unit\": \"states/(eV Å³)\", \"value_number\": 0.0054, \"value_raw\": \"~0.0054 states/(eV Å³)\", \"reading_precision\": 0.0009, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"H-derived DOS\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": null, \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"Seventh red H-derived DOS bar; shared LaH9 label and caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+                    "parser": "complementary",
+                    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                    "polygon": null,
+                    "block_id": "chart-reading-c5ddcd421d46602eb2394b56fce992f974b7da92",
+                    "pdf_page": 4,
+                    "table_id": null,
+                    "figure_id": "Figure 4",
+                    "source_kind": "vision",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      48.96,
+                      208.296,
+                      298.656,
+                      289.08
+                    ],
+                    "page": 4,
+                    "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+                    "parser": "complementary",
+                    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                    "polygon": null,
+                    "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+                    "pdf_page": 4,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  }
+                ],
+                "value_max": null,
+                "value_min": null,
+                "value_raw": "~0.0054 states/(eV Å³)",
+                "basis_kind": "paper_quote",
+                "method_raw": null,
+                "record_key": "fill-d2e145626a10596e01258088cafe",
+                "value_kind": "number",
+                "value_text": null,
+                "method_code": null,
+                "module_code": "electronic_properties",
+                "record_type": "property",
+                "uncertainty": null,
+                "value_number": 0.0054,
+                "criterion_raw": null,
+                "property_code": "dos_fermi",
+                "structure_key": null,
+                "value_boolean": null,
+                "canonical_unit": "states/(eV Å³)",
+                "criterion_code": null,
+                "definition_key": "record.electronic_properties.dos_fermi",
+                "is_representative": false,
+                "definition_version": 2,
+                "custom_property_key": null
+              }
+            ],
+            "metadata": {},
+            "module_key": "module-electronic_properties",
+            "module_code": "electronic_properties",
+            "definition_key": "module.electronic_properties",
+            "definition_version": 1
+          },
+          {
+            "records": [
+              {
+                "payload": {
+                  "tc_group": {
+                    "version": 1,
+                    "group_key": "fill-4c829a4af2ee97348d310135",
+                    "point_key": "5dc80acec38395e96ff466ad",
+                    "method_key": "fill-39ddd8e598c3fe46fa37273d"
+                  },
+                  "parameters": {
+                    "lambda_ep": {
+                      "reported": true,
+                      "unit_raw": "dimensionless",
+                      "evidences": null,
+                      "value_max": null,
+                      "value_min": null,
+                      "value_raw": "~0.87 dimensionless",
+                      "value_kind": "number",
+                      "value_text": null,
+                      "value_number": 0.87,
+                      "value_boolean": null
+                    },
+                    "mu_star": 0.1
+                  },
+                  "method_variant_status": "Eliashberg variant not specified.",
+                  "calculation_conditions": {
+                    "qe": null,
+                    "epw": null,
+                    "sscha": null,
+                    "phonon_method": "linear response theory",
+                    "calculation_code": "Quantum-ESPRESSO",
+                    "electronic_method": null,
+                    "vibrational_treatment": null,
+                    "exchange_correlation_functional": null
+                  }
+                },
+                "name_raw": "Superconducting transition temperature",
+                "unit_raw": "K",
+                "evidences": [
+                  {
+                    "bbox": [
+                      57.156,
+                      141.0,
+                      280.908,
+                      199.584
+                    ],
+                    "page": 4,
+                    "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+                    "parser": "complementary",
+                    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                    "polygon": null,
+                    "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+                    "pdf_page": 4,
+                    "table_id": null,
+                    "figure_id": "Figure 4",
+                    "source_kind": "vision",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      48.96,
+                      208.296,
+                      298.656,
+                      289.08
+                    ],
+                    "page": 4,
+                    "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+                    "parser": "complementary",
+                    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                    "polygon": null,
+                    "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+                    "pdf_page": 4,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      311.508,
+                      49.104,
+                      562.428,
+                      279.57599999999996
+                    ],
+                    "page": 4,
+                    "quote": "point (Fig. S14 [38]), the large λ values are mainly associated with in-plane stretching, in-plane rocking, and out-of-plane rocking vibrations of H clathrate cages (Fig. S15 [38]). The Eliashberg equation [37] gives a better description of systems with strong electron-phonon coupling for \\lambda > 1 . 5 We have therefore used the Eliashberg equation to predict superconductivity in the clathrate structures using the calculated logarithmic average frequency ( \\omega _ { \\mathrm { l o g } } ) and typical Coulomb pseudopotential parameters ( \\mu \\% ) from 0.1 to 0.13, The resulting T _ { c } values are 276 K (253 K for \\mu^{*} = 0.13 and 303 K (287 K for \\mu^{*} = 0.13 using \\mu^{*} = 0. 1 for \\mathrm { Y H } _ { 9 } at 150 GPa and \\mathrm{NH_{10}} at 400 GPa, respectively.The calculated T _ { c } of \\mathrm { L a H _ { 1 0 } } reaches 288 K using \\mu ^ { * } = 0 . 1 at 200 GPa. We also investigated potential superconductivity in other clathrate structures (Fig. 4) and predicted T _ { c } values for \\mathrm { S c H _ { 6 } } and \\mathrm { S c H _ { 9 } } as high as ~150 K, although for L \\mathrm{aH_{9},CeH_{9},CeH_{10}} and \\mathrm { P r H } _ { 9 } they are much lower at < 5 6 \\mathrm { K } ( \\mathrm { F i g . } 4 ) due to the introduction of much heavier elements which reduce BCS superconductivity.",
+                    "parser": "complementary",
+                    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                    "polygon": null,
+                    "block_id": "fc15867541110e319d0a31ac9c5ceda651ede83fd9ee3c6f4ab26bb260b72fc5",
+                    "pdf_page": 4,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      57.156000000000006,
+                      83.832,
+                      291.072,
+                      153.768
+                    ],
+                    "page": 4,
+                    "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"middle\", \"quantity\": \"lambda_ep\", \"quantity_name\": \"Electron–phonon coupling parameter λ\", \"unit\": \"dimensionless\", \"value_number\": 0.87, \"value_raw\": \"~0.87 dimensionless\", \"reading_precision\": 0.09, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"EPC parameter λ\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": \"linear response theory\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"Seventh blue bar; shared LaH9 category and caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+                    "parser": "complementary",
+                    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                    "polygon": null,
+                    "block_id": "chart-reading-3c42b5724436802b7bf61560de7673edc93c520a",
+                    "pdf_page": 4,
+                    "table_id": null,
+                    "figure_id": "Figure 4",
+                    "source_kind": "vision",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      47.736,
+                      561.528,
+                      299.268,
+                      719.928
+                    ],
+                    "page": 4,
+                    "quote": "The H clathrate structures of \\mathrm { R E H _ { 6 } ,   R E H _ { 9 } } , and \\mathrm { R E H _ { 1 0 } } are metallic as seen from the calculated electronic band structures and densities of states (Figs. S13 and S14 [38]). The electronic density of states at the Fermi level is typically large and is dominated by the contribution from H atoms. To examine potential superconductivity in the clathrate structures, lattice phonons and electron-phonon coupling (EPC) calculations were carried out using linear response theory [68]. Encouragingly, the resulting EPC parameters, \\lambda , of \\mathrm { \\underline { { Y H } } } _ { 9 } and \\mathrm{NH_{10}} are quite large and reach values of 4.42 and 2.41 at 150 and 400 GPa, respectively. Besides the H-derived high density of states at the Fermi level that is associated with a van Hove singularity at the Γ",
+                    "parser": "complementary",
+                    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                    "polygon": null,
+                    "block_id": "b542037f31767fc1a4bc36f92982a480b4d6135f12d54a4733ed3e7c694e657d",
+                    "pdf_page": 4,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      55.93,
+                      403.318,
+                      539.07,
+                      501.832
+                    ],
+                    "page": 3,
+                    "quote": "The phonon calculations were carried out by using supercell approach [17] as implemented in the phonopy code [18]. All structures of RE-H compounds are demonstrated to be dynamically stable in their stable pressure ranges by phonon calculations. The EPC parameter λ of the stable compounds are calculated within the framework of linear response theory through the Quantum-ESPRESSO code [19].",
+                    "parser": "complementary",
+                    "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+                    "polygon": null,
+                    "block_id": "620fb1b2d15525a05e94aa4f8a0c4614210837e2af9baeace948b662d4be6499",
+                    "pdf_page": 3,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      55.93,
+                      72.41199999999999,
+                      539.07,
+                      254.284
+                    ],
+                    "page": 3,
+                    "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+                    "parser": "complementary",
+                    "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+                    "polygon": null,
+                    "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+                    "pdf_page": 3,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      55.93,
+                      506.884,
+                      539.07,
+                      585.1899999999999
+                    ],
+                    "page": 3,
+                    "quote": "We explored the effects of temperature using the quasiharmonic approximation (QHA) that introduces volume dependence of phonon frequencies as a part of anharmonic effect, for which phonon calculations were performed for all promising structures using the phonopy code. Gibbs free energy (G) is defined at a constant temperature (T) and pressure (p) by the formula:",
+                    "parser": "complementary",
+                    "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+                    "polygon": null,
+                    "block_id": "ca0c8296c607daaa06a1f7bf4b27211cb1749b5ee0582aea2a230ce7edacbd31",
+                    "pdf_page": 3,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  }
+                ],
+                "value_max": null,
+                "value_min": null,
+                "value_raw": "~27",
+                "basis_kind": "paper_quote",
+                "method_raw": "Eliashberg equation",
+                "record_key": "fill-1e8c40e2d012cfd277a5fbd28957",
+                "value_kind": "number",
+                "value_text": null,
+                "method_code": "unknown",
+                "module_code": "superconductive_properties",
+                "record_type": "predicted_tc",
+                "uncertainty": null,
+                "value_number": 27,
+                "criterion_raw": null,
+                "property_code": "tc",
+                "structure_key": null,
+                "value_boolean": null,
+                "canonical_unit": "K",
+                "criterion_code": null,
+                "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+                "is_representative": false,
+                "definition_version": 2,
+                "custom_property_key": null
+              },
+              {
+                "payload": {
+                  "tc_group": {
+                    "version": 1,
+                    "group_key": "fill-4c829a4af2ee97348d310135",
+                    "point_key": "16cab1813a1aa71e09396e00",
+                    "method_key": "fill-39ddd8e598c3fe46fa37273d"
+                  },
+                  "parameters": {
+                    "lambda_ep": {
+                      "reported": true,
+                      "unit_raw": "dimensionless",
+                      "evidences": null,
+                      "value_max": null,
+                      "value_min": null,
+                      "value_raw": "~0.87 dimensionless",
+                      "value_kind": "number",
+                      "value_text": null,
+                      "value_number": 0.87,
+                      "value_boolean": null
+                    },
+                    "mu_star": 0.13
+                  },
+                  "method_variant_status": "Eliashberg variant not specified.",
+                  "calculation_conditions": {
+                    "qe": null,
+                    "epw": null,
+                    "sscha": null,
+                    "phonon_method": "linear response theory",
+                    "calculation_code": "Quantum-ESPRESSO",
+                    "electronic_method": null,
+                    "vibrational_treatment": null,
+                    "exchange_correlation_functional": null
+                  }
+                },
+                "name_raw": "Superconducting transition temperature",
+                "unit_raw": "K",
+                "evidences": [
+                  {
+                    "bbox": [
+                      57.156,
+                      141.0,
+                      280.908,
+                      199.584
+                    ],
+                    "page": 4,
+                    "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 21.0, \"value_raw\": \"~21 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.13\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.13, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 navy right bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+                    "parser": "complementary",
+                    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                    "polygon": null,
+                    "block_id": "chart-reading-186128f0899dc403d0be119976779a381e25aa9b",
+                    "pdf_page": 4,
+                    "table_id": null,
+                    "figure_id": "Figure 4",
+                    "source_kind": "vision",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      48.96,
+                      208.296,
+                      298.656,
+                      289.08
+                    ],
+                    "page": 4,
+                    "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+                    "parser": "complementary",
+                    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                    "polygon": null,
+                    "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+                    "pdf_page": 4,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      311.508,
+                      49.104,
+                      562.428,
+                      279.57599999999996
+                    ],
+                    "page": 4,
+                    "quote": "point (Fig. S14 [38]), the large λ values are mainly associated with in-plane stretching, in-plane rocking, and out-of-plane rocking vibrations of H clathrate cages (Fig. S15 [38]). The Eliashberg equation [37] gives a better description of systems with strong electron-phonon coupling for \\lambda > 1 . 5 We have therefore used the Eliashberg equation to predict superconductivity in the clathrate structures using the calculated logarithmic average frequency ( \\omega _ { \\mathrm { l o g } } ) and typical Coulomb pseudopotential parameters ( \\mu \\% ) from 0.1 to 0.13, The resulting T _ { c } values are 276 K (253 K for \\mu^{*} = 0.13 and 303 K (287 K for \\mu^{*} = 0.13 using \\mu^{*} = 0. 1 for \\mathrm { Y H } _ { 9 } at 150 GPa and \\mathrm{NH_{10}} at 400 GPa, respectively.The calculated T _ { c } of \\mathrm { L a H _ { 1 0 } } reaches 288 K using \\mu ^ { * } = 0 . 1 at 200 GPa. We also investigated potential superconductivity in other clathrate structures (Fig. 4) and predicted T _ { c } values for \\mathrm { S c H _ { 6 } } and \\mathrm { S c H _ { 9 } } as high as ~150 K, although for L \\mathrm{aH_{9},CeH_{9},CeH_{10}} and \\mathrm { P r H } _ { 9 } they are much lower at < 5 6 \\mathrm { K } ( \\mathrm { F i g . } 4 ) due to the introduction of much heavier elements which reduce BCS superconductivity.",
+                    "parser": "complementary",
+                    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                    "polygon": null,
+                    "block_id": "fc15867541110e319d0a31ac9c5ceda651ede83fd9ee3c6f4ab26bb260b72fc5",
+                    "pdf_page": 4,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      57.156000000000006,
+                      83.832,
+                      291.072,
+                      153.768
+                    ],
+                    "page": 4,
+                    "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"middle\", \"quantity\": \"lambda_ep\", \"quantity_name\": \"Electron–phonon coupling parameter λ\", \"unit\": \"dimensionless\", \"value_number\": 0.87, \"value_raw\": \"~0.87 dimensionless\", \"reading_precision\": 0.09, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"EPC parameter λ\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": null, \"method_raw\": \"linear response theory\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"Seventh blue bar; shared LaH9 category and caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+                    "parser": "complementary",
+                    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                    "polygon": null,
+                    "block_id": "chart-reading-3c42b5724436802b7bf61560de7673edc93c520a",
+                    "pdf_page": 4,
+                    "table_id": null,
+                    "figure_id": "Figure 4",
+                    "source_kind": "vision",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      47.736,
+                      561.528,
+                      299.268,
+                      719.928
+                    ],
+                    "page": 4,
+                    "quote": "The H clathrate structures of \\mathrm { R E H _ { 6 } ,   R E H _ { 9 } } , and \\mathrm { R E H _ { 1 0 } } are metallic as seen from the calculated electronic band structures and densities of states (Figs. S13 and S14 [38]). The electronic density of states at the Fermi level is typically large and is dominated by the contribution from H atoms. To examine potential superconductivity in the clathrate structures, lattice phonons and electron-phonon coupling (EPC) calculations were carried out using linear response theory [68]. Encouragingly, the resulting EPC parameters, \\lambda , of \\mathrm { \\underline { { Y H } } } _ { 9 } and \\mathrm{NH_{10}} are quite large and reach values of 4.42 and 2.41 at 150 and 400 GPa, respectively. Besides the H-derived high density of states at the Fermi level that is associated with a van Hove singularity at the Γ",
+                    "parser": "complementary",
+                    "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+                    "polygon": null,
+                    "block_id": "b542037f31767fc1a4bc36f92982a480b4d6135f12d54a4733ed3e7c694e657d",
+                    "pdf_page": 4,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      55.93,
+                      403.318,
+                      539.07,
+                      501.832
+                    ],
+                    "page": 3,
+                    "quote": "The phonon calculations were carried out by using supercell approach [17] as implemented in the phonopy code [18]. All structures of RE-H compounds are demonstrated to be dynamically stable in their stable pressure ranges by phonon calculations. The EPC parameter λ of the stable compounds are calculated within the framework of linear response theory through the Quantum-ESPRESSO code [19].",
+                    "parser": "complementary",
+                    "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+                    "polygon": null,
+                    "block_id": "620fb1b2d15525a05e94aa4f8a0c4614210837e2af9baeace948b662d4be6499",
+                    "pdf_page": 3,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      55.93,
+                      72.41199999999999,
+                      539.07,
+                      254.284
+                    ],
+                    "page": 3,
+                    "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+                    "parser": "complementary",
+                    "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+                    "polygon": null,
+                    "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+                    "pdf_page": 3,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  },
+                  {
+                    "bbox": [
+                      55.93,
+                      506.884,
+                      539.07,
+                      585.1899999999999
+                    ],
+                    "page": 3,
+                    "quote": "We explored the effects of temperature using the quasiharmonic approximation (QHA) that introduces volume dependence of phonon frequencies as a part of anharmonic effect, for which phonon calculations were performed for all promising structures using the phonopy code. Gibbs free energy (G) is defined at a constant temperature (T) and pressure (p) by the formula:",
+                    "parser": "complementary",
+                    "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+                    "polygon": null,
+                    "block_id": "ca0c8296c607daaa06a1f7bf4b27211cb1749b5ee0582aea2a230ce7edacbd31",
+                    "pdf_page": 3,
+                    "table_id": null,
+                    "figure_id": null,
+                    "source_kind": "ocr",
+                    "printed_page": null,
+                    "parser_version": "1",
+                    "source_version": 1
+                  }
+                ],
+                "value_max": null,
+                "value_min": null,
+                "value_raw": "~21",
+                "basis_kind": "paper_quote",
+                "method_raw": "Eliashberg equation",
+                "record_key": "fill-5883a9f3063bbaf626e3bc0a6709",
+                "value_kind": "number",
+                "value_text": null,
+                "method_code": "unknown",
+                "module_code": "superconductive_properties",
+                "record_type": "predicted_tc",
+                "uncertainty": null,
+                "value_number": 21,
+                "criterion_raw": null,
+                "property_code": "tc",
+                "structure_key": null,
+                "value_boolean": null,
+                "canonical_unit": "K",
+                "criterion_code": null,
+                "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+                "is_representative": false,
+                "definition_version": 2,
+                "custom_property_key": null
+              }
+            ],
+            "metadata": {},
+            "module_key": "module-superconductive_properties",
+            "module_code": "superconductive_properties",
+            "definition_key": "module.superconductive_properties",
+            "definition_version": 1
+          }
+        ],
+        "pressure_value_gpa": 50,
+        "structure_families": [
+          {
+            "id": null,
+            "name": "clathrate",
+            "status": "pending",
+            "is_primary": false
+          }
+        ],
+        "structure_optimization": "classical_static",
+        "material_dimensionality": "unknown",
+        "reported_space_group_number": 194,
+        "reported_space_group_symbol": "P6_3/mmc"
+      },
+      {
+        "material": "LaH9",
+        "state_key": "structure-state-4125a619-d9d3-416c-860a-4733bbe336b3",
+        "structure": {
+          "sources": [
+            {
+              "bbox": [
+                59.77299880981445,
+                455.16558837890625,
+                451.9219970703125,
+                466.7725830078125
+              ],
+              "page": 32,
+              "role": "supplementary",
+              "quote": "LaH9 Cc a = 5.5182 La(4a) -0.44188 -0.42736 -0.95784",
+              "parser": "original-pdf-rows-v1",
+              "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "pdf-row-3e58b70686f2b0241973aab45ee5a1c1",
+              "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+              "pdf_page": 32,
+              "source_kind": "original_pdf_row"
+            },
+            {
+              "bbox": [
+                59.77299880981445,
+                472.20556640625,
+                451.9219970703125,
+                483.0984191894531
+              ],
+              "page": 32,
+              "role": "supplementary",
+              "quote": "(50 GPa) b = 5.48010 H(4a) -0.48253 -0.15102 -0.80784",
+              "parser": "original-pdf-rows-v1",
+              "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "pdf-row-bb4dcacdefad47ac15771c218234c99c",
+              "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+              "pdf_page": 32,
+              "source_kind": "original_pdf_row"
+            },
+            {
+              "bbox": [
+                165.85299682617188,
+                489.4855651855469,
+                451.9219970703125,
+                500.37841796875
+              ],
+              "page": 32,
+              "role": "supplementary",
+              "quote": "c = 8.78360 H(4a) -0.79723 -0.45792 -0.41698",
+              "parser": "original-pdf-rows-v1",
+              "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "pdf-row-bc31b4792cdca37c0f5fdadf2afa185d",
+              "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+              "pdf_page": 32,
+              "source_kind": "original_pdf_row"
+            },
+            {
+              "bbox": [
+                165.85299682617188,
+                506.7655334472656,
+                451.9219970703125,
+                517.6583862304688
+              ],
+              "page": 32,
+              "role": "supplementary",
+              "quote": "α= γ = 90.0000° H(4a) -0.98153 -0.26495 -0.16038",
+              "parser": "original-pdf-rows-v1",
+              "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "pdf-row-4a333212b329911b03f55d43a678c363",
+              "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+              "pdf_page": 32,
+              "source_kind": "original_pdf_row"
+            },
+            {
+              "bbox": [
+                165.85299682617188,
+                524.0455322265625,
+                451.9219970703125,
+                534.9384155273438
+              ],
+              "page": 32,
+              "role": "supplementary",
+              "quote": "β = 137.6884° H(4a) -0.59696 -0.44799 -0.29199",
+              "parser": "original-pdf-rows-v1",
+              "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "pdf-row-f8167251697952b34ab0901e59bc622a",
+              "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+              "pdf_page": 32,
+              "source_kind": "original_pdf_row"
+            },
+            {
+              "bbox": [
+                246.97300720214844,
+                541.3255615234375,
+                451.9219970703125,
+                552.2184448242188
+              ],
+              "page": 32,
+              "role": "supplementary",
+              "quote": "H(4a) -0.90537 -0.32796 -0.63673",
+              "parser": "original-pdf-rows-v1",
+              "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "pdf-row-32003eb1042afe1f71f151c37c64a123",
+              "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+              "pdf_page": 32,
+              "source_kind": "original_pdf_row"
+            },
+            {
+              "bbox": [
+                246.97300720214844,
+                558.6055297851562,
+                451.9219970703125,
+                569.4984130859375
+              ],
+              "page": 32,
+              "role": "supplementary",
+              "quote": "H(4a) -0.72395 -0.06120 -0.09486",
+              "parser": "original-pdf-rows-v1",
+              "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "pdf-row-455920be36c9ae80c207ea3d82b468ec",
+              "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+              "pdf_page": 32,
+              "source_kind": "original_pdf_row"
+            },
+            {
+              "bbox": [
+                246.97300720214844,
+                575.8855590820312,
+                451.9219970703125,
+                586.7784423828125
+              ],
+              "page": 32,
+              "role": "supplementary",
+              "quote": "H(4a) -0.52603 -0.17360 -0.43048",
+              "parser": "original-pdf-rows-v1",
+              "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "pdf-row-02b2d9adbdf391d2d05305fc7d9830c8",
+              "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+              "pdf_page": 32,
+              "source_kind": "original_pdf_row"
+            },
+            {
+              "bbox": [
+                246.97300720214844,
+                593.16552734375,
+                451.9219970703125,
+                604.0584106445312
+              ],
+              "page": 32,
+              "role": "supplementary",
+              "quote": "H(4a) -0.99078 -0.32614 -0.08105",
+              "parser": "original-pdf-rows-v1",
+              "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "pdf-row-63226afc9ad9d215898a2ec4b282334b",
+              "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+              "pdf_page": 32,
+              "source_kind": "original_pdf_row"
+            },
+            {
+              "bbox": [
+                246.97300720214844,
+                610.20556640625,
+                451.9219970703125,
+                621.0984497070312
+              ],
+              "page": 32,
+              "role": "supplementary",
+              "quote": "H(4a) -0.41160 -0.19646 -0.30173",
+              "parser": "original-pdf-rows-v1",
+              "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "pdf-row-96420a7ea2855f2e0030f1d8d57652a9",
+              "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+              "pdf_page": 32,
+              "source_kind": "original_pdf_row"
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "page_end": 32,
+              "file_role": "supplementary",
+              "page_start": 32,
+              "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "page_end": 32,
+              "file_role": "supplementary",
+              "page_start": 32,
+              "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "page_end": 32,
+              "file_role": "supplementary",
+              "page_start": 32,
+              "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "source_version": 1
+            },
+            {
+              "quote": "a = 5.5182",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "ef638511907a89f36f63bb9bf26db4a946f1d19c55504b539f1532a3a19b8ae0",
+              "page_end": 32,
+              "file_role": "supplementary",
+              "page_start": 32,
+              "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "source_version": 1
+            },
+            {
+              "quote": "b = 5.48010",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "165e59e7902ce30105982938e794edfc5b944bb4d739d900b85e7ee23f4dc1a0",
+              "page_end": 32,
+              "file_role": "supplementary",
+              "page_start": 32,
+              "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "source_version": 1
+            },
+            {
+              "quote": "c = 8.78360",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "3b3b7f072c5a14c8f177923143426f5aafff6e2a5d56dcce4f2c71eb0de8525b",
+              "page_end": 32,
+              "file_role": "supplementary",
+              "page_start": 32,
+              "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "source_version": 1
+            },
+            {
+              "quote": "Structure searches for rare earth (RE) hydrides of REHx (x = 1 - 12 and 13-24) with simulation cells ranging from one to four formula units were performed at 50, 100, 150, 200, 300, and 400 GPa. Our CALYPSO structural searches focus mainly on the REHx (x = 2-12) stoichiometries, Ab Initio Random Structure Searching (AIRSS) [10] calculations were also employed to confirm some of our key clathrate structures, while some H-richer stoichiometries REHx (x =13-24) were also considered in the AIRSS approach [10]. Each generation contained 50 structures, and structures in the first generation were produced randomly with symmetry constraints. All the generated structures are optimized to their local minima by using DFT calculations. Here, almost all geometrical optimization calculations are performed by using PAW potentials and VASP code [11]. There are two exceptions on La hydrides and Pr hydrides, where the geometrical optimizations are performed by OTF potentials and CASTEP code [12] since PAW potentials of La and Pr are invalid to be used at high pressure as tested. During structure evolution, 60% of structures in the first generation with lower enthalpies are selected to produce the structures in the next generation by PSO. 40% of the structures in the new generation are randomly generated. A structure fingerprinting technique of bond characterization matrix is applied to produce structures, so that identical structures are strictly forbidden. These procedures significantly enhance the diversity of structures, which is crucial for the searching efficiency of algorithm. The local optimizations are performed by use of the conjugate gradients method and the criteria of the enthalpy change is 2 \\times 1 0 ^ { - 5 }   \\mathrm { e V } per atom. For most of the cases, the structure searches reach the convergence after 50 generations covering about 2500 structures.",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "03fa086c86ed4709a836dc268bed0854809b46648acf177e909403485ee0dbad",
+              "page_end": 2,
+              "file_role": "supplementary",
+              "page_start": 2,
+              "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "page_end": 3,
+              "file_role": "supplementary",
+              "page_start": 3,
+              "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+              "source_version": 1
+            }
+          ],
+          "user_note": null,
+          "derivation": {
+            "kind": "space_group_expansion",
+            "label": "空间群展开",
+            "reason": "Table S1 p32 gives 50 GPa; not replaced by 350 GPa phonon condition source-280.",
+            "input_layout": "validated_original_pdf_rows",
+            "space_group_setting": "Cc",
+            "rounding_adjustments": [],
+            "source_reading_notes": [],
+            "inferred_cell_parameters": [],
+            "rounded_fractional_sites": [],
+            "reported_multiplicity_factor": 1
+          },
+          "review_key": "pdf-structure-33dd4e573bed399ab7510ab0",
+          "validation": {
+            "volume": 178.80440752739798,
+            "elements": [
+              "H",
+              "La"
+            ],
+            "ase_valid": true,
+            "atom_count": 40,
+            "structure_hash": "31192e2f9c28533275df7e50237f5b39f58ba0ab82ad3c12fc03c4d3132c976c",
+            "cell_parameters": {
+              "a": 5.5182,
+              "b": 5.4801,
+              "c": 5.992998637927998,
+              "beta": 99.38463551941857,
+              "alpha": 90,
+              "gamma": 90
+            },
+            "structure_format": "cif"
+          },
+          "structure_hash": "31192e2f9c28533275df7e50237f5b39f58ba0ab82ad3c12fc03c4d3132c976c",
+          "structure_text": "data_image0\n_chemical_formula_structural       La4H36\n_chemical_formula_sum              \"La4 H36\"\n_cell_length_a       5.5182\n_cell_length_b       5.4801\n_cell_length_c       5.992998637927998\n_cell_angle_alpha    90.0\n_cell_angle_beta     99.38463551941855\n_cell_angle_gamma    90.0\n\n_space_group_name_H-M_alt    \"P 1\"\n_space_group_IT_number       1\n\nloop_\n  _space_group_symop_operation_xyz\n  'x, y, z'\n\nloop_\n  _atom_site_type_symbol\n  _atom_site_label\n  _atom_site_symmetry_multiplicity\n  _atom_site_fract_x\n  _atom_site_fract_y\n  _atom_site_fract_z\n  _atom_site_occupancy\n  La  La1       1.0  0.76596  0.8226400000000001  0.54216  1.0000\n  La  La2       1.0  0.76596  0.17735999999999996  0.042159999999999975  1.0000\n  La  La3       1.0  0.26596  0.32264000000000004  0.54216  1.0000\n  La  La4       1.0  0.26596  0.6773600000000001  0.042159999999999975  1.0000\n  H   H1        1.0  0.07530999999999986  0.59898  0.69216  1.0000\n  H   H2        1.0  0.57531  0.9010200000000002  0.19216  1.0000\n  H   H3        1.0  0.86975  0.79208  0.08301999999999997  1.0000\n  H   H4        1.0  0.36974999999999997  0.7079200000000001  0.5830199999999999  1.0000\n  H   H5        1.0  0.9288499999999998  0.48505000000000004  0.33961999999999987  1.0000\n  H   H6        1.0  0.9288499999999998  0.51495  0.8396199999999999  1.0000\n  H   H7        1.0  0.9450299999999998  0.8020100000000001  0.20801  1.0000\n  H   H8        1.0  0.4450299999999999  0.69799  0.70801  1.0000\n  H   H9        1.0  0.9813599999999997  0.9220400000000001  0.8632699999999996  1.0000\n  H   H10       1.0  0.48135999999999984  0.57796  0.36326999999999976  1.0000\n  H   H11       1.0  0.12090999999999993  0.6888  0.40514  1.0000\n  H   H12       1.0  0.6209099999999997  0.8112  0.9051400000000001  1.0000\n  H   H13       1.0  0.65445  0.5764  0.06952000000000001  1.0000\n  H   H14       1.0  0.65445  0.4236  0.56952  1.0000\n  H   H15       1.0  0.8402699999999999  0.42386  0.41895  1.0000\n  H   H16       1.0  0.8402699999999999  0.5761400000000001  0.91895  1.0000\n  H   H17       1.0  0.64013  0.55354  0.19826999999999992  1.0000\n  H   H18       1.0  0.64013  0.44645999999999997  0.6982699999999998  1.0000\n  H   H19       1.0  0.57531  0.09897999999999997  0.69216  1.0000\n  H   H20       1.0  0.07530999999999999  0.4010200000000001  0.19216  1.0000\n  H   H21       1.0  0.36974999999999997  0.2920799999999999  0.08301999999999997  1.0000\n  H   H22       1.0  0.86975  0.2079200000000001  0.5830199999999999  1.0000\n  H   H23       1.0  0.4288499999999999  0.98505  0.33961999999999987  1.0000\n  H   H24       1.0  0.4288499999999999  0.014950000000000019  0.8396199999999999  1.0000\n  H   H25       1.0  0.4450299999999998  0.30201  0.20801  1.0000\n  H   H26       1.0  0.9450299999999999  0.19799000000000003  0.70801  1.0000\n  H   H27       1.0  0.48135999999999984  0.42204  0.8632699999999996  1.0000\n  H   H28       1.0  0.98136  0.07796000000000003  0.36326999999999976  1.0000\n  H   H29       1.0  0.6209099999999997  0.18879999999999997  0.40514  1.0000\n  H   H30       1.0  0.12090999999999985  0.31120000000000003  0.9051400000000001  1.0000\n  H   H31       1.0  0.15444999999999998  0.07640000000000002  0.06952000000000001  1.0000\n  H   H32       1.0  0.15444999999999998  0.9236  0.56952  1.0000\n  H   H33       1.0  0.34026999999999996  0.9238599999999999  0.41895  1.0000\n  H   H34       1.0  0.34026999999999996  0.07613999999999999  0.91895  1.0000\n  H   H35       1.0  0.1401300000000001  0.05354000000000004  0.19826999999999992  1.0000\n  H   H36       1.0  0.14013000000000006  0.9464600000000002  0.6982699999999998  1.0000\n",
+          "representations": {
+            "primitive": {
+              "cif": {
+                "text": "data_image0\n_chemical_formula_structural       La2H18\n_chemical_formula_sum              \"La2 H18\"\n_cell_length_a       3.88850958755408\n_cell_length_b       3.88850958755408\n_cell_length_c       5.992998637927998\n_cell_angle_alpha    83.35596664851955\n_cell_angle_beta     96.64403335148045\n_cell_angle_gamma    90.39696325200822\n\n_space_group_name_H-M_alt    \"P 1\"\n_space_group_IT_number       1\n\nloop_\n  _space_group_symop_operation_xyz\n  'x, y, z'\n\nloop_\n  _atom_site_type_symbol\n  _atom_site_label\n  _atom_site_symmetry_multiplicity\n  _atom_site_fract_x\n  _atom_site_fract_y\n  _atom_site_fract_z\n  _atom_site_occupancy\n  La  La1       1.0  0.5886  0.056680000000000175  0.54216  1.0000\n  La  La2       1.0  0.94332  0.41140000000000015  0.042159999999999975  1.0000\n  H   H1        1.0  0.6742899999999997  0.52367  0.69216  1.0000\n  H   H2        1.0  0.4763300000000001  0.32571  0.19216  1.0000\n  H   H3        1.0  0.6618300000000001  0.92233  0.08301999999999997  1.0000\n  H   H4        1.0  0.07767000000000021  0.3381700000000001  0.5830199999999999  1.0000\n  H   H5        1.0  0.41389999999999993  0.5562000000000001  0.33961999999999987  1.0000\n  H   H6        1.0  0.4437999999999998  0.5861000000000001  0.8396199999999999  1.0000\n  H   H7        1.0  0.7470399999999997  0.8569800000000004  0.20800999999999997  1.0000\n  H   H8        1.0  0.14301999999999992  0.2529600000000001  0.70801  1.0000\n  H   H9        1.0  0.9033999999999996  0.9406800000000002  0.8632699999999996  1.0000\n  H   H10       1.0  0.059320000000000025  0.09660000000000003  0.36326999999999976  1.0000\n  H   H11       1.0  0.8097099999999998  0.56789  0.40514  1.0000\n  H   H12       1.0  0.4321099999999997  0.19029000000000013  0.9051400000000001  1.0000\n  H   H13       1.0  0.23084999999999994  0.9219499999999999  0.06952000000000001  1.0000\n  H   H14       1.0  0.07804999999999992  0.76915  0.56952  1.0000\n  H   H15       1.0  0.2641299999999997  0.5835900000000002  0.41895  1.0000\n  H   H16       1.0  0.4164099999999999  0.7358700000000002  0.9189499999999999  1.0000\n  H   H17       1.0  0.19367000000000015  0.91341  0.19826999999999992  1.0000\n  H   H18       1.0  0.08658999999999996  0.8063299999999999  0.6982699999999998  1.0000\n",
+                "format": "cif",
+                "cell_kind": "primitive",
+                "validation": {
+                  "volume": 89.40220376369898,
+                  "elements": [
+                    "H",
+                    "La"
+                  ],
+                  "ase_valid": true,
+                  "atom_count": 20,
+                  "structure_hash": "a489b82c4716fc7c173db23e1a037310b7b4de2b29e119f2964bf7fe80d2f9bb",
+                  "cell_parameters": {
+                    "a": 3.88850958755408,
+                    "b": 3.88850958755408,
+                    "c": 5.992998637927998,
+                    "beta": 96.64403335148045,
+                    "alpha": 83.35596664851955,
+                    "gamma": 90.39696325200822
+                  },
+                  "structure_format": "cif"
+                },
+                "standardization_method": "pymatgen.get_primitive_standard_structure"
+              },
+              "poscar": {
+                "text": "La H \n 1.0000000000000000\n     2.7400500000000001    2.7591000000000001    0.0000000000000000\n     2.7400500000000001   -2.7591000000000001    0.0000000000000000\n     0.0000000000000000   -0.9772267266312528   -5.9127878871953801\n La  H  \n   2  18\nCartesian\n  1.7680994640000005  0.9378072298895997 -3.2056770809218471\n  3.7120005360000001  1.4264205932052263 -0.2492831373241571\n  3.2824702979999998 -0.2608216091050883 -4.0925952640011545\n  2.1976297020000004  0.2277917542105389 -1.1362013204034642\n  4.3406776080000000 -0.7998749128449258 -0.4908796503949603\n  1.1394223920000004 -1.2884882761605525 -3.4472735939926498\n  2.6581225050000001 -0.7245056708985065 -2.0081010222492943\n  2.8219774949999996 -1.2131190342141331 -4.9644949658469848\n  4.3950950010000005 -0.5066083854065685 -1.2299190084155109\n  1.0850049989999999 -0.9952217487221937 -4.1863129520132016\n  5.0528714040000002 -0.9464697642989625 -5.1043323993791541\n  0.4272285960000002 -0.4578564009833350 -2.1479384557814645\n  3.7746928799999995  0.2712919259726140 -2.3955068846183365\n  1.7054071199999998 -0.2173214373430130 -5.3519008282160270\n  3.1587296399999998 -1.9747508120354047 -0.4110570139178229\n  2.3213703600000000 -2.4633641753510314 -3.3674509575155129\n  2.3227951860000000 -1.2908312231221646 -2.4771624853405045\n  3.1573048140000006 -1.7794445864377906 -5.4335564289381946\n  3.0334545540000009 -2.1795893770891781 -1.1723284543942276\n  2.4466454459999998 -2.6682027404048045 -4.1287223979919174\n",
+                "format": "poscar",
+                "cell_kind": "primitive",
+                "validation": {
+                  "volume": 89.40220376369898,
+                  "elements": [
+                    "H",
+                    "La"
+                  ],
+                  "ase_valid": true,
+                  "atom_count": 20,
+                  "structure_hash": "dde75f9e055d12e6075a7f3e6dc33469a089820c14c1a4abda622b09bfa17e8b",
+                  "cell_parameters": {
+                    "a": 3.88850958755408,
+                    "b": 3.88850958755408,
+                    "c": 5.992998637927998,
+                    "beta": 96.64403335148045,
+                    "alpha": 83.35596664851955,
+                    "gamma": 90.39696325200822
+                  },
+                  "structure_format": "poscar"
+                },
+                "standardization_method": "pymatgen.get_primitive_standard_structure"
+              }
+            },
+            "conventional": {
+              "cif": {
+                "text": "data_image0\n_chemical_formula_structural       La4H36\n_chemical_formula_sum              \"La4 H36\"\n_cell_length_a       5.5182\n_cell_length_b       5.4801\n_cell_length_c       5.992998637927998\n_cell_angle_alpha    90.0\n_cell_angle_beta     99.38463551941855\n_cell_angle_gamma    90.0\n\n_space_group_name_H-M_alt    \"P 1\"\n_space_group_IT_number       1\n\nloop_\n  _space_group_symop_operation_xyz\n  'x, y, z'\n\nloop_\n  _atom_site_type_symbol\n  _atom_site_label\n  _atom_site_symmetry_multiplicity\n  _atom_site_fract_x\n  _atom_site_fract_y\n  _atom_site_fract_z\n  _atom_site_occupancy\n  La  La1       1.0  0.76596  0.8226400000000001  0.54216  1.0000\n  La  La2       1.0  0.76596  0.17735999999999996  0.042159999999999975  1.0000\n  La  La3       1.0  0.26596  0.32264000000000004  0.54216  1.0000\n  La  La4       1.0  0.26596  0.6773600000000001  0.042159999999999975  1.0000\n  H   H1        1.0  0.07530999999999986  0.59898  0.69216  1.0000\n  H   H2        1.0  0.57531  0.9010200000000002  0.19216  1.0000\n  H   H3        1.0  0.86975  0.79208  0.08301999999999997  1.0000\n  H   H4        1.0  0.36974999999999997  0.7079200000000001  0.5830199999999999  1.0000\n  H   H5        1.0  0.9288499999999998  0.48505000000000004  0.33961999999999987  1.0000\n  H   H6        1.0  0.9288499999999998  0.51495  0.8396199999999999  1.0000\n  H   H7        1.0  0.9450299999999998  0.8020100000000001  0.20801  1.0000\n  H   H8        1.0  0.4450299999999999  0.69799  0.70801  1.0000\n  H   H9        1.0  0.9813599999999997  0.9220400000000001  0.8632699999999996  1.0000\n  H   H10       1.0  0.48135999999999984  0.57796  0.36326999999999976  1.0000\n  H   H11       1.0  0.12090999999999993  0.6888  0.40514  1.0000\n  H   H12       1.0  0.6209099999999997  0.8112  0.9051400000000001  1.0000\n  H   H13       1.0  0.65445  0.5764  0.06952000000000001  1.0000\n  H   H14       1.0  0.65445  0.4236  0.56952  1.0000\n  H   H15       1.0  0.8402699999999999  0.42386  0.41895  1.0000\n  H   H16       1.0  0.8402699999999999  0.5761400000000001  0.91895  1.0000\n  H   H17       1.0  0.64013  0.55354  0.19826999999999992  1.0000\n  H   H18       1.0  0.64013  0.44645999999999997  0.6982699999999998  1.0000\n  H   H19       1.0  0.57531  0.09897999999999997  0.69216  1.0000\n  H   H20       1.0  0.07530999999999999  0.4010200000000001  0.19216  1.0000\n  H   H21       1.0  0.36974999999999997  0.2920799999999999  0.08301999999999997  1.0000\n  H   H22       1.0  0.86975  0.2079200000000001  0.5830199999999999  1.0000\n  H   H23       1.0  0.4288499999999999  0.98505  0.33961999999999987  1.0000\n  H   H24       1.0  0.4288499999999999  0.014950000000000019  0.8396199999999999  1.0000\n  H   H25       1.0  0.4450299999999998  0.30201  0.20801  1.0000\n  H   H26       1.0  0.9450299999999999  0.19799000000000003  0.70801  1.0000\n  H   H27       1.0  0.48135999999999984  0.42204  0.8632699999999996  1.0000\n  H   H28       1.0  0.98136  0.07796000000000003  0.36326999999999976  1.0000\n  H   H29       1.0  0.6209099999999997  0.18879999999999997  0.40514  1.0000\n  H   H30       1.0  0.12090999999999985  0.31120000000000003  0.9051400000000001  1.0000\n  H   H31       1.0  0.15444999999999998  0.07640000000000002  0.06952000000000001  1.0000\n  H   H32       1.0  0.15444999999999998  0.9236  0.56952  1.0000\n  H   H33       1.0  0.34026999999999996  0.9238599999999999  0.41895  1.0000\n  H   H34       1.0  0.34026999999999996  0.07613999999999999  0.91895  1.0000\n  H   H35       1.0  0.1401300000000001  0.05354000000000004  0.19826999999999992  1.0000\n  H   H36       1.0  0.14013000000000006  0.9464600000000002  0.6982699999999998  1.0000\n",
+                "format": "cif",
+                "cell_kind": "conventional",
+                "validation": {
+                  "volume": 178.80440752739798,
+                  "elements": [
+                    "H",
+                    "La"
+                  ],
+                  "ase_valid": true,
+                  "atom_count": 40,
+                  "structure_hash": "31192e2f9c28533275df7e50237f5b39f58ba0ab82ad3c12fc03c4d3132c976c",
+                  "cell_parameters": {
+                    "a": 5.5182,
+                    "b": 5.4801,
+                    "c": 5.992998637927998,
+                    "beta": 99.38463551941857,
+                    "alpha": 90,
+                    "gamma": 90
+                  },
+                  "structure_format": "cif"
+                },
+                "standardization_method": "pymatgen.get_conventional_standard_structure"
+              },
+              "poscar": {
+                "text": "La H \n 1.0000000000000000\n     0.0000000000000000    5.5182000000000002    0.0000000000000000\n     5.4801000000000002    0.0000000000000000    0.0000000000000000\n     0.0000000000000000   -0.9772267266312528   -5.9127878871953801\n La  H  \n   4  36\nCartesian\n  4.5081494640000006  3.6969072298896002 -3.2056770809218471\n  0.9719505359999998  4.1855205932052266 -0.2492831373241571\n  1.7680994640000003  0.9378072298896000 -3.2056770809218471\n  3.7120005360000001  1.4264205932052263 -0.2492831373241571\n  3.2824702979999998 -0.2608216091050886 -4.0925952640011545\n  4.9376797020000005  2.9868917542105384 -1.1362013204034642\n  4.3406776080000000  4.7183250871550744 -0.4908796503949603\n  3.8794723920000007  1.4706117238394474 -3.4472735939926498\n  2.6581225050000001  4.7936943291014940 -2.0081010222492943\n  2.8219774950000001  4.3050809657858675 -4.9644949658469848\n  4.3950950010000005  5.0115916145934323 -1.2299190084155112\n  3.8250549990000002  1.7638782512778064 -4.1863129520132016\n  5.0528714040000002  4.5717302357010379 -5.1043323993791541\n  3.1672785960000001  2.3012435990166646 -2.1479384557814645\n  3.7746928799999999  0.2712919259726140 -2.3955068846183365\n  4.4454571200000004  2.5417785626569871 -5.3519008282160270\n  3.1587296400000002  3.5434491879645953 -0.4110570139178230\n  2.3213703600000000  3.0548358246489689 -3.3674509575155129\n  2.3227951860000000  4.2273687768778361 -2.4771624853405045\n  3.1573048140000002  3.7387554135622096 -5.4335564289381955\n  3.0334545540000004  3.3386106229108221 -1.1723284543942276\n  2.4466454459999998  2.8499972595951957 -4.1287223979919174\n  0.5424202979999998  2.4982783908949120 -4.0925952640011545\n  2.1976297020000004  0.2277917542105384 -1.1362013204034642\n  1.6006276079999995  1.9592250871550736 -0.4908796503949603\n  1.1394223920000006  4.2297117238394479 -3.4472735939926498\n  5.3981725049999998  2.0345943291014938 -2.0081010222492943\n  0.0819274950000001  1.5459809657858672 -4.9644949658469848\n  1.6550450010000000  2.2524916145934326 -1.2299190084155112\n  1.0850049990000001  4.5229782512778067 -4.1863129520132016\n  2.3128214040000001  1.8126302357010382 -5.1043323993791541\n  0.4272285960000002  5.0603435990166652 -2.1479384557814645\n  1.0346428799999998  3.0303919259726135 -2.3955068846183365\n  1.7054071200000003 -0.2173214373430129 -5.3519008282160270\n  0.4186796400000001  0.7843491879645952 -0.4110570139178230\n  5.0614203599999996  0.2957358246489689 -3.3674509575155129\n  5.0628451859999997  1.4682687768778366 -2.4771624853405045\n  0.4172548139999999  0.9796554135622101 -5.4335564289381955\n  0.2934045540000002  0.5795106229108221 -1.1723284543942276\n  5.1866954460000008  0.0908972595951957 -4.1287223979919174\n",
+                "format": "poscar",
+                "cell_kind": "conventional",
+                "validation": {
+                  "volume": 178.80440752739798,
+                  "elements": [
+                    "H",
+                    "La"
+                  ],
+                  "ase_valid": true,
+                  "atom_count": 40,
+                  "structure_hash": "171b07db52c0c4205a87c7f0d91efd5858215e5831a4c5ee02a561a136a589af",
+                  "cell_parameters": {
+                    "a": 5.5182,
+                    "b": 5.4801,
+                    "c": 5.992998637927998,
+                    "beta": 99.38463551941857,
+                    "alpha": 90,
+                    "gamma": 90
+                  },
+                  "structure_format": "poscar"
+                },
+                "standardization_method": "pymatgen.get_conventional_standard_structure"
+              }
+            }
+          },
+          "structure_format": "cif",
+          "nuclear_treatment": "classical_static",
+          "space_group_number": null,
+          "space_group_symbol": "Cc"
+        },
+        "state_kind": "theoretical",
+        "element_count": 2,
+        "crystal_system": "monoclinic",
+        "field_evidence": {
+          "material": [
+            {
+              "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "pdf_page": 3,
+              "source_version": 1
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "-0.30173",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+              "pdf_page": 32,
+              "source_version": 1
+            }
+          ],
+          "state_kind": [
+            {
+              "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "pdf_page": 3,
+              "source_version": 1
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "-0.30173",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+              "pdf_page": 32,
+              "source_version": 1
+            }
+          ],
+          "pressure_value_gpa": [
+            {
+              "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "pdf_page": 3,
+              "source_version": 1
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "-0.30173",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+              "pdf_page": 32,
+              "source_version": 1
+            }
+          ],
+          "structure_optimization": [
+            {
+              "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "pdf_page": 3,
+              "source_version": 1
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "-0.30173",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+              "pdf_page": 32,
+              "source_version": 1
+            }
+          ],
+          "reported_space_group_number": [
+            {
+              "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "pdf_page": 3,
+              "source_version": 1
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "-0.30173",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+              "pdf_page": 32,
+              "source_version": 1
+            }
+          ],
+          "reported_space_group_symbol": [
+            {
+              "quote": "FIG. 4. Calculated electronic DOS of H at the Fermi level ( N _ { E f } ) per \\mathrm { \\AA } ^ { 3 } (top panel), the EPC parameter λ (middle panel), and T _ { c } (bottom panel) of various clathrate structures at high pressures. The pressure values chosen within their stable pressure ranges of the phases are 300, 400, 120,150, 400, 100, 50, 100, 200, and 100 GPa for \\mathrm { S c H _ { 6 } } , ScH9, \\mathrm { Y H _ { 6 } } , YH9, YH10, LaH6, LaH9, CeH9, \\mathrm { C e H _ { 1 0 } } , and \\mathrm { P r H } _ { 9 } , respectively.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "4fa63eb2e2db44fef1e285090d463b08041d978bbcb22b1e379829535278d21c",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "CALIBRATED ORIGINAL FIGURE READING — derived from the actual uploaded figure, not a printed quotation.\n{\"figure\": \"Figure 4\", \"panel\": \"bottom\", \"quantity\": \"tc\", \"quantity_name\": \"Superconducting transition temperature\", \"unit\": \"K\", \"value_number\": 27.0, \"value_raw\": \"~27 K\", \"reading_precision\": 8.0, \"precision_kind\": \"graph_reading_resolution\"}\nMaterial, series and conditions: {\"material\": \"LaH9\", \"category\": \"LaH9\", \"series\": \"μ*=0.1\", \"pressure_value_gpa\": 50, \"space_group_symbol\": null, \"mu_star\": 0.1, \"method_raw\": \"Eliashberg equation\", \"conditions\": [{\"label\": \"structure\", \"unit\": null, \"value\": \"clathrate\"}], \"reason\": \"LaH9 green left bar; caption pressure 50 GPa.\"}\nReading precision describes graph localization, NOT physical measurement error. Keep approximate qualifiers. This fact does not establish any other material/phase/condition.",
+              "file_id": "418df5b86f64460d95c52e754c2f7bfb",
+              "block_id": "chart-reading-28f5701a5937cbb1a82758e0e04ae54ffc22e401",
+              "pdf_page": 4,
+              "source_version": 1
+            },
+            {
+              "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+              "pdf_page": 3,
+              "source_version": 1
+            },
+            {
+              "quote": "LaH9",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "(50 GPa)",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "Cc",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+              "pdf_page": 32,
+              "source_version": 1
+            },
+            {
+              "quote": "-0.30173",
+              "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+              "block_id": "1f036977f0fc7921c0e5064dab9c7ecec36bfbeac9c389b4fca75bf7a53efbc6",
+              "pdf_page": 32,
+              "source_version": 1
+            }
+          ]
+        },
+        "schema_version": 2,
+        "property_modules": [],
+        "pressure_value_gpa": 50,
+        "structure_families": [],
+        "deleted_module_keys": [],
+        "deleted_record_keys": [],
+        "structure_optimization": "classical_static",
+        "material_dimensionality": "unknown",
+        "reported_space_group_number": 9,
+        "reported_space_group_symbol": "Cc"
+      }
+    ]
+  },
+  "changes": [
+    {
+      "op": "remove_item",
+      "path": [
+        "material_states"
+      ],
+      "identity": {
+        "key": "state_key",
+        "value": "structure-state-4125a619-d9d3-416c-860a-4733bbe336b3"
+      }
+    },
+    {
+      "path": [
+        "material_states",
+        {
+          "key": "state_key",
+          "value": "state-d3a7ec5c19fad5b56094"
+        },
+        "structure"
+      ],
+      "before": null,
+      "value": {
+        "sources": [
+          {
+            "bbox": [
+              59.77299880981445,
+              455.16558837890625,
+              451.9219970703125,
+              466.7725830078125
+            ],
+            "page": 32,
+            "role": "supplementary",
+            "quote": "LaH9 Cc a = 5.5182 La(4a) -0.44188 -0.42736 -0.95784",
+            "parser": "original-pdf-rows-v1",
+            "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "pdf-row-3e58b70686f2b0241973aab45ee5a1c1",
+            "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+            "pdf_page": 32,
+            "source_kind": "original_pdf_row"
+          },
+          {
+            "bbox": [
+              59.77299880981445,
+              472.20556640625,
+              451.9219970703125,
+              483.0984191894531
+            ],
+            "page": 32,
+            "role": "supplementary",
+            "quote": "(50 GPa) b = 5.48010 H(4a) -0.48253 -0.15102 -0.80784",
+            "parser": "original-pdf-rows-v1",
+            "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "pdf-row-bb4dcacdefad47ac15771c218234c99c",
+            "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+            "pdf_page": 32,
+            "source_kind": "original_pdf_row"
+          },
+          {
+            "bbox": [
+              165.85299682617188,
+              489.4855651855469,
+              451.9219970703125,
+              500.37841796875
+            ],
+            "page": 32,
+            "role": "supplementary",
+            "quote": "c = 8.78360 H(4a) -0.79723 -0.45792 -0.41698",
+            "parser": "original-pdf-rows-v1",
+            "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "pdf-row-bc31b4792cdca37c0f5fdadf2afa185d",
+            "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+            "pdf_page": 32,
+            "source_kind": "original_pdf_row"
+          },
+          {
+            "bbox": [
+              165.85299682617188,
+              506.7655334472656,
+              451.9219970703125,
+              517.6583862304688
+            ],
+            "page": 32,
+            "role": "supplementary",
+            "quote": "α= γ = 90.0000° H(4a) -0.98153 -0.26495 -0.16038",
+            "parser": "original-pdf-rows-v1",
+            "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "pdf-row-4a333212b329911b03f55d43a678c363",
+            "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+            "pdf_page": 32,
+            "source_kind": "original_pdf_row"
+          },
+          {
+            "bbox": [
+              165.85299682617188,
+              524.0455322265625,
+              451.9219970703125,
+              534.9384155273438
+            ],
+            "page": 32,
+            "role": "supplementary",
+            "quote": "β = 137.6884° H(4a) -0.59696 -0.44799 -0.29199",
+            "parser": "original-pdf-rows-v1",
+            "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "pdf-row-f8167251697952b34ab0901e59bc622a",
+            "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+            "pdf_page": 32,
+            "source_kind": "original_pdf_row"
+          },
+          {
+            "bbox": [
+              246.97300720214844,
+              541.3255615234375,
+              451.9219970703125,
+              552.2184448242188
+            ],
+            "page": 32,
+            "role": "supplementary",
+            "quote": "H(4a) -0.90537 -0.32796 -0.63673",
+            "parser": "original-pdf-rows-v1",
+            "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "pdf-row-32003eb1042afe1f71f151c37c64a123",
+            "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+            "pdf_page": 32,
+            "source_kind": "original_pdf_row"
+          },
+          {
+            "bbox": [
+              246.97300720214844,
+              558.6055297851562,
+              451.9219970703125,
+              569.4984130859375
+            ],
+            "page": 32,
+            "role": "supplementary",
+            "quote": "H(4a) -0.72395 -0.06120 -0.09486",
+            "parser": "original-pdf-rows-v1",
+            "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "pdf-row-455920be36c9ae80c207ea3d82b468ec",
+            "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+            "pdf_page": 32,
+            "source_kind": "original_pdf_row"
+          },
+          {
+            "bbox": [
+              246.97300720214844,
+              575.8855590820312,
+              451.9219970703125,
+              586.7784423828125
+            ],
+            "page": 32,
+            "role": "supplementary",
+            "quote": "H(4a) -0.52603 -0.17360 -0.43048",
+            "parser": "original-pdf-rows-v1",
+            "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "pdf-row-02b2d9adbdf391d2d05305fc7d9830c8",
+            "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+            "pdf_page": 32,
+            "source_kind": "original_pdf_row"
+          },
+          {
+            "bbox": [
+              246.97300720214844,
+              593.16552734375,
+              451.9219970703125,
+              604.0584106445312
+            ],
+            "page": 32,
+            "role": "supplementary",
+            "quote": "H(4a) -0.99078 -0.32614 -0.08105",
+            "parser": "original-pdf-rows-v1",
+            "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "pdf-row-63226afc9ad9d215898a2ec4b282334b",
+            "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+            "pdf_page": 32,
+            "source_kind": "original_pdf_row"
+          },
+          {
+            "bbox": [
+              246.97300720214844,
+              610.20556640625,
+              451.9219970703125,
+              621.0984497070312
+            ],
+            "page": 32,
+            "role": "supplementary",
+            "quote": "H(4a) -0.41160 -0.19646 -0.30173",
+            "parser": "original-pdf-rows-v1",
+            "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "pdf-row-96420a7ea2855f2e0030f1d8d57652a9",
+            "filename": "2017 YHn LaHn-彭枫 Supplementary.pdf",
+            "pdf_page": 32,
+            "source_kind": "original_pdf_row"
+          },
+          {
+            "quote": "LaH9",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "f3b9e86a72b9e8b005d8ed345e4e16465d122c9f406224e14f9c19f7fe6f983d",
+            "page_end": 32,
+            "file_role": "supplementary",
+            "page_start": 32,
+            "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "source_version": 1
+          },
+          {
+            "quote": "(50 GPa)",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "9e977131653cc6698335afb8b39b89a27ab60d726bebb933a19aaba9dc42a82a",
+            "page_end": 32,
+            "file_role": "supplementary",
+            "page_start": 32,
+            "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "source_version": 1
+          },
+          {
+            "quote": "Cc",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "0ff358370e202b233ffc99995f82a5dcdbd761c52193d0c8246e348f329e970c",
+            "page_end": 32,
+            "file_role": "supplementary",
+            "page_start": 32,
+            "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "source_version": 1
+          },
+          {
+            "quote": "a = 5.5182",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "ef638511907a89f36f63bb9bf26db4a946f1d19c55504b539f1532a3a19b8ae0",
+            "page_end": 32,
+            "file_role": "supplementary",
+            "page_start": 32,
+            "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "source_version": 1
+          },
+          {
+            "quote": "b = 5.48010",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "165e59e7902ce30105982938e794edfc5b944bb4d739d900b85e7ee23f4dc1a0",
+            "page_end": 32,
+            "file_role": "supplementary",
+            "page_start": 32,
+            "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "source_version": 1
+          },
+          {
+            "quote": "c = 8.78360",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "3b3b7f072c5a14c8f177923143426f5aafff6e2a5d56dcce4f2c71eb0de8525b",
+            "page_end": 32,
+            "file_role": "supplementary",
+            "page_start": 32,
+            "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "source_version": 1
+          },
+          {
+            "quote": "Structure searches for rare earth (RE) hydrides of REHx (x = 1 - 12 and 13-24) with simulation cells ranging from one to four formula units were performed at 50, 100, 150, 200, 300, and 400 GPa. Our CALYPSO structural searches focus mainly on the REHx (x = 2-12) stoichiometries, Ab Initio Random Structure Searching (AIRSS) [10] calculations were also employed to confirm some of our key clathrate structures, while some H-richer stoichiometries REHx (x =13-24) were also considered in the AIRSS approach [10]. Each generation contained 50 structures, and structures in the first generation were produced randomly with symmetry constraints. All the generated structures are optimized to their local minima by using DFT calculations. Here, almost all geometrical optimization calculations are performed by using PAW potentials and VASP code [11]. There are two exceptions on La hydrides and Pr hydrides, where the geometrical optimizations are performed by OTF potentials and CASTEP code [12] since PAW potentials of La and Pr are invalid to be used at high pressure as tested. During structure evolution, 60% of structures in the first generation with lower enthalpies are selected to produce the structures in the next generation by PSO. 40% of the structures in the new generation are randomly generated. A structure fingerprinting technique of bond characterization matrix is applied to produce structures, so that identical structures are strictly forbidden. These procedures significantly enhance the diversity of structures, which is crucial for the searching efficiency of algorithm. The local optimizations are performed by use of the conjugate gradients method and the criteria of the enthalpy change is 2 \\times 1 0 ^ { - 5 }   \\mathrm { e V } per atom. For most of the cases, the structure searches reach the convergence after 50 generations covering about 2500 structures.",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "03fa086c86ed4709a836dc268bed0854809b46648acf177e909403485ee0dbad",
+            "page_end": 2,
+            "file_role": "supplementary",
+            "page_start": 2,
+            "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "source_version": 1
+          },
+          {
+            "quote": "Once we have the predicted structures at hand, we then optimized a number of low-enthalpy structures at a higher accuracy as a function of pressure using either VASP or CASTEP method. The plane wave basis set was constructed using the energy cutoff of 800 eV in all calculations, and the Brillouin zone was sampled with a k-point resolution of 2 \\pi \\times 0 . 0 3 ~ \\mathring { \\mathrm { A } } ^ { - 1 } . This usually gives total enthalpies well converged within ~ 1 meV/atom. The PAW potentials [13] are adopted for Sc, Y, Ce, and H in Sc-H, Y-H, and Ce-H systems for VASP calculations. While On The Fly (OTF) potentials are adopted for La, Pr and H in La-H and Pr-H systems for CASTEP calculations. The exchange-correlation functional was described using Perdew-Burke-Ernzerhof [14] of generalized gradient approximation [15]",
+            "file_id": "311d9c17cfa04095bcd3cb613872f4ce",
+            "block_id": "2aa2922848fb0424f8e21fc81b77c3564927b1f23fa82b45f9beba8d035b5f8d",
+            "page_end": 3,
+            "file_role": "supplementary",
+            "page_start": 3,
+            "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+            "source_version": 1
+          }
+        ],
+        "user_note": "本轮人工科学裁定（经用户确认）：LaH9只保留Cc、50 GPa这一材料状态。正文Fig.1(c)的P63/mmc原标注保留；其与附件结构资料存在冲突，本轮结合附件结构、声子计算对象及稳定压力关系审查后采用Cc，现有Tc/DOS等结果统一归入此状态，各自原始来源和适用条件分别保留。SI Fig.S30的Cc声子图注为350 GPa，不将其条件改写为50 GPa的声子验证。对称性计算只能证明所构建结构为Cc，不能单独证明原图注有误。后续本篇审查按此人工裁定处置原图冲突，避免仅根据Fig.1(c)再拆出第二个50 GPa状态。",
+        "derivation": {
+          "kind": "space_group_expansion",
+          "label": "空间群展开",
+          "reason": "Table S1 p32 gives 50 GPa; not replaced by 350 GPa phonon condition source-280.",
+          "input_layout": "validated_original_pdf_rows",
+          "space_group_setting": "Cc",
+          "rounding_adjustments": [],
+          "source_reading_notes": [],
+          "inferred_cell_parameters": [],
+          "rounded_fractional_sites": [],
+          "reported_multiplicity_factor": 1
+        },
+        "review_key": "pdf-structure-33dd4e573bed399ab7510ab0",
+        "validation": {
+          "volume": 178.80440752739798,
+          "elements": [
+            "H",
+            "La"
+          ],
+          "ase_valid": true,
+          "atom_count": 40,
+          "structure_hash": "31192e2f9c28533275df7e50237f5b39f58ba0ab82ad3c12fc03c4d3132c976c",
+          "cell_parameters": {
+            "a": 5.5182,
+            "b": 5.4801,
+            "c": 5.992998637927998,
+            "beta": 99.38463551941857,
+            "alpha": 90,
+            "gamma": 90
+          },
+          "structure_format": "cif"
+        },
+        "structure_hash": "31192e2f9c28533275df7e50237f5b39f58ba0ab82ad3c12fc03c4d3132c976c",
+        "structure_text": "data_image0\n_chemical_formula_structural       La4H36\n_chemical_formula_sum              \"La4 H36\"\n_cell_length_a       5.5182\n_cell_length_b       5.4801\n_cell_length_c       5.992998637927998\n_cell_angle_alpha    90.0\n_cell_angle_beta     99.38463551941855\n_cell_angle_gamma    90.0\n\n_space_group_name_H-M_alt    \"P 1\"\n_space_group_IT_number       1\n\nloop_\n  _space_group_symop_operation_xyz\n  'x, y, z'\n\nloop_\n  _atom_site_type_symbol\n  _atom_site_label\n  _atom_site_symmetry_multiplicity\n  _atom_site_fract_x\n  _atom_site_fract_y\n  _atom_site_fract_z\n  _atom_site_occupancy\n  La  La1       1.0  0.76596  0.8226400000000001  0.54216  1.0000\n  La  La2       1.0  0.76596  0.17735999999999996  0.042159999999999975  1.0000\n  La  La3       1.0  0.26596  0.32264000000000004  0.54216  1.0000\n  La  La4       1.0  0.26596  0.6773600000000001  0.042159999999999975  1.0000\n  H   H1        1.0  0.07530999999999986  0.59898  0.69216  1.0000\n  H   H2        1.0  0.57531  0.9010200000000002  0.19216  1.0000\n  H   H3        1.0  0.86975  0.79208  0.08301999999999997  1.0000\n  H   H4        1.0  0.36974999999999997  0.7079200000000001  0.5830199999999999  1.0000\n  H   H5        1.0  0.9288499999999998  0.48505000000000004  0.33961999999999987  1.0000\n  H   H6        1.0  0.9288499999999998  0.51495  0.8396199999999999  1.0000\n  H   H7        1.0  0.9450299999999998  0.8020100000000001  0.20801  1.0000\n  H   H8        1.0  0.4450299999999999  0.69799  0.70801  1.0000\n  H   H9        1.0  0.9813599999999997  0.9220400000000001  0.8632699999999996  1.0000\n  H   H10       1.0  0.48135999999999984  0.57796  0.36326999999999976  1.0000\n  H   H11       1.0  0.12090999999999993  0.6888  0.40514  1.0000\n  H   H12       1.0  0.6209099999999997  0.8112  0.9051400000000001  1.0000\n  H   H13       1.0  0.65445  0.5764  0.06952000000000001  1.0000\n  H   H14       1.0  0.65445  0.4236  0.56952  1.0000\n  H   H15       1.0  0.8402699999999999  0.42386  0.41895  1.0000\n  H   H16       1.0  0.8402699999999999  0.5761400000000001  0.91895  1.0000\n  H   H17       1.0  0.64013  0.55354  0.19826999999999992  1.0000\n  H   H18       1.0  0.64013  0.44645999999999997  0.6982699999999998  1.0000\n  H   H19       1.0  0.57531  0.09897999999999997  0.69216  1.0000\n  H   H20       1.0  0.07530999999999999  0.4010200000000001  0.19216  1.0000\n  H   H21       1.0  0.36974999999999997  0.2920799999999999  0.08301999999999997  1.0000\n  H   H22       1.0  0.86975  0.2079200000000001  0.5830199999999999  1.0000\n  H   H23       1.0  0.4288499999999999  0.98505  0.33961999999999987  1.0000\n  H   H24       1.0  0.4288499999999999  0.014950000000000019  0.8396199999999999  1.0000\n  H   H25       1.0  0.4450299999999998  0.30201  0.20801  1.0000\n  H   H26       1.0  0.9450299999999999  0.19799000000000003  0.70801  1.0000\n  H   H27       1.0  0.48135999999999984  0.42204  0.8632699999999996  1.0000\n  H   H28       1.0  0.98136  0.07796000000000003  0.36326999999999976  1.0000\n  H   H29       1.0  0.6209099999999997  0.18879999999999997  0.40514  1.0000\n  H   H30       1.0  0.12090999999999985  0.31120000000000003  0.9051400000000001  1.0000\n  H   H31       1.0  0.15444999999999998  0.07640000000000002  0.06952000000000001  1.0000\n  H   H32       1.0  0.15444999999999998  0.9236  0.56952  1.0000\n  H   H33       1.0  0.34026999999999996  0.9238599999999999  0.41895  1.0000\n  H   H34       1.0  0.34026999999999996  0.07613999999999999  0.91895  1.0000\n  H   H35       1.0  0.1401300000000001  0.05354000000000004  0.19826999999999992  1.0000\n  H   H36       1.0  0.14013000000000006  0.9464600000000002  0.6982699999999998  1.0000\n",
+        "representations": {
+          "primitive": {
+            "cif": {
+              "text": "data_image0\n_chemical_formula_structural       La2H18\n_chemical_formula_sum              \"La2 H18\"\n_cell_length_a       3.88850958755408\n_cell_length_b       3.88850958755408\n_cell_length_c       5.992998637927998\n_cell_angle_alpha    83.35596664851955\n_cell_angle_beta     96.64403335148045\n_cell_angle_gamma    90.39696325200822\n\n_space_group_name_H-M_alt    \"P 1\"\n_space_group_IT_number       1\n\nloop_\n  _space_group_symop_operation_xyz\n  'x, y, z'\n\nloop_\n  _atom_site_type_symbol\n  _atom_site_label\n  _atom_site_symmetry_multiplicity\n  _atom_site_fract_x\n  _atom_site_fract_y\n  _atom_site_fract_z\n  _atom_site_occupancy\n  La  La1       1.0  0.5886  0.056680000000000175  0.54216  1.0000\n  La  La2       1.0  0.94332  0.41140000000000015  0.042159999999999975  1.0000\n  H   H1        1.0  0.6742899999999997  0.52367  0.69216  1.0000\n  H   H2        1.0  0.4763300000000001  0.32571  0.19216  1.0000\n  H   H3        1.0  0.6618300000000001  0.92233  0.08301999999999997  1.0000\n  H   H4        1.0  0.07767000000000021  0.3381700000000001  0.5830199999999999  1.0000\n  H   H5        1.0  0.41389999999999993  0.5562000000000001  0.33961999999999987  1.0000\n  H   H6        1.0  0.4437999999999998  0.5861000000000001  0.8396199999999999  1.0000\n  H   H7        1.0  0.7470399999999997  0.8569800000000004  0.20800999999999997  1.0000\n  H   H8        1.0  0.14301999999999992  0.2529600000000001  0.70801  1.0000\n  H   H9        1.0  0.9033999999999996  0.9406800000000002  0.8632699999999996  1.0000\n  H   H10       1.0  0.059320000000000025  0.09660000000000003  0.36326999999999976  1.0000\n  H   H11       1.0  0.8097099999999998  0.56789  0.40514  1.0000\n  H   H12       1.0  0.4321099999999997  0.19029000000000013  0.9051400000000001  1.0000\n  H   H13       1.0  0.23084999999999994  0.9219499999999999  0.06952000000000001  1.0000\n  H   H14       1.0  0.07804999999999992  0.76915  0.56952  1.0000\n  H   H15       1.0  0.2641299999999997  0.5835900000000002  0.41895  1.0000\n  H   H16       1.0  0.4164099999999999  0.7358700000000002  0.9189499999999999  1.0000\n  H   H17       1.0  0.19367000000000015  0.91341  0.19826999999999992  1.0000\n  H   H18       1.0  0.08658999999999996  0.8063299999999999  0.6982699999999998  1.0000\n",
+              "format": "cif",
+              "cell_kind": "primitive",
+              "validation": {
+                "volume": 89.40220376369898,
+                "elements": [
+                  "H",
+                  "La"
+                ],
+                "ase_valid": true,
+                "atom_count": 20,
+                "structure_hash": "a489b82c4716fc7c173db23e1a037310b7b4de2b29e119f2964bf7fe80d2f9bb",
+                "cell_parameters": {
+                  "a": 3.88850958755408,
+                  "b": 3.88850958755408,
+                  "c": 5.992998637927998,
+                  "beta": 96.64403335148045,
+                  "alpha": 83.35596664851955,
+                  "gamma": 90.39696325200822
+                },
+                "structure_format": "cif"
+              },
+              "standardization_method": "pymatgen.get_primitive_standard_structure"
+            },
+            "poscar": {
+              "text": "La H \n 1.0000000000000000\n     2.7400500000000001    2.7591000000000001    0.0000000000000000\n     2.7400500000000001   -2.7591000000000001    0.0000000000000000\n     0.0000000000000000   -0.9772267266312528   -5.9127878871953801\n La  H  \n   2  18\nCartesian\n  1.7680994640000005  0.9378072298895997 -3.2056770809218471\n  3.7120005360000001  1.4264205932052263 -0.2492831373241571\n  3.2824702979999998 -0.2608216091050883 -4.0925952640011545\n  2.1976297020000004  0.2277917542105389 -1.1362013204034642\n  4.3406776080000000 -0.7998749128449258 -0.4908796503949603\n  1.1394223920000004 -1.2884882761605525 -3.4472735939926498\n  2.6581225050000001 -0.7245056708985065 -2.0081010222492943\n  2.8219774949999996 -1.2131190342141331 -4.9644949658469848\n  4.3950950010000005 -0.5066083854065685 -1.2299190084155109\n  1.0850049989999999 -0.9952217487221937 -4.1863129520132016\n  5.0528714040000002 -0.9464697642989625 -5.1043323993791541\n  0.4272285960000002 -0.4578564009833350 -2.1479384557814645\n  3.7746928799999995  0.2712919259726140 -2.3955068846183365\n  1.7054071199999998 -0.2173214373430130 -5.3519008282160270\n  3.1587296399999998 -1.9747508120354047 -0.4110570139178229\n  2.3213703600000000 -2.4633641753510314 -3.3674509575155129\n  2.3227951860000000 -1.2908312231221646 -2.4771624853405045\n  3.1573048140000006 -1.7794445864377906 -5.4335564289381946\n  3.0334545540000009 -2.1795893770891781 -1.1723284543942276\n  2.4466454459999998 -2.6682027404048045 -4.1287223979919174\n",
+              "format": "poscar",
+              "cell_kind": "primitive",
+              "validation": {
+                "volume": 89.40220376369898,
+                "elements": [
+                  "H",
+                  "La"
+                ],
+                "ase_valid": true,
+                "atom_count": 20,
+                "structure_hash": "dde75f9e055d12e6075a7f3e6dc33469a089820c14c1a4abda622b09bfa17e8b",
+                "cell_parameters": {
+                  "a": 3.88850958755408,
+                  "b": 3.88850958755408,
+                  "c": 5.992998637927998,
+                  "beta": 96.64403335148045,
+                  "alpha": 83.35596664851955,
+                  "gamma": 90.39696325200822
+                },
+                "structure_format": "poscar"
+              },
+              "standardization_method": "pymatgen.get_primitive_standard_structure"
+            }
+          },
+          "conventional": {
+            "cif": {
+              "text": "data_image0\n_chemical_formula_structural       La4H36\n_chemical_formula_sum              \"La4 H36\"\n_cell_length_a       5.5182\n_cell_length_b       5.4801\n_cell_length_c       5.992998637927998\n_cell_angle_alpha    90.0\n_cell_angle_beta     99.38463551941855\n_cell_angle_gamma    90.0\n\n_space_group_name_H-M_alt    \"P 1\"\n_space_group_IT_number       1\n\nloop_\n  _space_group_symop_operation_xyz\n  'x, y, z'\n\nloop_\n  _atom_site_type_symbol\n  _atom_site_label\n  _atom_site_symmetry_multiplicity\n  _atom_site_fract_x\n  _atom_site_fract_y\n  _atom_site_fract_z\n  _atom_site_occupancy\n  La  La1       1.0  0.76596  0.8226400000000001  0.54216  1.0000\n  La  La2       1.0  0.76596  0.17735999999999996  0.042159999999999975  1.0000\n  La  La3       1.0  0.26596  0.32264000000000004  0.54216  1.0000\n  La  La4       1.0  0.26596  0.6773600000000001  0.042159999999999975  1.0000\n  H   H1        1.0  0.07530999999999986  0.59898  0.69216  1.0000\n  H   H2        1.0  0.57531  0.9010200000000002  0.19216  1.0000\n  H   H3        1.0  0.86975  0.79208  0.08301999999999997  1.0000\n  H   H4        1.0  0.36974999999999997  0.7079200000000001  0.5830199999999999  1.0000\n  H   H5        1.0  0.9288499999999998  0.48505000000000004  0.33961999999999987  1.0000\n  H   H6        1.0  0.9288499999999998  0.51495  0.8396199999999999  1.0000\n  H   H7        1.0  0.9450299999999998  0.8020100000000001  0.20801  1.0000\n  H   H8        1.0  0.4450299999999999  0.69799  0.70801  1.0000\n  H   H9        1.0  0.9813599999999997  0.9220400000000001  0.8632699999999996  1.0000\n  H   H10       1.0  0.48135999999999984  0.57796  0.36326999999999976  1.0000\n  H   H11       1.0  0.12090999999999993  0.6888  0.40514  1.0000\n  H   H12       1.0  0.6209099999999997  0.8112  0.9051400000000001  1.0000\n  H   H13       1.0  0.65445  0.5764  0.06952000000000001  1.0000\n  H   H14       1.0  0.65445  0.4236  0.56952  1.0000\n  H   H15       1.0  0.8402699999999999  0.42386  0.41895  1.0000\n  H   H16       1.0  0.8402699999999999  0.5761400000000001  0.91895  1.0000\n  H   H17       1.0  0.64013  0.55354  0.19826999999999992  1.0000\n  H   H18       1.0  0.64013  0.44645999999999997  0.6982699999999998  1.0000\n  H   H19       1.0  0.57531  0.09897999999999997  0.69216  1.0000\n  H   H20       1.0  0.07530999999999999  0.4010200000000001  0.19216  1.0000\n  H   H21       1.0  0.36974999999999997  0.2920799999999999  0.08301999999999997  1.0000\n  H   H22       1.0  0.86975  0.2079200000000001  0.5830199999999999  1.0000\n  H   H23       1.0  0.4288499999999999  0.98505  0.33961999999999987  1.0000\n  H   H24       1.0  0.4288499999999999  0.014950000000000019  0.8396199999999999  1.0000\n  H   H25       1.0  0.4450299999999998  0.30201  0.20801  1.0000\n  H   H26       1.0  0.9450299999999999  0.19799000000000003  0.70801  1.0000\n  H   H27       1.0  0.48135999999999984  0.42204  0.8632699999999996  1.0000\n  H   H28       1.0  0.98136  0.07796000000000003  0.36326999999999976  1.0000\n  H   H29       1.0  0.6209099999999997  0.18879999999999997  0.40514  1.0000\n  H   H30       1.0  0.12090999999999985  0.31120000000000003  0.9051400000000001  1.0000\n  H   H31       1.0  0.15444999999999998  0.07640000000000002  0.06952000000000001  1.0000\n  H   H32       1.0  0.15444999999999998  0.9236  0.56952  1.0000\n  H   H33       1.0  0.34026999999999996  0.9238599999999999  0.41895  1.0000\n  H   H34       1.0  0.34026999999999996  0.07613999999999999  0.91895  1.0000\n  H   H35       1.0  0.1401300000000001  0.05354000000000004  0.19826999999999992  1.0000\n  H   H36       1.0  0.14013000000000006  0.9464600000000002  0.6982699999999998  1.0000\n",
+              "format": "cif",
+              "cell_kind": "conventional",
+              "validation": {
+                "volume": 178.80440752739798,
+                "elements": [
+                  "H",
+                  "La"
+                ],
+                "ase_valid": true,
+                "atom_count": 40,
+                "structure_hash": "31192e2f9c28533275df7e50237f5b39f58ba0ab82ad3c12fc03c4d3132c976c",
+                "cell_parameters": {
+                  "a": 5.5182,
+                  "b": 5.4801,
+                  "c": 5.992998637927998,
+                  "beta": 99.38463551941857,
+                  "alpha": 90,
+                  "gamma": 90
+                },
+                "structure_format": "cif"
+              },
+              "standardization_method": "pymatgen.get_conventional_standard_structure"
+            },
+            "poscar": {
+              "text": "La H \n 1.0000000000000000\n     0.0000000000000000    5.5182000000000002    0.0000000000000000\n     5.4801000000000002    0.0000000000000000    0.0000000000000000\n     0.0000000000000000   -0.9772267266312528   -5.9127878871953801\n La  H  \n   4  36\nCartesian\n  4.5081494640000006  3.6969072298896002 -3.2056770809218471\n  0.9719505359999998  4.1855205932052266 -0.2492831373241571\n  1.7680994640000003  0.9378072298896000 -3.2056770809218471\n  3.7120005360000001  1.4264205932052263 -0.2492831373241571\n  3.2824702979999998 -0.2608216091050886 -4.0925952640011545\n  4.9376797020000005  2.9868917542105384 -1.1362013204034642\n  4.3406776080000000  4.7183250871550744 -0.4908796503949603\n  3.8794723920000007  1.4706117238394474 -3.4472735939926498\n  2.6581225050000001  4.7936943291014940 -2.0081010222492943\n  2.8219774950000001  4.3050809657858675 -4.9644949658469848\n  4.3950950010000005  5.0115916145934323 -1.2299190084155112\n  3.8250549990000002  1.7638782512778064 -4.1863129520132016\n  5.0528714040000002  4.5717302357010379 -5.1043323993791541\n  3.1672785960000001  2.3012435990166646 -2.1479384557814645\n  3.7746928799999999  0.2712919259726140 -2.3955068846183365\n  4.4454571200000004  2.5417785626569871 -5.3519008282160270\n  3.1587296400000002  3.5434491879645953 -0.4110570139178230\n  2.3213703600000000  3.0548358246489689 -3.3674509575155129\n  2.3227951860000000  4.2273687768778361 -2.4771624853405045\n  3.1573048140000002  3.7387554135622096 -5.4335564289381955\n  3.0334545540000004  3.3386106229108221 -1.1723284543942276\n  2.4466454459999998  2.8499972595951957 -4.1287223979919174\n  0.5424202979999998  2.4982783908949120 -4.0925952640011545\n  2.1976297020000004  0.2277917542105384 -1.1362013204034642\n  1.6006276079999995  1.9592250871550736 -0.4908796503949603\n  1.1394223920000006  4.2297117238394479 -3.4472735939926498\n  5.3981725049999998  2.0345943291014938 -2.0081010222492943\n  0.0819274950000001  1.5459809657858672 -4.9644949658469848\n  1.6550450010000000  2.2524916145934326 -1.2299190084155112\n  1.0850049990000001  4.5229782512778067 -4.1863129520132016\n  2.3128214040000001  1.8126302357010382 -5.1043323993791541\n  0.4272285960000002  5.0603435990166652 -2.1479384557814645\n  1.0346428799999998  3.0303919259726135 -2.3955068846183365\n  1.7054071200000003 -0.2173214373430129 -5.3519008282160270\n  0.4186796400000001  0.7843491879645952 -0.4110570139178230\n  5.0614203599999996  0.2957358246489689 -3.3674509575155129\n  5.0628451859999997  1.4682687768778366 -2.4771624853405045\n  0.4172548139999999  0.9796554135622101 -5.4335564289381955\n  0.2934045540000002  0.5795106229108221 -1.1723284543942276\n  5.1866954460000008  0.0908972595951957 -4.1287223979919174\n",
+              "format": "poscar",
+              "cell_kind": "conventional",
+              "validation": {
+                "volume": 178.80440752739798,
+                "elements": [
+                  "H",
+                  "La"
+                ],
+                "ase_valid": true,
+                "atom_count": 40,
+                "structure_hash": "171b07db52c0c4205a87c7f0d91efd5858215e5831a4c5ee02a561a136a589af",
+                "cell_parameters": {
+                  "a": 5.5182,
+                  "b": 5.4801,
+                  "c": 5.992998637927998,
+                  "beta": 99.38463551941857,
+                  "alpha": 90,
+                  "gamma": 90
+                },
+                "structure_format": "poscar"
+              },
+              "standardization_method": "pymatgen.get_conventional_standard_structure"
+            }
+          }
+        },
+        "structure_format": "cif",
+        "nuclear_treatment": "classical_static",
+        "space_group_number": null,
+        "space_group_symbol": "Cc"
+      }
+    },
+    {
+      "path": [
+        "material_states",
+        {
+          "key": "state_key",
+          "value": "state-d3a7ec5c19fad5b56094"
+        },
+        "crystal_system"
+      ],
+      "before": "hexagonal",
+      "value": "monoclinic"
+    },
+    {
+      "path": [
+        "material_states",
+        {
+          "key": "state_key",
+          "value": "state-d3a7ec5c19fad5b56094"
+        },
+        "reported_space_group_number"
+      ],
+      "before": 194,
+      "value": 9
+    },
+    {
+      "path": [
+        "material_states",
+        {
+          "key": "state_key",
+          "value": "state-d3a7ec5c19fad5b56094"
+        },
+        "reported_space_group_symbol"
+      ],
+      "before": "P6_3/mmc",
+      "value": "Cc"
+    }
+  ]
+}

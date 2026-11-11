@@ -27,3 +27,10 @@ test_workdraft_changes.py；workdraft-saver.test.tsx；完整宿主和隔离 SQL
 最终候选独立于共享工作区导出；TypeScript 与生产构建通过。汇总见 [联合验证](../192-handoff-snapshots/assets/verification.json)。Tc 的配对缓存、首次保存基线、事务回滚和批量审核均有故障回放；RR 两会话覆盖与陈旧交接检查使用真实 MySQL。冻结谱只读取提供的数据，人工资料在合法经手人之间覆盖，原提供者与旧附件保持。
 
 [独立旧回归基线](../192-handoff-snapshots/assets/legacy-baseline.json)记录两套旧管理端用例在 a871fbbd 与本轮均为 6 通过／18 失败，逐项状态一致；旧 human 用例两侧均因重复审批当前已通过字段而失败。原测试保留，没有将其计入本轮通过或删除断言掩盖失败。
+
+
+## 2026-11-11 可空规范结构首次保存回归
+
+真实Safari归并产生的5项PATCH在原代码返回400 draft_field_invalid。原卡structure为null，展开后无法进入子字段；同时新增对象显式null子字段被当成无变化省略。修复仅初始化已登记的material_states/state_key/structure空对象，其他空标量、未知结构键及禁止路径保持拒绝。显式null新键仍按真实修改保存，不覆盖未修改邻项。
+
+真实diff固定重放及SQLite save_fields→工作稿/上传草稿重读，修复前2项失败，修复后通过；原晶胞、方法、来源、记录身份和邻卡全文比较。测试文件test_workdraft_changes.py本轮15通过，既有人工理由保留1失败在独立HEAD基线同样失败，未计通过。真实网页重试200，LaH9单Cc及其他51卡全文保持。证据见tests/TestForRealScenario/runs/20261111-peng2017-flash-blackbox-01/下nullable-structure-before/after.log、workdraft-head-baseline.log及gpt-cc-merge-reread.json。未改变科学核对、权限、工作稿租约或并发规则。
