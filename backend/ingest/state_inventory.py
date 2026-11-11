@@ -409,7 +409,7 @@ def plan_states(draft, chunks, model, *, on_response=None, on_request=None, file
                'Evidence source_id and quote_span reference the supplied original content (Unicode characters, left closed/right open). '
                'reused_original_pages identifies same-hash pages actually read by the preceding chart reader: use its calibrated '
                'source facts without claiming a new image read. Unresolved/unprocessed pages remain attached; uncertainty stays explicit.\n')
-    batches = inventory_requests(draft, request, images, PROMPT + purpose + scope_prompt(material_scope))
+    batches = inventory_requests(draft, request, images, PROMPT + purpose + scope_prompt(material_scope, purpose='structure'))
     if on_request and len(batches) > 1:
         on_request({**deepcopy(request), 'image_count': len(images), 'batches': [
             {'candidate_keys': [s['state_key'] for s in body['candidates']], 'original_pages': body['original_pages']}

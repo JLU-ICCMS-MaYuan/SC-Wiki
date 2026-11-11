@@ -4,12 +4,22 @@ import json
 
 MARKER='_json_action_transport'
 VERSION='registered-json-actions-v1'
+SCHEMA_MODE='responses-registered-schema-v1'
+FLASH_MODELS={'deepseek-flash','deepseek-v4-flash','deepseek-v4-flash-vision-exp'}
 INSTRUCTION='''
 This request uses a host-dispatched JSON Schema action protocol. Return only the action name and
 arguments allowed by the schema. The host executes the actual registered read-only tool. Do not
 fabricate tool results or provider tool-call IDs. Use exactly ONE action. All scientific values,
 source and argument constraints remain unchanged. This is not a native provider tool-call receipt.
 '''
+
+
+def schema_request(request):
+    """规范结构不变；实际传输使用同一登记动作外框。"""
+    from .deepseek_strict import schema_tool
+    return {'system_prompt': request['system_prompt'] + INSTRUCTION,
+            'user_prompt': request['user_prompt'],
+            'tool_definitions': [schema_tool(request['response_schema'])]}
 
 
 def action_schema(definitions):

@@ -102,13 +102,26 @@ def assert_allowed(states, scope, *, purpose='form'):
             raise ValueError(message + state['material'])
 
 
-def scope_prompt(scope):
+def scope_prompt(scope, *, purpose='form'):
     if (scope or {}).get('rule_version') == VERSION:
+        excluded = (scope or {}).get('excluded_materials') or []
+        # 整篇审计保留原文；当前片段只接收范围结论，不把别窗正文伪装成可引用输入。
+        audit = [{'material': e['material'], 'has_specific_tc': e.get('has_specific_tc'),
+                  'has_range_tc': e.get('has_range_tc'), 'reasons': e.get('reasons', []),
+                  'source_refs': [{k: source.get(k) for k in
+                      ('file_id', 'file_role', 'chunk_index', 'page_start', 'page_end')}
+                      for source in e.get('evidences', [])]} for e in excluded] if purpose == 'form' else excluded
         return ('\nCURRENT-PAPER STRUCTURE POLICY v2: retain all structures actually studied in this '
             'body/SI regardless of absent/range-only Tc. Do not import reference-only structures. '
             'Range-only materials cannot acquire invented Tc points; preserve original bounds and sources. '
+            + ('For each material listed below, emit NO predicted_tc/measured_tc record, including '
+               'range or upper-bound records. Its original Tc bound remains in this whole-paper audit '
+               'and source-backed coverage_exclusions, NOT property_modules. Retain studied structures '
+               'and independently supported non-Tc records. This list is whole-paper decision metadata; '
+               'source_refs are provenance locations, not currently read blocks. Only the supplied '
+               'Document IR pages provide source IDs for this extraction. ' if excluded and purpose == 'form' else '') +
             'A calibrated material/condition-specific graph point remains a specific approximate Tc.\n' +
-            json.dumps((scope or {}).get('excluded_materials') or [], ensure_ascii=False))
+            json.dumps(audit, ensure_ascii=False))
     excluded = (scope or {}).get('excluded_materials') or []
     if not excluded:
         return ''

@@ -510,7 +510,7 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
                     'Its updates array contains only the reading_id and revised structure from structure_repairs. '
                     'Do not return the full structures list or repeat valid neighbors; the host reuses them unchanged. '
                     'Unchanged unresolved items may be omitted from updates and remain explicitly blocked.')
-            answer = model(instruction + scope_prompt(material_scope),
+            answer = model(instruction + scope_prompt(material_scope, purpose='structure'),
                            json.dumps(model_request, ensure_ascii=False), tool_definitions=active_definitions,
                            **({'tool_history': model_history} if model_history else {}),
                            **({'images': list(page_images.values())} if page_images else {}),

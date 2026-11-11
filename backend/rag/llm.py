@@ -337,6 +337,11 @@ def _complete_json(
         tool_definitions = [{'type':'function','function':{'name':'report_structured_output',
             'description':'Return the complete requested JSON using exactly this strict schema.',
             'strict':True,'parameters':response_schema}}]
+    from .registered_actions import SCHEMA_MODE, VERSION as ACTION_VERSION, schema_request
+    if schema_tool and _strict_transport == SCHEMA_MODE:
+        actual = schema_request({'system_prompt':system_prompt,'user_prompt':user_prompt,'response_schema':response_schema})
+        system_prompt = actual['system_prompt']
+        _json_action_transport = True
     format_options = {"response_format": output_format(response_schema)} if response_schema is not None else {}
     if schema_tool:format_options['response_format']={'type':'json_object'}
     if _strict_transport:
@@ -380,10 +385,11 @@ def _complete_json(
                 **format_options,
             )
             if schema_tool:
-                if not result.get('_tool_call') or (result.get('action') or {}).get('name')!='report_structured_output':
+                receipt = (result.get('_tool_transport') == ACTION_VERSION if _json_action_transport else bool(result.get('_tool_call')))
+                if not receipt or (result.get('action') or {}).get('name')!='report_structured_output':
                     raise StructuredOutputError('当前接口未返回登记的严格结构工具回执，未降级采用自由文本')
                 result=result['action']['arguments']
-                _call_stats.set({**_call_stats.get(),'schema_transport':_call_stats.get().get('schema_transport','strict_function')})
+                _call_stats.set({**_call_stats.get(),'schema_transport':ACTION_VERSION if _json_action_transport else _call_stats.get().get('schema_transport','strict_function')})
             if response_schema is not None:
                 validate_output(result, response_schema)
             if on_call:
@@ -457,6 +463,10 @@ def complete_json(system_prompt: str, user_prompt: str, **options) -> dict[str, 
         from .responses_json import protocol_for
         if protocol_for(config) == 'chat_completions':
             options[MARKER] = MODE
+            from .registered_actions import SCHEMA_MODE, FLASH_MODELS
+            if (options.get('response_schema') is not None and not options.get('tool_definitions')
+                    and config.model in FLASH_MODELS and getattr(config,'api_protocol',None) in {None,'auto'}):
+                options[MARKER] = SCHEMA_MODE
     from backend.ingest.model_runtime import current_execution
     runtime = current_execution()
     if runtime:

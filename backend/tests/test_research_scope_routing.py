@@ -19,6 +19,28 @@ def test_current_paper_structure_is_not_deleted_for_range_only_tc():
     assert value['materials'][0]['evidences'][0]['content'].endswith('Tc < 56 K.')
 
 
+def test_tc_record_hint_does_not_change_structure_only_request_identity():
+    from backend.ingest.tc_material_scope import scope_prompt
+    value = scope()
+    assert 'emit NO predicted_tc/measured_tc' in scope_prompt(value)
+    original = scope_prompt(value, purpose='structure')
+    assert 'emit NO predicted_tc/measured_tc' not in original
+    assert 'retain all structures' in original
+
+
+def test_whole_paper_scope_audit_cannot_offer_other_window_as_current_extraction_source():
+    from backend.ingest.tc_material_scope import scope_prompt
+    value = scope()
+    marker = '361a4d642b57f5ade746276252a4a9f4653d5fe4624e0ba0c55fbc1c11a920a0'
+    value['excluded_materials'][0]['evidences'][0]['content'] = '<!-- block: ' + marker + ' --> Other window Tc < 56 K.'
+    before = deepcopy(value)
+    prompt = scope_prompt(value)
+    assert marker not in prompt
+    assert 'Other window' not in prompt
+    assert 'CeH10' in prompt and '本文仅报告Tc小于56 K' in prompt
+    assert value == before  # 完整原审计与来源保存，不在提示投影时删除。
+
+
 def test_chunk_scope_rejection_precedes_success_checkpoint_and_resume_reissues_only_failure(tmp_path, monkeypatch):
     from contextlib import nullcontext
     from types import SimpleNamespace

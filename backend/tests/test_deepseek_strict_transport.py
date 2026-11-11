@@ -15,7 +15,7 @@ SCHEMA={"type":"object","properties":{"measurement":{"anyOf":[{"$ref":"#/$defs/M
 
 
 def install(monkeypatch,host="api.deepseek.com"):
-    config=NS(model="deepseek-flash",base_url="https://"+host,provider="fixture")
+    config=NS(model="deepseek-flash",base_url="https://"+host,provider="fixture",api_protocol='chat_completions')
     monkeypatch.setattr(llm,"get_llm_config",lambda:config)
     sent=[];clients=[]
     def handle(request):
@@ -146,7 +146,7 @@ def test_real_sdk_source_alias_response_is_restored_before_canonical_validation(
         "block_id":{"$ref":"#/$defs/CurrentSourceBlock"}},"required":["file_id","block_id"],"additionalProperties":False}
     schema={"type":"object","properties":{"evidences":{"type":"array","items":quote}},"required":["evidences"],"additionalProperties":False,
       "$defs":{"CurrentSourceFile":{"type":"string","enum":[file_id]},"CurrentSourceBlock":{"type":"string","enum":[block_id]}}}
-    config=NS(model="deepseek-flash",base_url="https://api.deepseek.com")
+    config=NS(model="deepseek-flash",base_url="https://api.deepseek.com",api_protocol='chat_completions')
     monkeypatch.setattr(llm,"get_llm_config",lambda:config)
     requests=[];clients=[]
     def handle(request):
