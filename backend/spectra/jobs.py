@@ -244,9 +244,35 @@ def enqueue_upload(task_id):
         log.warning("上传谱任务未能启动 task=%s type=%s", task_id, type(exc).__name__)
 
 
+def _recover_ended_automatic_run(session, task_id, current_job_id):
+    from rq.exceptions import NoSuchJobError
+    from rq.job import Job
+    from backend.ingest.upload_tasks import upload_queue
+    row = session.scalar(select(models.SpectrumCollection).where(
+        models.SpectrumCollection.target == 'upload', models.SpectrumCollection.target_id == task_id,
+        models.SpectrumCollection.source_key == '__all__',
+        models.SpectrumCollection.panel_key == '__discovery__').with_for_update())
+    if row is None or not row.current_run_id:
+        return
+    run = session.get(models.SpectrumRun, row.current_run_id, with_for_update=True)
+    if run is None or run.status not in {'queued', 'running'}:
+        return
+    owner = (run.calibration_json or {}).get('automatic_upload_job_id')
+    if not owner or not current_job_id or owner == current_job_id:
+        return
+    try:
+        status = Job.fetch(owner, connection=upload_queue().connection).get_status(refresh=True)
+    except NoSuchJobError:
+        return  # 无法核实旧父任务，不接手。
+    if status in {'finished', 'failed', 'stopped', 'canceled'}:
+        _mark_interrupted(run, '上一父任务已结束，保留谱记录并由本次继续')
+        session.flush()
+
+
 def run_upload(task_id):
     """自动谱属于同一次上传；独立手动重提仍走原异步入口。"""
     from backend.ingest.upload_tasks import get_state
+    from backend.ingest.model_runtime import ExecutionStopped
     from backend.rag.llm_context import get_llm_config
     state = get_state(task_id)
     if not state or state.get('is_shadow'):
@@ -254,12 +280,21 @@ def run_upload(task_id):
     with SessionLocal.begin() as session:
         service.require_tables(session)
         ctx = service.context(session, 'upload', task_id, session.get(models.User, state['user_id']), write=True)
+        _recover_ended_automatic_run(session, task_id, state.get('job_id'))
         job = enqueue(session, ctx, expected_version=ctx['version'], config=get_llm_config())
         if job.get('dispatch'):
             run = session.get(models.SpectrumRun, job['job_id'])
             run.calibration_json = {**(run.calibration_json or {}), 'automatic_upload_job_id': state.get('job_id')}
     if job.get('dispatch'):
-        run_job(job['job_id'], 'upload', task_id, state['user_id'], job['version'])
+        try:
+            run_job(job['job_id'], 'upload', task_id, state['user_id'], job['version'])
+        except ExecutionStopped:
+            try:
+                if state.get('job_id'):
+                    fail_upload_runs(task_id, state['job_id'], '父任务暂停或停止，保留原图及此前结果')
+            except Exception as error:
+                log.warning('记录自动谱中断状态失败 task=%s type=%s', task_id, type(error).__name__)
+            raise
     with SessionLocal() as session:
         run = session.get(models.SpectrumRun, job['job_id'])
         if run is None or run.status in {'failed', 'queued', 'running'}:
@@ -270,6 +305,14 @@ def run_upload(task_id):
         return detail
 
 
+def _mark_interrupted(run, reason):
+    from datetime import datetime, timezone
+    run.status = 'failed'
+    run.error_code = 'automatic_spectra_interrupted'
+    run.error_message = reason
+    run.completed_at = datetime.now(timezone.utc)
+
+
 def fail_upload_runs(task_id, job_id, reason):
     """父Worker中断只终止该父任务拥有的自动谱；手动提取及其他任务不受影响。"""
     with SessionLocal.begin() as session:
@@ -278,11 +321,7 @@ def fail_upload_runs(task_id, job_id, reason):
         runs = session.scalars(select(models.SpectrumRun).join(models.SpectrumCollection,
             models.SpectrumCollection.id == models.SpectrumRun.collection_id).where(
                 models.SpectrumCollection.target == 'upload', models.SpectrumCollection.target_id == task_id,
-                models.SpectrumRun.status.in_(['queued', 'running'])))
+            models.SpectrumRun.status.in_(['queued', 'running'])).with_for_update())
         for run in runs:
             if (run.calibration_json or {}).get('automatic_upload_job_id') == job_id:
-                run.status = 'failed'
-                run.error_code = 'automatic_spectra_interrupted'
-                run.error_message = reason
-                from datetime import datetime, timezone
-                run.completed_at = datetime.now(timezone.utc)
+                _mark_interrupted(run, reason)

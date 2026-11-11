@@ -164,6 +164,60 @@ def test_worker_failure_closes_only_its_owned_automatic_spectrum(monkeypatch):
         assert db.get(models.SpectrumRun,"other").status=="running"
     engine.dispose()
 
+@pytest.mark.parametrize('parent_status,interrupt',[('finished',False),('started',False),('finished',True)])
+def test_inline_spectrum_resume_recovers_only_ended_parent(monkeypatch,parent_status,interrupt):
+    from types import SimpleNamespace
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+    from rq.job import Job
+    from backend import models
+    from backend.ingest import upload_tasks
+    from backend.ingest.model_runtime import ExecutionStopped
+    from backend.rag import llm_context
+    from backend.spectra import jobs
+    from backend.services import spectra as service
+    engine=create_engine('sqlite:///:memory:')
+    models.Base.metadata.create_all(engine,tables=[models.User.__table__,models.SpectrumCollection.__table__,models.SpectrumRun.__table__])
+    sessions=sessionmaker(engine)
+    ctx={'target':'upload','target_id':'task','owner_id':1,'paper':None,'version':'v'}
+    monkeypatch.setattr(jobs,'SessionLocal',sessions)
+    monkeypatch.setattr(service,'context',lambda *a,**k:ctx)
+    monkeypatch.setattr(upload_tasks,'get_state',lambda _: {'user_id':1,'job_id':'new'})
+    monkeypatch.setattr(upload_tasks,'upload_queue',lambda:SimpleNamespace(connection=None))
+    monkeypatch.setattr(upload_tasks,'save_llm_config',lambda *a:None)
+    monkeypatch.setattr(llm_context,'get_llm_config',lambda:SimpleNamespace(model='test'))
+    monkeypatch.setattr(Job,'fetch',lambda *a,**k:SimpleNamespace(get_status=lambda **kw:parent_status))
+    calls=[]
+    def run_job(run_id,*args):
+        calls.append(run_id)
+        with sessions.begin() as db:
+            run=db.get(models.SpectrumRun,run_id)
+            assert run.calibration_json['automatic_upload_job_id']=='new'
+            run.status='running' if interrupt else 'succeeded'
+            if not interrupt:run.result_json={'collections':1}
+        if interrupt:raise ExecutionStopped('pause fixture')
+    monkeypatch.setattr(jobs,'run_job',run_job)
+    with sessions.begin() as db:
+        row=service.collection(db,ctx,'__all__','__discovery__',{'source_version':'v'})
+        run,_=service.new_run(db,row,{'discovery_version':'v','model_name':'test'},None)
+        service.activate(row,run,None)
+        run.status='running';run.calibration_json={**run.calibration_json,'automatic_upload_job_id':'old'}
+        rid=run.id
+    if interrupt:
+        with pytest.raises(ExecutionStopped):jobs.run_upload('task')
+        with sessions() as db:
+            run=db.get(models.SpectrumRun,rid)
+            assert run.status=='failed' and run.error_code=='automatic_spectra_interrupted'
+        assert calls==[rid]
+    elif parent_status=='finished':
+        assert jobs.run_upload('task')=={'collections':1}
+        assert calls==[rid]
+    else:
+        with pytest.raises(RuntimeError,match='running'):jobs.run_upload('task')
+        assert not calls
+    engine.dispose()
+
+
 def test_late_worker_failure_cannot_stop_new_attempt(monkeypatch):
     from types import SimpleNamespace
     from backend.ingest import upload_tasks

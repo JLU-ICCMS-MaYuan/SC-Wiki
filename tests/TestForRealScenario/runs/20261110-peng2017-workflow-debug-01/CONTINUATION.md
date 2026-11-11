@@ -1,3 +1,7 @@
+## 最新：谱声明修复f1dbb583后续跑发现旧running，已补恢复逻辑
+
+原Task d789acceee124022b3257f84780d1156，上一Job2692ef85-d839-4007-b08e-bb4403648ad3 failed/automatic_spectra_incomplete，observe-20261110T235604582175Z.json。旧谱运行3fbd8275b41042b397a9484e629fabb7 running，实查其父Job862cbf40 FINISHED，非真实执行。补同Task当前自动谱只恢复已核实结束父Job、暂停控制信号结清本父谱，不接管运行中/未知父任务或手动谱。旧回归先检出，114通过1个MySQL竞争条件在SQLite跳过、3定向通过。下一步提交后通过Safari继续实际消费谱，不改DB状态、不重传；52状态已保存，仍无正式PaperID，阶段二至五未执行。用户已确认ScH6条件式返修，详下文。
+
 ## 最新：用户已确认ScH6真实返修项；52状态完成后谱503格式故障已修复验证
 
 Task仍d789acceee124022b3257f84780d1156，Job862cbf40-6dab-4c37-9b5e-50fd29c7c18f已保存26/26组52状态，automatic_spectra因明确report_spectrum_calibration数组schema错误被网关包装503，5次后按规则paused，未收到输出。五份失败保留issues/spectrum-wire-schema/。当前没有正式PaperID，阶段二至五未执行。
