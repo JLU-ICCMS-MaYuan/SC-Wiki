@@ -8,6 +8,17 @@ import type { UploadTaskState } from '../../frontend/src/lib/paperProcessing'
 vi.mock('../../frontend/src/context/LanguageContext', () => ({useLanguage: () => ({t: (key: string, params?: Record<string, unknown>) => key + (params ? JSON.stringify(params) : '')})}))
 afterEach(() => {cleanup();vi.unstubAllGlobals()})
 const task: UploadTaskState={task_id:'a'.repeat(32),status:'reading',stage:'extracting',stage_index:2,stage_total:5,processing_status:'processing',completed_chunks:0,total_chunks:0,model_activity:{status:'retry_wait',phase:'structure_reading',attempt:7,error:{status_code:503,message:'service unavailable',request_id:'req-7',output_started:false},retry_at:Date.now()/1000+20}}
+it('reassesses an unmatched workflow only on explicit click using the original resume route',async()=>{
+  const updated=vi.fn()
+  const fetch=vi.fn(async()=>new Response(JSON.stringify({ok:true,data:{...task,status:'queued'}}),{headers:{'Content-Type':'application/json'}}))
+  vi.stubGlobal('fetch',fetch)
+  render(<UploadModelActivity task={{...task,status:'needs_workflow',processing_status:'needs_input'}} onUpdated={updated} onRetry={vi.fn()} onManual={vi.fn()} />)
+  expect(fetch).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByRole('button',{name:'upload.reassessWorkflow'}))
+  await waitFor(()=>expect(updated).toHaveBeenCalledOnce())
+  expect(fetch).toHaveBeenCalledOnce()
+  expect(String(fetch.mock.calls[0][0])).toContain(`/api/upload-tasks/${task.task_id}/resume`)
+})
 it('shows real error and posts pause once; displays resume after reread',async()=>{
   const updated=vi.fn()
   const fetch=vi.fn(async()=>new Response(JSON.stringify({ok:true,data:{...task,status:'paused',processing_status:'paused'}}),{headers:{'Content-Type':'application/json'}}))

@@ -5,6 +5,7 @@ export default {
   modelActivityTitle: 'Parsing activity',
   stopAndKeep: 'Stop and keep progress',
   continueParsing: 'Continue parsing',
+  reassessWorkflow: 'Reassess parsing workflow',
   modelPages: 'PDF pages {pages}',
   modelAttempt: 'Request {attempt}',
   modelWaitSeconds: 'This request: {seconds}s',

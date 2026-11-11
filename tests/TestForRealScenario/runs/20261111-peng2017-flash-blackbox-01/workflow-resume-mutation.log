@@ -1,0 +1,5 @@
+
+> sc-wiki-frontend@1.0.0 test:form-contract:mutation
+> node ../scripts/check-form-contract.mjs --mutation
+
+通过：8 项完整宿主渲染回退、4 项原免审字段漏红回退均检出；工作树未修改。

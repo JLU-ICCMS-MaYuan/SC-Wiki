@@ -52,3 +52,6 @@ FR-002/SC-001由model_runtime单点执行：每次未完成调用的新一轮计
 ## 无完成原因的流结束
 
 统一Chat Completions上传路径在关闭流后、JSON/原生工具解析前检查正常完成原因；已输出但finish_reason=None时抛出httpx.RemoteProtocolError的具名子类ModelIncompleteStreamError。既有运行器识别TransportError、原样保留部分响应、显示安全错误并按同一5次规则重发。非上传旧宿主兼容不变，明确结束原因及科学严格校验不变；不改并行#233新增的Responses适配。
+
+
+现有needs_workflow任务允许上传者显式重新判断，走原resume入口并沿用模型、输入和草稿版本保护；不改变未匹配时暂停专用流程，也不建立人工强制绑定规则。

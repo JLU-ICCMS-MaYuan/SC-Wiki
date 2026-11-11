@@ -109,10 +109,11 @@ def test_real_openai_stream_recovers_unanswered_attempts_and_disk_resume(tmp_pat
     finally:server.shutdown();server.server_close()
 
 
-def test_resume_is_idempotent_and_rejects_changed_draft(monkeypatch):
+@pytest.mark.parametrize('status', ['paused', 'needs_workflow'])
+def test_resume_is_idempotent_and_rejects_changed_draft(monkeypatch, status):
     from backend.ingest import upload_tasks,model_runtime
     from backend.ingest.upload_contracts import apply_state_changes
-    state={'status':'paused','execution_generation':2,'user_id':1,'files':[],'execution_draft_hash':model_runtime.digest({'value':'current'})}
+    state={'status':status,'execution_generation':2,'user_id':1,'files':[],'execution_draft_hash':model_runtime.digest({'value':'current'})}
     draft={'value':'current'};enqueued=[]
     monkeypatch.setattr(upload_tasks,'get_state',lambda _:dict(state))
     monkeypatch.setattr(upload_tasks,'get_draft',lambda _:dict(draft))
@@ -126,7 +127,7 @@ def test_resume_is_idempotent_and_rejects_changed_draft(monkeypatch):
     assert model_runtime.resume_task('a'*32)['status']=='queued'
     assert model_runtime.resume_task('a'*32)['status']=='queued'
     assert len(enqueued)==1
-    state['status']='paused';draft['value']='human changed'
+    state['status']=status;draft['value']='human changed'
     with pytest.raises(ValueError,match='草稿已变化'):model_runtime.resume_task('a'*32)
     assert len(enqueued)==1
 

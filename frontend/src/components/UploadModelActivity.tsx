@@ -68,6 +68,7 @@ const UploadModelActivity: React.FC<{ task: UploadTaskState; onUpdated: (task: U
       <Box sx={{ flex: 1 }} />
       {(active || pausing) && <Button disabled={pending} color="warning" onClick={() => void action('pause')}>{t('upload.stopAndKeep')}</Button>}
       {task.status === 'paused' && <Button disabled={pending} variant="contained" onClick={() => void action('resume')}>{t('upload.continueParsing')}</Button>}
+      {task.status === 'needs_workflow' && <Button disabled={pending} variant="contained" onClick={() => void action('resume')}>{t('upload.reassessWorkflow')}</Button>}
       {failed && <>
         <Button disabled={pending} variant="contained" onClick={task.execution_resumable ? () => void action('resume') : onRetry}>
           {t(task.execution_resumable ? 'upload.continueParsing' : 'upload.retryParse')}</Button>

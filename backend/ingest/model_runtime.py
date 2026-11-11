@@ -530,7 +530,7 @@ def resume_task(task_id):
         state = get_state(task_id) or {}
         if state.get("status") == "queued" and state.get("execution_resume_requested"):
             return state
-        if state.get("paper_id") or state.get("status") not in {"paused", "failed"}:
+        if state.get("paper_id") or state.get("status") not in {"paused", "failed", "needs_workflow"}:
             raise ValueError("当前任务不能继续")
         if state.get("execution_input_hash") and state["execution_input_hash"] != input_identity(state):
             raise ValueError("输入文件或角色已变化，不能沿用旧解析上下文")

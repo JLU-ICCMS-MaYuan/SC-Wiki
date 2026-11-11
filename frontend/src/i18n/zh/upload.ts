@@ -7,6 +7,7 @@ export default {
   modelActivityTitle: '解析动态',
   stopAndKeep: '停止并保留进度',
   continueParsing: '继续解析',
+  reassessWorkflow: '重新判断解析流程',
   modelPages: 'PDF 第 {pages} 页',
   modelAttempt: '第 {attempt} 次请求',
   modelWaitSeconds: '本次已用 {seconds} 秒',

@@ -1,0 +1,12 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+_____ test_resume_is_idempotent_and_rejects_changed_draft[needs_workflow] ______
+backend/tests/test_model_runtime.py:127: in test_resume_is_idempotent_and_rejects_changed_draft
+    assert model_runtime.resume_task('a'*32)['status']=='queued'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+backend/ingest/model_runtime.py:534: in resume_task
+    raise ValueError("当前任务不能继续")
+E   ValueError: 当前任务不能继续
+=========================== short test summary info ============================
+FAILED backend/tests/test_model_runtime.py::test_resume_is_idempotent_and_rejects_changed_draft[needs_workflow]
+1 failed, 1 passed, 26 deselected in 0.67s

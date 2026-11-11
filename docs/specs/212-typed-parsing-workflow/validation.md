@@ -59,3 +59,6 @@ Issue保持OPEN：远程Spec链接未经授权推送及实际访问验证；真�
 两个跨窗回归在未改生产源码的隔离副本上先失败；修复后共享/隔离33项通过，包含SI独立贡献、未知编号及无标题正文反例。原Flash两窗口报告完整复用，真实Flash仅新做一次最终汇总：matched，贡献均选review-source-5/11/22/23/24/25/67正文依据，正式绑定与JSON重读通过。证据位于tests/TestForRealScenario/runs/20261111-peng2017-flash-blackbox-01/live-workflow-ownership/。尚未代写业务任务，必须经网页恢复实际消费。
 
 相邻旧test_sources_include_supplement_and_exclude_bibliography在本工作区失败，独立未改源码亦同样失败，单列为旧基线；本次未改task_sources和旧Markdown分节路径。首次新测试monkeypatch目标错误已修正，真正旧源码回归失败记录在source-ownership-before-corrected-fixture.log。当前源码的frontend目录和字段契约未改，复用同轮Node24四宿主233、12变异和字段契约记录；不计为另一次执行。完整双模型五阶段仍未完成。
+
+
+恢复入口补齐：needs_workflow原先没有网页重新判断入口，故修复无法由原任务消费。上传者可显式点击“重新判断解析流程”，复用原resume端点；仍要求原模型/端点、文件角色、输入及草稿哈希一致，不接受已送审或其他状态。不会强行matched，原流程判断及未匹配暂停保持。回归先检出needs_workflow被拒；后端55、动态区交互5、完整四宿主233及12变异通过。真实网页消费待继续。
