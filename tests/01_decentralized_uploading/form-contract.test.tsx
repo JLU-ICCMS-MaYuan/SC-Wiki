@@ -426,3 +426,21 @@ it.each(["upload", "revision", "admin", "superadmin"])("220 %s 宿主标红：�
   await waitFor(()=>expect(api.patch).toHaveBeenCalled())
   expect(caption).toHaveAttribute("data-evidence-caption-problem","true")
 })
+
+
+it.each(["upload","revision","admin","superadmin"])("174 %s 人工新增材料立即取得稳定身份，保存只插入新卡", async kind=>{
+  await host(kind)
+  fireEvent.click(screen.getByRole("button",{name:"添加材料状态",exact:true}))
+  const card=document.querySelector('[data-material-state-index="5"]') as HTMLElement
+  expect(card.dataset.stateKey).toMatch(/^state-/)
+  expect(card.dataset.stateKey).not.toBe("state-6")
+  fireEvent.change(within(card).getByLabelText("化学式"),{target:{value:"PrH9"}})
+  const stable=card.dataset.stateKey
+  fireEvent.click(screen.getByRole("button",{name:["admin","superadmin"].includes(kind)?"保存修改":"立即保存",exact:true}))
+  await waitFor(()=>expect(api.patch).toHaveBeenCalled())
+  const changes=(vi.mocked(api.patch).mock.calls.at(-1)![1]as any).changes
+  const insert=changes.find((c:any)=>c.op==="insert"&&c.path[0]==="material_states")
+  expect(insert.value.state_key).toBe(stable)
+  expect(insert.value.material).toBe("PrH9")
+  expect(changes.filter((c:any)=>c.path[0]==="material_states")).toEqual([insert])
+})

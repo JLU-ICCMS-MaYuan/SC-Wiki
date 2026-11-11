@@ -32,7 +32,7 @@ import StructureCandidateSource from './StructureCandidateSource'
 import PropertyModuleEditor from './PropertyModuleEditor'
 import type { PropertySpectrumTarget as SpectrumTarget } from '../lib/propertySpectra'
 import PressureEditor from './PressureEditor'
-import { PROPERTY_SCHEMA_VERSION } from '../lib/propertyModules'
+import { PROPERTY_SCHEMA_VERSION, newStableKey } from '../lib/propertyModules'
 import {
   CRYSTAL_SYSTEM_VALUES, CrystalSystem, DraftKeyProperty, DraftMaterialState, DraftTcResult, SourceEvidence,
   StructureCandidate, evidenceList, unwrapData,
@@ -570,6 +570,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   // 新材料状态只写统一物性模块；旧字段仅保留给迁移前草稿的兼容编辑。
   const addState = () => {
     emitStates([...statesRef.current, {
+      state_key: newStableKey('state'),
       material_name: '',
       material: '',
       structure_families: [],
