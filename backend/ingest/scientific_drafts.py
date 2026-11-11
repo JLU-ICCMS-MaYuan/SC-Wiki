@@ -427,7 +427,8 @@ async def persist_scientific_draft(
                 for evidence in evidence_list(item) if entity is not None else []:
                     record_path = f"{state_path}.property_modules[{module_index}].records[{record_index}]"
                     relative = str(evidence.get('field_path') or '')
-                    if relative in {'method_code', 'value_number', 'value_min', 'value_max', 'value_text', 'value_boolean'} or relative.startswith(('payload.parameters.', 'payload.calculation_conditions.')):
+                    from .upload_contracts import PropertyRecordInput
+                    if relative and relative.split('.',1)[0] in PropertyRecordInput.model_fields:
                         record_path += '.' + relative
                     targets.append(ScientificEvidenceTarget(
                         record_path,

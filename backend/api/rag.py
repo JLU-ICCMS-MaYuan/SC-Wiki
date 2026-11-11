@@ -2139,13 +2139,14 @@ async def _create_pending_paper(
                     provenance = {r['field']: science.rebind_source_references(r.get('provenance'), formal_chunks, file_mapping)
                                   for r in evidence_checks if r['field'] in {'paper.theoretical_subtype', 'paper.keywords_tags'}}
                     persisted = await session.run_sync(lambda sync: paper_snapshot(sync, paper.id, 0, '', check_access=False, review_provenance=provenance, submission=draft))
+                    same_sources = science.source_transfer_matches((manual_snapshot or {}).get('chunks') or [], persisted['chunks'], file_mapping)
                     if manual_snapshot is not None and manual_baseline is not None:
                         manual_snapshot['_workdraft_current']=True
                         await session.run_sync(lambda sync: manual_evidence.transfer_to_paper(
-                            sync, manual_snapshot, manual_baseline, paper.id, paper.content_revision, persisted))
+                            sync, manual_snapshot, manual_baseline, paper.id, paper.content_revision, persisted,
+                            source_transfer_verified=same_sources))
                         from backend.ingest.field_review import bind_support_versions
                         await session.run_sync(lambda sync: bind_support_versions(persisted, sync))
-                    same_sources = science.source_transfer_matches((manual_snapshot or {}).get('chunks') or [], persisted['chunks'], file_mapping)
                     by_item = {r['item_key']: r for r in evidence_checks}
                     transferred = {}
                     for r in persisted['records']:

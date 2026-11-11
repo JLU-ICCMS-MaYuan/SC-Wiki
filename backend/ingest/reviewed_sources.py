@@ -52,7 +52,10 @@ def rebind_references(value, chunks, file_ids):
         return deepcopy(value)
     result = {}
     for key, item in value.items():
-        if key in {'history', 'legacy_evidences', 'legacy_source_history', 'validation_record', 'audit_events'}:
+        if key in {'history', 'legacy_evidences', 'legacy_source_history', 'validation_record', 'audit_events',
+                   'claim', 'current_value'}:
+            # 科学值与核对输入由当前稿件持有；其中的提取背景不是本字段选定引用。
+            # finish会使用正式快照的当前值；不能递归改写或对这些背景另设来源门禁。
             result[key] = deepcopy(item)
         elif key in {'evidences', 'fact_evidences', 'scope_evidences', 'software_evidences'} and isinstance(item, list):
             sources = []

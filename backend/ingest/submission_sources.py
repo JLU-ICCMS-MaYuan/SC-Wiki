@@ -16,6 +16,20 @@ def reviewed_legacy_targets(targets, checks, draft, chunks):
     by_item = {row['item_key']: row for row in checks}
     output, emitted = [], set()
     for target in targets:
+        if target.kind == 'property_record':
+            match=re.match(r'^(material_states\[\d+\]\.property_modules\[\d+\]\.records\[\d+\])(?:\.|$)',target.field_path)
+            root=match[1]if match else None
+            owned=[row for row in checks if root and row.get('record_key')==getattr(target.entity,'record_key',None)
+                   and row['field'].startswith(root+'.')]
+            if (root==target.field_path and root not in by_field and owned
+                    and all(row.get('status')=='supported'or row.get('required')is False for row in owned)):
+                # 逐字段已选来源另有明确field_path；未选的旧整条记录背景不能形成第二套入库门。
+                # 原文完整留在审核历史，当前字段的已选引用继续逐一严格定位。
+                history=owned[0].setdefault('legacy_source_history',[])
+                entry={'field':root,'evidence':deepcopy(target.evidence),'status':'historical_unselected',
+                       'reason':'原记录背景未被选作当前字段依据；保留原来源，不冒充已审核的字段引用'}
+                if entry not in history:history.append(entry)
+                continue
         owner = None
         if target.field_path.endswith('.reported_space_group'):
             owner = by_field.get(target.field_path + '_symbol')

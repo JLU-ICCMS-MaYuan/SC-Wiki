@@ -576,6 +576,39 @@ def rebind_source_references(value, chunks, file_ids):
     return rebind_references(value, chunks, file_ids)
 
 
+def handoff_content_matches(record, previous, *, source_transfer_verified=False):
+    """仅允许已验证来源交接中方法引用的表示变化，不忽略科学内容变化。"""
+    if record.get('content_hash') == previous.get('content_hash'):
+        return True
+    if (not source_transfer_verified or record.get('record_field') != 'method_code'
+            or previous.get('record_field') != 'method_code'
+            or record.get('item_key') != previous.get('item_key')):
+        return False
+    from .field_review import content_claim
+    from .property_evidence import digest
+
+    def method_content(row):
+        claim = copy.deepcopy(content_claim(row))
+        if digest(canonical(claim)) != row.get('content_hash'):
+            return None
+        context = claim.get('context') or {}
+        inputs = context.get('direct_inputs') or {}
+        observations = context.pop('method_observations', None)
+        if observations is None:
+            names = [inputs.get('method_raw')]
+        else:
+            if not observations or any(not isinstance(item, dict)
+                    or set(item) - {'method_raw', 'evidences'} for item in observations):
+                return None
+            names = [item.get('method_raw') for item in observations]
+        inputs.pop('method_raw', None)
+        context['method_original_names'] = sorted(set(names), key=lambda value: str(value))
+        return canonical(claim)
+
+    current, old = method_content(record), method_content(previous)
+    return current is not None and old is not None and current == old
+
+
 def transfer_result(record, result, chunks, file_ids=None, *, source_transfer_verified=False):
     """上传落库后转接来源身份；文件 ID 变化不能抹掉候选或人工来源。"""
     from .property_evidence import digest, locate, normalized_text
@@ -584,7 +617,7 @@ def transfer_result(record, result, chunks, file_ids=None, *, source_transfer_ve
         record['provenance'] = copy.deepcopy(result['provenance'])
         source_hash = digest(sorted(normalized_text(c['content']) for c in chunks))
         record['source_hash'] = digest([source_hash, record['provenance']])
-    if (result.get('content_hash') != record['content_hash'] or result.get('stale')
+    if (not handoff_content_matches(record, result, source_transfer_verified=source_transfer_verified) or result.get('stale')
             or (result.get('source_hash') != record['source_hash'] and not source_transfer_verified)):
         history = [{name: copy.deepcopy(result.get(name)) for name in ('current_value', 'status', 'reason', 'ai_reason', 'evidences', 'proposal', 'decision', 'field_decision', 'adopted_basis', 'content_hash', 'source_hash', 'audit_events', 'legacy_source_history')}]
         return {**record, 'status': 'unchecked', 'reason': '上传值与保存后的内容或来源不同，请重新核对',

@@ -108,9 +108,9 @@ def call_browser(browser, origin, window=None, tab=None, source=None):
             raise ValueError("必须明确指定正整数 window 和 tab")
         # 原生 URL 检查后再核对当前 origin，防止页面在两次读取之间跳转。
         script = (
-            "JSON.stringify((function(){"
+            "JSON.stringify((function(){try{"
             f"if(location.origin!=={json.dumps(origin)}) throw new Error('网站来源已变化');"
-            + source + "\n})())"
+            + source + "\n}catch(error){return {__scwiki_browser_exception__:String(error)};}})())"
         )
         args += [str(window), str(tab), script]
     result = subprocess.run(
@@ -120,7 +120,12 @@ def call_browser(browser, origin, window=None, tab=None, source=None):
     if result.returncode:
         raise RuntimeError(result.stderr.strip())
     output = result.stdout.strip()
-    return output if mode == "tabs" else json.loads(output or "null")
+    if mode == 'tabs':
+        return output
+    result = json.loads(output or 'null')
+    if isinstance(result,dict) and set(result)=={'__scwiki_browser_exception__'}:
+        raise RuntimeError(result['__scwiki_browser_exception__'])
+    return result
 
 
 def run_dir(value):

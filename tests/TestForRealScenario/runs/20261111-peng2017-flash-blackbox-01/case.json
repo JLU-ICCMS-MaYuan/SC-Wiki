@@ -35,35 +35,21 @@
       "authorization": "用户本轮明确指定；仅作返修目标，不预先改写AI草稿以制造修改"
     },
     "state": {
-      "field": "material_states[].structure_families",
-      "target": "笼型结构",
-      "classes": [
-        {
-          "material": "YH10",
-          "phase": "Fm-3m"
-        },
-        {
-          "material": "CeH10",
-          "phase": "Fm-3m"
-        },
-        {
-          "material": "LaH10",
-          "phase": "Fm-3m"
-        },
-        {
-          "material": "YH9",
-          "phase": "P63/mmc"
-        },
-        {
-          "material": "CeH9",
-          "phase": "P63/mmc"
-        }
-      ],
-      "selection": "新草稿中核验具体状态和当前值后选择真实需改项；已有正确内容不记为修改"
+      "field": "material_states[1].reported_space_group_symbol",
+      "state_key": "state-39dba9b24f3c9aeccb05",
+      "material": "ScH6",
+      "pressure_gpa": 300,
+      "before": "Im-3m",
+      "target": "P6_3/mmc",
+      "dependent_values": {
+        "reported_space_group_number": 194,
+        "crystal_system": "hexagonal"
+      },
+      "basis": "正文Fig.1(c)压力分段及SI Fig.S28(f)；用户已明确采用为材料级真实返修项"
     }
   },
   "round_kind": "独立视觉模型黑盒轮",
-  "status": "准备真实上传",
+  "status": "Flash第23次续跑失败于结构归属；GPT排障轮论文1485已送审并真实拒绝，正在返修",
   "model": "server:LLM1/deepseek-flash",
   "previous_gpt_task": "d789acceee124022b3257f84780d1156",
   "started": "2026-11-11T00:53:52.888245+00:00",
@@ -90,5 +76,31 @@
       "id": 5,
       "status": "未执行"
     }
-  ]
+  ],
+  "scientific_adjudications_file": "user-scientific-adjudications.json",
+  "model_rounds": {
+    "gpt": {
+      "task_id": "d789acceee124022b3257f84780d1156",
+      "paper_id": 1485,
+      "model": "server:LLM2/gpt-6.1-sol",
+      "review_status": "rejected",
+      "revision_id": "8136d82df2ae4e0f8549c472ee610b79",
+      "phases": [
+        "已实际送审",
+        "已实际拒绝并重读",
+        "正在网页返修",
+        "未执行",
+        "未执行"
+      ]
+    },
+    "flash": {
+      "task_id": "0f9ed9412e7f4ad2bac8ececcbbd1525",
+      "model": "server:LLM1/deepseek-flash",
+      "job_id": "125b9652-824e-4a0a-83e8-c772ae300668",
+      "generation": 23,
+      "status": "failed",
+      "failure": "结构归属重复读取已读来源，未空转缓存为成功",
+      "paper_id": null
+    }
+  }
 }

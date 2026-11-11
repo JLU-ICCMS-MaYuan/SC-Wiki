@@ -607,7 +607,7 @@ def mark_ai_read(session, refs: list[dict[str, str]], *, read: bool) -> None:
 
 
 def transfer_to_paper(session, snapshot: dict, baseline: dict, paper_id: int, revision: int,
-                      persisted_snapshot: dict | None = None) -> None:
+                      persisted_snapshot: dict | None = None, *, source_transfer_verified=False) -> None:
     persisted = _by_item(persisted_snapshot or {})
     from .field_waiver import keys as waived_keys
     waived = waived_keys(session, snapshot)
@@ -624,7 +624,9 @@ def transfer_to_paper(session, snapshot: dict, baseline: dict, paper_id: int, re
             raise ManualEvidenceError("manual_evidence_incomplete", "人工修改依据已变化，请补齐后重新提交",
                                       field=record["field"], status=409)
         mapped = persisted.get(record["item_key"])
-        if persisted_snapshot is not None and (mapped is None or mapped.get("content_hash") != record.get("content_hash")):
+        from .scientific_evidence import handoff_content_matches
+        if persisted_snapshot is not None and (mapped is None or not handoff_content_matches(
+                mapped, record, source_transfer_verified=source_transfer_verified)):
             raise ManualEvidenceError("manual_evidence_transfer_failed", "人工证据对应的正式字段已变化，原草稿已保留",
                                       field=record["field"], status=409)
         row.target, row.target_id = "paper", str(paper_id)
