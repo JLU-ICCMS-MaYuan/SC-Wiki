@@ -1,3 +1,9 @@
+## 最新：Flash图表完成，流程汇总混入SI编号已补来源角色待网页恢复
+
+图表IR：正文25条/16未读，SI21条/6未读；与GPT不同，整稿仍需科学核对。Job fa7e251a正常完成图表后needs_workflow，无技术错误；原因是贡献数组混入SI。原窗口本身已携带文件角色，最终汇总却仅传window_reports，丢失归属。已补只读source_index到流程和全文二级分类最终汇总，原窗口字节及调用次数不变。原正文门不放宽。真实Flash原2窗口复用、1次新汇总matched，见live-workflow-ownership/result.json。共享/隔离33通过，真实源码先失败记录及1项独立旧基线失败另列。提交后需按网页正常重新解析入口恢复needs_workflow，不能改库或把隔离matched写回。若网页没有重判入口，先调查原设计，不能用普通API绕过。
+
+用户已明确授权新增拆分网页操作，Issue创建操作已派发，待读取返回编号并建完整Spec/Plan/Tasks后实现。授权“同意增加该网页操作，保留原记录身份和来源（推荐）”。四宿主预览两张卡、原物性身份来源保留、Cc晶胞来源完整移到新卡。GPT仍ready无PaperID，不删除。两模型五阶段均未完成。
+
 # 双视觉模型黑盒接续
 
 目标为GPT和Flash各有真实五阶段通过证据；当前两者均未完成。先前GPT为LLM2/gpt-6.1-sol，旧Task d789acceee124022b3257f84780d1156 ready，无正式PaperID；LaH9@50拆分尚未实施，用户已确认P63/mmc保留Fig4物性、Cc保留SI结构，数据原样保留。旧任务详情仍见上一run/CONTINUATION.md。

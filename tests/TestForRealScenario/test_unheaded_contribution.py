@@ -25,6 +25,38 @@ def test_unheaded_results_route_to_current_workflow():
     assert report["evidences"][0]["section_role"] == "other"
 
 
+@pytest.mark.parametrize('kind', ['workflow', 'classification'])
+def test_multiwindow_summary_preserves_main_and_supplementary_source_ownership(monkeypatch, kind):
+    import json
+    from backend.ingest import theoretical_subtype
+    from backend.ingest import property_evidence
+    module = property_evidence if kind == 'workflow' else theoretical_subtype
+    sources = [SOURCES[0], {**SOURCES[0], 'file_id':'si', 'file_role':'supplementary',
+                           'content':'Supporting electronic DOS calculation.'}]
+    monkeypatch.setattr(module, 'source_batches', lambda rows:[[rows[0]], [rows[1]]])
+    calls=[]
+    def complete(_prompt, payload, **_options):
+        body=json.loads(payload);calls.append(body)
+        if 'sources' in body:
+            selected=body['sources'][0]['source_id']
+        else:
+            index={x['source_id']:x for x in body['source_index']}
+            assert index['review-source-0']['file_role']=='main'
+            assert index['review-source-1']['file_role']=='supplementary'
+            assert all('content' not in row for row in index.values())
+            selected=next(k for k,v in index.items() if v['file_role']=='main')
+        if kind=='workflow':
+            return dict(paper_type='theoretical',theoretical_subtype='calculation',
+                superconductor_kind='conventional',reason='本文主要贡献为材料计算',
+                source_ids=[selected],contribution_source_ids=[selected],paper={})
+        return dict(value='calculation',reason='本文主要贡献为材料计算',
+                    evidences=[{'source_id':selected}],contribution_source_ids=[selected])
+    report=(workflows.assess(sources,complete=complete) if kind=='workflow'
+            else theoretical_subtype.classify(sources,complete=complete))
+    assert report['status']==('matched' if kind=='workflow' else 'completed')
+    assert len(calls)==3  # 原有两窗口+一次汇总；不是新增纠错或重读。
+
+
 def test_unheaded_contribution_survives_classification_and_field_check():
     assessment = assess_candidate(SOURCES, classification())
     assert assessment["status"] == "completed"

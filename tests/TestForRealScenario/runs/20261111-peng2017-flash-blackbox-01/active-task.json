@@ -1,8 +1,8 @@
 {
   "task_id": "0f9ed9412e7f4ad2bac8ececcbbd1525",
-  "status": "extracting",
+  "status": "needs_workflow",
   "stage": "extracting",
-  "job_id": "21574cce-b141-4e63-b020-24dc9c6c8144",
+  "job_id": "fa7e251a-a1d3-4750-b254-ca412037d37b",
   "execution_model": {
     "provider": "server:LLM1",
     "model": "deepseek-flash",
@@ -44,9 +44,9 @@
     }
   },
   "rq": {
-    "status": "JobStatus.STARTED",
-    "worker": "1d73ac7a86604f8aa930c4469c456383",
-    "queue": "scwiki-upload"
+    "status": "JobStatus.FINISHED",
+    "worker": "af6a4ef043a94a888ce87e38d05847f4"
   },
-  "at": "2026-11-11T00:59:51.586684+00:00"
+  "at": "2026-11-11T00:59:51.586684+00:00",
+  "source_commit_after_fix": "9f148136"
 }

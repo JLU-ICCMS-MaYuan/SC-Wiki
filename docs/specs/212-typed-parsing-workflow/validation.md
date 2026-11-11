@@ -50,3 +50,12 @@
 相邻字段验证限定CaH6正文全部页面和SI第1、2、3、19页，整理可读取完整SI；逐项核对150 GPa的220 K/μ*=0.13、235 K/μ*=0.1和λ=2.69，以及来源、归属、绑定和重读。没有重提整篇所有字段、重新运行全部PDF工具、数字化全部谱或正式送审，不声称整篇解析已验收。谱终态依赖#211，本次不把其未提交改动混入提交。
 
 Issue保持OPEN：远程Spec链接未经授权推送及实际访问验证；真实MySQL四宿主全链路和整篇谱终态没有在本Feature中重新验收。
+
+
+## 2026-11-11 Flash跨窗口来源角色交接
+
+真实Task 0f9ed9412e7f4ad2bac8ececcbbd1525已读完图表后进入needs_workflow：最终贡献数组混入SI编号，原正文归属门正确拒绝。原两窗口和最终响应均保留。根因之一是汇总输入只有窗口报告，没有原编号的文件角色，后续无法可靠区分正文贡献与SI支持。现为流程判断和相邻全文二级分类的汇总添加只读source_index（编号、文件、角色、节类型及页码）；原文窗口提示和响应不变，不加模型调用，不过滤模型错误，不放宽正文及来源门。
+
+两个跨窗回归在未改生产源码的隔离副本上先失败；修复后共享/隔离33项通过，包含SI独立贡献、未知编号及无标题正文反例。原Flash两窗口报告完整复用，真实Flash仅新做一次最终汇总：matched，贡献均选review-source-5/11/22/23/24/25/67正文依据，正式绑定与JSON重读通过。证据位于tests/TestForRealScenario/runs/20261111-peng2017-flash-blackbox-01/live-workflow-ownership/。尚未代写业务任务，必须经网页恢复实际消费。
+
+相邻旧test_sources_include_supplement_and_exclude_bibliography在本工作区失败，独立未改源码亦同样失败，单列为旧基线；本次未改task_sources和旧Markdown分节路径。首次新测试monkeypatch目标错误已修正，真正旧源码回归失败记录在source-ownership-before-corrected-fixture.log。当前源码的frontend目录和字段契约未改，复用同轮Node24四宿主233、12变异和字段契约记录；不计为另一次执行。完整双模型五阶段仍未完成。

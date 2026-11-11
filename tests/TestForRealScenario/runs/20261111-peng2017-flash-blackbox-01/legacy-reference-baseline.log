@@ -1,0 +1,10 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_sources_include_supplement_and_exclude_bibliography ___________
+tests/01_decentralized_uploading/test_fulltext_theoretical_subtype.py:119: in test_sources_include_supplement_and_exclude_bibliography
+    assert not any('Others predicted' in item['content'] for item in sources)
+E   assert not True
+E    +  where True = any(<generator object test_sources_include_supplement_and_exclude_bibliography.<locals>.<genexpr> at 0x10e1be330>)
+=========================== short test summary info ============================
+FAILED tests/01_decentralized_uploading/test_fulltext_theoretical_subtype.py::test_sources_include_supplement_and_exclude_bibliography
+1 failed in 0.23s

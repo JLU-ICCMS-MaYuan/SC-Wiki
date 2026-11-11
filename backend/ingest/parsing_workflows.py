@@ -130,8 +130,12 @@ def assess(chunks, *, complete=None, model='', cancelled=lambda: None):
             return dict(base, status='failed', reason='流程适用性判断调用失败；通用结果已保留，请稍后重新解析')
     cancelled()
     try:
-        raw = reports[0] if len(reports) == 1 else complete(PROMPT,
-            json.dumps({'window_reports': reports}, ensure_ascii=False), response_schema=_schema())
+        from .source_ownership import source_identity_index
+        raw = reports[0] if len(reports) == 1 else complete(PROMPT +
+            '\n汇总时source_index保留原编号及文件角色。contribution_source_ids只能选file_role=main的正文依据；'
+            'SI可列入source_ids支持上下文，不能混入正文贡献编号。不得靠编号大小猜文件归属。',
+            json.dumps({'window_reports': reports, 'source_index': source_identity_index(sources)},
+                       ensure_ascii=False), response_schema=_schema())
         if not isinstance(raw, dict) or not isinstance(raw.get('reason'), str) or not raw['reason'].strip():
             raise ValueError('invalid routing response')
         base['paper'] = deepcopy(raw.get('paper') or {})

@@ -110,7 +110,11 @@ def classify(chunks: list[dict], *, complete: Callable | None = None, model: str
             for batch in batches:
                 summaries.append(_call(WINDOW_PROMPT, {"sources": batch}, complete))
                 base["covered_batches"] += 1
-            raw = _call(CLASSIFY_PROMPT, {"window_summaries": summaries,
+            from .source_ownership import source_identity_index
+            raw = _call(CLASSIFY_PROMPT + '\n汇总时source_index保留原编号和文件角色；'
+                        '主要贡献编号只选择file_role=main的正文，不将SI支持性编号混作正文贡献。',
+                        {"window_summaries": summaries, "source_index": source_identity_index([
+                            {**chunk, 'source_id': f'review-source-{index}'} for index, chunk in enumerate(chunks)]),
                                           "coverage": {"read": len(summaries), "total": len(batches)}}, complete)
     except Exception as exc:
         return {**base, "status": "failed", "value": None,
