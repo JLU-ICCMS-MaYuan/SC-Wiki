@@ -22,6 +22,7 @@ class RagSettings(BaseSettings):
     upload_task_ttl_seconds: int = 24 * 60 * 60
     upload_stale_seconds: int = 60 * 60
     upload_active_task_limit: int = 100
+    upload_human_questions_enabled: bool = True
     upload_llm_concurrency: int = 2
     upload_parser_stage: str = "legacy"
     upload_parser_default_profile: str = "layout"

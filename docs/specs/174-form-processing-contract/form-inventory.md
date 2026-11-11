@@ -1,5 +1,9 @@
 # 全站表单入口调查
 
+## #239/#240 人工问题窗口
+
+UploadPage/UploadTaskPage的UploadModelActivity挂载独立UploadHumanQuestions；新任务策略默认开启，旧无策略不回填。窗口不修改科学字段契约、侧栏或批准规则；回答作为相关人工材料沿上传、返修、管理员、超级管理员原保存交接链处理。问题/动态/论文先行12项交互通过，四宿主250项和12变异通过；真实新文献等待/答题/局部恢复及五阶段边界见[#239](../239-field-human-question-queue/validation.md)、[#240](../240-human-question-default-integration/validation.md)。刷新以稳定task_id保留编辑器，不用卸载来清缓存。
+
 日期：2026-10-28。当前已完成科学表单的本轮验证，其他入口只完成代码调查，不代替 GitHub Issue 状态。证据见 [validation.md](validation.md)。
 
 入口来源：`frontend/src/App.tsx`、`frontend/src/LazyRoutes.tsx`。搜索范围包含 pages、components 及路由委托的功能目录；下表按用户入口合并共享子控件，不把每个输入框当成独立表单。

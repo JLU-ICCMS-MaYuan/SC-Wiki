@@ -552,6 +552,10 @@ def resume_task(task_id):
             return state
         if state.get("paper_id") or state.get("status") not in {"paused", "failed", "needs_workflow"}:
             raise ValueError("当前任务不能继续")
+        if state.get('pause_reason') == 'human_questions':
+            from .human_questions import ready_answers
+            if not ready_answers(state):
+                raise ValueError('相关字段仍在等待回答；可先回答问题，再局部继续')
         if state.get("execution_input_hash") and state["execution_input_hash"] != input_identity(state):
             raise ValueError("输入文件或角色已变化，不能沿用旧解析上下文")
         draft = get_draft(task_id)
@@ -568,6 +572,7 @@ def resume_task(task_id):
             raise ValueError('模型服务地址已变化，不能沿用旧请求上下文')
         raw_draft = redis_client().get(draft_key(task_id))
         update_state(task_id, status="queued", resume=True, retry=state.get("status") == "failed",
+            pause_reason=None,
             execution_claimed=False, execution_resume_requested=True, processing_status="processing",
             execution_draft_hash=draft_hash,
             reparse_expected_draft_hash=hashlib.sha256(raw_draft.encode()).hexdigest() if raw_draft else None,
@@ -576,6 +581,7 @@ def resume_task(task_id):
         try:
             enqueue_processing(task_id)
         except Exception:
-            update_state(task_id, status="paused", processing_status="paused", processing_error="继续任务未能入队，请重试")
+            update_state(task_id, status="paused", processing_status="paused", pause_reason=state.get('pause_reason'),
+                processing_error="继续任务未能入队，请重试")
             raise
         return get_state(task_id)

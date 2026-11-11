@@ -270,17 +270,49 @@ def _structure_reading_cancelled(task_id: str) -> bool:
 
 
 def _extract_pdf_structure_candidates(task_id, markdown, file_source, file_item, *, material_scope=None):
+    from . import human_questions as questions
+    state = get_state(task_id) or {}
+    enabled = questions.enabled(state)
+    active = [q for q in questions.ready_answers(state) if any(t.get('reading_id') for t in q['target_refs'])]
+    directions = {t['reading_id']: {'direction': q['answers'][-1]['direction'],
+        'reason': q['answers'][-1].get('reason'), 'source_kind': 'human_direction',
+        'actor_user_id': q['answers'][-1]['actor_user_id']}
+        for q in active for t in q['target_refs'] if t.get('reading_id') and t.get('source_hash') == file_item.get('sha256')}
+    def report(route, **kwargs):
+        from .upload_tasks import upload_task_lock
+        with upload_task_lock(task_id):
+            current = get_state(task_id)
+            registry = deepcopy(current.get('human_question_candidates') or {})
+            for target in route['target_refs']:
+                registry[target['candidate_id']] = deepcopy(target)
+            update_state(task_id, human_question_candidates=registry)
+        return questions.report_question(task_id, route, **kwargs)
+    excluded_reading_ids = set()
     def save_structure_reading(event):
+        excluded_reading_ids.update(row['reading_id'] for row in event.get('exclusions') or [] if row.get('reading_id'))
         directory = artifact_directory(task_id) / 'structure_reading' / str(file_item['file_id'])
         directory.mkdir(parents=True, exist_ok=True)
         _atomic_write_json(directory / f"call-{event['iteration']}-{event['status']}.json", event)
     with call_phase('structure_reading'):
-        return extract_structure_candidates(markdown, pdf_path=file_source,
+        values = extract_structure_candidates(markdown, pdf_path=file_source,
             source={'file_id': file_item.get('file_id'),
                     'filename': file_item.get('original_filename') or file_source.name,
                     'role': file_item.get('role'), 'sha256': file_item.get('sha256')},
             material_scope=material_scope,
-            on_event=save_structure_reading, cancelled=lambda: _structure_reading_cancelled(task_id))
+            on_event=save_structure_reading, cancelled=lambda: _structure_reading_cancelled(task_id),
+            **({'on_human_question': report, 'human_directions': directions} if enabled or active else {}))
+    outcomes = {}
+    for q in active:
+        for target in q['target_refs']:
+            candidate = next((v for v in values if v['candidate_id'] == target.get('candidate_id') and v.get('status') == 'valid'), None)
+            if candidate:
+                candidate['user_note'] = '\n'.join(filter(None, [candidate.get('user_note'),
+                    '人工处理方向（非论文原句）：' + q['answers'][-1]['direction'], q['answers'][-1].get('reason')]))
+            if target.get('source_hash') == file_item.get('sha256'):
+                outcomes[target['candidate_id']] = bool(candidate or target.get('reading_id') in excluded_reading_ids)
+    if outcomes:
+        questions.finish_candidate_answers(task_id, outcomes)
+    return values
 
 
 def _original_path(state: dict[str, Any]) -> Path:
@@ -1970,9 +2002,18 @@ def process_upload_task(task_id: str) -> dict[str, Any]:
     except ExecutionStopped:
         current = get_state(task_id) or {}
         if current.get('status') == 'pausing':
-            return update_state(task_id, status='paused', processing_status='paused',
+            paused = update_state(task_id, status='paused', processing_status='paused',
                 processing_error=None, model_activity={**(current.get('model_activity') or {}),
                     'status':'paused', 'retry_at':None})
+            if paused.get('pause_reason') == 'human_questions':
+                from .human_questions import ready_answers, dispatch_ready_answer
+                if ready_answers(paused):
+                    try:
+                        dispatch_ready_answer(task_id)
+                        return get_state(task_id)
+                    except Exception:
+                        return update_state(task_id, processing_error='回答已保存，但续跑未入队，请使用继续解析')
+            return paused
         if current.get('status') == 'cancelling':
             return update_state(task_id, status='cancelled', processing_status='cancelled', processing_error=None)
         return current
@@ -2800,13 +2841,32 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                      'saving': 'material_saving', 'completed': 'material_saving'}[value['action']]
             update_state(task_id, processing_phase=phase, material_batch=value)
             publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='reviewing')
-        grouped = process_material_groups(draft, material_sources, fill_existing_fields,
+        material_input_states = deepcopy(draft['material_states'])
+        def run_material_groups():
+            from .human_questions import pause_for_questions
+            return process_material_groups(draft, material_sources, fill_existing_fields,
             review=review_material_group, prepare=prepare_material_group,
             save=lambda value: None if state.get('is_shadow') else persist_paper(task_id, current_state, value),
             checkpoint=artifact_directory(task_id)/'material-stage.json',
             identity={'execution_model': current_state.get('execution_model'),
                       'workflow': draft.get('_parsing_workflow')},
-            cancelled=lambda: _ensure_not_cancelled(task_id), on_progress=material_progress)
+                cancelled=lambda: _ensure_not_cancelled(task_id), on_progress=material_progress,
+                input_states=material_input_states,
+                **({'question_state': lambda: get_state(task_id),
+                    'on_waiting': lambda: pause_for_questions(task_id, allow_ready=True)}
+                   if (current_state.get('human_questions_policy') or {}).get('enabled') or current_state.get('human_questions') else {}))
+        grouped = run_material_groups()
+        while grouped.get('waiting_human'):
+            # 答案恰在安全点到达时由同一个Worker领取；保存的组检查点避免重复填写。
+            grouped = run_material_groups()
+        from .human_questions import ready_answers, pause_for_questions
+        paper_question_fields = {t['field'] for q in ready_answers(get_state(task_id) or {})
+            for t in q['target_refs'] if str(t.get('field') or '').startswith('paper.')}
+        if paper_question_fields:
+            generate_upload_suggestions(task_id, draft, int(current_state.get('user_id') or 0),
+                scientific_sources=scientific_sources, requested_fields=paper_question_fields)
+            persist_paper(task_id, get_state(task_id) or current_state, draft)
+        pause_for_questions(task_id)
         form_filling = grouped['filling_report']
         suggestion_results = grouped['review_results']
         draft['model_review_report'] = {

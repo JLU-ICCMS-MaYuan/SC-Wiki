@@ -4,6 +4,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { api } from '../lib/api'
 import { useLanguage } from '../context/LanguageContext'
 import { type UploadTaskState, type ModelActivity, unwrapData } from '../lib/paperProcessing'
+import UploadHumanQuestions from './UploadHumanQuestions'
 
 // 请求动态独立于科学表单；本地计时不触发草稿扫描或模型调用。
 const UploadModelActivity: React.FC<{ task: UploadTaskState; onUpdated: (task: UploadTaskState) => void;
@@ -21,6 +22,12 @@ const UploadModelActivity: React.FC<{ task: UploadTaskState; onUpdated: (task: U
   useEffect(() => { mounted.current = true; return () => { mounted.current = false } }, [])
   useEffect(() => { setEarlier([]); setMore(true); setError(''); setPending(false); setHistoryLoading(false) }, [task.task_id])
   const activity = task.model_activity
+  const reloadTask = React.useCallback(() => {
+    const taskId = task.task_id
+    void api.get<{ ok: boolean; data: UploadTaskState }>(`/api/upload-tasks/${taskId}`).then(response => {
+      if (mounted.current && currentTask.current === taskId) onUpdated(unwrapData(response))
+    }).catch(() => undefined)
+  }, [task.task_id, onUpdated])
   const active = ['queued', 'extracting', 'reading', 'summarizing'].includes(task.status || '')
   const pausing = task.status === 'pausing'
   useEffect(() => {
@@ -93,6 +100,7 @@ const UploadModelActivity: React.FC<{ task: UploadTaskState; onUpdated: (task: U
     {task.processing_error && !activity?.error && <Alert severity={failed ? 'error' : 'info'} sx={{ mt: 1 }}>{task.processing_error}</Alert>}
     {task.status === 'paused' && <Typography variant="body2" sx={{ mt: 1 }}>{t('upload.pausedRetention')}</Typography>}
     {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
+    <UploadHumanQuestions task={task} onAnswered={reloadTask} />
     {!!activity?.history?.length && <Accordion disableGutters elevation={0} sx={{ mt: 1 }}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>{t('upload.modelHistory')}</AccordionSummary>
       <AccordionDetails sx={{ maxHeight: 280, overflow: 'auto' }}>

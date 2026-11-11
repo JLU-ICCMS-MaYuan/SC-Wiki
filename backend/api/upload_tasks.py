@@ -48,6 +48,40 @@ class ResolveRoles(BaseModel):
     roles: list[RoleDecision] = Field(min_length=1)
 
 
+class HumanQuestionAnswer(BaseModel):
+    model_config = {'extra': 'forbid'}
+    answer_id: str = Field(min_length=1, max_length=64)
+    expected_queue_revision: int = Field(ge=0)
+    prompt_revision: int = Field(ge=1)
+    target_token: str = Field(min_length=1, max_length=128)
+    choice_id: Literal['recommended', 'investigate', 'manual']
+    manual_text: str = Field(default='', max_length=100000)
+    reason: str = Field(default='', max_length=4000)
+
+
+@router.get('/{task_id}/human-questions')
+def read_human_questions(task_id: str, current_user: User = Depends(get_current_user)):
+    from backend.ingest.human_questions import read_public
+    _owned_state(task_id, current_user)
+    try: return {'ok': True, 'data': read_public(task_id, current_user.id)}
+    except PermissionError as error: raise _error(403, 'HUMAN_QUESTION_FORBIDDEN', str(error)) from error
+
+
+@router.post('/{task_id}/human-questions/{question_id}/answers')
+def answer_human_question(task_id: str, question_id: str, body: HumanQuestionAnswer,
+                          current_user: User = Depends(get_current_user)):
+    from backend.ingest.human_questions import receive_answer
+    _owned_state(task_id, current_user)
+    try:
+        result = receive_answer(task_id, current_user.id, question_id, body.model_dump())
+    except PermissionError as error: raise _error(403, 'HUMAN_QUESTION_FORBIDDEN', str(error)) from error
+    except LookupError as error: raise _error(404, 'HUMAN_QUESTION_NOT_FOUND', str(error)) from error
+    except (ValueError, TimeoutError) as error: raise _error(409, 'HUMAN_QUESTION_CONFLICT', str(error)) from error
+    if not result['accepted']:
+        raise _error(409, 'HUMAN_QUESTION_STALE', '问题或目标版本已变化，回答输入已保留，未应用')
+    return {'ok': True, 'data': result}
+
+
 def _error(status: int, code: str, message: str) -> HTTPException:
     return HTTPException(status_code=status, detail={"code": code, "message": message})
 

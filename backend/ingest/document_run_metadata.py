@@ -19,7 +19,8 @@ def save_run_metadata(task_id, state, config, *, latency, cpu):
                      "upload_source_bundle.py", "tc_material_scope.py", "scientific_form_filling.py", "state_inventory.py", "state_optimization.py",
                      "property_modules.py", "review_dependencies.py", "scientific_values.py",
                      "paper_first.py", "parallel_extraction.py", "request_slots.py", "source_highlight.py",
-                     "model_runtime.py", "chunker.py", "document_regions.py", "pdf_evidence_crops.py")})
+                     "model_runtime.py", "model_review.py", "material_batches.py", "human_questions.py",
+                     "human_question_routing.py", "chunker.py", "document_regions.py", "pdf_evidence_crops.py")})
     _atomic_write_json(artifact_directory(task_id) / "run-metadata.json", {
         "task_id":task_id, "parser_profile":state.get("parser_profile", "legacy"),
         "pipeline_revision":"sha256:" + fingerprint, "provider":config.provider, "model":config.model,

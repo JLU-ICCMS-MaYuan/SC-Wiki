@@ -206,6 +206,8 @@ def create_task(
         "parser_runs": [],
         "reading_state": None,
     }
+    from backend.rag.config import get_rag_settings
+    state['human_questions_policy'] = {'version': 1, 'enabled': get_rag_settings().upload_human_questions_enabled}
     from backend.storage.paths import object_mode
     if object_mode():
         state["file_contract_version"] = 1
@@ -237,16 +239,16 @@ def create_task(
 def authoritative_state(task_id: str, session=None):
     """新工作稿只读SQL状态列，缓存失败不会丢失当前人工修改基线。"""
     from contextlib import nullcontext
-    from sqlalchemy import select,inspect,exists
+    from sqlalchemy import select,inspect,exists,or_
     from backend.database import SessionLocal
     from backend import models
     from backend.workdraft_models import ScientificWorkDraft
     with (nullcontext(session) if session is not None else SessionLocal()) as db:
-        if not inspect(db.connection()).has_table(ScientificWorkDraft.__tablename__):
-            return None
-        active=exists(select(ScientificWorkDraft.id).where(
+        active=(exists(select(ScientificWorkDraft.id).where(
             ScientificWorkDraft.target=='upload',ScientificWorkDraft.target_id==task_id))
-        query=select(models.ScientificUploadDraft.state).where(models.ScientificUploadDraft.task_id==task_id,active)
+            if inspect(db.connection()).has_table(ScientificWorkDraft.__tablename__) else False)
+        questions=models.ScientificUploadDraft.state['human_questions']['version'].as_integer()==1
+        query=select(models.ScientificUploadDraft.state).where(models.ScientificUploadDraft.task_id==task_id,or_(active,questions))
         if session is not None:query=query.with_for_update(read=True)
         return db.scalar(query)
 
@@ -964,6 +966,10 @@ def cleanup_upload_task(
                 if has_upload_checks(session, task_id):
                     return
             state = get_state(task_id)
+            if state and state.get('status') != 'cancelled' and (state.get('human_questions') or {}).get('questions'):
+                from .human_questions import PENDING
+                if any(q['state'] in PENDING for q in state['human_questions']['questions']):
+                    return
             if state and int(state.get("updated_at", 0)) != context.expected_updated_at:
                 cleanup_at = state.get("cleanup_at")
                 if cleanup_at:

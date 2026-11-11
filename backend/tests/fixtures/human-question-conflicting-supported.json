@@ -1,0 +1,9 @@
+{
+  "capture_kind": "实际工具输出摘录，非完整上游响应",
+  "material": "ScH10",
+  "pressure_gpa": 300,
+  "status": "supported",
+  "reason": "SI Table S1 明确列出 ScH10 (300 GPa) 的空间群为 P63/mmc（a=b=4.48860 Å, c=2.56950 Å, γ=120°），与当前值一致；SI Fig. S28(i) 亦记载 ScH10 在 Cmcm 相、300 GPa 下的声子色散，说明该压力下 ScH10 的物相归属需注意：表S1给出的是 P63/mmc 结构参数，而 Fig. S28(i) 标注为 Cmcm 相。两者虽同为 ScH10、300 GPa，但空间群符号不同，存在原文内部不一致。当前值 P63/mmc 有 Table S1 直接支持，但 Fig. S28(i) 的 Cmcm 标注构成反证，无法唯一裁决。",
+  "source_pages": [30, 21],
+  "limitation": "初版隔离脚本未分轮输出，原完整文件被下一次调用覆盖；保留此实际输出摘录，不宣称完整原生响应仍在。脚本现按时间戳分轮留证。"
+}

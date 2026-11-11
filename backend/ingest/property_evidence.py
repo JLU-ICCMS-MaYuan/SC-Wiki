@@ -1292,9 +1292,40 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
         _ensure_not_cancelled(task_id)
         return False
     initial = rebuild(draft)
+    from . import human_questions as questions
+    from .upload_tasks import get_state
+    question_state = get_state(task_id) or {}
+    use_questions = questions.enabled(question_state) or bool(question_state.get('human_questions'))
+    if question_state.get('human_questions'):
+        questions.invalidate_changed_targets(task_id, initial['records'])
+        question_state = get_state(task_id) or question_state
+    waiting = questions.waiting_item_keys(question_state) if use_questions else set()
+    contexts = questions.answer_context(question_state, initial['records']) if use_questions else {}
     with SessionLocal() as session:
         protected = human_protected_keys(session, initial)
         previous = cached_results(session, initial)
+    for row in initial['records']:
+        if row['key'] in contexts or previous.get(row['key'], {}).get('human_question_id'):
+            previous.pop(row['key'], None)
+    def human_context(snapshot, batch):
+        from . import manual_evidence
+        with SessionLocal() as session:
+            materials = manual_evidence.review_context(session, {**snapshot, 'records': batch})
+        for key, value in contexts.items():
+            if key not in {r['key'] for r in batch}:
+                continue
+            entry = materials.setdefault(key, {})
+            for kind in ('items', 'decisions', 'images', 'pdf_refs'):
+                entry[kind] = [*(entry.get(kind) or []), *(value.get(kind) or [])]
+        return materials
+    def report_question(route, **kwargs):
+        from .human_question_routing import dependent_records
+        dependencies = dependent_records(initial['records'], route['target_refs'])
+        route['dependency_refs'] = [{k:r.get(k) for k in ('item_key', 'field', 'state_key', 'content_hash', 'source_hash')}
+                                    for r in dependencies]
+        question = questions.report_question(task_id, route, draft=draft, **kwargs)
+        waiting.update(r['item_key'] for r in dependencies)
+        return {**question, 'dependent_item_keys': [r['item_key'] for r in dependencies]}
     def save(snapshot, results, report):
         cancelled()
         _atomic_write_json(artifact_directory(task_id) / 'model_review.json', report)
@@ -1313,10 +1344,26 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
     filled, snapshot, results, report = review_draft(draft, rebuild,
         model_name=get_llm_config().model, cancelled=cancelled, skip_auto_fill=skip_auto_fill or (),
         protected_keys=protected, save=save, on_progress=on_progress, on_preview=published,
-        initial_results=previous, preserve_paper=field_scope == 'states', state_keys=state_keys)
+        initial_results=previous, preserve_paper=field_scope == 'states', state_keys=state_keys,
+        **({'on_human_question': report_question,
+            'human_context_builder': human_context, 'waiting_keys': waiting} if use_questions else {}))
     draft.clear(); draft.update(filled)
     draft['model_review_report'] = report
+    if use_questions:
+        processed = {r['item_key'] for r in snapshot['records'] if r['key'] in contexts
+                     and r['key'] in results and not results[r['key']].get('review_error')
+                     and not results[r['key']].get('human_question_id')}
+        with SessionLocal.begin() as session:
+            questions.persist_directions(session, question_state, snapshot, processed, model_read=True)
+        refreshed = rebuild(draft)
+        from .model_review import bind_result
+        for row in refreshed['records']:
+            if row['item_key'] in processed and row['key'] in results:
+                results[row['key']] = bind_result(row, results[row['key']], refreshed['chunks'])
+        snapshot = refreshed
     save(snapshot, results, report)
+    if use_questions and processed:
+        questions.mark_processed(task_id, processed)
     return {key: {**result, 'field': next(r['field'] for r in snapshot['records'] if r['key'] == key)}
             for key, result in results.items()}
 

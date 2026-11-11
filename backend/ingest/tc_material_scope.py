@@ -2,10 +2,10 @@
 from copy import deepcopy
 import json
 
-VERSION = 'specific-tc-materials-v1'
+VERSION = 'current-paper-structures-v2'
 PROMPT = '''Also inventory ALL current-paper materials with reported Tc in tc_materials. This is a
 BACKEND AUDIT list, NOT the scientific form. Include BOTH retained AND excluded materials; never omit
-a material from tc_materials because it will be excluded from the form. In a shared statement listing
+a material from tc_materials because its Tc cannot become a numeric form record. In a shared statement listing
 several materials with a common Tc bound/range, create one audit entry for EACH named material.
 For each material
 give its chemical formula (or exact reported name), has_specific_tc, has_range_tc, source_ids and reason.
@@ -18,11 +18,18 @@ has_range_tc is true ONLY for an explicitly reported NUMERICAL Tc interval or in
 current-paper text. A Tc figure/caption WITHOUT readable reported numbers is NOT a numerical range:
 set BOTH flags false and retain the material. Do not infer a Tc range from a plot, a pressure/stability
 interval, a general high-Tc statement or another paper's results. Missing Tc is not range-only Tc.
-Read all body and SI windows. A material is excluded from specialized extraction and the form ONLY
-when the whole paper/SI reports range/bounds Tc and NO specific Tc for that material. If any window
-reports a specific Tc, preserve that material. Do not exclude materials merely because Tc is absent.
+Read all body and SI windows. A range-only Tc must not become a numeric Tc record. Preserve all
+current-paper structures independently of whether a concrete Tc was reported. If any window reports
+a specific Tc, preserve that point. Do not exclude materials merely because Tc is absent.
 Keep different materials distinct. Other papers' Tc does not qualify. Preserve source-backed reasons;
 empty tc_materials means this window has no such reported Tc, not that all materials are excluded.'''
+PROMPT += '''
+Current collection policy separates Tc values from structures: preserve EVERY crystal geometry
+actually studied in the current paper/body/SI, including materials with no Tc or only a Tc bound.
+Range-only Tc is not a numeric Tc point. Preserve its original expression and sources in this audit.
+Do not collect structures merely cited from other works; introduction location alone does not decide
+this relationship, because it may also describe this paper's own contributions.
+'''
 
 
 def material_key(value):
@@ -69,19 +76,39 @@ def collect_scope(reports, sources):
         deepcopy(m) for m in values if m['has_range_tc'] and not m['has_specific_tc']])
 
 
-def is_excluded(material, scope):
+def is_excluded(material, scope, *, purpose='tc'):
+    if purpose == 'structure' and (scope or {}).get('rule_version') == VERSION:
+        return False
     key = material_key(material)
     return bool(key) and any(key == material_key(item.get('material'))
         for item in (scope or {}).get('excluded_materials', []))
 
 
-def assert_allowed(states, scope):
+def assert_allowed(states, scope, *, purpose='form'):
     for state in states:
+        if state.get('scope') == 'referenced_work':
+            continue
+        if (scope or {}).get('rule_version') == VERSION:
+            if purpose == 'structure' or not is_excluded(state.get('material'), scope):
+                continue
+            records = [*(state.get('tc_results') or []), *[r for m in state.get('property_modules') or []
+                for r in m.get('records') or [] if r.get('record_type') in {'predicted_tc', 'measured_tc'}]]
+            if not any(any(r.get(k) is not None and r.get(k) != '' for k in
+                ('value_number', 'value_min', 'value_max', 'value_raw', 'value_text')) for r in records):
+                continue
         if is_excluded(state.get('material'), scope):
-            raise ValueError('已按整篇原文排除的仅范围Tc材料不能重新进入表单：' + state['material'])
+            message = ('仅范围Tc不得补造具体Tc；本文结构仍应保留：' if (scope or {}).get('rule_version') == VERSION
+                       else '已按整篇原文排除的仅范围Tc材料不能重新进入表单：')
+            raise ValueError(message + state['material'])
 
 
 def scope_prompt(scope):
+    if (scope or {}).get('rule_version') == VERSION:
+        return ('\nCURRENT-PAPER STRUCTURE POLICY v2: retain all structures actually studied in this '
+            'body/SI regardless of absent/range-only Tc. Do not import reference-only structures. '
+            'Range-only materials cannot acquire invented Tc points; preserve original bounds and sources. '
+            'A calibrated material/condition-specific graph point remains a specific approximate Tc.\n' +
+            json.dumps((scope or {}).get('excluded_materials') or [], ensure_ascii=False))
     excluded = (scope or {}).get('excluded_materials') or []
     if not excluded:
         return ''

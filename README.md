@@ -19,6 +19,8 @@ Embedding 与聊天模型独立配置。百炼 `text-embedding-v4` 的接入参�
 
 ## macOS 原生本地开发（#117）
 
+新上传默认开启解析人工科学问题窗口，位于“解析动态”内。代码/配置开关为 `UPLOAD_HUMAN_QUESTIONS_ENABLED`，仅新任务记录该策略；旧无策略任务不自动升级，已有题目关闭后仍可读答。问题可追加，不答只暂挂相关字段；回答不代表科学审核通过。当前实现及独立验证、真实文献待验边界见 [#239](docs/specs/239-field-human-question-queue/validation.md)、[#240](docs/specs/240-human-question-default-integration/validation.md)。
+
 上传表单并发数由本机 `.env` 的 `UPLOAD_LLM_CONCURRENCY` 决定；本机当前配置为 `10`。本地启动脚本继承该配置，上传 Worker 重启后生效。排队中的活动记录数量与同时解析数量分别统计，详见[部署与运行时](docs/overview/02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md)。
 
 上传解析详情的五步条下显示请求与错误动态，支持“停止并保留进度／继续解析”；同一模型请求每轮最多尝试5次（含首次），连续5次临时失败后自动暂停，保留最后错误、请求ID、草稿与检查点，手动继续重新计数；明确额度耗尽、鉴权及参数错误立即停止。暂停记录保留到主动清理。依赖清单已包含 `langmem==0.0.30`，安装到项目 `sc-wiki` 环境，用于旧过程摘要；当前科学依据独立保留。传输重试不代表科学核对通过，详见 [#224](docs/specs/224-resumable-model-requests/spec.md)。

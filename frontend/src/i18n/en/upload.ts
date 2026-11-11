@@ -2,6 +2,20 @@
 // 推导，缺键或多键会在 `tsc -b` 阶段报错。处理阶段/任务状态/文件角色/晶胞表示等
 // 枚举标签与后端 value 对齐，仅展示文案随语言变化。
 export default {
+  humanQuestionTitle: 'Scientific decision needed',
+  humanQuestionHelp: 'Only related fields wait; other work continues. No click means no answer. An answer does not approve a field.',
+  humanQuestionManual: 'Enter a direction',
+  humanQuestionLater: 'Handle later',
+  humanQuestionDirection: 'Direction or target value',
+  humanQuestionRetained: 'Retained answer input (copyable)',
+  humanQuestionReason: 'Reason and evidence',
+  humanQuestionSend: 'Submit this answer',
+  humanQuestionRefresh: 'Reload questions',
+  humanQuestionAccepted: 'Direction saved; related processing pending:',
+  humanQuestionStale: 'Question or target version changed. Your input is retained; reload and check it.',
+  humanQuestionResumeError: 'Answer saved, but resumption could not be queued. Use Continue parsing.',
+  humanQuestionState: { waiting: 'Waiting for an answer', investigating: 'Further investigation pending',
+    answer_received: 'Answer saved', resuming: 'Processing related fields', resolved: 'Processed; review is separate', stale: 'Target changed' },
   modelActivityTitle: 'Parsing activity',
   stopAndKeep: 'Stop and keep progress',
   continueParsing: 'Continue parsing',

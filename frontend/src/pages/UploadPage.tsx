@@ -114,7 +114,10 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
         const state = unwrapData(response)
         setTaskState(state)
         setError('')
-        if (['processing', 'pausing'].includes(state.processing_status)) timer = window.setTimeout(poll, 2000)
+        if (['processing', 'pausing'].includes(state.processing_status) ||
+            (state.human_questions_summary?.pending_count || 0) > 0) {
+          timer = window.setTimeout(poll, state.status === 'paused' ? 5000 : 2000)
+        }
       } catch (reason: any) {
         if (stopped || reason.name === 'AbortError') return
         if (reason.code === 'UPLOAD_TASK_SUBMITTED' && Number.isSafeInteger(reason.submittedPaperId) && reason.submittedPaperId > 0) {
@@ -490,7 +493,7 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                     </Alert>
                   )}
                   {activeTaskId && taskState?.status !== 'needs_role_review' &&
-                    <UploadParsingDetail key={`${activeTaskId}:${taskPollTick}`} taskId={activeTaskId} onSubmitted={handleTaskSubmitted} onPhaseChange={setProcessingPhase} />}
+                    <UploadParsingDetail key={activeTaskId} taskId={activeTaskId} refreshRevision={taskPollTick} onSubmitted={handleTaskSubmitted} onPhaseChange={setProcessingPhase} />}
                 </MaterialOutlineLayout>
                 </CardContent>
                 </MaterialStateControlsContext.Provider>

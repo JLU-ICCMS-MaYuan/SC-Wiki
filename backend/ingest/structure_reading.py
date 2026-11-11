@@ -39,7 +39,7 @@ structure is reported in the fully read file; if coverage or interpretation rema
 it in uncertainties instead of pretending absence. Give short source-backed reasons, no deliberation.'''
 
 
-def _schema(source_ids):
+def _schema(source_ids, *, research_scope=False):
     text = {'type': 'string'}
     refs = array({'$ref': '#/$defs/SourceId'})
     result = obj({'structures': array(obj({
@@ -57,6 +57,10 @@ def _schema(source_ids):
         'source_ids': refs, 'uncertainties': array(text), 'reason': text,
     })), 'uncertainties': array(text), 'reason': text})
     result['$defs'] = {'SourceId': {'type': 'string', 'enum': list(source_ids)}}
+    if research_scope:
+        structure = result['properties']['structures']['items']
+        structure['properties']['source_scope'] = {'type': 'string', 'enum': ['current_paper', 'referenced_work', 'uncertain']}
+        structure['required'].append('source_scope')
     return result
 
 
@@ -390,6 +394,18 @@ def _apply_structure_scope(updates, scope, catalog):
     kept, excluded = {}, []
     normalize = lambda text: unicodedata.normalize('NFKC', str(text)).casefold()
     for key, item in updates.items():
+        from .tc_material_scope import VERSION as SCOPE_VERSION
+        if (scope or {}).get('rule_version') == SCOPE_VERSION:
+            if item.get('source_scope') == 'referenced_work':
+                refs = item.get('source_ids') or []
+                if not refs or any(ref not in catalog for ref in refs) or not str(item.get('reason') or '').strip():
+                    raise ValueError('仅引用结构缺少已读原文关系依据，未据此丢弃候选')
+                excluded.append({'reading_id': key, 'structure': deepcopy(item),
+                    'sources': [deepcopy(catalog[ref]) for ref in refs],
+                    'scope_decision': {'relationship': 'referenced_work', 'reason': item['reason']}})
+            else:
+                kept[key] = item
+            continue
         decision = decisions.get(material_key(item.get('material')))
         if decision is None:
             kept[key] = item
@@ -409,7 +425,8 @@ def _apply_structure_scope(updates, scope, catalog):
 
 
 def extract_structure_candidates(markdown, *, source, material_state_ref=None, pdf_path=None,
-                                 model=None, on_event=None, cancelled=lambda: False, material_scope=None):
+                                 model=None, on_event=None, cancelled=lambda: False, material_scope=None,
+                                 on_human_question=None, human_directions=None):
     if pdf_path is None:
         from .structure_extractor import extract_structure_candidates as legacy
         return legacy(markdown, source=source, material_state_ref=material_state_ref)
@@ -431,7 +448,9 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
         raise ValueError('当前PDF没有可验证结构文字，需保留未读疑点')
     tools = DocumentTools({source['file_id']: ir}, cancelled=cancelled)
     manifest = [{**source, 'kind': 'pdf'}]
-    schema = _schema(catalog)
+    from .tc_material_scope import VERSION as SCOPE_VERSION
+    research_scope = (material_scope or {}).get('rule_version') == SCOPE_VERSION
+    schema = _schema(catalog, research_scope=research_scope)
     definitions = tool_definitions(tools.documents, manifest)
     definitions, restore_arguments = structure_tool_transport(definitions, catalog)
     from .image_reading import ImageReadingTools, ACTIONS as IMAGE_ACTIONS
@@ -463,6 +482,10 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
             request['structure_repairs'] = [{'reading_id': key, 'structure': deepcopy(row['structure'])}
                 for key, row in structure_rows.items() if row['status'] != 'valid']
             request['reused_reading_ids'] = [key for key, row in structure_rows.items() if row['status'] == 'valid']
+            directions = {key: value for key, value in (human_directions or {}).items()
+                          if key in structure_rows and structure_rows[key]['status'] != 'valid'}
+            if directions:
+                request['human_provided_directions'] = directions
             active_definitions = [d for d in definitions if d['function']['name'] != 'report_structures']
             active_definitions.append({'type': 'function', 'function': {'name': 'repair_structures',
                 'description': '仅返回structure_repairs中需要修订的项；成功项由宿主原样复用，禁止重写。',
@@ -479,6 +502,8 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
         try:
             from .tc_material_scope import scope_prompt
             instruction = PROMPT
+            if research_scope:
+                instruction += '\nFor every structure return source_scope: current_paper for this paper\'s actual studied geometry, referenced_work for reference-only geometry, uncertain for a genuinely unresolved relationship. Read body/SI before deciding; no Tc or range-only Tc never excludes a studied structure. Preserve both sides of real conflicts.'
             if structure_rows:
                 instruction = instruction.replace('Return report_structures when finished.',
                     'Initial discovery is complete. Use ONLY repair_structures for subsequent results. '
@@ -520,7 +545,7 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
                 if on_event:
                     on_event({'iteration': iteration, 'status': 'scope-excluded', 'exclusions': excluded,
                               'reason': '执行已确认全文范围；原候选及来源留档，不生成科学表单字段'})
-            assert_allowed(list(updates.values()), material_scope)
+            assert_allowed(list(updates.values()), material_scope, purpose='structure')
             reused = [key for key, row in structure_rows.items() if row['status'] == 'valid']
             checked = _reading_result({'structures': list(updates.values()),
                 'uncertainties': result['uncertainties'], 'reason': result['reason']}, catalog, read, imaged_pages, source)
@@ -528,6 +553,21 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
                 raise ValueError('结构修订校验没有保持一项一结果')
             coverage_candidates = checked[len(updates):]
             for (key, item), candidate in zip(updates.items(), checked[:len(updates)]):
+                if item.get('source_scope') == 'uncertain' and candidate.get('status') == 'valid':
+                    candidate.update(status='blocked', validation={**(candidate.get('validation') or {}),
+                        'code': 'subject_ambiguous', 'message': item['reason']}, human_question_route={
+                        'reason_code': 'subject_ambiguous', 'reason': item['reason'],
+                        'source_ids': item['source_ids'], 'checked_context': result['reason'], 'requires_human': True})
+                    candidate['human_question_route']['reading_id'] = key
+                    if on_human_question:
+                        from .human_question_routing import route_problem
+                        record = {'candidate_id': candidate['candidate_id'], 'reading_id': key,
+                            'content_hash': content_hash({k: v for k, v in item.items() if k not in {'reason', 'uncertainties'}}),
+                            'source_hash': source['sha256']}
+                        route = route_problem(record, candidate['human_question_route'], read)
+                        if route.get('kind') != 'human_required':
+                            raise ValueError(route.get('reason') or '结构关系缺少已读来源')
+                        on_human_question(route, recommendation='保留原结构与来源；请确认是否属于本文研究对象，并说明依据')
                 structure_rows[key] = {'structure': deepcopy(item), 'candidate': candidate, 'status': candidate['status']}
             candidates = [deepcopy(row['candidate']) for row in structure_rows.values()] + coverage_candidates
             issues = [{'reading_id': key, 'candidate_id':row['candidate']['candidate_id'],
@@ -538,6 +578,10 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
             issues.extend({'reading_id': None, 'candidate_id': c['candidate_id'], 'source': c.get('sources'),
                 'reason_code': 'incomplete_source_coverage', 'reason': (c.get('validation') or {}).get('message')}
                 for c in coverage_candidates)
+            if (issues and all(issue.get('reason_code') == 'subject_ambiguous' for issue in issues)
+                    and not any(key in (human_directions or {}) for key in updates)):
+                if on_event: on_event({'iteration': iteration, 'status': 'scientific-human-required', 'issues': issues})
+                return candidates
             if (name == 'repair_structures' or 'updates' in result) and on_event:
                 on_event({'iteration':iteration,'status':'structure-repair',
                     'updated_reading_ids':list(updates),'reused_reading_ids':reused})
@@ -561,8 +605,16 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
             for candidate in decoded:
                 if candidate.get('status') != 'valid': continue
                 scope = candidate.get('reported_structure') or {}
+                if research_scope:
+                    # 几何解码器没有本文/引用关系判断；只补已由本轮模型识别为本文对象的几何，
+                    # 不能绕过前面reference-only或归属待答决定重新收录。
+                    if not any(row['structure'].get('source_scope') == 'current_paper'
+                        and all(row['structure'].get(k) == scope.get(k) for k in
+                                ('material', 'pressure_value_gpa', 'space_group_symbol'))
+                        for row in structure_rows.values()):
+                        continue
                 from .tc_material_scope import is_excluded
-                if is_excluded(scope.get('material'), material_scope):
+                if is_excluded(scope.get('material'), material_scope, purpose='structure'):
                     continue
                 same = next((c for c in candidates if c.get('status') == 'valid'
                     and (c.get('validation') or {}).get('structure_hash') == candidate['validation']['structure_hash']

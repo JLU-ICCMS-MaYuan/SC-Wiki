@@ -17,6 +17,7 @@ def test_pdf_positions_table_reaches_content_reader_before_legacy_filter(tmp_pat
     def read(*args, **kwargs):
         called.append(kwargs);raise Observed()
     monkeypatch.setattr(llm,"complete_json",read)
+    monkeypatch.setattr(upload_jobs,"get_state",lambda _: {"status":"extracting"})
     monkeypatch.setattr(upload_jobs,"_ensure_not_cancelled",lambda _:{"status":"extracting"})
     monkeypatch.setattr(upload_jobs,"artifact_directory",lambda _:tmp_path/"artifacts")
     try:

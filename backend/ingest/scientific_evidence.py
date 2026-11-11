@@ -825,7 +825,8 @@ def persist_upload(session, task_id, state, draft):
     if saved is None:
         session.add(models.ScientificUploadDraft(**values))
     else:
-        saved.state, saved.draft = values['state'], draft
+        from .human_questions import merge_state
+        saved.state, saved.draft = merge_state(values['state'], saved.state), draft
     session.flush()
 
 
@@ -852,7 +853,8 @@ def persist_upload_state(task_id, state):
     with SessionLocal.begin() as session:
         saved = session.get(models.ScientificUploadDraft, task_id, with_for_update=True)
         if saved is not None:
-            saved.state = {**state, 'cleanup_at': None}
+            from .human_questions import merge_state
+            saved.state = {**merge_state(state, saved.state), 'cleanup_at': None}
 
 
 def restore_user_uploads(user_id):

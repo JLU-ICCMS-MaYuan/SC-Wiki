@@ -1,6 +1,6 @@
 # 实施计划：默认启用人工问题窗口并以最小改动接入新文献解析
 
-**Issue**：[240](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/240)；**日期**：2026-11-11；**规格**：[spec.md](spec.md)。本计划为技术草案，本轮只建档。
+**Issue**：[240](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/240)；**日期**：2026-11-11；**规格**：[spec.md](spec.md)。已按spec.md末尾本轮实施授权接线；具体已验证事实与未完成业务范围见validation.md。
 
 ## 摘要
 
@@ -59,3 +59,8 @@
 ## 复杂度说明
 
 只增加任务问题协议和必要的局部恢复，不引入另一个Agent编排器、数据库或全表状态框架；持久化首题、版本和精确依赖是防丢失/串字段所必需。所有设计是后续实现方案，本轮不触发运行环境变更。
+
+
+## 2026-11-12 实施补充
+
+同一次模型结果显式给出resolution，原生request_human_question与最终human_required共用同一窄路由；不按理由文字猜科学结论，不另调分类模型。问题仅目标及原review_dependencies闭包暂挂。队列SQL先提交，任务保存合并最新revision；未发送的逐题草稿按task/actor/question/prompt版本存于sessionStorage。答案先持久接受，再经原模型/RQ恢复；相关资料沿ScientificManualEvidence保存，无科学approve。材料检查点允许待答前组和完成后组共存。无关题追加不使旧题版本失效，见contracts。

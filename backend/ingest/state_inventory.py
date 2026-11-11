@@ -323,6 +323,9 @@ def collect_inventory_responses(batches):
 
 
 def _scope_effective_response(response,sources,material_scope):
+    from .tc_material_scope import VERSION as SCOPE_VERSION
+    if (material_scope or {}).get('rule_version') == SCOPE_VERSION:
+        return deepcopy(response), []  # 本文无Tc/仅范围Tc的结构状态不再被旧空卡拦截删除。
     # 原模型可能又从原文盘点出范围外、无候选归属的空卡；只执行已确认的排除，保留完整去向。
     # 任何已有候选/结果指向该卡都不能删除，最终apply_inventory的范围与守恒门仍负责拒绝。
     from .tc_material_scope import material_key

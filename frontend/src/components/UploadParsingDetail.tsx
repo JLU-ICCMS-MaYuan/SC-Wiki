@@ -55,11 +55,12 @@ interface ParsingDetail {
 
 interface Props {
   taskId: string
+  refreshRevision?: number
   onSubmitted?: (paperId: number) => void
   onPhaseChange?: (phase: string | undefined) => void
 }
 
-const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => undefined, onPhaseChange }) => {
+const UploadParsingDetail: React.FC<Props> = ({ taskId, refreshRevision, onSubmitted = () => undefined, onPhaseChange }) => {
   const { t, lang } = useLanguage()
   const [detail, setDetail] = useState<ParsingDetail | null>(null)
   const [error, setError] = useState('')
@@ -101,7 +102,7 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
     }
     void poll()
     return () => { stopped = true; if (timer) window.clearTimeout(timer) }
-  }, [taskId, reload, onPhaseChange])
+  }, [taskId, reload, refreshRevision, onPhaseChange])
 
   const runAction = async (path: 'retry' | 'manual') => {
     setActionPending(true)

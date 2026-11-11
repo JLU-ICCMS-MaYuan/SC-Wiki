@@ -29,6 +29,7 @@ FILE_SUFFIXES = {".pdf", ".txt", ".md", ".cif", ".poscar", ".vasp"}
 PUBLIC_TASK_FIELDS = {"task_id", "status", "stage", "progress", "processing_status", "processing_error", "error_code", "created_at", "updated_at", "cleanup_at", "filename", "file_kind", "files", "revision", "state_schema_version", "duplicate", "existing_paper_id", "existing_paper_status", "allowed_actions", "duplicate_reason", "paper_id", "llm_provider", "consistency", "completed_chunks", "total_chunks", "stage_index", "stage_total", "parser_profile", "parser_runs", "reading_state", "role_assessment", "extraction_timing", "extraction_token_usage"}
 PUBLIC_TASK_FIELDS |= {"workflow_policy", "workflow_assessment", "_parsing_workflow"}
 PUBLIC_TASK_FIELDS |= {"model_activity", "execution_heartbeat", "execution_resumable"}
+PUBLIC_TASK_FIELDS |= {'pause_reason', 'human_questions_summary'}
 PUBLIC_FILE_FIELDS = {"file_id", "role", "declared_role", "original_filename", "media_type", "kind", "size", "sha256", "sort_order", "upload_status", "extraction_status", "error"}
 
 
@@ -155,6 +156,10 @@ def validate_manifest(files: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
 def public_task_state(state: dict[str, Any]) -> dict[str, Any]:
     public = {key: state[key] for key in PUBLIC_TASK_FIELDS if key in state}
     public["files"] = [{key: item[key] for key in PUBLIC_FILE_FIELDS if key in item} for item in state.get("files") or [] if isinstance(item, dict)]
+    if state.get('human_questions_policy') or state.get('human_questions'):
+        from .human_questions import public_queue
+        summary = public_queue(state)
+        public['human_questions_summary'] = {k:v for k,v in summary.items() if k != 'questions'}
     return public
 
 def compare_file_identities(identities: list[dict[str, Any]]) -> dict[str, Any]:

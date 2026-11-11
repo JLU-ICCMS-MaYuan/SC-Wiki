@@ -46,10 +46,11 @@ def _report(groups, status):
 
 
 def process_material_groups(draft, sources, model, *, review, prepare, save, checkpoint,
-                            identity, cancelled=lambda: None, on_progress=lambda _: None):
+                            identity, cancelled=lambda: None, on_progress=lambda _: None,
+                            question_state=None, on_waiting=None, input_states=None):
     """每组完成后才调用下一组；回调沿正式来源、核对和事务保存，不另设科学通过规则。"""
     checkpoint = Path(checkpoint)
-    original = deepcopy(draft['material_states'])
+    original = deepcopy(draft['material_states'] if input_states is None else input_states)
     keys = [s['state_key'] for s in original]
     if len(set(keys)) != len(keys):
         raise ValueError('材料状态身份重复')
@@ -77,28 +78,37 @@ def process_material_groups(draft, sources, model, *, review, prepare, save, che
     if groups:
         on_progress({'index': len(groups), 'total': total, 'state_count': len(groups[-1]['state_keys']),
                      'completed_states': sum(len(g['state_keys']) for g in groups), 'action': 'completed'})
-    for index in range(len(groups), total):
+    for index in range(total):
         cancelled()
         offset = index * BATCH_SIZE
         state_keys = keys[offset:offset+BATCH_SIZE]
+        entry = groups[index] if index < len(groups) else None
+        if entry:
+            from .human_questions import question_pending, ready_answers
+            pending_questions = question_pending(question_state() if question_state else {}, entry.get('question_ids') or [])
+            if not pending_questions:
+                continue
+            if not ready_answers({'human_questions': {'questions': pending_questions}}):
+                continue
         def progress(action):
             on_progress({'index': index + 1, 'total': total, 'state_count': len(state_keys),
                          'completed_states': offset, 'action': action})
-        progress('filling')
-        values, filling = fill_scientific_forms(original[offset:offset+BATCH_SIZE], sources, model,
-            _state_offset=offset, cancelled=cancelled,
-            on_attempt=lambda value: _write(checkpoint.parent/'material-groups'/f'{index:04d}-filling.json', value))
-        if filling['status'] not in {'completed', 'not_needed'}:
-            reasons = '; '.join(i.get('message', '') for i in filling.get('issues') or [])
-            raise MaterialBatchIncomplete(f'第{index+1}/{total}组填写未完成：{reasons}')
-        if [s.get('state_key') for s in values] != state_keys:
-            raise ValueError('材料填写改变了状态身份或数量')
-        draft['material_states'][offset:offset+len(state_keys)] = values
-        claims = prepare(draft, offset, len(state_keys))
-        prepared = deepcopy(draft['material_states'][offset:offset+len(state_keys)])
-        entry = {'offset': offset, 'state_keys': state_keys, 'filling_report': report_summary(filling),
-                 'filled_states': prepared, 'claims': [c.model_dump(mode='json') for c in claims]}
-        draft['form_filling_report'] = _report([*groups, entry], 'in_progress')
+        if entry is None:
+            progress('filling')
+            values, filling = fill_scientific_forms(original[offset:offset+BATCH_SIZE], sources, model,
+                _state_offset=offset, cancelled=cancelled,
+                on_attempt=lambda value: _write(checkpoint.parent/'material-groups'/f'{index:04d}-filling.json', value))
+            if filling['status'] not in {'completed', 'not_needed'}:
+                reasons = '; '.join(i.get('message', '') for i in filling.get('issues') or [])
+                raise MaterialBatchIncomplete(f'第{index+1}/{total}组填写未完成：{reasons}')
+            if [s.get('state_key') for s in values] != state_keys:
+                raise ValueError('材料填写改变了状态身份或数量')
+            draft['material_states'][offset:offset+len(state_keys)] = values
+            claims = prepare(draft, offset, len(state_keys))
+            prepared = deepcopy(draft['material_states'][offset:offset+len(state_keys)])
+            entry = {'offset': offset, 'state_keys': state_keys, 'filling_report': report_summary(filling),
+                     'filled_states': prepared, 'claims': [c.model_dump(mode='json') for c in claims]}
+            draft['form_filling_report'] = _report([*groups, entry], 'in_progress')
         paper, other = deepcopy(draft['paper']), deepcopy(draft['material_states'])
         cancelled(); progress('reviewing')
         results = review(draft, state_keys) or {}
@@ -114,14 +124,25 @@ def process_material_groups(draft, sources, model, *, review, prepare, save, che
         save(draft)
         if errors:
             raise MaterialBatchIncomplete(f'第{index+1}/{total}组核对未完成：' + '; '.join(errors))
-        entry.update(review_results=deepcopy(results), review_report=deepcopy(draft.get('model_review_report') or {}))
-        groups.append(entry)
-        filled_states[offset:offset+len(state_keys)] = prepared
+        combined = {**entry.get('review_results', {}), **deepcopy(results)}
+        entry.update(review_results=combined, review_report=deepcopy(draft.get('model_review_report') or {}),
+                     question_ids=list(dict.fromkeys([*(entry.get('question_ids') or []),
+                        *(r['human_question_id'] for r in results.values() if r.get('human_question_id'))])))
+        if index < len(groups): groups[index] = entry
+        else: groups.append(entry)
+        filled_states[offset:offset+len(state_keys)] = deepcopy(entry['filled_states'])
         cancelled()
         _write(checkpoint, {'version': VERSION, 'source_identity': source_identity,
                             'completed_groups': groups, 'draft': draft})
         on_progress({'index': index+1, 'total': total, 'state_count': len(state_keys),
                      'completed_states': offset+len(state_keys), 'action': 'completed'})
+    if question_state:
+        from .human_questions import question_pending
+        waiting = question_pending(question_state(), [qid for g in groups for qid in g.get('question_ids') or []])
+        if waiting:
+            if on_waiting:
+                on_waiting()
+            return {'waiting_human': True, 'question_ids': [q['question_id'] for q in waiting]}
     report = _report(groups, 'completed')
     validate_filling_coverage(original, filled_states, report)
     draft['form_filling_report'] = report

@@ -4,6 +4,20 @@
 // PROCESSING_STAGES（处理阶段）与 UploadTaskStatus（任务状态）的显示标签，
 // 键与后端 value 对齐；`role` 是上传文件角色，`cell` 是晶胞表示。
 export default {
+  humanQuestionTitle: '需要你的科学判断',
+  humanQuestionHelp: '只暂挂相关字段，其他内容继续处理。不点击不会采用推荐；回答不代表审核通过。',
+  humanQuestionManual: '人工填写',
+  humanQuestionLater: '暂不处理',
+  humanQuestionDirection: '处理方向或目标值',
+  humanQuestionRetained: '已保留的回答输入（可复制）',
+  humanQuestionReason: '理由与依据',
+  humanQuestionSend: '提交此问题的回答',
+  humanQuestionRefresh: '重新读取问题',
+  humanQuestionAccepted: '已保存人工方向，等待相关字段处理：',
+  humanQuestionStale: '问题或目标版本已变化，输入已保留；请重新读取后核对。',
+  humanQuestionResumeError: '回答已保存，续跑尚未排队；请使用继续解析恢复。',
+  humanQuestionState: { waiting: '等待回答', investigating: '等待进一步查证', answer_received: '回答已保存',
+    resuming: '正在处理相关字段', resolved: '已处理，审核仍独立', stale: '目标已变化' },
   modelActivityTitle: '解析动态',
   stopAndKeep: '停止并保留进度',
   continueParsing: '继续解析',

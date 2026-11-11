@@ -183,7 +183,8 @@ def _add_conditions(draft, additions, batch):
 
 def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip_auto_fill=(),
                  protected_keys=(), save=None, on_progress=None, on_preview=None, max_passes=3,
-                 initial_results=None, on_response=None, preserve_paper=False, state_keys=None):
+                 initial_results=None, on_response=None, preserve_paper=False, state_keys=None,
+                 on_human_question=None, human_context_builder=None, waiting_keys=()):
     """新增或真实依赖变化才进入下一轮，已完成项直接复用。"""
     from .property_evidence import record_batches
     from .field_review import changed_keys, reusable
@@ -214,12 +215,17 @@ def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip
     protected = set(protected_keys) | changed_keys(snapshot)
     report = {'contract': CONTRACT, 'passes': [], 'errors': errors}
     for turn in range(max_passes):
-        pending = [r for r in snapshot['records'] if _reviewable(r) and not reusable(r, results.get(r['key']))]
+        pending = [r for r in snapshot['records'] if _reviewable(r) and r['item_key'] not in waiting_keys
+                   and not results.get(r['key'], {}).get('human_question_id')
+                   and not reusable(r, results.get(r['key']))]
         if not pending:
             break
         batches = record_batches(pending)
         report['passes'].append({'pass': turn + 1, 'fields': len(pending), 'batches': len(batches)})
         for index, batch in enumerate(batches):
+            batch = [r for r in batch if r['item_key'] not in waiting_keys]
+            if not batch:
+                continue
             if cancelled():
                 raise InterruptedError('模型核对已取消')
             additions = []
@@ -230,7 +236,9 @@ def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip
                     row['organization_context'] = context
             reviewed = review_fields(batch, snapshot['chunks'], model_name=model_name, cancelled=cancelled,
                 manifest=snapshot.get('pdf_manifest') or [], allow_condition_additions=allow_additions, additions=additions,
-                on_response=on_response, source_policy='referenced' if state_keys is not None else 'initial')
+                on_response=on_response, source_policy='referenced' if state_keys is not None else 'initial',
+                **({'on_human_question': on_human_question} if on_human_question else {}),
+                **({'human_context': human_context_builder(snapshot, batch)} if human_context_builder else {}))
             batch_count += 1
             for row in batch:
                 result = reviewed[row['key']]
@@ -265,7 +273,9 @@ def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip
         row = final.get(key)
         if row is None:
             continue
-        if result.get('review_error'):
+        if result.get('human_question_id'):
+            output[key] = bind_result(row, deepcopy(result), snapshot['chunks'])
+        elif result.get('review_error'):
             # 未完成本就不可复用；保留实际技术错误，不能一律改写为依赖变化。
             output[key] = bind_result(row, {**deepcopy(result), 'status': 'unchecked',
                 'proposal': None, 'human_confirmed': False,
@@ -340,7 +350,7 @@ def _read_original_page(arguments, manifest, tools, *, retry=False):
 def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_partial=None,
                   model_name='', manifest=(), allow_condition_additions=False, additions=None,
                   max_rounds=13, on_completed=None, human_context=None, on_response=None,
-                  review_started_at=None, on_activity=None, source_policy='initial'):
+                  review_started_at=None, on_activity=None, source_policy='initial', on_human_question=None):
     """单一有界工具循环；部分结果立即保留，错误引用交回模型定位。"""
     from .field_document_followup import tools_for_chunks
     from .document_agent import AgentStopped
@@ -443,9 +453,32 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
     from .scientific_evidence import BIBLIOGRAPHY_FIELDS
     definitions = tool_definitions(tools.documents, manifest, bibliography=any(
         r['field'].startswith('paper.') and r['field'].split('.')[-1] in BIBLIOGRAPHY_FIELDS for r in records))
+    if on_human_question:
+        from .human_questions import question_tool_definition
+        definitions.append(question_tool_definition())
     from .image_reading import ACTIONS as IMAGE_ACTIONS, manifest_tools
     image_tools = manifest_tools(tools.documents, manifest, cancelled=cancelled)
     allowed_tools = [item['function']['name'] for item in definitions]
+    def hold_for_human(row, fact, recommendation):
+        from .human_question_routing import route_problem
+        route = route_problem(row, {**fact, 'requires_human': True}, read)
+        if not route or route['kind'] != 'human_required' or not str(recommendation or '').strip():
+            raise ValueError('真实科学问题缺少双方已读依据、明确原因、查证关系或推荐方向')
+        tools.budget.consume('request_human_question')
+        question = on_human_question(route, recommendation=recommendation)
+        output[row['key']] = bind_result(row, {'status': 'unchecked', 'reason': fact['reason'],
+            'evidences': _evidences(fact['source_ids'], catalog, read), 'proposal': None,
+            'human_question_id': question['question_id'], 'human_confirmed': False,
+            'model': model_name, 'location_errors': [], 'review_started_at': started}, chunks)
+        del pending[row['key']]
+        for key, dependent in list(pending.items()):
+            if dependent['item_key'] in question.get('dependent_item_keys', []):
+                output[key] = bind_result(dependent, {'status': 'unchecked', 'evidences': [],
+                    'proposal': None, 'human_confirmed': False, 'human_question_id': question['question_id'],
+                    'reason': '实际依赖字段正在等待人工方向', 'model': model_name}, chunks)
+                del pending[key]
+        if on_completed: on_completed(row, output[row['key']])
+        return question
     for _ in range(max_rounds):
         if cancelled():
             raise InterruptedError('模型核对已取消')
@@ -473,7 +506,8 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
         try:
             summary_seen = False
             activity('model', '模型正在结合当前字段与已读依据核对')
-            answer = model(PROMPT, json.dumps(request, ensure_ascii=False, default=str), retries=0,
+            from .human_questions import QUESTION_PROMPT
+            answer = model(PROMPT + (QUESTION_PROMPT if on_human_question else ''), json.dumps(request, ensure_ascii=False, default=str), retries=0,
                            tool_definitions=definitions,
                            **({'tool_history': tool_history} if tool_history else {}),
                            **({'on_partial': streamed_public_summary} if on_partial or on_activity else {}),
@@ -499,6 +533,12 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                         continue
                     try:
                         status = raw.get('status')
+                        if on_human_question:
+                            if raw.get('resolution') not in {'resolved', 'not_reported', 'unresolved', 'human_required'}:
+                                raise ValueError('当前字段缺少resolution：请在同一次科学判断中明确是否仍有真实科学冲突需要人工，不另调分类模型')
+                            if raw['resolution'] == 'human_required':
+                                hold_for_human(row, raw, raw.get('recommendation'))
+                                continue
                         identity = (row.get('claim', {}).get('context') or {}).get('paper_identity') or {}
                         known_doi = identity.get('doi') or next((r.get('current_value') for r in records if r['field'] == 'paper.doi'), None)
                         if (row['field'] in {'paper.volume', 'paper.issue_number', 'paper.pages'} and known_doi
@@ -614,6 +654,23 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
             if name not in allowed_tools:
                 tools.budget.consume('invalid_tool')
                 raise ValueError('请仅使用给定只读文档工具')
+            if name == 'request_human_question':
+                from .human_questions import question_tool_definition
+                from backend.rag.structured_output import validate_output
+                validate_output(arguments, question_tool_definition()['function']['parameters'])
+                row = pending.get(arguments['key'])
+                if row is None:
+                    raise ValueError('人工问题目标不是当前待核对字段')
+                question = hold_for_human(row, arguments, arguments['recommendation'])
+                if not pending:
+                    break
+                observation = {'question_id': question['question_id'], 'state': 'waiting',
+                               'continue_keys': list(pending)}
+                if native_call:
+                    tool_history = [{'role': 'assistant', 'content': None, 'tool_calls': [native_call]},
+                        {'role': 'tool', 'tool_call_id': native_call['id'], 'content': json.dumps(observation)}]
+                error = None
+                continue
             labels = {'lookup_bibliography': '查询正式题录', 'read_original_page': '读取PDF原页图像',
                       'read_page': '读取文档页面文字', 'read_document': '读取当前文档',
                       'search_within_document': '检索当前文献', 'read_region': '读取原文区域',

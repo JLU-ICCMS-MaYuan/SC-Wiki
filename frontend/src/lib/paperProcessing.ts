@@ -261,6 +261,9 @@ export interface UploadTokenUsage {
 }
 
 export interface UploadTaskState {
+  pause_reason?: string | null
+  human_questions_summary?: { queue_revision: number; pending_count: number;
+    can_create_questions: boolean; can_answer_existing: boolean }
   extraction_token_usage?: UploadTokenUsage | null
   model_activity?: ModelActivity | null
   execution_resumable?: boolean

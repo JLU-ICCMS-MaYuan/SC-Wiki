@@ -111,3 +111,29 @@ def test_stop_after_saved_group_prevents_next_request_and_source_change_invalida
     events.clear()
     process_material_groups(deepcopy(original), changed, model_for(events), **options)
     assert len(events) == 3
+
+
+def test_waiting_first_group_does_not_block_other_groups_and_answer_only_rechecks_that_group(tmp_path):
+    original, sources = draft_for_groups(); events = []
+    queue = {'human_questions': {'questions': []}}
+    options = dict(save=lambda _: events.append(('save', [])), prepare=lambda *_: [],
+        checkpoint=tmp_path/'material-stage.json', identity={}, question_state=lambda: queue)
+    def review(current, keys):
+        events.append(('review', list(keys)))
+        if keys[0] == 's0':
+            if not queue['human_questions']['questions']:
+                queue['human_questions']['questions'].append({'question_id': 'q', 'state': 'waiting', 'answers': []})
+                return {'field': {'human_question_id': 'q', 'status': 'unchecked'}}
+            queue['human_questions']['questions'][0]['state'] = 'resolved'
+            return {'field': {'status': 'supported'}}
+        return {}
+    result = process_material_groups(deepcopy(original), sources, model_for(events), review=review, **options)
+    assert result['waiting_human']
+    assert len([e for e in events if e[0] == 'fill']) == 3
+    assert [e[1] for e in events if e[0] == 'review'] == [['s0', 's1'], ['s2', 's3'], ['s4']]
+    queue['human_questions']['questions'][0].update(state='answer_received', answers=[{'choice_id': 'recommended'}])
+    events.clear()
+    resumed = process_material_groups(deepcopy(original), sources, model_for(events), review=review, **options)
+    assert [e for e in events if e[0] == 'fill'] == []
+    assert [e[1] for e in events if e[0] == 'review'] == [['s0', 's1']]
+    assert resumed['filling_report']['status'] == 'completed'

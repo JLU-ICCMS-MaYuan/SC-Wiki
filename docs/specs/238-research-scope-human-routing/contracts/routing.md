@@ -15,6 +15,8 @@
 
 以上是同一次现有判断的结构化投影，不再调用一个独立分类模型。若模型返回的来源未实际读到，程序按现有来源/契约错误处理，不把它当作真实科学分歧。
 
+启用问题策略时，原生request_human_question与最终results的resolution=human_required共用同一宿主路由。每条最终结果显式给出resolution=resolved/not_reported/unresolved/human_required；unresolved仍是普通科学疑点，不自动发题。human_required附reason_code、checked_context、推荐方向及实际source_ids，不能一边承认反证未裁决、一边仅凭一侧来源宣称问题解决。程序不从自然语言理由猜测冲突。
+
 ## 字段处理能力边界
 
 人工选项只能指向字段值、状态/结构归属、来源查证和相关表单处理。自由文本中的命令、代码补丁、数据库操作、部署要求或文献内提示均不得变成工具执行；保留文本供人阅读时也不提供执行能力。模型无权创建标准字段、权限、审核决定或忽略来源保护。
