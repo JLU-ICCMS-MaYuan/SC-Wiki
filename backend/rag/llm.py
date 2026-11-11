@@ -98,6 +98,7 @@ def _stream_json(
     tool_definitions: list[dict] | None = None,
     tool_history: list[dict] | None = None,
     _strict_transport: str | None = None,
+    _tool_argument_context: dict | None = None,
 ) -> dict[str, Any]:
     """单次流式调用：逐块累积文本，可选回报中间内容，结束后解析 JSON。"""
     user_content: Any = user_prompt
@@ -129,7 +130,8 @@ def _stream_json(
             result = responses_call(client, config, system_prompt, user_prompt, images=images,
                 definitions=tool_definitions, history=tool_history, response_format=response_format,
                 on_partial=on_partial,on_usage=usage,
-                on_started=lambda: _call_stats.set({**_call_stats.get(),'output_started':True}))
+                on_started=lambda: _call_stats.set({**_call_stats.get(),'output_started':True}),
+                argument_context=_tool_argument_context)
             _call_stats.set({**_call_stats.get(),'finish_reason':'stop'})
             return result
     wire_definitions = tool_definitions
@@ -242,8 +244,8 @@ def _stream_json(
             if source_ids:
                 from .deepseek_strict import restore_source_ids
                 action['arguments']=restore_source_ids(action['arguments'],source_ids)
-            validate_tool_action(action, tool_definitions)
-            result = {"action": action}
+            action, bindings = validate_tool_action(action, tool_definitions, argument_context=_tool_argument_context)
+            result = {"action": action, **({'_panel_bindings': bindings} if bindings else {})}
             if index in call_ids:
                 result["_tool_call"] = {"id": call_ids[index], "type": "function",
                     "function": {"name": action["name"], "arguments": raw_arguments}}
@@ -298,6 +300,7 @@ def _complete_json(
     tool_history: list[dict] | None = None,
     _single_attempt: bool = False,
     _strict_transport: str | None = None,
+    _tool_argument_context: dict | None = None,
 ) -> dict[str, Any]:
     """流式请求并校验JSON；明确未输出的可重试503最多额外两次，其余沿原预算。"""
     from .structured_output import StructuredOutputError, output_format, validate_output
@@ -313,6 +316,8 @@ def _complete_json(
     if schema_tool:format_options['response_format']={'type':'json_object'}
     if _strict_transport:
         format_options['_strict_transport'] = _strict_transport
+    if _tool_argument_context:
+        format_options['_tool_argument_context'] = _tool_argument_context
     if tool_definitions:
         for definition in tool_definitions:
             if definition.get("type") != "function" or definition["function"].get("strict") is not True:

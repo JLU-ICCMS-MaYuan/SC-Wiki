@@ -1,0 +1,136 @@
+{
+  "scope": "真实失败回放，非新模型提取",
+  "action": {
+    "name": "digitize_image_elements",
+    "arguments": {
+      "region_id": "pdf-region-3a40a574605e5693d832ba4e2dad4fdd00d08c446d2cf1450e3fcd28a982d04b",
+      "panel": {
+        "axis": {
+          "bounds": [
+            344.6,
+            611.4
+          ],
+          "scale": "linear",
+          "ticks": [
+            {
+              "position": 344.6,
+              "value": 4
+            },
+            {
+              "position": 411.3,
+              "value": 3
+            },
+            {
+              "position": 478.0,
+              "value": 2
+            },
+            {
+              "position": 544.7,
+              "value": 1
+            },
+            {
+              "position": 611.4,
+              "value": 0
+            }
+          ]
+        },
+        "categories": [
+          "YH9"
+        ],
+        "colorbar": null,
+        "figure": "Fig. S14",
+        "kind": "line",
+        "layout": "sparse",
+        "points": [
+          {
+            "category": "YH9",
+            "conditions": [],
+            "label_text": null,
+            "label_value": null,
+            "material": "YH9",
+            "method_raw": null,
+            "mu_star": null,
+            "pixel_error": 3.0,
+            "pressure_value_gpa": null,
+            "reading": "position",
+            "reason": "Total DOS curve at Fermi level (dotted line at E-EF=0) for YH9 middle panel; value read from y-axis calibration.",
+            "series": "Total",
+            "space_group_symbol": null,
+            "x": 702.9,
+            "y": 478.0
+          }
+        ],
+        "quantity": "dos_fermi",
+        "quantity_name": "Electron DOS at Fermi level (total)",
+        "reason": "Middle panel of Fig. S14: total DOS at Fermi level for YH9.",
+        "series": [
+          "Total"
+        ],
+        "unit": "states/eV",
+        "unresolved": [],
+        "x_axis": {
+          "bounds": [
+            145.1,
+            943.0
+          ],
+          "scale": "linear",
+          "ticks": [
+            {
+              "position": 145.1,
+              "value": -20
+            },
+            {
+              "position": 344.6,
+              "value": -15
+            },
+            {
+              "position": 544.1,
+              "value": -10
+            },
+            {
+              "position": 743.6,
+              "value": -5
+            },
+            {
+              "position": 943.0,
+              "value": 10
+            }
+          ]
+        },
+        "x_quantity": "energy",
+        "x_unit": "eV"
+      }
+    }
+  },
+  "context": {
+    "version": "program-panel-id-v1",
+    "default_region_id": "pdf-region-3a40a574605e5693d832ba4e2dad4fdd00d08c446d2cf1450e3fcd28a982d04b",
+    "regions": {
+      "pdf-region-3a40a574605e5693d832ba4e2dad4fdd00d08c446d2cf1450e3fcd28a982d04b": {
+        "localization_resolution": 0.5120327700972862,
+        "band_candidates": [
+          {
+            "bbox": [
+              0.0,
+              76.549,
+              1000.0,
+              344.598
+            ],
+            "basis": "相邻长水平线的跨度一致；是否为独立面板仍须看图判断"
+          },
+          {
+            "bbox": [
+              0.0,
+              344.598,
+              1000.0,
+              611.367
+            ],
+            "basis": "相邻长水平线的跨度一致；是否为独立面板仍须看图判断"
+          }
+        ],
+        "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+        "pdf_page": 13
+      }
+    }
+  }
+}

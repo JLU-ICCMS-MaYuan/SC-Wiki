@@ -41,3 +41,8 @@ HTTP错误须同时满足status_code=503、上游output_started=false及retryabl
 
 
 2026-11-11实施补齐：deepseek_strict模块负责官方严格接口表示与可逆来源短ID，llm发送/beta原生工具、还原后校验规范Schema，model_memory按实际传输计预算，model_runtime对传输marker保持规范成功缓存身份。修订工具强制native并对旧失败缓存独立版本化；原完整报告和已验证成功记录复用。真实原分段重提、负探针、SSE/等价/预算/缓存回归见validation.md，完整黑盒另验。
+
+
+## 已确认面板身份实施方案
+
+图像反馈在当前region真实像素几何上构建服务器身份上下文；模型已给出观察且轴边界唯一匹配原图band时，以来源哈希、页、region和实际band几何产生稳定ID。只在请求边界规范化技术panel身份，原始标签与原生工具回执保持；规范工具参数仍通过原严格校验。上下文显式参与缓存身份，不发送为上游未知参数；原生Chat和Responses共用同一绑定器。不同精读region不串用。以真实SI Fig.S14漏键响应先检出，再测歧义、越权region、错误类型／额外字段、相邻观察与保存重读；真实原图另行新模型验收。

@@ -39,10 +39,13 @@ def validate_output(value, schema):
         raise StructuredOutputError(f"模型输出未遵守固定字段结构：{path}（{exc.validator}）") from exc
 
 
-def validate_tool_action(action, definitions):
+def validate_tool_action(action, definitions, *, argument_context=None):
     if not isinstance(action, dict) or set(action) != {"name", "arguments"}:
         raise StructuredOutputError("工具调用必须仅包含名称和参数")
     definition = next((item["function"] for item in definitions if item["function"]["name"] == action["name"]), None)
     if definition is None:
         raise StructuredOutputError("模型请求了当前不可用的工具")
+    from .panel_identity import bind
+    action, bindings = bind(action, argument_context)
     validate_output(action["arguments"], definition["parameters"])
+    return action, bindings

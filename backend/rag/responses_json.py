@@ -13,7 +13,7 @@ def protocol_for(config):
 
 
 def call(client, config, system, prompt, *, images, definitions, history, response_format,
-         on_partial, on_usage, on_started):
+         on_partial, on_usage, on_started, argument_context=None):
     from .structured_output import validate_tool_action, StructuredOutputError
     content = [{'type':'input_text','text':prompt}]
     content += [{'type':'input_image','image_url':url,'detail':'high'} for url in images or []]
@@ -60,8 +60,8 @@ def call(client, config, system, prompt, *, images, definitions, history, respon
         if len(actions)!=1:raise StructuredOutputError('只接受一个完整登记工具调用')
         call_id,action=next(iter(actions.items()));raw=action['arguments']
         action['arguments']=json.loads(raw)
-        validate_tool_action(action,definitions)
-        return {'action':action,'_tool_call':{'id':call_id,'type':'function',
+        action, bindings = validate_tool_action(action,definitions,argument_context=argument_context)
+        return {'action':action, **({'_panel_bindings':bindings} if bindings else {}),'_tool_call':{'id':call_id,'type':'function',
             'function':{'name':action['name'],'arguments':raw}}}
     from .llm import _extract_json
     result=_extract_json(''.join(output))

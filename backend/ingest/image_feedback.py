@@ -137,6 +137,15 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
     current_rendered = render_region_image(path, locator)
     payload['current_crop_geometry'] = geometry_observations(Image.open(io.BytesIO(current_rendered['png'])))
     payload['current_crop_geometry']['region_id'] = locator['region_id']
+    argument_context = {'version': 'program-panel-id-v1', 'default_region_id': locator['region_id'],
+        'regions': {locator['region_id']: {**payload['current_crop_geometry'],
+            'source_sha256': source['sha256'], 'pdf_page': request['pdf_page']}}}
+    identity_bindings = []
+    from backend.rag.panel_identity import remember as remember_panel_identity
+    remember_panel_identity(argument_context, payload.get('retained_panels', []), locator['region_id'])
+    def feedback_state(**extra):
+        return {**progress.state(), 'reuse': reuse_events,
+                'panel_identity_bindings': deepcopy(identity_bindings), **extra}
     answer = None
     previous_answer, verified, reuse_events, calibration_cache = None, set(), [], {}
     objects = visual_objects(ir)
@@ -156,7 +165,8 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
             payload['repair_inventory'] = [{'figure':p['figure'], 'panel':p['panel'], 'quantity':p['quantity'],
                 'verified_points':[{'category':a, 'series':b} for f,n,q,a,b in sorted(verified)
                                    if (f,n,q)==_chart_panel_key(p)]} for p in previous_answer['panels']]
-        options = {'images': images, 'tool_definitions': available}
+        options = {'images': images, 'tool_definitions': available,
+                   '_tool_argument_context': argument_context}
         if history: options['tool_history'] = history
         result = model(prompt + '\nUse the registered tools to inspect or repair a concrete issue. '
             'Keep the SAME task model. Report all target observations with report_chart_reading. '
@@ -180,6 +190,21 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
             'No unsupported zero values or extra scientific fields.',
             json.dumps(payload, ensure_ascii=False), **options)
         action = result.get('action') or {}
+        from backend.rag.panel_identity import bind as bind_panel_identity
+        if action:
+            action, bound = bind_panel_identity(action, argument_context)
+        else:
+            # 固定重放／既有直接报告调用也走同一服务器身份绑定，不伪造原生调用。
+            direct, bound = bind_panel_identity({'name': 'report_chart_reading', 'arguments': result}, argument_context)
+            result = direct['arguments']
+        for binding in [*(result.get('_panel_bindings') or []), *bound]:
+            if binding not in identity_bindings: identity_bindings.append(deepcopy(binding))
+        if action.get('name') in {'digitize_image_elements', 'verify_image_reading'}:
+            remember_panel_identity(argument_context, [action['arguments'].get('panel')],
+                                    action['arguments'].get('region_id'))
+        else:
+            remember_panel_identity(argument_context,
+                (action.get('arguments') or result).get('panels', []), locator['region_id'])
         native = result.get('_tool_call')
         name = action.get('name')
         if name in ACTIONS:
@@ -233,6 +258,9 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
             images = images[:2] + [url for url in actual_images if url not in images[:2]]
             payload['additional_image_regions'] = [new]
             payload['observation'] = receipt
+            argument_context['regions'][new['region_id']] = {
+                **receipt['geometry_observations'], 'source_sha256': source['sha256'],
+                'pdf_page': request['pdf_page']}
             on_event({'stage':'feedback','status':'completed','iteration':iteration,
                 'action':name,'arguments':action.get('arguments'), 'receipt':receipt,'progress':progress.state()})
             if native:
@@ -282,7 +310,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
         coverage_issues = _chart_repair_coverage(answer,payload.get('required_repair_panels',[]))
         issues.extend(coverage_issues)
         previous_answer = deepcopy(answer)
-        if not issues: return answer, current_crop, {**progress.state(), 'reuse':reuse_events}
+        if not issues: return answer, current_crop, feedback_state()
         declared_unread = {(u['category'],u['series'],u['reason'])
                            for p in answer['panels'] for u in p['unresolved']}
         def source_unread(issue):
@@ -295,7 +323,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
         if (inspected and any(source_unread(issue) for issue in issues)
                 and all(source_unread(issue) or (issue.get('scope') == 'target'
                         and not issue.get('reason_code')) for issue in issues)):
-            return answer, current_crop, {**progress.state(), 'reuse':reuse_events, 'source_unresolved':True}
+            return answer, current_crop, feedback_state(source_unresolved=True)
         fresh = progress.observe('program_verification', request['selected_regions'][0]['region_id'], issue_signature(issues))
         on_event({'stage':'feedback','status':'verification','iteration':iteration,
             'issues':issues,'progress':progress.state()})
@@ -307,7 +335,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
                 answer['panels'] = [panel for i,panel in enumerate(answer['panels']) if i not in invalid]
                 answer['notes'].extend({'scope':'target','reason':issue['category']+': '+issue['reason']}
                     for issue in issues if issue.get('reason_code')=='INVALID_PANEL_OBSERVATION')
-            return answer, current_crop, {**progress.state(), 'reuse':reuse_events}
+            return answer, current_crop, feedback_state()
         payload['verification_issues'] = issues
         from .image_geometry import geometry_observations
         payload['current_crop_geometry'] = geometry_observations(Image.open(io.BytesIO(rendered['png'])))
