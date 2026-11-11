@@ -584,3 +584,6 @@ LangMem 0.0.30滚动摘要直接接入现有LangChain/LangGraph。先去重，�
 
 
 读图v13补齐多列/窄列/有色闭合图框的技术身份；原生工具明确主值坐标，避免将频率坐标充作耦合常数。横轴标签局限当前面板或唯一共用轴，曲线点不能仅靠图框墨迹；原字段/来源/预算保持。旧有效块原样复用，局部新模型及尚未通过范围见[#234方向验证](../../specs/234-image-feedback-repair/horizontal-role-validation.md)。
+
+
+官方Flash图像反馈现使用同一视觉模型的Responses受限JSON动作；原生回执格式异常留证，本机按原注册表真实执行工具，不伪造provider原生ID。原Schema、来源和预算保留，动作Schema按真实发送内容计入预算，reasoning显式none。其他模型及普通JSON路径保持；实测与协议替代边界见[#233动作传输](../../specs/233-unified-image-tool/registered-json-actions.md)。

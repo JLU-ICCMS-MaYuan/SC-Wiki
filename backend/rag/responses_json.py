@@ -30,6 +30,8 @@ def call(client, config, system, prompt, *, images, definitions, history, respon
     if fmt.get('type') == 'json_schema':
         fmt = {'type':'json_schema', **fmt['json_schema']}
     options = {'model':config.model,'instructions':system,'input':inputs,'text':{'format':fmt}, 'stream':True}
+    if str(config.model).startswith('deepseek'):
+        options.update(reasoning={'effort':'none'},temperature=.1,max_output_tokens=65536)
     if definitions:
         options.update(tools=[{'type':'function',**d['function']} for d in definitions],parallel_tool_calls=False)
         if any(d['function']['name'].startswith('report_') for d in definitions):

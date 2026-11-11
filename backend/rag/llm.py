@@ -99,6 +99,7 @@ def _stream_json(
     tool_history: list[dict] | None = None,
     _strict_transport: str | None = None,
     _tool_argument_context: dict | None = None,
+    _json_action_transport: bool = False,
 ) -> dict[str, Any]:
     """单次流式调用：逐块累积文本，可选回报中间内容，结束后解析 JSON。"""
     user_content: Any = user_prompt
@@ -119,6 +120,26 @@ def _stream_json(
     if runtime:
         runtime.check()
         runtime.register_client(client)
+    if _json_action_transport:
+        from .registered_actions import action_schema,conversation,VERSION
+        from .structured_output import output_format,validate_tool_action,validate_output,StructuredOutputError
+        from .responses_json import call as responses_call
+        schema=action_schema(tool_definitions)
+        _call_stats.set({**_call_stats.get(),'api_protocol':'responses','tool_transport':VERSION})
+        with token_request() as receive_usage:
+            result=responses_call(client,config,system_prompt,user_prompt,images=images,definitions=None,
+                history=conversation(tool_history),response_format=output_format(schema),on_partial=on_partial,
+                on_usage=lambda value: (receive_usage(value),_call_stats.set({**_call_stats.get(),'usage':value})),
+                on_started=lambda:_call_stats.set({**_call_stats.get(),'output_started':True}))
+        if not isinstance(result,dict) or set(result)!={'action'}:
+            raise StructuredOutputError('受限JSON动作必须只有action，不接受伪造的工具结果或原生ID')
+        original=json.loads(json.dumps(result,ensure_ascii=False))
+        action,bindings=validate_tool_action(result['action'],tool_definitions,argument_context=_tool_argument_context)
+        result['action']=action;validate_output(result,schema)
+        _call_stats.set({**_call_stats.get(),'finish_reason':'response.completed',
+            'tool_names':[action['name']],'host_action_count':1})
+        return {**result,'_tool_transport':VERSION,'_host_action_raw':original,
+            **({'_panel_bindings':bindings}if bindings else{})}
     from .responses_json import protocol_for, call as responses_call
     protocol = protocol_for(config)
     _call_stats.set({**_call_stats.get(), 'api_protocol': protocol})
@@ -303,6 +324,7 @@ def _complete_json(
     _single_attempt: bool = False,
     _strict_transport: str | None = None,
     _tool_argument_context: dict | None = None,
+    _json_action_transport: bool = False,
 ) -> dict[str, Any]:
     """流式请求并校验JSON；明确未输出的可重试503最多额外两次，其余沿原预算。"""
     from .structured_output import StructuredOutputError, output_format, validate_output
@@ -320,6 +342,8 @@ def _complete_json(
         format_options['_strict_transport'] = _strict_transport
     if _tool_argument_context:
         format_options['_tool_argument_context'] = _tool_argument_context
+    if _json_action_transport:
+        format_options['_json_action_transport']=True
     if tool_definitions:
         for definition in tool_definitions:
             if definition.get("type") != "function" or definition["function"].get("strict") is not True:
@@ -411,7 +435,10 @@ def complete_json(system_prompt: str, user_prompt: str, **options) -> dict[str, 
     """上传执行使用持久运行器；其他宿主保留原有调用契约。"""
     validate_result = options.pop('validate_result',None)
     system_prompt = _json_output_prompt(system_prompt)
-    if _has_repair_tool(options.get('tool_definitions')):
+    if options.get('_json_action_transport'):
+        from .registered_actions import INSTRUCTION
+        system_prompt+=INSTRUCTION
+    if _has_repair_tool(options.get('tool_definitions')) and not options.get('_json_action_transport'):
         # 只更新受影响修订请求的检查点；此前成功读取/完整报告保持原身份复用。
         system_prompt += '\nRepair transport native-required-v1: use a registered native tool call; plain JSON content is not a tool receipt.'
     from urllib.parse import urlparse
@@ -425,7 +452,7 @@ def complete_json(system_prompt: str, user_prompt: str, **options) -> dict[str, 
     from .image_inputs import prepare_image_inputs
     system_prompt, options = prepare_image_inputs(system_prompt, options)
     from .deepseek_strict import MODE, MARKER, official
-    if official(config) and (options.get('response_schema') is not None or options.get('tool_definitions')):
+    if official(config) and not options.get('_json_action_transport') and (options.get('response_schema') is not None or options.get('tool_definitions')):
         from .responses_json import protocol_for
         if protocol_for(config) == 'chat_completions':
             options[MARKER] = MODE

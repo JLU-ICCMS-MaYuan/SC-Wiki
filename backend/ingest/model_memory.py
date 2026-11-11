@@ -28,7 +28,10 @@ def _fixed_token_estimate(request):
     # 估计实际消息文本，而非把已序列化user_prompt再次JSON转义；不是上游容量声明。
     texts = [request.get('system_prompt') or '', request.get('user_prompt') or '']
     from backend.rag.deepseek_strict import MODE, MARKER, request_view
-    if request.get(MARKER) == MODE:
+    from backend.rag.registered_actions import action_schema,MARKER as ACTION_MARKER
+    if request.get(ACTION_MARKER):
+        texts.append(json.dumps(action_schema(request['tool_definitions']),ensure_ascii=False,separators=(',',':')))
+    elif request.get(MARKER) == MODE:
         actual = request_view(request)
         texts = [actual.get('system_prompt') or '',actual.get('user_prompt') or '']
         texts.append(json.dumps(actual['tool_definitions'], ensure_ascii=False, separators=(',', ':')))

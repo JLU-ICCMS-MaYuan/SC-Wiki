@@ -57,6 +57,6 @@ def test_official_flash_schema_uses_same_strict_native_tool(monkeypatch):
     monkeypatch.setattr(llm,'_client',lambda _:NS(chat=NS(completions=NS(create=lambda **kw:(calls.append(kw) or iter([
         NS(id='id',choices=[NS(delta=NS(content=None,tool_calls=[NS(index=0,id='native',function=NS(name='report_structured_output',arguments='{"code":"seen"}'))]),finish_reason='tool_calls')])]))))))
     assert llm.complete_json('JSON','read',response_schema=schema)=={'code':'seen'}
-    assert calls[0]['response_format']=={'type':'json_object'}
+    assert 'response_format' not in calls[0]
     assert calls[0]['tools'][0]['function']['parameters']==schema
     assert calls[0]['tools'][0]['function']['strict'] is True
