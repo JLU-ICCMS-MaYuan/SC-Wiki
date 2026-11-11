@@ -174,3 +174,30 @@ def test_phase_scope_ignores_other_material_or_foreign_owned_record(tmp_path):
         'reported_space_group_symbol':'Fm-3m'},'source_ids':[]}],
         'assignments':[{'candidate_state_key':'other','target_index':0,'source_ids':[]}]}
     assert inventory_scope_sources(context,previous,ir,request,response) is None
+
+
+def test_empty_layout_container_is_explicit_without_reextracting_valid_chunk(tmp_path, monkeypatch):
+    from backend.ingest import upload_jobs as jobs
+    from backend.rag import llm_context
+    from backend.storage import paths
+    _, _, context, _ = case(tmp_path)
+    context['pages'][0]['blocks'].append({'block_id':'table-frame','block_type':'table',
+        'pdf_page':1,'text':'','table_id':'table-frame'})
+    original = deepcopy(context)
+    monkeypatch.setattr(jobs,'_chunk_result_path',lambda *_:tmp_path/'chunk.json')
+    monkeypatch.setattr(jobs,'artifact_directory',lambda *_:tmp_path/'artifacts')
+    monkeypatch.setattr(paths,'object_mode',lambda:False)
+    monkeypatch.setattr(llm_context,'get_llm_config',lambda:SimpleNamespace(provider='test',model='test',base_url='http://unused'))
+    requests = []
+    def model(_system, prompt, **options):
+        requests.append(prompt)
+        return {'extraction_version':'1','material_states':[],'coverage_exclusions':[]}
+    monkeypatch.setattr(jobs,'complete_json',model)
+    chunk=SimpleNamespace(chunk_index=0,content=json.dumps(context),section_name='Document IR',source_page=1)
+    source={'file_id':'main','kind':'pdf','parser_profile':'complementary'}
+    first=jobs._read_chunk('task',chunk,'main',source)
+    body=json.loads(requests[0][requests[0].find('{'):])
+    assert body['pages'][0]['blocks'][1]['source_usage']=='layout_only_no_text_evidence'
+    assert body['pages'][0]['blocks'][0]['text']==original['pages'][0]['blocks'][0]['text']
+    assert context==original
+    assert jobs._read_chunk('task',chunk,'main',source)==first and len(requests)==1

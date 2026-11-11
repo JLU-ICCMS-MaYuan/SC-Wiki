@@ -620,9 +620,20 @@ def _read_chunk(
         if (cached.get("_schema_version") == CHUNK_RESULT_SCHEMA_VERSION
                 and cached.get("_document_signature") == signature):
             return cached
+    if structured:
+        # 身份与原文不变；只为新/失败请求说明原Schema已排除的空文本版面定位块。
+        system_prompt += ('\nPROGRAM SOURCE ID CONTRACT: blocks marked layout_only_no_text_evidence '
+            'cannot be cited as block_id or quote_id. A table_id is not a text evidence block. '
+            'Cite a populated cell, paragraph or caption registered in the supplied source schema. '
+            'If this window provides no allowed evidence for a paper type, return paper_type_evidence=[]; '
+            'do not force a type citation from an empty table frame.')
+        for page in context['pages']:
+            for block in page['blocks']:
+                if not str(block.get('text') or '').strip():
+                    block['source_usage'] = 'layout_only_no_text_evidence'
     prompt = (
         f"章节：{chunk.section_name or '正文'}\n页码：{getattr(chunk, 'source_page', None) or '未知'}\n"
-        f"分段编号：{chunk.chunk_index}\n\n{json.dumps(context, ensure_ascii=False) if source_handoff else chunk.content}"
+        f"分段编号：{chunk.chunk_index}\n\n{json.dumps(context, ensure_ascii=False) if structured else chunk.content}"
     )
     attempt_directory = None
     if profile == "complementary":
