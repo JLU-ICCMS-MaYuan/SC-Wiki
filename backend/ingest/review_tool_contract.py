@@ -48,7 +48,7 @@ def tool_definitions(documents, manifest, *, bibliography=False):
             {'region_id': region, 'bbox_page': {'type': 'array', 'items': {'type': 'number'}, 'minItems': 4, 'maxItems': 4},
              'reason': {'type': 'string', 'minLength': 1}, 'dpi': {'type': 'integer', 'minimum': 600}})
         from .chart_reading import reading_schema
-        panel = reading_schema()['properties']['panels']['items']
+        panel = reading_schema(require_value_coordinate=True)['properties']['panels']['items']
         add('digitize_image_elements', '程序根据当前区域中识别的轴、点/柱/色标标定标量，不直接保存科学字段。',
             {'region_id': region, 'panel': panel})
         add('verify_image_reading', '复算当前回执的几何、刻度和读数，返回具体元素未读原因。',

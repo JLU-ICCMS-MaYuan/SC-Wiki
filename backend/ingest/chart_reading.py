@@ -11,11 +11,11 @@ import re
 
 from PIL import Image
 
-from .chart_calibration import ChartReadingError, approximate, coordinate_value, heatmap_position, bar_edge, align_value_ticks, verify_horizontal_tick_labels
+from .chart_calibration import ChartReadingError, approximate, coordinate_value, heatmap_position, bar_edge, align_value_ticks, verify_horizontal_tick_labels, verify_line_point_support
 from .document_ir import DocumentBlock, content_hash
 from .scientific_output_schema import obj, array, nullable, TEXT, NUMBER
 
-VERSION = 'scientific-chart-reading-v12'
+VERSION = 'scientific-chart-reading-v13'
 QUANTITIES = ['tc', 'lambda_ep', 'omega_log', 'dos_fermi']
 
 DISCOVERY_PROMPT = '''Inventory EVERY attached PDF page and EVERY figure visible on it, including SI.
@@ -63,6 +63,15 @@ For heatmap colors use reading=color; identify the actual colorbar rectangle/ori
 Ticks for position readings refer to the value axis (normally y); for colors they refer to colorbar axis.
 x_axis/x_quantity/x_unit describe a numeric horizontal condition axis (pressure, temperature, energy),
 or null for material categories. Read actual markers/source-requested x values, not arbitrary samples.
+For a line plot whose HORIZONTAL scalar is lambda_ep, set x_quantity="lambda_ep", copy its actual
+horizontal x_axis ticks and unit, and retain axis as the vertical plot axis (for example frequency).
+The program then computes lambda from point.x, never from the frequency point.y. A cumulative
+lambda(omega) curve supplies total lambda only at a source-supported fully covered/saturated endpoint,
+not an arbitrary finite-frequency sample. Keep the full original point coordinates and conditions.
+Every panel MUST declare value_coordinate: "x" when the requested scalar is read from the horizontal
+axis, "y" when read from the vertical axis; null is only for color/printed-label-only observations.
+This declaration controls calculation. If your reason says "lambda read from horizontal axis", return
+value_coordinate="x"; never send "y" and turn the frequency ordinate into the coupling constant.
 For DOS at EF, the point must be at E-EF=0, with the actual energy-axis calibration.
 axis.bounds are the ACTUAL visible minimum/maximum positions of that value axis, including frame space
 beyond the first/last labeled tick. Do not confuse the last tick with the plotted axis limit.
@@ -119,7 +128,7 @@ def page_inventory(answer, geometries):
     return targets, excluded
 
 
-def reading_schema():
+def reading_schema(*, require_value_coordinate=False):
     axis = obj({'scale': {'type': 'string', 'enum': ['linear', 'log10', 'unknown']},
                 'bounds': {'type': 'array', 'items': NUMBER, 'minItems': 2, 'maxItems': 2},
                 'ticks': array(obj({'position': NUMBER, 'value': NUMBER}))})
@@ -131,17 +140,20 @@ def reading_schema():
         'x': NUMBER, 'y': NUMBER, 'label_value': nullable(NUMBER), 'label_text': nullable(TEXT),
         'pixel_error': NUMBER, 'conditions': array(obj({'label': TEXT, 'value': TEXT, 'unit': nullable(TEXT)})),
         'reason': TEXT})
-    return obj({'panels': array(obj({'figure': TEXT, 'panel': TEXT,
+    result = obj({'panels': array(obj({'figure': TEXT, 'panel': TEXT,
         'kind': {'type': 'string', 'enum': ['line', 'bar', 'heatmap']},
         'quantity': {'type': 'string', 'enum': QUANTITIES}, 'quantity_name': TEXT, 'unit': TEXT,
         'layout': {'type': 'string', 'enum': ['matrix', 'sparse']},
         'categories': array(TEXT), 'series': array(TEXT), 'axis': axis,
-        'x_axis': nullable(axis), 'x_quantity': nullable({'type': 'string', 'enum': ['pressure', 'temperature', 'energy', 'other']}),
+        'x_axis': nullable(axis), 'x_quantity': nullable({'type': 'string', 'enum': ['pressure', 'temperature', 'energy', 'other', 'lambda_ep']}),
         'x_unit': nullable(TEXT),
         'colorbar': nullable(obj({'bbox': box, 'orientation': {'type': 'string', 'enum': ['vertical', 'horizontal']}})),
         'points': array(point), 'unresolved': array(obj({'category': TEXT, 'series': TEXT, 'reason': TEXT})),
-        'reason': TEXT})), 'notes': array(obj({
+        'reason': TEXT, 'value_coordinate': nullable({'type':'string','enum':['x','y']})})), 'notes': array(obj({
             'scope': {'type':'string','enum':['target','context']}, 'reason':TEXT}))})
+    if not require_value_coordinate:
+        result['properties']['panels']['items']['required'].remove('value_coordinate')
+    return result
 
 
 def chart_regions(ir, pdf=None):
@@ -215,6 +227,8 @@ def calibrate_panel(panel, image, source, crop_bbox):
         raise ChartReadingError('图中类别或系列身份重复')
     expected = {(c, s) for c in categories for s in series}
     seen, identities, readings, unresolved = set(), set(), [], deepcopy(panel['unresolved'])
+    coordinate=panel.get('value_coordinate','x' if panel.get('x_quantity')==panel.get('quantity')=='lambda_ep' else 'y')
+    horizontal_value=coordinate=='x'
     for point in [*panel['points'], *unresolved]:
         pair = point['category'], point['series']
         if panel['kind'] == 'line' and panel['layout'] == 'sparse':
@@ -244,14 +258,20 @@ def calibrate_panel(panel, image, source, crop_bbox):
                  'unit': panel['unit'], 'crop_bbox': list(crop_bbox), 'image_size': list(image.size),
                  'point': deepcopy(point), 'axis': deepcopy(panel['axis']), 'colorbar': deepcopy(panel['colorbar'])}
         try:
+            if point['reading']=='position' and coordinate not in {'x','y'}:
+                raise ChartReadingError('坐标读数未明确声明主值沿横轴还是纵轴，未猜测或计算')
             if panel.get('x_axis'):
                 facts['x_axis_label_geometry'] = verify_horizontal_tick_labels(image, panel['x_axis'],
-                    localization_error=max(point['pixel_error'], 1000/image.width, source.get('native_pixel_error', 0)))
+                    localization_error=max(point['pixel_error'], 1000/image.width, source.get('native_pixel_error', 0)),
+                    panel_bounds=panel['axis']['bounds'],point=point)
+                if panel['kind']=='line' and point['reading']=='position' and facts['x_axis_label_geometry'].get('owner_frame'):
+                    facts['line_pixel_support']=verify_line_point_support(image,point,
+                        facts['x_axis_label_geometry']['owner_frame'],localization_error=max(point['pixel_error'],1000/image.width,1000/image.height))
                 xv, xp, transform = coordinate_value(panel['x_axis'], point['x'],
                     pixel_error=2 * max(point['pixel_error'], 1000 / image.width, source.get('native_pixel_error', 0)))
-                facts['x_reading'] = {'quantity': panel.get('x_quantity'), 'unit': panel.get('x_unit'),
+                facts['x_reading'] = {'quantity': panel['quantity'] if horizontal_value else panel.get('x_quantity'), 'unit': panel.get('x_unit'),
                     'value': xv, 'reading_precision': xp, 'calibration': transform, 'axis': deepcopy(panel['x_axis'])}
-                if panel.get('x_quantity') == 'pressure':
+                if not horizontal_value and panel.get('x_quantity') == 'pressure':
                     from .scientific_evidence import converted_state_value
                     converted = converted_state_value({'pressure_raw': str(xv), 'pressure_unit_raw': panel.get('x_unit')}, 'pressure_value_gpa')
                     upper = converted_state_value({'pressure_raw': str(xv + xp), 'pressure_unit_raw': panel.get('x_unit')}, 'pressure_value_gpa')
@@ -279,11 +299,17 @@ def calibrate_panel(panel, image, source, crop_bbox):
             else:
                 position = point['y']
                 # 数据与刻度各有一次定位误差；放大渲染不提高嵌入原图的真实分辨率。
-                resolution = max(1000 / image.height,
+                resolution = max(1000 / (image.width if horizontal_value else image.height),
                     source.get('native_pixel_error', 0) if point['reading'] != 'color' else 0)
                 error = 2 * max(point['pixel_error'], resolution)
                 value_axis = panel['axis']
-                if point['reading'] == 'position':
+                if horizontal_value:
+                    if panel['kind']!='line' or not panel.get('x_axis'):
+                        raise ChartReadingError('横向耦合常数读数需要原线图及其实际横轴')
+                    value_axis=panel['x_axis'];position=point['x']
+                    facts['value_coordinate']='x'
+                    facts['calibrated_axis']=deepcopy(value_axis)
+                elif point['reading'] == 'position':
                     value_axis, axis_facts = align_value_ticks(image, value_axis,
                         localization_error=max(point['pixel_error'], resolution), verify_label_positions=panel['kind']=='bar')
                     facts.update(axis_alignment=axis_facts, calibrated_axis=value_axis)

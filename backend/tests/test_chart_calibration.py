@@ -50,6 +50,27 @@ def test_real_horizontal_printed_positions_are_accepted_without_changing_values(
     assert [tick['value'] for tick in axis['ticks']] == [-20,-15,-10,-5,0,5,10]
 
 
+def test_real_top_material_cannot_borrow_bottom_material_tick_positions():
+    import json
+    from pathlib import Path
+    from PIL import Image
+    from copy import deepcopy
+    from backend.ingest.chart_reading import calibrate_panel
+    root=Path(__file__).parent/'fixtures'
+    record=json.loads((root/'s15-lambda-axis-scope.json').read_text())
+    image=Image.open(root/'s15-lambda-columns.png')
+    panel=deepcopy(record['actual_arguments']['panels'][0])
+    width=record['original_size'][0];left=record['crop_pixels'][0]
+    transform=lambda x:(x*width/1000-left)/image.width*1000
+    panel['x_axis']['bounds']=[transform(x)for x in panel['x_axis']['bounds']]
+    for tick in panel['x_axis']['ticks']:tick['position']=transform(tick['position'])
+    for point in panel['points']:
+        point['x']=transform(point['x']);point['pixel_error']*=width/image.width
+    readings,issues=calibrate_panel(panel,image,{'file_id':'si','sha256':record['source_sha256'],'page':14},[0,0,100,100])
+    assert not readings
+    assert issues[0]['reason_code']=='HORIZONTAL_TICK_LABEL_POSITION_UNSUPPORTED'
+
+
 @pytest.mark.parametrize('scale,ticks,expected', [
     ('linear', [{'position': 100, 'value': 200}, {'position': 900, 'value': 0}], 100),
     ('linear', [{'position': 100, 'value': 0}, {'position': 900, 'value': 200}], 100),

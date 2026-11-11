@@ -167,34 +167,53 @@ def coordinate_value(axis, position, *, pixel_error=1.0):
                               'residual': residual, 'scale': axis['scale']}
 
 
-def verify_horizontal_tick_labels(image, axis, *, localization_error=1.0):
+def verify_horizontal_tick_labels(image, axis, *, localization_error=1.0, panel_bounds=None, point=None):
     """用原像素核实横轴声明位置有印刷文字；不识字、不分配刻度值。"""
-    from .image_geometry import horizontal_axis_text_regions
+    from .image_geometry import horizontal_axis_text_regions, closed_plot_frames
     bounds = axis_bounds(axis)
     rgb = np.asarray(image.convert('RGB'), dtype=float)
     height, width = rgb.shape[:2]
+    owner = None
+    if panel_bounds and point:
+        low_y,high_y=sorted(panel_bounds)
+        owners=[frame['bbox'] for frame in closed_plot_frames(image)
+            if frame['bbox'][1]<=(low_y+high_y)/2<=frame['bbox'][3]
+            and frame['bbox'][0]-localization_error<=point['x']<=frame['bbox'][2]+localization_error]
+        if len(owners)==1:
+            owner=owners[0];bounds=[owner[0],owner[2]]
     left, right = max(0, round(bounds[0]*(width-1)/1000)), min(width-1, round(bounds[1]*(width-1)/1000))
     if right <= left: return {'checked': False}
-    dark = (np.ptp(rgb, axis=2) < 8) & (np.mean(rgb, axis=2) < 128)
+    dark = np.mean(rgb, axis=2) < 128
     profile = dark[:, left:right+1].sum(axis=1)
     rows = np.flatnonzero(profile > (right-left)/2)
     if not len(rows): return {'checked': False}
     groups = np.split(rows, np.flatnonzero(np.diff(rows) > 1)+1)
-    candidates = []
+    candidates = [];rows_with_text=[]
     for group in groups:
         spine = round(float(np.mean(group)))
         regions = horizontal_axis_text_regions(image, spine, bounds)
         supported = [any(box[0]-localization_error <= tick['position'] <= box[2]+localization_error
                          for box in regions) for tick in axis['ticks']]
-        if len(regions) >= 2 and sum(supported) >= 2:
-            candidates.append((len(regions), sum(supported), spine, regions, supported))
-    if not candidates: return {'checked': False}
-    ranked = sorted(candidates, key=lambda item: item[:2], reverse=True)
-    if len(ranked)>1 and ranked[0][:2] == ranked[1][:2]:
-        return {'checked': False, 'reason': '多个原图文字行，未猜测其归属'}
-    _, _, spine, regions, supported = ranked[0]
+        entry=(len(regions),sum(supported),spine,regions,supported)
+        candidates.append(entry)
+        if len(regions)>=2:rows_with_text.append(entry)
+    if not rows_with_text:return {'checked':False}
+    chosen=None
+    if panel_bounds:
+        expected=max(panel_bounds)*(height-1)/1000
+        own=min(candidates,key=lambda item:abs(item[2]-expected))
+        if own[0]>=2:chosen=own
+    if chosen is None:
+        # 对齐的复合图可共用唯一印刷轴；多套标签不能按“更匹配”从别的材料借用。
+        unique={tuple(tuple(box)for box in item[3]):item for item in rows_with_text}
+        if len(unique)==1:chosen=next(iter(unique.values()))
+        else:
+            raise ChartReadingError('当前面板横轴归属尚未唯一定位，不能借用其他面板的多套刻度。',{
+                'reason_code':'HORIZONTAL_AXIS_SCOPE_AMBIGUOUS','panel_bounds':panel_bounds})
+    _, _, spine, regions, supported = chosen
     original_boxes = regions
-    facts = {'checked': True, 'horizontal_spine_pixel': spine, 'axis_text_regions': original_boxes}
+    facts = {'checked': True, 'horizontal_spine_pixel': spine, 'axis_text_regions': original_boxes,
+             'panel_bounds':panel_bounds,'owner_frame':owner}
     if not all(supported):
         raise ChartReadingError('横轴声明的刻度位置没有对应印刷文字；请在当前原图补读数字和位置，不能把数学上自洽的坐标当成已看见的标签。', {
             'reason_code': 'HORIZONTAL_TICK_LABEL_POSITION_UNSUPPORTED', **facts,
@@ -203,6 +222,54 @@ def verify_horizontal_tick_labels(image, axis, *, localization_error=1.0):
                 max(0,spine*1000/(height-1)-2*localization_error), min(1000,bounds[1]+2*localization_error),
                 min(1000,max(box[3] for box in original_boxes)+2*localization_error)]})
     return facts
+
+
+def verify_line_point_support(image, point, frame, *, localization_error):
+    """图框本身不证明曲线数据点；只验证附近有非图框像素，不替AI判科学含义。"""
+    height,width=image.height,image.width
+    if not any(abs(point['x']-x)<=localization_error for x in (frame[0],frame[2])) and not any(
+            abs(point['y']-y)<=localization_error for y in (frame[1],frame[3])):
+        return {'checked':False}
+    rgb=np.asarray(image.convert('RGB'));ink=rgb.mean(axis=2)<128
+    left,top,right,bottom=[round(v*(width-1 if i%2==0 else height-1)/1000)for i,v in enumerate(frame)]
+    interior=ink.copy()
+    interior[:top]=False;interior[bottom+1:]=False;interior[:,:left]=False;interior[:,right+1:]=False
+    def remove_spine(profile,center,radius,vertical):
+        start,end=max(0,center-radius),min(len(profile),center+radius+1)
+        index=start+int(np.argmax(profile[start:end]));strength=profile[index]
+        if strength<=0:return
+        a,b=index,index
+        while a>0 and profile[a-1]>=strength*.9:a-=1
+        while b+1<len(profile) and profile[b+1]>=strength*.9:b+=1
+        if vertical:interior[:,max(0,a-1):b+2]=False
+        else:interior[max(0,a-1):b+2]=False
+    dx=max(3,math.ceil(localization_error*width/1000));dy=max(3,math.ceil(localization_error*height/1000))
+    columns=ink[top:bottom+1].sum(axis=0);rows=ink[:,left:right+1].sum(axis=1)
+    for x in (left,right):remove_spine(columns,x,dx,True)
+    for y in (top,bottom):remove_spine(rows,y,dy,False)
+    x,y=round(point['x']*(width-1)/1000),round(point['y']*(height-1)/1000)
+    if interior[max(0,y-dy):y+dy+1,max(0,x-dx):x+dx+1].any():
+        return {'checked':True,'supported':True,'role':'non_frame_pixel_support_only'}
+    from scipy.ndimage import label,find_objects
+    candidates=[]
+    for channel in range(3):
+        other=np.max(np.delete(rgb.astype(float),channel,axis=2),axis=2)
+        mask=interior & (rgb[:,:,channel].astype(float)>other+30)
+        components,_=label(mask,structure=np.ones((3,3)))
+        for number,box in enumerate(find_objects(components),1):
+            if box is None:continue
+            yy,xx=np.nonzero(components[box]==number)
+            if len(xx)<4:continue
+            xx=xx+box[1].start;yy=yy+box[0].start
+            at_top=yy==yy.min()
+            candidates.append({'dominant_channel':channel,'pixel_count':len(xx),
+                'top_ink':[float(np.mean(xx[at_top]))*1000/(width-1),float(yy.min())*1000/(height-1)],
+                'bbox':[float(xx.min())*1000/(width-1),float(yy.min())*1000/(height-1),
+                        float(xx.max())*1000/(width-1),float(yy.max())*1000/(height-1)]})
+    raise ChartReadingError('声明的曲线点只有图框墨迹支持，附近未见非图框数据；请选择实际曲线，不能用图框端点代替饱和终点。',{
+        'reason_code':'LINE_POINT_ONLY_FRAME_INK','point':dict(point),'frame_bbox':frame,
+        'stroke_geometry_candidates':sorted(candidates,key=lambda c:c['pixel_count'],reverse=True),
+        'geometry_role':'unlabelled_pixel_candidates_not_scientific_values'})
 
 
 def bar_edge(image, point, axis):

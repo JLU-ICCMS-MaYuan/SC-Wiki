@@ -12,6 +12,23 @@ from backend.ingest.chart_reading import enrich_document, calibrate_panel, Chart
 from backend.ingest.document_ir import DocumentIR, DocumentBlock, PageGeometry, content_hash
 
 
+def test_horizontal_scalar_role_never_turns_vertical_frequency_into_lambda():
+    from PIL import Image
+    from backend.ingest.chart_reading import reading_schema
+    from backend.rag.structured_output import validate_output
+    value=panel();value.update(kind='line',quantity='lambda_ep',quantity_name='Total coupling',unit='dimensionless',
+        axis={'scale':'linear','bounds':[100,900],'ticks':[{'position':100,'value':2000},{'position':900,'value':0}]},
+        x_axis={'scale':'linear','bounds':[100,900],'ticks':[{'position':100,'value':0},{'position':900,'value':4}]},
+        x_quantity='other',x_unit='dimensionless',value_coordinate='x')
+    value['points']=value['points'][:1];value['series']=[value['points'][0]['series']]
+    value['points'][0].update(x=900,y=100)
+    validate_output({'panels':[value],'notes':[]},reading_schema())
+    readings,issues=calibrate_panel(value,Image.new('RGB',(1000,1000),'white'),
+        {'file_id':'source','sha256':'a'*64,'page':1},[0,0,100,100])
+    assert not issues and readings[0]['value_number']==4
+    assert readings[0]['value_coordinate']=='x'
+
+
 def original(tmp_path):
     path = tmp_path / 'source.pdf'
     pdf = pymupdf.open(); page = pdf.new_page(width=200, height=200)

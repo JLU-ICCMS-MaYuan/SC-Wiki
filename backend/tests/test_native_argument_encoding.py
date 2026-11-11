@@ -60,8 +60,9 @@ def test_actual_sdk_stream_and_registered_chart_schema_keep_original_native_iden
     monkeypatch.setattr(llm, 'get_llm_config', lambda: config)
     monkeypatch.setattr(llm, '_client', lambda _: client)
     try:
-        result = llm.complete_json('JSON', 'fixed replay', tool_definitions=[{'type': 'function',
-            'function': {'name': 'report_chart_reading', 'strict': True, 'parameters': reading_schema()}}])
+        # 原失败使用其真实历史工具Schema；不把旧原生响应冒充含新坐标角色的回复。
+        historical=json.loads((Path(__file__).parent/'fixtures/native-tool-extra-closer-schema.json').read_text())
+        result = llm.complete_json('JSON', 'fixed replay', tool_definitions=[historical])
     finally: client.close()
     assert len(sent) == 1 and result['action']['arguments'] == expected
     assert result['_tool_call']['id'] == 'original-call' and result['_tool_call']['function']['arguments'] == raw

@@ -1,0 +1,203 @@
+{
+  "source_sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+  "pdf_page": 14,
+  "original_size": [
+    3275,
+    3183
+  ],
+  "crop_pixels": [
+    2600,
+    0,
+    3275,
+    3183
+  ],
+  "resampled": false,
+  "actual_arguments": {
+    "panels": [
+      {
+        "figure": "Fig. S15",
+        "panel": "a",
+        "kind": "line",
+        "quantity": "lambda_ep",
+        "quantity_name": "Integrated electron-phonon coupling constant lambda(omega)",
+        "unit": "dimensionless",
+        "layout": "sparse",
+        "categories": [
+          "YH9"
+        ],
+        "series": [
+          "lambda(omega)"
+        ],
+        "axis": {
+          "scale": "linear",
+          "bounds": [
+            56.1,
+            444.7
+          ],
+          "ticks": [
+            {
+              "position": 444.7,
+              "value": 0
+            },
+            {
+              "position": 357.0,
+              "value": 500
+            },
+            {
+              "position": 269.3,
+              "value": 1000
+            },
+            {
+              "position": 181.6,
+              "value": 1500
+            },
+            {
+              "position": 93.9,
+              "value": 2000
+            }
+          ]
+        },
+        "x_axis": {
+          "scale": "linear",
+          "bounds": [
+            813.4,
+            959.0
+          ],
+          "ticks": [
+            {
+              "position": 813.4,
+              "value": 0
+            },
+            {
+              "position": 862.0,
+              "value": 2
+            },
+            {
+              "position": 910.6,
+              "value": 4
+            }
+          ]
+        },
+        "x_quantity": "lambda_ep",
+        "x_unit": "dimensionless",
+        "colorbar": null,
+        "points": [
+          {
+            "category": "YH9",
+            "series": "lambda(omega)",
+            "material": "YH9",
+            "pressure_value_gpa": null,
+            "space_group_symbol": null,
+            "mu_star": null,
+            "method_raw": null,
+            "reading": "position",
+            "x": 958.0,
+            "y": 60.0,
+            "label_value": null,
+            "label_text": null,
+            "pixel_error": 3.0,
+            "conditions": [],
+            "reason": "Saturated endpoint of the integrated lambda(omega) curve (blue) at the top of the alpha2F panel; lambda value read from the horizontal lambda axis (0-4)."
+          }
+        ],
+        "unresolved": [],
+        "reason": "Right-hand Eliashberg panel of YH9 (a): green alpha2F(omega) and blue integrated lambda(omega); total lambda taken at the fully covered high-frequency endpoint."
+      },
+      {
+        "figure": "Fig. S15",
+        "panel": "b",
+        "kind": "line",
+        "quantity": "lambda_ep",
+        "quantity_name": "Integrated electron-phonon coupling constant lambda(omega)",
+        "unit": "dimensionless",
+        "layout": "sparse",
+        "categories": [
+          "YH10"
+        ],
+        "series": [
+          "lambda(omega)"
+        ],
+        "axis": {
+          "scale": "linear",
+          "bounds": [
+            527.0,
+            916.1
+          ],
+          "ticks": [
+            {
+              "position": 916.1,
+              "value": 0
+            },
+            {
+              "position": 786.4,
+              "value": 1000
+            },
+            {
+              "position": 656.6,
+              "value": 2000
+            },
+            {
+              "position": 527.0,
+              "value": 3000
+            }
+          ]
+        },
+        "x_axis": {
+          "scale": "linear",
+          "bounds": [
+            813.4,
+            959.0
+          ],
+          "ticks": [
+            {
+              "position": 813.4,
+              "value": 0
+            },
+            {
+              "position": 862.0,
+              "value": 1
+            },
+            {
+              "position": 910.6,
+              "value": 2
+            },
+            {
+              "position": 959.0,
+              "value": 3
+            }
+          ]
+        },
+        "x_quantity": "lambda_ep",
+        "x_unit": "dimensionless",
+        "colorbar": null,
+        "points": [
+          {
+            "category": "YH10",
+            "series": "lambda(omega)",
+            "material": "YH10",
+            "pressure_value_gpa": null,
+            "space_group_symbol": null,
+            "mu_star": null,
+            "method_raw": null,
+            "reading": "position",
+            "x": 940.0,
+            "y": 530.0,
+            "label_value": null,
+            "label_text": null,
+            "pixel_error": 3.0,
+            "conditions": [],
+            "reason": "Saturated endpoint of the integrated lambda(omega) curve (blue) at the top of the alpha2F panel of YH10 (b); lambda read from the horizontal lambda axis (0-3)."
+          }
+        ],
+        "unresolved": [],
+        "reason": "Right-hand Eliashberg panel of YH10 (b): green alpha2F(omega) and blue integrated lambda(omega); total lambda taken at the fully covered high-frequency endpoint."
+      }
+    ],
+    "notes": [
+      {
+        "scope": "target",
+        "reason": "Only the Eliashberg lambda(omega) panels are scalar charts; the phonon dispersion and PDOS panels are non-scalar and not digitized. Pressure for YH9/YH10 is not stated in the caption, so pressure_value_gpa is null."
+      }
+    ]
+  }
+}

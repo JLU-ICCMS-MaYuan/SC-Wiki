@@ -148,7 +148,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
                    if t['function']['name'] in ACTIONS]
     definitions.append({'type':'function','function':{'name':'report_chart_reading',
         'description':'提交目标图全部面板的原图观察；服务器标定和验证，不作批准。',
-        'strict':True,'parameters':reading_schema()}})
+        'strict':True,'parameters':reading_schema(require_value_coordinate=True)}})
     progress = FeedbackProgress()
     history = []
     exhausted = set()

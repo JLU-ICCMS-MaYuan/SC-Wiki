@@ -4,6 +4,16 @@ import pytest
 from backend.ingest.image_geometry import geometry_observations
 
 
+def test_multiple_narrow_colored_plot_frames_are_measured_without_scientific_labels():
+    image=Image.new('RGB',(1000,1000),'white');draw=ImageDraw.Draw(image)
+    for left,right in [(50,600),(620,780),(800,960)]:
+        for top,bottom in [(50,450),(530,950)]:
+            draw.rectangle((left,top,right,bottom),outline='blue' if left==800 else 'black',width=3)
+    before=image.tobytes();result=geometry_observations(image)
+    assert len(result['panel_frames']) == 6
+    assert image.tobytes()==before
+
+
 def fixture(scale=1):
     im=Image.new("RGB",(320,500),"white");d=ImageDraw.Draw(im)
     for y in [20,160,300,450]:d.line((60,y,300,y),fill="black",width=2)

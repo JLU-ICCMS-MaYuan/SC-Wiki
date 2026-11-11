@@ -39,6 +39,17 @@ def bind(action, context):
             if type(resolution) in (int, float) and math.isfinite(resolution) and resolution > 0:
                 matched = [band for band in geometry.get('band_candidates', [])
                     if max(abs(lo-band['bbox'][1]), abs(hi-band['bbox'][3])) <= resolution]
+                points=panel.get('points') or []
+                usable=(points and all(isinstance(p,dict) and all(type(p.get(k)) in (int,float)
+                    and math.isfinite(p[k]) for k in ('x','y')) for p in points))
+                if usable:
+                    matched=[band for band in matched if all(
+                        band['bbox'][0]-resolution<=p['x']<=band['bbox'][2]+resolution for p in points)]
+                if not matched and usable and all(lo<=p['y']<=hi for p in points):
+                    middle=(lo+hi)/2
+                    matched=[frame for frame in geometry.get('panel_frames',[]) if
+                        frame['bbox'][1]<=middle<=frame['bbox'][3] and all(
+                            frame['bbox'][0]-resolution<=p['x']<=frame['bbox'][2]+resolution for p in points)]
         if len(matched) != 1:
             if missing:
                 from .structured_output import StructuredOutputError

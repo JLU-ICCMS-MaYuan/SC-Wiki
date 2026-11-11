@@ -4,9 +4,9 @@ from __future__ import annotations
 import hashlib
 import numpy as np
 from PIL import Image
-from scipy.ndimage import binary_closing, label, find_objects
+from scipy.ndimage import binary_closing, binary_opening, label, find_objects
 
-VERSION = 'image-geometry-v1'
+VERSION = 'image-geometry-v2'
 
 
 def axis_text_regions(image, spine_pixel, bounds):
@@ -54,7 +54,7 @@ def horizontal_axis_text_regions(image, spine_pixel, bounds):
     top = min(height, spine_pixel+6)
     below = rgb[top:]
     if not below.size: return []
-    dark = (np.ptp(below.astype(float), axis=2)<8) & (below.mean(axis=2)<128)
+    dark = below.mean(axis=2)<128
     components, _ = label(dark, structure=np.ones((3,3)))
     low, high = [value*(width-1)/1000 for value in sorted(bounds)]
     glyphs = []
@@ -80,6 +80,38 @@ def horizontal_axis_text_regions(image, spine_pixel, bounds):
             for x0,y0,x1,y1 in words if x1>=low and x0<=high]
 
 
+def closed_plot_frames(image):
+    """闭合墨迹图框的几何候选，包含窄列和有色轴；不识别其科学用途。"""
+    rgb=np.asarray(image.convert('RGB'));height,width=rgb.shape[:2]
+    ink=rgb.mean(axis=2)<180
+    minimum=max(4,min(width,height)//25)
+    def segments(structure):
+        components,_=label(binary_opening(ink,structure=structure),structure=np.ones((3,3)))
+        return [(box[1].start,box[0].start,box[1].stop-1,box[0].stop-1)
+                for box in find_objects(components) if box is not None]
+    horizontal=segments(np.ones((1,minimum)));vertical=segments(np.ones((minimum,1)))
+    boxes=[]
+    for first in vertical:
+        for second in vertical:
+            left=(first[0]+first[2])/2;right=(second[0]+second[2])/2
+            if right-left<minimum:continue
+            top=max(first[1],second[1]);bottom=min(first[3],second[3])
+            if bottom-top<minimum:continue
+            tolerance=max(2,first[2]-first[0]+1,second[2]-second[0]+1)
+            upper=[row for row in horizontal if abs((row[1]+row[3])/2-top)<=tolerance
+                   and row[0]<=left+tolerance and row[2]>=right-tolerance]
+            lower=[row for row in horizontal if abs((row[1]+row[3])/2-bottom)<=tolerance
+                   and row[0]<=left+tolerance and row[2]>=right-tolerance]
+            if upper and lower:
+                box=[left,min((r[1]+r[3])/2 for r in upper),right,max((r[1]+r[3])/2 for r in lower)]
+                if box not in boxes:boxes.append(box)
+    # 图内竖网格也形成小矩形；有同上下边的完整外框时不把网格单元冒充面板。
+    boxes=[box for box in boxes if not any(other!=box and other[0]<=box[0] and other[2]>=box[2]
+        and abs(other[1]-box[1])<=2 and abs(other[3]-box[3])<=2 for other in boxes)]
+    return [{'bbox':[x0*1000/(width-1),y0*1000/(height-1),x1*1000/(width-1),y1*1000/(height-1)],
+             'source':'closed_ink_frame'}for x0,y0,x1,y1 in boxes]
+
+
 def geometry_observations(image):
     original_size = image.size
     view = image.convert('RGB').copy()
@@ -94,6 +126,7 @@ def geometry_observations(image):
         'limitations': ['色块观察只提供彩色近矩形候选，图例也可能在列；缺少候选不代表没有数据。']}
     if width < 3 or height < 3:
         return result
+    result['panel_frames']=closed_plot_frames(view)
     def norm_box(x0,y0,x1,y1):
         return [round(x0*1000/(width-1),3),round(y0*1000/(height-1),3),
                 round((x1-1)*1000/(width-1),3),round((y1-1)*1000/(height-1),3)]
@@ -112,7 +145,9 @@ def geometry_observations(image):
     frames=[(int(np.median([r[0] for r in line])),int(np.median([r[1] for r in line])),float(np.mean([r[2] for r in line]))) for line in lines]
     result['horizontal_frames']=[{'x0':x0*1000/(width-1),'x1':x1*1000/(width-1),'y':y*1000/(height-1)} for x0,x1,y in frames]
     result['horizontal_axis_text_regions'] = []
-    for x0, x1, y in frames:
+    label_frames=[*frames,*[(box['bbox'][0]*(width-1)/1000,box['bbox'][2]*(width-1)/1000,
+        box['bbox'][edge]*(height-1)/1000) for box in result['panel_frames'] for edge in (1,3)]]
+    for x0, x1, y in label_frames:
         bounds = [x0*1000/(width-1), x1*1000/(width-1)]
         regions = horizontal_axis_text_regions(view, round(y), bounds)
         if len(regions) >= 2:

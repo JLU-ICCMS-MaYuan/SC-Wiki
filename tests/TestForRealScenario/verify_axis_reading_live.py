@@ -7,6 +7,11 @@ from dotenv import load_dotenv
 
 
 def main():
+    import argparse
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--failure-directory',default='native-json-failure',
+        choices=['native-json-failure','p14-panel-identity-failure'])
+    selected=parser.parse_args().failure_directory
     load_dotenv('.env')
     import pymupdf
     from PIL import Image
@@ -18,9 +23,9 @@ def main():
     from backend.ingest.image_feedback import read_chart
     from backend.ingest.pdf_regions import render_region_image
     root = Path(__file__).parent/'runs/20261111-peng2017-flash-clean-01'
-    out = root/'axis-calibration-live'/datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
+    out = root/('axis-calibration-live' if selected=='native-json-failure' else 'horizontal-lambda-live')/datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')
     out.mkdir(parents=True)
-    request = json.loads((root/'native-json-failure/prepared-request.json').read_text())['request']
+    request = json.loads((root/selected/'prepared-request.json').read_text())['request']
     old = json.loads(request['user_prompt'])
     keep = ['document', 'pdf_page', 'crop_bbox', 'crop_bbox_coordinate_space', 'reading_coordinate_space',
             'crop_image_size', 'selected_regions', 'source_pages', 'crop_sha256', 'image_origin', 'complete_figure', 'context_image_size']
@@ -59,7 +64,7 @@ def main():
         result = {'scope': '原SI受影响轴新Flash提取→正式标定→IR隔离保存重读，非整篇或业务验收',
             'model': 'server:LLM1/deepseek-flash', 'calls': count[0], 'readings': len(readings),
             'unresolved': unresolved, 'feedback': feedback, 'source_sha256': source['sha256'],
-            'saved_and_reread': True, 'values': [{k:r.get(k) for k in ['panel','value_number','reading_precision','x_reading']} for r in readings]}
+            'saved_and_reread': True, 'values': [{k:r.get(k) for k in ['panel','value_number','value_raw','value_coordinate','reading_precision','x_reading']} for r in readings]}
         (out/'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2))
         print(json.dumps({k:v for k,v in result.items() if k not in ['feedback','values','unresolved']}, ensure_ascii=False), flush=True)
     except BaseException as error:

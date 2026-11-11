@@ -14,7 +14,7 @@ def bar_calibration_upgrade(ir, path, source):
     from PIL import Image
     from .chart_calibration import bar_edge, align_value_ticks, coordinate_value, verify_horizontal_tick_labels, ChartReadingError
     old = ir.coverage.get('chart_reading') or {}
-    legacy = {'scientific-chart-reading-v10', 'scientific-chart-reading-v11'}
+    legacy = {'scientific-chart-reading-v10', 'scientific-chart-reading-v11', 'scientific-chart-reading-v12'}
     if (old.get('version') not in legacy or old.get('status') != 'completed'
             or old.get('source_sha256') != source['sha256']
             or sorted(old.get('scanned_pages', [])) != sorted(p.pdf_page for p in ir.pages)):
@@ -52,7 +52,8 @@ def bar_calibration_upgrade(ir, path, source):
                 axes = [fact.get('calibrated_axis') or fact['axis']] if fact['point']['reading'] != 'label' else []
                 if fact.get('x_reading', {}).get('axis'):
                     axes.append(fact['x_reading']['axis'])
-                    verify_horizontal_tick_labels(image, fact['x_reading']['axis'], localization_error=error)
+                    verify_horizontal_tick_labels(image, fact['x_reading']['axis'], localization_error=error,
+                        panel_bounds=fact['axis']['bounds'],point=fact['point'])
                 for axis in axes:
                     coordinate_value(axis, axis['ticks'][0]['position'], pixel_error=2 * error)
                 if (old['version'] != 'scientific-chart-reading-v10'

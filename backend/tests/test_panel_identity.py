@@ -1,5 +1,24 @@
 """技术面板身份由服务器原图几何限定，不修补科学内容。"""
 from copy import deepcopy
+
+
+def test_missing_identity_uses_unique_closed_column_frame_without_rewriting_observations():
+    from backend.rag.panel_identity import bind
+    action={'name':'digitize_image_elements','arguments':{'region_id':'region','panel':{
+        'figure':'Fig. S15','quantity':'lambda_ep','axis':{'bounds':[40,440]},
+        'points':[{'x':860,'y':40,'pixel_error':3}]}}}
+    context={'version':'program-panel-id-v1','default_region_id':'region','regions':{'region':{
+        'source_sha256':'a'*64,'pdf_page':14,'localization_resolution':1,'band_candidates':[],
+        'panel_frames':[{'bbox':[50,50,600,450]},{'bbox':[620,50,780,450]},
+            {'bbox':[800,50,960,450]},{'bbox':[800,530,960,950]}]}}}
+    before=deepcopy(action)
+    bound,bindings=bind(action,context)
+    assert bindings[0]['bbox']==[800,50,960,450]
+    bound['arguments']['panel'].pop('panel')
+    assert bound==before and action==before
+    ambiguous=deepcopy(context)
+    ambiguous['regions']['region']['panel_frames'].append({'bbox':[800,50,960,450]})
+    with pytest.raises(StructuredOutputError):bind(action,ambiguous)
 import pytest
 from backend.rag.structured_output import validate_tool_action, StructuredOutputError
 
