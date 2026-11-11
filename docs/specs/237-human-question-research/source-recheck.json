@@ -1,0 +1,26 @@
+[
+  {
+    "path": "codex-rs/core/src/tools/handlers/request_user_input_async.rs",
+    "git_blob": "17309c5041a56fb12cff32b4b30eaef5d38bfb21",
+    "evidence": [
+      "use codex_protocol::items::AsyncUserInputQuestion;",
+      "pub struct RequestUserInputAsyncHandler {",
+      "struct RequestUserInputAsyncArgs {",
+      "    questions: Vec<AsyncUserInputQuestion>,",
+      "impl ToolExecutor<ToolInvocation> for RequestUserInputAsyncHandler {",
+      "            let args: RequestUserInputAsyncArgs = parse_arguments(&arguments)?;",
+      "                delivery: Some(AgentMessageDelivery::Async),",
+      "                r#\"{\"accepted\":true}\"#.to_string(),",
+      "impl CoreToolRuntime for RequestUserInputAsyncHandler {"
+    ]
+  },
+  {
+    "path": "codex-rs/tui/src/bottom_pane/async_questions/state.rs",
+    "git_blob": "7023328f1419577e500d64957d5bd3046c919fae",
+    "evidence": [
+      "impl AsyncQuestions {",
+      "    pub(crate) fn append(&mut self, message_id: &str, questions: &[AsyncUserInputQuestion]) {",
+      "            let question = AsyncUserInputQuestion {"
+    ]
+  }
+]
