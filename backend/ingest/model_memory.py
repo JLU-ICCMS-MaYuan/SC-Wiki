@@ -312,12 +312,13 @@ def _groups(history):
 
 
 def _messages(history):
+    from backend.rag.structured_output import decode_tool_arguments
     messages = []
     for index, row in enumerate(history):
         identity = digest({"index": index, "message": row})
         if row["role"] == "assistant":
             calls = [{"id": call["id"], "name": call["function"]["name"],
-                      "args": json.loads(call["function"]["arguments"])} for call in row.get("tool_calls") or []]
+                      "args": decode_tool_arguments(call["function"]["arguments"])[0]} for call in row.get("tool_calls") or []]
             messages.append(AIMessage(content=row.get("content") or "", tool_calls=calls, id=identity))
         elif row["role"] == "tool":
             messages.append(ToolMessage(content=row.get("content") or "", tool_call_id=row["tool_call_id"], id=identity))
