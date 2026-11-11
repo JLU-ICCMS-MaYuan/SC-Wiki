@@ -286,14 +286,18 @@ class ModelRuntime:
             self.close_clients()
             raise
 
-    def call(self, complete, system_prompt, user_prompt, **options):
+    def call(self, complete, system_prompt, user_prompt, *, validate_result=None, **options):
         from backend.rag.llm import _call_phase, _call_scope
         from .model_memory import prepare_request, ContextBudgetError, validate_context_output
         self.check()
         phase = _call_phase.get() or str(self.read_state().get("reading_state") or "model_request")
         request = {"system_prompt": system_prompt, "user_prompt": user_prompt,
             **{key: value for key, value in options.items() if key not in {"on_partial", "on_call"}}}
-        key = digest({"identity": self.identity, "phase": phase, "request": request})
+        # 传输表示不改变规范Schema的接受条件；旧的已验证成功结果继续复用。
+        # 预算与留证仍保留该提示，以实际送出的严格工具Schema计算。
+        from backend.rag.deepseek_strict import MARKER
+        key = digest({"identity": self.identity, "phase": phase,
+                      "request": {k:v for k,v in request.items() if k != MARKER}})
         with self.occurrence_lock:
             occurrence = self.occurrences[key]
             self.occurrences[key] += 1
@@ -308,6 +312,20 @@ class ModelRuntime:
         filename = filename or _call_scope.get().get('filename')
         pages = pages or _call_scope.get().get('pages') or []
         cached = read_json(directory / "result.json")
+        if cached is not None and validate_result is not None:
+            try:
+                validate_result(cached['response'])
+            except Exception as error:
+                from backend.rag.structured_output import StructuredOutputError
+                if not isinstance(error,(ValueError,StructuredOutputError)):
+                    raise
+                # 未通过现有业务校验的缓存不算成功步骤；原响应完整保留供追查。
+                with self.lock():
+                    self.check()
+                    rejected=directory/f'rejected-result-{uuid4().hex}.json'
+                    atomic_json(rejected,{**cached,'rejection_type':type(error).__name__})
+                    (directory/'result.json').unlink(missing_ok=True)
+                cached=None
         if cached is not None:
             self.event("reused", phase=phase, attempt=0, retry_at=None, error=None,
                        filename=filename, pages=pages, action=None, note=None)
@@ -338,10 +356,12 @@ class ModelRuntime:
                     options["on_partial"](text)
             def invoke():
                 with self.request_slot(self) if self.request_slot else nullcontext():
-                    return complete(prepared["system_prompt"], prepared["user_prompt"],
+                    result = complete(prepared["system_prompt"], prepared["user_prompt"],
                         **{key: value for key, value in prepared.items() if key not in {"system_prompt", "user_prompt"}},
                         on_partial=receive, **({"on_call": options["on_call"]} if options.get("on_call") else {}),
                         _single_attempt=True)
+                    if validate_result is not None:validate_result(result)
+                    return result
             try:
                 if not prepared_once and not compacted:
                     prepared = self.interruptible(lambda: prepare_request(request, directory, budget=budget))

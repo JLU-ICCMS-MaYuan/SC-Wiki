@@ -322,6 +322,34 @@ def collect_inventory_responses(batches):
     return output
 
 
+def _scope_effective_response(response,sources,material_scope):
+    # 原模型可能又从原文盘点出范围外、无候选归属的空卡；只执行已确认的排除，保留完整去向。
+    # 任何已有候选/结果指向该卡都不能删除，最终apply_inventory的范围与守恒门仍负责拒绝。
+    from .tc_material_scope import material_key
+    excluded={material_key(row.get('material')):row for row in (material_scope or {}).get('excluded_materials',[])}
+    assigned={entry.get('target_index') for kind in ('assignments','record_assignments')for entry in response.get(kind,[])}
+    discarded=[]
+    for index,entry in enumerate(response.get('states',[])):
+        decision=excluded.get(material_key((entry.get('values')or{}).get('material')))
+        if decision is not None and index not in assigned:
+            ids=entry.get('source_ids')or[]
+            _evidence(ids,{s['source_id']:s for s in sources})
+            discarded.append({'index':index,'state':deepcopy(entry),
+                'sources':[deepcopy(s)for s in sources if s['source_id']in ids],
+                'scope_decision':deepcopy(decision),'reason':'执行已有全文范围决定；此卡没有原候选或结果归属'})
+    effective=deepcopy(response)
+    if discarded:
+        removed={entry['index']for entry in discarded}
+        retained=[i for i in range(len(effective['states']))if i not in removed]
+        remap={old:new for new,old in enumerate(retained)}
+        effective['states']=[effective['states'][i]for i in retained]
+        for kind in ('assignments','record_assignments'):
+            for entry in effective.get(kind,[]):
+                if entry['target_index']not in remap:raise ValueError('范围排除不能丢失原候选或记录去向')
+                entry['target_index']=remap[entry['target_index']]
+    return effective,discarded
+
+
 def plan_states(draft, chunks, model, *, on_response=None, on_request=None, files=(), target_id=None,
                 material_scope=None, documents=None):
     from .scientific_context import build_context
@@ -385,9 +413,20 @@ def plan_states(draft, chunks, model, *, on_response=None, on_request=None, file
             for body, _, _ in batches]})
     responses = []
     for body, pixels, prompt in batches:
-        response = model(prompt, json.dumps(body, ensure_ascii=False), response_schema=SCHEMA, **({'images': pixels} if pixels else {}))
+        keys={candidate['state_key']for candidate in body['candidates']}
+        subset={**draft,'material_states':[deepcopy(state)for state in draft['material_states']if state['state_key']in keys]}
+        def validate_result(value):
+            assigned=[entry.get('candidate_state_key')for entry in value.get('assignments',[])]
+            if len(assigned)!=len(set(assigned))or set(assigned)!=keys:
+                raise ValueError('材料状态规划遗漏或重复本组候选')
+            effective,_=_scope_effective_response(value,sources,material_scope)
+            apply_inventory(deepcopy(subset),sources,effective,material_scope=material_scope)
+        response = model(prompt, json.dumps(body, ensure_ascii=False), response_schema=SCHEMA,
+                         validate_result=validate_result, **({'images': pixels} if pixels else {}))
+        validate_result(response)
         responses.append((body['candidates'], response))
     response = collect_inventory_responses(responses) if len(batches) > 1 else responses[0][1]
+    effective,discarded=_scope_effective_response(response,sources,material_scope)
     if on_response:
-        on_response(response)
-    return apply_inventory(draft, sources, response, material_scope=material_scope)
+        on_response({**response,**({'scope_exclusions':discarded,'effective_response':effective}if discarded else{})})
+    return apply_inventory(draft, sources, effective, material_scope=material_scope)

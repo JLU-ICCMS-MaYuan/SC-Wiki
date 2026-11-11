@@ -1495,7 +1495,16 @@ def _bind_structure_candidates(draft: dict[str, Any], candidates: list[dict[str,
     from .canonical_structure import assign_structures, assignment_response_schema
     request_model = model or complete_json
     def complete_assignment(prompt, content):
-        return request_model(prompt, content, response_schema=assignment_response_schema())
+        payload=json.loads(content)
+        def validate_result(value):
+            if value.get('done',True):return
+            unread_ids={row['source_id']for row in payload.get('unread_sources',[])}
+            unread_pages={(str(row['file_id']),row['page'])for row in payload.get('unread_pages',[])}
+            if (not unread_ids.intersection(value.get('read_source_ids',[]))
+                    and not any((str(row.get('file_id')),row.get('page'))in unread_pages for row in value.get('read_pages',[]))
+                    and not value.get('search')):
+                raise ValueError('结构归属没有取得新原文，未将空转缓存为成功步骤')
+        return request_model(prompt, content, response_schema=assignment_response_schema(payload),validate_result=validate_result)
     with call_phase('structure_assignment'):
         assign_structures(draft, candidates, sources, complete_assignment, on_response=on_response)
 

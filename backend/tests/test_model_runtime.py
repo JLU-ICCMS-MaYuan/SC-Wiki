@@ -385,3 +385,35 @@ def test_partial_output_then_whitespace_timeout_retries_original_request(tmp_pat
     assert failure['error']['output_started'] is True
     assert failure['error']['code']=='LLM_STREAM_IDLE_TIMEOUT'
     assert failure['partial_response'].startswith('{"value":')
+
+
+def test_semantically_rejected_checkpoint_is_archived_and_only_failed_step_is_reissued(tmp_path,monkeypatch):
+    import json
+    def validate(value):
+        if value.get("target")!="same-material":raise ValueError("目标身份不一致")
+    good={"target":"same-material"};bad={"target":"other-material"};calls=[]
+    def invoke(*_a,**_k):calls.append(1);return good
+    monkeypatch.setattr(llm,"_complete_json",invoke)
+    # 旧缓存的prompt经过JSON补句，使用与原生产入口相同的规范化。
+    runtime,context,_=setup_runtime(tmp_path/"production",monkeypatch)
+    prompt=llm._json_output_prompt("system")
+    runtime.call(lambda *_a,**_k:good,prompt,"valid")
+    runtime.call(lambda *_a,**_k:bad,prompt,"failed")
+    runtime,context,_=setup_runtime(tmp_path/"production",monkeypatch)
+    with context(runtime):
+        assert llm.complete_json("system","valid",validate_result=validate)==good
+        assert llm.complete_json("system","failed",validate_result=validate)==good
+    assert calls==[1]
+    rejected=list((tmp_path/"production").rglob("rejected-result-*.json"))
+    assert len(rejected)==1 and json.loads(rejected[0].read_text())["response"]==bad
+
+
+def test_new_semantic_failure_is_not_saved_or_automatically_retried(tmp_path,monkeypatch):
+    from backend.ingest.model_runtime import ModelRequestError
+    runtime,context,_=setup_runtime(tmp_path,monkeypatch);calls=[]
+    def invoke(*_a,**_k):calls.append(1);return {"wrong":1}
+    def reject(_):raise ValueError("候选不守恒")
+    monkeypatch.setattr(llm,"_complete_json",invoke)
+    with context(runtime),pytest.raises(ModelRequestError):llm.complete_json("system","source",validate_result=reject)
+    assert calls==[1] and not list(tmp_path.rglob("result.json"))
+    assert list(tmp_path.rglob("failure-*.json"))

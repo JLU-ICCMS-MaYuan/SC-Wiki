@@ -240,3 +240,41 @@ def test_native_read_budget_still_stops_at_twelve_actions(tmp_path):
     with pytest.raises(AgentStopped,match='agent_budget_exhausted'):
         extract_structure_candidates('',source={**source(),'sha256':hashlib.sha256(pdf.read_bytes()).hexdigest()},pdf_path=pdf,model=model)
     assert calls==13,'12次合法行动后，第13次被拒绝，未扩大预算或吞掉失败'
+
+
+def test_scope_excluded_structure_is_archived_without_blocking_allowed_neighbor(tmp_path):
+    import json,pymupdf
+    from backend.ingest.structure_reading import extract_structure_candidates
+    pdf=tmp_path/"scope.pdf"
+    with pymupdf.open() as doc:
+        page=doc.new_page();page.insert_text((40,40),
+            "NaCl at 10 GPa, Pm-3m, fractional atomic positions\na = b = c = 5.64 Angstrom\nalpha = beta = gamma = 90 degree\nNa 0 0 0\nCl 0.5 0.5 0.5\nKCl at 10 GPa, Pm-3m, fractional atomic positions\na = b = c = 6.28 Angstrom\nalpha = beta = gamma = 90 degree\nK 0 0 0\nCl 0.5 0.5 0.5")
+        doc.save(pdf)
+    src={**source(),"sha256":hashlib.sha256(pdf.read_bytes()).hexdigest()}
+    scope={"excluded_materials":[{"material":"KCl","reason":"本文只报告数值Tc范围","evidences":[{"file_id":"main","content":"KCl Tc below 56 K."}]}]}
+    calls=[];events=[]
+    def model(prompt,payload,**options):
+        request=json.loads(payload);calls.append(request)
+        if len(calls)==1:
+            return {"action":{"name":"read_original_page","arguments":{"file_id":src["file_id"],"page":1}}}
+        rows=request["sources"]
+        def ref(prefix,last=False):
+            found=[r["source_id"]for r in rows if r["content"].startswith(prefix)]
+            return found[-1]if last else found[0]
+        good=reported();good.update(source_ids=[ref("NaCl at")],cell_source_ids=[ref("a = b = c = 5.64"),ref("alpha")])
+        good["atoms"][0]["source_id"]=ref("Na ")
+        good["atoms"][1]["source_id"]=ref("Cl ")
+        bad=reported();bad.update(material="KCl",source_ids=[ref("KCl at")],cell_source_ids=[ref("a = b = c = 6.28"),ref("alpha",True)])
+        bad["cell_parameters"].update(a=6.28,b=6.28,c=6.28)
+        bad["atoms"][0].update(element="K",source_id=ref("K "))
+        bad["atoms"][1]["source_id"]=ref("Cl ",True)
+        return {"structures":[good,bad],"uncertainties":[],"reason":"原表两个完整结构；范围决定另行由既有元数据拥有。"}
+    result=extract_structure_candidates("",source=src,pdf_path=pdf,model=model,on_event=events.append,material_scope=scope)
+    valid=[c for c in result if c["status"]=="valid"]
+    assert len(valid)==1 and valid[0]["reported_structure"]["material"]=="NaCl"
+    excluded=[e for e in events if e["status"]=="scope-excluded"]
+    assert len(excluded)==1
+    trace=excluded[0]["exclusions"][0]
+    assert trace["structure"]["material"]=="KCl" and trace["sources"]
+    assert trace["scope_decision"]==scope["excluded_materials"][0]
+    assert len(calls)==2

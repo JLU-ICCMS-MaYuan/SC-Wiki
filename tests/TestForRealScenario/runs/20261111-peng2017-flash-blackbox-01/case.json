@@ -49,7 +49,7 @@
     }
   },
   "round_kind": "独立视觉模型黑盒轮",
-  "status": "Flash第23次续跑失败于结构归属；GPT排障轮论文1485已送审并真实拒绝，正在返修",
+  "status": "GPT排障轮五阶段已完成并按流程清理；Flash旧重复任务已清理，准备同原文件全新复测",
   "model": "server:LLM1/deepseek-flash",
   "previous_gpt_task": "d789acceee124022b3257f84780d1156",
   "started": "2026-11-11T00:53:52.888245+00:00",
@@ -83,23 +83,25 @@
       "task_id": "d789acceee124022b3257f84780d1156",
       "paper_id": 1485,
       "model": "server:LLM2/gpt-6.1-sol",
-      "review_status": "rejected",
+      "review_status": "approved_then_cleaned",
       "revision_id": "8136d82df2ae4e0f8549c472ee610b79",
       "phases": [
         "已实际送审",
         "已实际拒绝并重读",
-        "正在网页返修",
-        "未执行",
-        "未执行"
-      ]
+        "已实际返修重提",
+        "已实际批准并重读",
+        "探索YH10命中1485，正式值与选定来源核验通过"
+      ],
+      "report": "GPT-DEBUG-ROUND-REPORT.md",
+      "cleanup": "gpt-cleanup-reread.json"
     },
     "flash": {
       "task_id": "0f9ed9412e7f4ad2bac8ececcbbd1525",
       "model": "server:LLM1/deepseek-flash",
-      "job_id": "125b9652-824e-4a0a-83e8-c772ae300668",
-      "generation": 23,
-      "status": "failed",
-      "failure": "结构归属重复读取已读来源，未空转缓存为成功",
+      "job_id": "1b7b2e80-74b3-44e7-a52b-3faf356a9f4c",
+      "generation": 25,
+      "status": "duplicate_then_cleaned",
+      "failure": "结构归属完成后命中本轮GPT论文1485的DOI重复保护；没有Flash正式论文或完成表单",
       "paper_id": null
     }
   }

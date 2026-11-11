@@ -83,6 +83,10 @@ def _extract_json(content: str) -> dict[str, Any]:
         return json.loads(text[start : end + 1])
 
 
+def _has_repair_tool(definitions):
+    return any(item['function']['name'].startswith('repair_') for item in definitions or [])
+
+
 def _stream_json(
     system_prompt: str,
     user_prompt: str,
@@ -93,6 +97,7 @@ def _stream_json(
     response_format: dict | None = None,
     tool_definitions: list[dict] | None = None,
     tool_history: list[dict] | None = None,
+    _strict_transport: str | None = None,
 ) -> dict[str, Any]:
     """单次流式调用：逐块累积文本，可选回报中间内容，结束后解析 JSON。"""
     user_content: Any = user_prompt
@@ -127,6 +132,23 @@ def _stream_json(
                 on_started=lambda: _call_stats.set({**_call_stats.get(),'output_started':True}))
             _call_stats.set({**_call_stats.get(),'finish_reason':'stop'})
             return result
+    wire_definitions = tool_definitions
+    source_ids = {}
+    if _strict_transport:
+        from .deepseek_strict import MODE, official, request_view
+        if _strict_transport != MODE or not official(config) or not tool_definitions:
+            from .structured_output import StructuredOutputError
+            raise StructuredOutputError('严格传输与当前模型接口不匹配')
+        client.base_url = 'https://api.deepseek.com/beta'
+        actual = request_view({'system_prompt':messages[0]['content'],'user_prompt':user_prompt,
+                               'tool_definitions':tool_definitions,'tool_history':tool_history})
+        wire_definitions = actual['tool_definitions'];source_ids=actual['source_ids']
+        messages[0]['content']=actual['system_prompt']
+        if images:messages[1]['content'][0]['text']=actual['user_prompt']
+        else:messages[1]['content']=actual['user_prompt']
+        _call_stats.set({**_call_stats.get(), 'schema_transport': MODE,
+                         'source_reference_codec':'sref-v1' if source_ids else None,
+                         'source_reference_count':len(source_ids)})
     with token_request() as receive_usage:
         stream = client.chat.completions.create(
             model=config.model,
@@ -137,10 +159,10 @@ def _stream_json(
             **({"max_tokens": 65536} if deepseek else {}),
             stream_options={"include_usage": True},
             stream=True,
-            **({"tools": tool_definitions, "parallel_tool_calls": False} if tool_definitions else {}),
+            **({"tools": wire_definitions, "parallel_tool_calls": False} if tool_definitions else {}),
             **({'tool_choice':{'type':'function','function':{'name':'report_structured_output'}}}
                if tool_definitions and len(tool_definitions)==1 and tool_definitions[0]['function']['name']=='report_structured_output'
-               else {'tool_choice':'required'} if any(d['function']['name'].startswith('report_') for d in tool_definitions or []) else {}),
+               else {'tool_choice':'required'} if any(d['function']['name'].startswith(('report_', 'repair_')) for d in tool_definitions or []) else {}),
         )
         accumulated: list[str] = []
         actions: dict[int, dict] = {}
@@ -217,12 +239,18 @@ def _stream_json(
                 action["arguments"] = json.loads(action["arguments"])
             except json.JSONDecodeError as exc:
                 raise StructuredOutputError("工具参数未形成完整JSON") from exc
+            if source_ids:
+                from .deepseek_strict import restore_source_ids
+                action['arguments']=restore_source_ids(action['arguments'],source_ids)
             validate_tool_action(action, tool_definitions)
             result = {"action": action}
             if index in call_ids:
                 result["_tool_call"] = {"id": call_ids[index], "type": "function",
                     "function": {"name": action["name"], "arguments": raw_arguments}}
             return result
+        if _has_repair_tool(tool_definitions):
+            from .structured_output import StructuredOutputError
+            raise StructuredOutputError('修订阶段必须返回登记的原生工具调用，未采用自由JSON替代工具回执')
         if finish_reason not in (None, "stop"):
             raise RuntimeError("模型输出未完整结束")
         result = _extract_json("".join(accumulated))
@@ -269,6 +297,7 @@ def _complete_json(
     tool_definitions: list[dict] | None = None,
     tool_history: list[dict] | None = None,
     _single_attempt: bool = False,
+    _strict_transport: str | None = None,
 ) -> dict[str, Any]:
     """流式请求并校验JSON；明确未输出的可重试503最多额外两次，其余沿原预算。"""
     from .structured_output import StructuredOutputError, output_format, validate_output
@@ -282,6 +311,8 @@ def _complete_json(
             'strict':True,'parameters':response_schema}}]
     format_options = {"response_format": output_format(response_schema)} if response_schema is not None else {}
     if schema_tool:format_options['response_format']={'type':'json_object'}
+    if _strict_transport:
+        format_options['_strict_transport'] = _strict_transport
     if tool_definitions:
         for definition in tool_definitions:
             if definition.get("type") != "function" or definition["function"].get("strict") is not True:
@@ -320,7 +351,7 @@ def _complete_json(
                 if not result.get('_tool_call') or (result.get('action') or {}).get('name')!='report_structured_output':
                     raise StructuredOutputError('当前接口未返回登记的严格结构工具回执，未降级采用自由文本')
                 result=result['action']['arguments']
-                _call_stats.set({**_call_stats.get(),'schema_transport':'strict_function'})
+                _call_stats.set({**_call_stats.get(),'schema_transport':_call_stats.get().get('schema_transport','strict_function')})
             if response_schema is not None:
                 validate_output(result, response_schema)
             if on_call:
@@ -371,7 +402,11 @@ def _complete_json(
 
 def complete_json(system_prompt: str, user_prompt: str, **options) -> dict[str, Any]:
     """上传执行使用持久运行器；其他宿主保留原有调用契约。"""
+    validate_result = options.pop('validate_result',None)
     system_prompt = _json_output_prompt(system_prompt)
+    if _has_repair_tool(options.get('tool_definitions')):
+        # 只更新受影响修订请求的检查点；此前成功读取/完整报告保持原身份复用。
+        system_prompt += '\nRepair transport native-required-v1: use a registered native tool call; plain JSON content is not a tool receipt.'
     from urllib.parse import urlparse
     config = get_llm_config()
     if (options.get('response_schema') is not None and not options.get('tool_definitions')
@@ -382,8 +417,15 @@ def complete_json(system_prompt: str, user_prompt: str, **options) -> dict[str, 
             code='LLM_IMAGE_UNSUPPORTED')
     from .image_inputs import prepare_image_inputs
     system_prompt, options = prepare_image_inputs(system_prompt, options)
+    from .deepseek_strict import MODE, MARKER, official
+    if official(config) and (options.get('response_schema') is not None or options.get('tool_definitions')):
+        from .responses_json import protocol_for
+        if protocol_for(config) == 'chat_completions':
+            options[MARKER] = MODE
     from backend.ingest.model_runtime import current_execution
     runtime = current_execution()
     if runtime:
-        return runtime.call(_complete_json, system_prompt, user_prompt, **options)
-    return _complete_json(system_prompt, user_prompt, **options)
+        return runtime.call(_complete_json, system_prompt, user_prompt, validate_result=validate_result, **options)
+    result = _complete_json(system_prompt, user_prompt, **options)
+    if validate_result is not None:validate_result(result)
+    return result

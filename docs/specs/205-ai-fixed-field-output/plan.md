@@ -38,3 +38,6 @@ _read_chunk依据其已提供Document IR绑定生成schema：非空原文块身�
 ## 2026-11-06 无输出503的有限恢复
 
 HTTP错误须同时满足status_code=503、上游output_started=false及retryable=true、当前流未收到文本/原生工具片段。标记可位于根或error对象，所有已给出的值必须一致且为严格布尔值。至多额外两次，相同提示、来源、图片、工具定义和历史不变；其他既有网络预算不扩张。每次失败先进入on_call/observer账本，再执行1/2秒有界退避；计账附本机是否已输出、是否满足服务重试条件及是否实际安排重试。结构错误仍直接失败。
+
+
+2026-11-11实施补齐：deepseek_strict模块负责官方严格接口表示与可逆来源短ID，llm发送/beta原生工具、还原后校验规范Schema，model_memory按实际传输计预算，model_runtime对传输marker保持规范成功缓存身份。修订工具强制native并对旧失败缓存独立版本化；原完整报告和已验证成功记录复用。真实原分段重提、负探针、SSE/等价/预算/缓存回归见validation.md，完整黑盒另验。

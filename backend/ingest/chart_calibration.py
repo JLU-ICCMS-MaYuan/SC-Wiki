@@ -169,10 +169,13 @@ def bar_edge(image, point, axis):
         interior = patch[chroma >= chroma.max() - 2 * math.sqrt(3)]
     else:
         interior = patch[np.linalg.norm(patch - 255, axis=1) > 2 * math.sqrt(3)]
-    if not len(interior): raise ChartReadingError('柱内部只有背景，未猜测零值或柱高')
+    if not len(interior):
+        raise ChartReadingError('柱内部只有背景，未猜测零值或柱高',
+                                {'reason_code':'BAR_INTERIOR_UNREADABLE'})
     color = np.median(interior, axis=0)
     if np.linalg.norm(color - background) <= 2 * math.sqrt(3):
-        raise ChartReadingError('柱内部只有背景，未猜测零值或柱高')
+        raise ChartReadingError('柱内部只有背景，未猜测零值或柱高',
+                                {'reason_code':'BAR_INTERIOR_UNREADABLE'})
     tolerance = max(2 * math.sqrt(3), 3 * float(np.median(np.linalg.norm(interior - color, axis=1))))
     column = np.median(rgb[:, x - 1:x + 2], axis=1)
     mask = np.linalg.norm(column - color, axis=1) <= tolerance

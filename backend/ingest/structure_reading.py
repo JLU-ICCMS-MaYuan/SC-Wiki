@@ -381,6 +381,33 @@ def _repair_structure_schema(schema, rows):
     return result
 
 
+def _apply_structure_scope(updates, scope, catalog):
+    """执行已有全文AI范围决定；排除的原候选和来源留档，不成为表单结构。"""
+    import unicodedata
+    from .tc_material_scope import material_key
+    decisions = {material_key(row.get('material')): row for row in (scope or {}).get('excluded_materials', [])
+                 if material_key(row.get('material'))}
+    kept, excluded = {}, []
+    normalize = lambda text: unicodedata.normalize('NFKC', str(text)).casefold()
+    for key, item in updates.items():
+        decision = decisions.get(material_key(item.get('material')))
+        if decision is None:
+            kept[key] = item
+            continue
+        refs = list(dict.fromkeys([*item['source_ids'], *item['cell_source_ids'],
+                                  *(atom['source_id'] for atom in item['atoms'])]))
+        if not refs or any(ref not in catalog for ref in refs):
+            raise ValueError('范围外结构引用不属于当前原PDF，未据此丢弃候选')
+        rows = [catalog[ref] for ref in refs]
+        name = re.sub(r'\s+', '', normalize(item['material']))
+        pattern = r'(?<![a-z0-9])' + r'\s*'.join(map(re.escape, name)) + r'(?![a-z0-9])'
+        if not any(re.search(pattern, normalize(row['content'])) for row in rows):
+            raise ValueError('范围外结构材料身份未在所选原文找到，未据此丢弃候选')
+        excluded.append({'reading_id': key, 'structure': deepcopy(item), 'sources': deepcopy(rows),
+                         'scope_decision': deepcopy(decision)})
+    return kept, excluded
+
+
 def extract_structure_candidates(markdown, *, source, material_state_ref=None, pdf_path=None,
                                  model=None, on_event=None, cancelled=lambda: False, material_scope=None):
     if pdf_path is None:
@@ -486,6 +513,13 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
                 updates = {'structure-reading-' + content_hash(source['sha256'], index, item)[:24]: item
                            for index, item in enumerate(result['structures'])}
             from .tc_material_scope import assert_allowed
+            updates, excluded = _apply_structure_scope(updates, material_scope, catalog)
+            if excluded:
+                for row in excluded:
+                    structure_rows.pop(row['reading_id'], None)
+                if on_event:
+                    on_event({'iteration': iteration, 'status': 'scope-excluded', 'exclusions': excluded,
+                              'reason': '执行已确认全文范围；原候选及来源留档，不生成科学表单字段'})
             assert_allowed(list(updates.values()), material_scope)
             reused = [key for key, row in structure_rows.items() if row['status'] == 'valid']
             checked = _reading_result({'structures': list(updates.values()),

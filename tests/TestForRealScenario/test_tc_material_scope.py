@@ -97,3 +97,35 @@ def test_excluded_extraction_fails_before_value_validation_without_retry(tmp_pat
     assert len(calls) == 1
     assert len(list(tmp_path.rglob("raw.json"))) == 1
     assert not (tmp_path / "00000.json").exists()
+
+
+def test_unassigned_scope_excluded_inventory_state_is_archived_without_losing_real_candidates():
+    from backend.ingest.state_inventory import plan_states,FIELDS
+    allowed={"material":"YH10","state_key":"kept-state","property_modules":[]}
+    draft={"material_states":[deepcopy(allowed)]}
+    source="YH10 has Tc 303 K at 400 GPa. PrH9 only below 56 K; Table also lists PrH9 geometry."
+    def state(name,pressure):
+        return {"values":{k:name if k=="material"else pressure if k=="pressure_value_gpa"else None for k in FIELDS},
+          "source_ids":["inventory-source-0"],"reason":"原文状态"}
+    response={"states":[state("PrH9",100),state("YH10",400)],
+      "assignments":[{"candidate_state_key":"kept-state","target_index":1,"status":"supported","reason":"原候选仍在YH10","source_ids":["inventory-source-0"]}],
+      "record_assignments":[]}
+    seen=[]
+    plan_states(draft,[{"file_id":"main","content":source}],lambda *_a,**_k:deepcopy(response),
+      material_scope={"excluded_materials":[material(name="PrH9")]},on_response=seen.append)
+    assert [s["material"]for s in draft["material_states"]]==["YH10"]
+    trace=seen[0]["scope_exclusions"][0]
+    assert trace["state"]==response["states"][0] and trace["sources"][0]["content"]==source
+    assert trace["reason"] and trace["scope_decision"]["material"]=="PrH9"
+
+
+def test_scope_excluded_inventory_cannot_drop_any_assigned_candidate():
+    from backend.ingest.state_inventory import plan_states,FIELDS
+    draft={"material_states":[{"material":"YH10","state_key":"kept-state","property_modules":[]}]};before=deepcopy(draft)
+    response={"states":[{"values":{k:"PrH9"if k=="material"else None for k in FIELDS},
+      "source_ids":["inventory-source-0"],"reason":"错误目标"}],
+      "assignments":[{"candidate_state_key":"kept-state","target_index":0,"status":"supported","reason":"不能丢失原候选","source_ids":["inventory-source-0"]}],"record_assignments":[]}
+    with pytest.raises(ValueError):
+        plan_states(draft,[{"file_id":"main","content":"YH10 and PrH9."}],lambda *_a,**_k:response,
+          material_scope={"excluded_materials":[material(name="PrH9")]})
+    assert draft==before

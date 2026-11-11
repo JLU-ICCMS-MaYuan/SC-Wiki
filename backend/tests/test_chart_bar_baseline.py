@@ -96,3 +96,14 @@ def test_inward_ticks_are_located_from_the_real_s33_spine_without_reusing_shifte
     assert len(found)==16 and not missing
     pr=next(f for f in found if f["point"]["material"]=="PrH9")
     assert abs(pr["calculated_value"]-expected)<=.04/(502-27)*3
+
+
+def test_real_background_only_bar_remains_unread_and_never_becomes_zero():
+    panel=json.loads((ROOT/"background-only-bar-response.json").read_text())["panel"]
+    source=json.loads((ROOT/"source.json").read_text())
+    found,missing=calibrate_panel(panel,Image.open(ROOT/"failed-crop.png"),
+        {**source["document"],"page":4},source["crop_bbox"])
+    assert len(found)==18
+    pr=[x for x in missing if x["category"]=="PrH9"]
+    assert len(pr)==2 and all(x.get("reason_code")=="BAR_INTERIOR_UNREADABLE" for x in pr)
+    assert all(x["value_number"]>0 for x in found)

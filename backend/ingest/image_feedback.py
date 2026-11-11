@@ -264,7 +264,7 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
         declared_unread = {(u['category'],u['series'],u['reason'])
                            for p in answer['panels'] for u in p['unresolved']}
         def source_unread(issue):
-            return (issue.get('reason_code') == 'BAR_HEIGHT_BELOW_IMAGE_RESOLUTION'
+            return (issue.get('reason_code') in {'BAR_HEIGHT_BELOW_IMAGE_RESOLUTION','BAR_INTERIOR_UNREADABLE'}
                     or (not issue.get('point') and not issue.get('reason_code')
                         and (issue.get('category'),issue.get('series'),issue['reason']) in declared_unread))
         inspected = any(row['action'] in ACTIONS for row in progress.history)
