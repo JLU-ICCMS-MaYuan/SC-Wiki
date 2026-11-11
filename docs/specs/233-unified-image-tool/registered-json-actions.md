@@ -20,3 +20,8 @@
 同一真实失败输入、同模型/原图/参数Schema：官方Responses返回completed、合法动作及本地Schema通过，76018输入/1112输出token、reasoning token0；仅协议探针，没有工具或业务执行。原SI正式工具链新读3次得到lambda约4.3（图读分辨率0.3）和2.4（0.2），经过原标定及IR保存重读；原图人工核对在该约数精度内。不把这一个图的局部通过当整篇/五阶段通过。记录在responses-action-probe及最新horizontal-lambda-live时间目录。
 
 SDK序列化/本地拒绝/引用/预算/旧路径及原图相邻回归、三项契约另见本轮registered-actions-*.log。当前真实Task仍需从网页续跑后验收，不能宣布黑盒完成。
+
+
+## 完整动作交付
+
+真实第8代收到的流式文本在JSON内部缺少分隔符，完整坏响应和堆栈保留host-action-generation8-failure；不作内容修补。该分支现在使用完整Responses交付：请求stream=false，收到completed标记后才解析，期间如实显示等待，取消仍由原可中断请求控制。并非增加模型重试或调用层次，其他模型/原生Responses流保持原方式。原单图新模型3次返回合法JSON、按原图标定保留未解决结果（0条合格读数），不把协议完成冒充科学成功。完整/未完成标记、请求/取消/记忆相关回归见atomic-actions-after.log；真实任务继续验收。

@@ -130,7 +130,7 @@ def _stream_json(
             result=responses_call(client,config,system_prompt,user_prompt,images=images,definitions=None,
                 history=conversation(tool_history),response_format=output_format(schema),on_partial=on_partial,
                 on_usage=lambda value: (receive_usage(value),_call_stats.set({**_call_stats.get(),'usage':value})),
-                on_started=lambda:_call_stats.set({**_call_stats.get(),'output_started':True}))
+                on_started=lambda:_call_stats.set({**_call_stats.get(),'output_started':True}),atomic=True)
         if not isinstance(result,dict) or set(result)!={'action'}:
             raise StructuredOutputError('受限JSON动作必须只有action，不接受伪造的工具结果或原生ID')
         original=json.loads(json.dumps(result,ensure_ascii=False))

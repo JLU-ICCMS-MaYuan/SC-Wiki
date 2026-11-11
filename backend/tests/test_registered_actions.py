@@ -19,12 +19,12 @@ def test_actual_responses_sdk_closed_action_and_no_fake_provider_receipt(monkeyp
         body=json.loads(request.content);sent.append(body)
         assert request.url.path=='/responses' and 'tools' not in body
         assert body['reasoning']=={'effort':'none'}
+        assert body['stream'] is False
         assert body['text']['format']['schema']==action_schema(TOOLS)
         value={'action':{'name':'read_page','arguments':{'page':1,**({'invented':True}if bad else{})}}}
-        events=[{'type':'response.output_text.delta','delta':json.dumps(value)},
-            {'type':'response.completed','response':{'id':'actual-response','status':'completed','usage':None}}]
-        return httpx.Response(200,headers={'content-type':'text/event-stream'},
-            content=''.join('data: '+json.dumps(e)+'\n\n'for e in events))
+        return httpx.Response(200,json={'id':'actual-response','object':'response','status':'completed','usage':None,
+            'output':[{'type':'message','id':'message','role':'assistant','status':'completed',
+                'content':[{'type':'output_text','text':json.dumps(value),'annotations':[]}]}]})
     config=NS(model='deepseek-flash',base_url='https://api.deepseek.com',provider='fixture')
     client=OpenAI(api_key='isolated-placeholder',base_url=config.base_url,max_retries=0,
         http_client=httpx.Client(transport=httpx.MockTransport(handle)))
@@ -51,3 +51,11 @@ def test_actual_schema_budget_and_independent_function_refs():
     validate_output({'action':{'name':'read_page','arguments':{'page':1}}},schema)
     request={'system_prompt':'JSON','user_prompt':'source','tool_definitions':tools,MARKER:True}
     assert _fixed_token_estimate(request)==_fixed_token_estimate({'system_prompt':'JSON','user_prompt':'source','response_schema':schema})
+
+
+def test_atomic_incomplete_response_never_uses_even_complete_looking_json():
+    from backend.rag.responses_json import call
+    client=NS(responses=NS(create=lambda **kwargs:NS(status='incomplete',output_text='{"action":{"name":"read_page","arguments":{"page":1}}}',usage=None)))
+    with pytest.raises(StructuredOutputError,match='完成标记'):
+        call(client,NS(model='deepseek-flash'),'JSON','source',images=[],definitions=None,history=[],
+            response_format=None,on_partial=None,on_usage=lambda _:None,on_started=lambda:None,atomic=True)
