@@ -645,17 +645,22 @@ def _read_chunk(
                 response.replace(archived)
     callbacks = {"on_partial":archive_partial,"on_call":archive_call} if profile == "complementary" else {}
     schema_options = {"response_schema": generation_schema} if structured else {}
+    def validate_scope(value):
+        from backend.rag.structured_output import StructuredOutputError
+        try:
+            assert_allowed(value.get('material_states') or [], material_scope)
+        except ValueError as exc:
+            raise StructuredOutputError(str(exc)) from exc
+    if material_scope:
+        # 只有通过已有范围检查的响应才可成为可复用的成功检查点。
+        schema_options['validate_result'] = validate_scope
     if source_handoff:
         schema_options['images'] = source_handoff['images']
     result = complete_json(system_prompt, prompt, **schema_options, **callbacks)
     if attempt_directory:
         _atomic_write_json(attempt_directory / "raw.json", result)
     if material_scope:
-        from backend.rag.structured_output import StructuredOutputError
-        try:
-            assert_allowed(result.get('material_states') or [], material_scope)
-        except ValueError as exc:
-            raise StructuredOutputError(str(exc)) from exc
+        validate_scope(result)
     if structured:
         from backend.ingest.scientific_output_schema import decode_optional_containers
         result = decode_optional_containers(result)

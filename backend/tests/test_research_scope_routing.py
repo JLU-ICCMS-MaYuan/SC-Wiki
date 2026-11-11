@@ -19,6 +19,48 @@ def test_current_paper_structure_is_not_deleted_for_range_only_tc():
     assert value['materials'][0]['evidences'][0]['content'].endswith('Tc < 56 K.')
 
 
+def test_chunk_scope_rejection_precedes_success_checkpoint_and_resume_reissues_only_failure(tmp_path, monkeypatch):
+    from contextlib import nullcontext
+    from types import SimpleNamespace
+    monkeypatch.setenv('DATABASE_URL', 'sqlite:///' + str(tmp_path / 'isolated.sqlite'))
+    monkeypatch.setenv('JWT_SECRET_KEY', 'isolated-scope-test-only')
+    from backend.ingest import upload_jobs as jobs
+    from backend.ingest.chunker import Chunk
+    from backend.ingest.model_runtime import ModelRuntime, ModelRequestError, execution_context
+    from backend.rag.structured_output import StructuredOutputError
+    from backend.storage import paths
+    monkeypatch.setattr(paths, 'object_mode', lambda: False)
+    from backend.rag import llm, llm_context
+    import json
+    state = {'status': 'reading', 'execution_generation': 1}
+    config = SimpleNamespace(provider='fixture', model='fixture', base_url='https://fixture.invalid')
+    monkeypatch.setattr(llm_context, 'get_llm_config', lambda: config)
+    monkeypatch.setattr(llm, 'get_llm_config', lambda: config)
+    monkeypatch.setattr(jobs, '_chunk_result_path', lambda _t, index, _f=None: tmp_path / f'chunk-{index}.json')
+    bad = {'material_states': [{'material': 'CeH10', 'tc_results': [{'value_number': 56}]}]}
+    good = {'material_states': [{'material': 'CeH10', 'property_modules': []}]}
+    calls = []
+    def invoke(*_args, **_options):
+        calls.append(1)
+        return deepcopy(bad if len(calls) == 1 else good)
+    monkeypatch.setattr(llm, '_complete_json', invoke)
+    def runtime():
+        return ModelRuntime('a' * 32, 1, tmp_path / 'runtime', lambda: dict(state),
+            lambda **changes: state.update(changes), lambda: nullcontext(), identity={'model': 'fixture'})
+    chunk = Chunk(content='Current paper reports Tc < 56 K.', section_name='Results', chunk_index=0,
+                  paper_id=0, heading=None, token_count=10)
+    source = {'tc_material_scope': scope()}
+    with execution_context(runtime()), pytest.raises((StructuredOutputError, ModelRequestError)):
+        jobs._read_chunk('a' * 32, chunk, source=source)
+    assert not list((tmp_path / 'runtime').rglob('result.json'))
+    assert list((tmp_path / 'runtime').rglob('failure-*.json'))
+    with execution_context(runtime()):
+        result = jobs._read_chunk('a' * 32, chunk, source=source)
+    assert result['material_states'] == good['material_states']
+    assert len(calls) == 2
+    assert json.loads((tmp_path / 'chunk-0.json').read_text()) == result
+
+
 def test_reference_relationship_is_candidate_local_not_a_formula_or_chapter_filter():
     from backend.ingest.structure_reading import _apply_structure_scope
     source = {'a': {'content': 'Other work'}, 'b': {'content': 'This work studies it independently'}}
