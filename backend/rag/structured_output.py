@@ -7,6 +7,38 @@ class StructuredOutputError(ValueError):
     """结构不合规不能通过增加模型纠错轮次处理。"""
 
 
+def decode_tool_arguments(raw):
+    """只恢复已完整对象后的单个冗余闭合符，不修字段、内容或截断响应。"""
+    import json
+    import hashlib
+    import math
+    try:
+        return json.loads(raw), None
+    except json.JSONDecodeError as original:
+        if original.msg == 'Extra data':
+            def pairs(items):
+                value = {}
+                for key, item in items:
+                    if key in value: raise ValueError('duplicate key')
+                    value[key] = item
+                return value
+            def constant(_): raise ValueError('nonfinite constant')
+            def number(text):
+                value = float(text)
+                if not math.isfinite(value): raise ValueError('nonfinite number')
+                return value
+            try:
+                text = raw.lstrip()
+                value, end = json.JSONDecoder(object_pairs_hook=pairs, parse_constant=constant,
+                                              parse_float=number).raw_decode(text)
+                if isinstance(value, dict) and text[end:].strip() == '}':
+                    return value, {'normalization': 'redundant_terminal_object_closer',
+                                   'raw_sha256': hashlib.sha256(raw.encode()).hexdigest()}
+            except (ValueError, TypeError):
+                pass
+        raise StructuredOutputError('工具参数未形成完整JSON') from original
+
+
 def output_format(schema):
     try:
         Draft202012Validator.check_schema(schema)

@@ -230,22 +230,21 @@ def _stream_json(
         if runtime and not output_seen and finish_reason in (None, 'stop'):
             raise ModelNoOutputError('模型连接已结束，但未返回任何输出')
         if actions:
-            from .structured_output import StructuredOutputError, validate_tool_action
+            from .structured_output import StructuredOutputError, validate_tool_action, decode_tool_arguments
             _call_stats.set({**_call_stats.get(), 'tool_call_count': len(actions),
                 'tool_names': [action['name'] for action in actions.values()]})
             if len(actions) != 1 or finish_reason != "tool_calls" or not tool_definitions:
                 raise StructuredOutputError("只接受一次完整的已登记工具调用")
             index, action = next(iter(actions.items()))
             raw_arguments = action["arguments"]
-            try:
-                action["arguments"] = json.loads(action["arguments"])
-            except json.JSONDecodeError as exc:
-                raise StructuredOutputError("工具参数未形成完整JSON") from exc
+            action['arguments'], encoding = decode_tool_arguments(raw_arguments)
             if source_ids:
                 from .deepseek_strict import restore_source_ids
                 action['arguments']=restore_source_ids(action['arguments'],source_ids)
             action, bindings = validate_tool_action(action, tool_definitions, argument_context=_tool_argument_context)
             result = {"action": action, **({'_panel_bindings': bindings} if bindings else {})}
+            if encoding:
+                result['_argument_encoding'] = encoding
             if index in call_ids:
                 result["_tool_call"] = {"id": call_ids[index], "type": "function",
                     "function": {"name": action["name"], "arguments": raw_arguments}}
