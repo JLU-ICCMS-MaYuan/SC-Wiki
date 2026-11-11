@@ -1,0 +1,6 @@
+{
+  "retained_valid_count": 32,
+  "retained_exactly": true,
+  "source": "initial actual report vs final candidates; includes values, locators, geometry and identity",
+  "new_extraction_claimed_for_reused": false
+}

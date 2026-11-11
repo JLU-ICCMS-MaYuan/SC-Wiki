@@ -137,65 +137,28 @@ def test_real_reader_restores_alias_before_document_or_image_tool(tmp_path, name
         assert audit[0]['arguments']['block_id'] == original.block_id
 
 
-def test_partial_repair_must_not_replace_complete_structure_report(tmp_path):
-    from backend.ingest.structure_reading import extract_structure_candidates
-    path = tmp_path / 'two-structures.pdf'
-    with pymupdf.open() as pdf:
-        pdf.new_page().insert_text((40, 40), '\n'.join([
-            'NaCl 10 GPa Pm-3m fractional coordinates',
-            'a = b = c = 5.64 Angstrom', 'alpha = beta = gamma = 90 degree',
-            'Na 0.000 0.000 0.000', 'Cl 0.500 0.500 0.500',
-            'KCl 20 GPa Pm-3m coordinates', 'K 0.000 0.000 0.000']))
-        pdf.save(path)
-    source = {'file_id': 'si', 'role': 'supplementary', 'filename': path.name,
-              'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
-    calls, initial = [], []
-    class Captured(Exception):
-        pass
-    def model(system, payload, **options):
-        request = json.loads(payload)
-        calls.append(request)
-        if len(calls) == 1:
-            args = {'file_id': 'si', 'page': 1}
-            return {'action': {'name': 'read_original_page', 'arguments': args}, '_tool_call': {
-                'id': 'page', 'type': 'function', 'function': {'name': 'read_original_page', 'arguments': json.dumps(args)}}}
-        rows = request['sources']
-        def ref(prefix):
-            return next(row['source_id'] for row in rows if row['content'].startswith(prefix))
-        if len(calls) == 2:
-            for material, pressure, element, mode in [('NaCl', 10, 'Na', 'fractional'), ('KCl', 20, 'K', 'unknown')]:
-                initial.append({'material': material, 'pressure_value_gpa': pressure, 'space_group_symbol': 'Pm-3m',
-                    'coordinate_mode': mode, 'length_unit': 'angstrom', 'angle_unit': 'degree',
-                    'position_unit': 'dimensionless', 'cell_parameters': dict(a=5.64,b=5.64,c=5.64,alpha=90,beta=90,gamma=90),
-                    'cell_source_ids': [ref('a ='), ref('alpha =')], 'source_ids': [ref(material + ' ')],
-                    'atoms': [{'element': element, 'coordinates': [0,0,0], 'source_id': ref(element + ' ')},
-                              {'element': 'Cl', 'coordinates': [.5,.5,.5], 'source_id': ref('Cl ')}],
-                    'uncertainties': [], 'reason': '保留当前原页的结构行和坐标类型。'})
-            items = initial
-        elif len(calls) == 3:
-            items = [initial[1]]  # 模型只回答了有问题的邻项。
-        else:
-            receipt = json.loads(options['tool_history'][-1]['content'])
-            assert receipt['missing_structures'][0]['material'] == 'NaCl'
-            assert len(receipt['required_report_inventory']) == 2
-            assert '完整' in receipt['required_next_step']
-            raise Captured()
-        result = {'structures': items, 'uncertainties': [], 'reason': '报告已读原表'}
-        return {'action': {'name': 'report_structures', 'arguments': result}, '_tool_call': {
-            'id': f'report-{len(calls)}', 'type': 'function', 'function': {
-                'name': 'report_structures', 'arguments': json.dumps(result)}}}
-    with pytest.raises(Captured):
-        extract_structure_candidates('', source=source, pdf_path=path, model=model)
 
-
-def test_report_inventory_keeps_independent_same_condition_source_slots():
-    from copy import deepcopy
-    from backend.ingest.structure_reading import _missing_structure_reports
+def test_incremental_schema_uses_distinct_ids_even_for_same_condition_sources():
+    from backend.ingest.structure_reading import _repair_structure_schema, _schema, _apply_structure_updates
+    from backend.rag.structured_output import output_format
     first = dict(material='XH6', pressure_value_gpa=200, space_group_symbol='P1',
-        source_ids=['table'], cell_source_ids=['shared-cell'], atoms=[{'source_id': 'method-a-sites'}])
-    second = {**first, 'atoms': [{'source_id': 'method-b-sites'}]}
-    assert _missing_structure_reports([first, second], [first, deepcopy(first)]) == [second]
-    assert _missing_structure_reports([first, second], [second, first]) == []
-    # 原项的相同完整来源允许纠正条件；本检查不合并或恢复科学值。
-    corrected = {**first, 'space_group_symbol': 'P-1'}
-    assert _missing_structure_reports([first], [corrected]) == []
+                 source_ids=['table'], cell_source_ids=['cell'], atoms=[{'source_id':'method-a'}])
+    second = {**first, 'atoms':[{'source_id':'method-b'}]}
+    rows = {'first':{'status':'valid','structure':first},
+            'second':{'status':'blocked','structure':second}}
+    schema = _repair_structure_schema(_schema(['table','cell','method-a','method-b']), rows)
+    output_format(schema)
+    assert schema['properties']['updates']['items']['properties']['reading_id']['enum'] == ['second']
+    updated = _apply_structure_updates([{'reading_id':'second','structure':second}], rows)
+    assert updated == {'second':second}
+    assert rows['first']['structure'] is first
+
+
+def test_coverage_only_feedback_accepts_no_structure_rewrites():
+    from jsonschema import Draft202012Validator
+    from backend.ingest.structure_reading import _repair_structure_schema, _schema
+    from backend.rag.structured_output import output_format
+    schema = _repair_structure_schema(_schema(['source']), {'good':{'status':'valid'}})
+    output_format(schema)
+    Draft202012Validator(schema).validate({'updates':[], 'uncertainties':['仍有未读页'], 'reason':'只补覆盖范围'})
+    assert schema['properties']['updates']['maxItems'] == 0

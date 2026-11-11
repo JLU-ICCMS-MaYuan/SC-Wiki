@@ -1,0 +1,52 @@
+{
+  "task_id": "0f9ed9412e7f4ad2bac8ececcbbd1525",
+  "status": "extracting",
+  "stage": "extracting",
+  "job_id": "21574cce-b141-4e63-b020-24dc9c6c8144",
+  "execution_model": {
+    "provider": "server:LLM1",
+    "model": "deepseek-flash",
+    "catalog_id": "LLM1",
+    "input_hash": "b675daa87645c55fdeec1c299983ed2c75ce85f35e6041ffe8994b3391170659",
+    "endpoint_hash": "146dfd3a1cc41399419742ea11b6564accec6249bd2d758fff680b61caf3881e"
+  },
+  "reading_state": "extracting_sources",
+  "processing_error": null,
+  "completed_chunks": 0,
+  "total_chunks": 0,
+  "files": [
+    {
+      "file_id": "c19cfd4759f241ed840293637bbf2666",
+      "role": "main",
+      "sha256": "bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846",
+      "size": 3476148,
+      "original_filename": "2017 YHn LaHn-彭枫.pdf"
+    },
+    {
+      "file_id": "198c74c2e81c44f5bcea24a85de1cd0b",
+      "role": "supplementary",
+      "sha256": "361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93",
+      "size": 14260391,
+      "original_filename": "2017 YHn LaHn-彭枫 Supplementary.pdf"
+    }
+  ],
+  "previous": {
+    "task_id": "d789acceee124022b3257f84780d1156",
+    "status": "ready",
+    "stage": "ready",
+    "job_id": "e7f9b20c-7799-4e6e-bce9-a033cb0e343d",
+    "execution_model": {
+      "model": "gpt-6.1-sol",
+      "provider": "server:LLM2",
+      "catalog_id": "LLM2",
+      "input_hash": "ccaff15ce7571f2ce96e907a5152e8fd2340ee440552a040313a271016c5b5d3",
+      "endpoint_hash": "8f11cc1d483994c69a25d434dbc98dc8be8e43bd63ef3a59af2f68795f62e5af"
+    }
+  },
+  "rq": {
+    "status": "JobStatus.STARTED",
+    "worker": "1d73ac7a86604f8aa930c4469c456383",
+    "queue": "scwiki-upload"
+  },
+  "at": "2026-11-11T00:59:51.586684+00:00"
+}

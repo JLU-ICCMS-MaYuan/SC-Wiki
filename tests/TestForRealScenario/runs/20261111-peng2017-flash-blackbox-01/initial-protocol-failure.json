@@ -1,0 +1,13 @@
+{
+  "error": {
+    "error_type": "StructuredOutputError",
+    "status_code": null,
+    "code": "StructuredOutputError",
+    "message": "模型输出未遵守固定字段结构：panel（required）",
+    "request_id": null,
+    "output_started": true
+  },
+  "body": null,
+  "partial_response": "{\"tool_calls\": [{\"name\": \"digitize_image_elements\", \"arguments\": \"{\\\"region_id\\\": \\\"pdf-region-14a9958e77c91475eb675e4695d22ce523934f3c4a2ac7ffd5e8e0ec9642ce4a\\\", \\\"panel\\\": {\\\"axis\\\": {\\\"bounds\\\": [344.6, 611.4], \\\"scale\\\": \\\"linear\\\", \\\"ticks\\\": [{\\\"position\\\": 344.6, \\\"value\\\": 4}, {\\\"position\\\": 411.3, \\\"value\\\": 3}, {\\\"position\\\": 478.0, \\\"value\\\": 2}, {\\\"position\\\": 544.7, \\\"value\\\": 1}, {\\\"position\\\": 611.4, \\\"value\\\": 0}]}, \\\"categories\\\": [\\\"YH9\\\"], \\\"colorbar\\\": null, \\\"figure\\\": \\\"Fig. S14\\\", \\\"kind\\\": \\\"line\\\", \\\"layout\\\": \\\"sparse\\\", \\\"points\\\": [{\\\"category\\\": \\\"YH9\\\", \\\"conditions\\\": [], \\\"label_text\\\": null, \\\"label_value\\\": null, \\\"material\\\": \\\"YH9\\\", \\\"method_raw\\\": null, \\\"mu_star\\\": null, \\\"pixel_error\\\": 3, \\\"pressure_value_gpa\\\": null, \\\"reading\\\": \\\"position\\\", \\\"reason\\\": \\\"Total DOS (black) of YH9 at E-EF=0 (dotted Fermi line at x=943); curve height ~1.1 states/eV.\\\", \\\"series\\\": \\\"Total\\\", \\\"space_group_symbol\\\": null, \\\"x\\\": 943, \\\"y\\\": 538}], \\\"quantity\\\": \\\"dos_fermi\\\", \\\"quantity_name\\\": \\\"Electron DOS at Fermi level (Total)\\\", \\\"reason\\\": \\\"Middle panel DOS of YH9; Fermi level at E=0 dotted line.\\\", \\\"series\\\": [\\\"Total\\\"], \\\"unit\\\": \\\"states/eV\\\", \\\"unresolved\\\": [], \\\"x_axis\\\": {\\\"bounds\\\": [145.1, 943], \\\"scale\\\": \\\"linear\\\", \\\"ticks\\\": [{\\\"position\\\": 145.1, \\\"value\\\": -20}, {\\\"position\\\": 344.6, \\\"value\\\": -15}, {\\\"position\\\": 544.1, \\\"value\\\": -10}, {\\\"position\\\": 743.6, \\\"value\\\": -5}, {\\\"position\\\": 943, \\\"value\\\": 0}]}, \\\"x_quantity\\\": \\\"energy\\\", \\\"x_unit\\\": \\\"eV\\\"}}\"}]}",
+  "created_at": 1794359094.7724102
+}

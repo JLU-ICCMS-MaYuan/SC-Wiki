@@ -1,0 +1,5 @@
+
+> sc-wiki-frontend@1.0.0 test:field-contract
+> python3 ../scripts/check-scientific-field-contract.py
+
+科学字段契约v1基线通过：21论文字段、11材料字段、3软件组

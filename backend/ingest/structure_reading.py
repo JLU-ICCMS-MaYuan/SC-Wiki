@@ -360,32 +360,25 @@ def structure_tool_transport(definitions, catalog):
     return projected, restore
 
 
-def _missing_structure_reports(previous, current):
-    """整份报告不得被局部修订替换；来源锚点允许同一原项纠正条件。"""
-    def anchors(item):
-        return frozenset([*item['source_ids'], *item['cell_source_ids'],
-                          *(atom['source_id'] for atom in item['atoms'])])
-    def scope(item):
-        return (item['material'], item['pressure_value_gpa'], item['space_group_symbol'],
-                frozenset(item['cell_source_ids']))
-    remaining = list(current)
-    missing = []
-    for item in previous:
-        unique_scope = (sum(scope(row) == scope(item) for row in previous) == 1
-                        and sum(scope(row) == scope(item) for row in current) == 1)
-        match = next((i for i, row in enumerate(remaining)
-            if (unique_scope and scope(item) == scope(row))
-            or (anchors(item) and anchors(item) == anchors(row))), None)
-        if match is None:
-            missing.append(item)
-        else:
-            remaining.pop(match)
-    return missing
+def _apply_structure_updates(updates, rows):
+    """只接受本次失败项的稳定身份；完整验证前不修改已保存结果。"""
+    identities = [item['reading_id'] for item in updates]
+    if (len(set(identities)) != len(identities)
+            or any(key not in rows or rows[key]['status'] == 'valid' for key in identities)):
+        raise ValueError('结构修订身份重复、未知或指向已验证成功项')
+    return {item['reading_id']: deepcopy(item['structure']) for item in updates}
 
 
-def _structure_inventory(items):
-    return [{key: deepcopy(item[key]) for key in ('material', 'pressure_value_gpa',
-        'space_group_symbol', 'source_ids', 'cell_source_ids')} for item in items]
+def _repair_structure_schema(schema, rows):
+    pending = [key for key, row in rows.items() if row['status'] != 'valid']
+    result = obj({'updates': array(obj({
+        'reading_id': {'type': 'string', **({'enum': pending} if pending else {})},
+        'structure': deepcopy(schema['properties']['structures']['items'])})),
+        'uncertainties': array({'type': 'string'}), 'reason': {'type': 'string'}})
+    if not pending:
+        result['properties']['updates']['maxItems'] = 0
+    result['$defs'] = deepcopy(schema['$defs'])
+    return result
 
 
 def extract_structure_candidates(markdown, *, source, material_state_ref=None, pdf_path=None,
@@ -425,7 +418,7 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
     page_images, imaged_pages, history = {}, set(), []
     from .image_feedback import FeedbackProgress
     feedback = FeedbackProgress()
-    observation, complete_report = None, []
+    observation, structure_rows, coverage_candidates = None, {}, []
     for iteration in range(13):
         if cancelled(): raise InterruptedError('结构读取已取消')
         request = {'document': {'file_id': source['file_id'], 'role': source.get('role'),
@@ -438,6 +431,15 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
                 'pdf_page': page, 'source_sha256': source['sha256']}
                 for index, page in enumerate(page_images, 1)],
             'observation': observation, 'remaining_actions': tools.budget.max_actions - tools.budget.actions}
+        active_definitions = definitions
+        if structure_rows:
+            request['structure_repairs'] = [{'reading_id': key, 'structure': deepcopy(row['structure'])}
+                for key, row in structure_rows.items() if row['status'] != 'valid']
+            request['reused_reading_ids'] = [key for key, row in structure_rows.items() if row['status'] == 'valid']
+            active_definitions = [d for d in definitions if d['function']['name'] != 'report_structures']
+            active_definitions.append({'type': 'function', 'function': {'name': 'repair_structures',
+                'description': '仅返回structure_repairs中需要修订的项；成功项由宿主原样复用，禁止重写。',
+                'strict': True, 'parameters': _repair_structure_schema(schema, structure_rows)}})
         model_request, model_history = compact_model_context(request, history)
         event = {'iteration': iteration, 'request': model_request, 'tool_history': model_history,
                  'original_context': {'request': deepcopy(request), 'tool_history': deepcopy(history)},
@@ -449,8 +451,15 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
             partial['text'] = text
         try:
             from .tc_material_scope import scope_prompt
-            answer = model(PROMPT + scope_prompt(material_scope),
-                           json.dumps(model_request, ensure_ascii=False), tool_definitions=definitions,
+            instruction = PROMPT
+            if structure_rows:
+                instruction = instruction.replace('Return report_structures when finished.',
+                    'Initial discovery is complete. Use ONLY repair_structures for subsequent results. '
+                    'Its updates array contains only the reading_id and revised structure from structure_repairs. '
+                    'Do not return the full structures list or repeat valid neighbors; the host reuses them unchanged. '
+                    'Unchanged unresolved items may be omitted from updates and remain explicitly blocked.')
+            answer = model(instruction + scope_prompt(material_scope),
+                           json.dumps(model_request, ensure_ascii=False), tool_definitions=active_definitions,
                            **({'tool_history': model_history} if model_history else {}),
                            **({'images': list(page_images.values())} if page_images else {}),
                            on_partial=remember, retries=0)
@@ -465,39 +474,52 @@ def extract_structure_candidates(markdown, *, source, material_state_ref=None, p
         name, arguments = action.get('name'), action.get('arguments') or {}
         native = answer.get('_tool_call')
         arguments = restore_arguments(name, arguments)
-        if name == 'report_structures' or 'structures' in answer:
-            result = arguments if name == 'report_structures' else answer
-            validate_output(result, schema)
-            from .tc_material_scope import assert_allowed
-            assert_allowed(result['structures'], material_scope)
-            missing = _missing_structure_reports(complete_report, result['structures'])
-            candidates = _reading_result(result, catalog, read, imaged_pages, source) if not missing else []
-            issues = [{'candidate_id':c['candidate_id'],'source':c.get('sources'),
-                'reason_code':(c.get('validation') or {}).get('code'),
-                'reason':(c.get('validation') or {}).get('message')}
-                for c in candidates if c.get('status') == 'blocked']
-            if missing:
-                issues = [{'reason_code': 'incomplete_structure_report',
-                    'missing_structures': _structure_inventory(missing)}]
+        if name in {'report_structures', 'repair_structures'} or 'structures' in answer or 'updates' in answer:
+            result = arguments if name in {'report_structures', 'repair_structures'} else answer
+            if structure_rows:
+                if name != 'repair_structures' and not (name is None and 'updates' in answer):
+                    raise ValueError('结构反馈阶段只接受明确失败项的局部修订')
+                validate_output(result, _repair_structure_schema(schema, structure_rows))
+                updates = _apply_structure_updates(result['updates'], structure_rows)
             else:
-                complete_report = deepcopy(result['structures'])
+                validate_output(result, schema)
+                updates = {'structure-reading-' + content_hash(source['sha256'], index, item)[:24]: item
+                           for index, item in enumerate(result['structures'])}
+            from .tc_material_scope import assert_allowed
+            assert_allowed(list(updates.values()), material_scope)
+            reused = [key for key, row in structure_rows.items() if row['status'] == 'valid']
+            checked = _reading_result({'structures': list(updates.values()),
+                'uncertainties': result['uncertainties'], 'reason': result['reason']}, catalog, read, imaged_pages, source)
+            if len(checked) < len(updates):
+                raise ValueError('结构修订校验没有保持一项一结果')
+            coverage_candidates = checked[len(updates):]
+            for (key, item), candidate in zip(updates.items(), checked[:len(updates)]):
+                structure_rows[key] = {'structure': deepcopy(item), 'candidate': candidate, 'status': candidate['status']}
+            candidates = [deepcopy(row['candidate']) for row in structure_rows.values()] + coverage_candidates
+            issues = [{'reading_id': key, 'candidate_id':row['candidate']['candidate_id'],
+                'source':row['candidate'].get('sources'),
+                'reason_code':(row['candidate'].get('validation') or {}).get('code'),
+                'reason':(row['candidate'].get('validation') or {}).get('message')}
+                for key, row in structure_rows.items() if row['status'] == 'blocked']
+            issues.extend({'reading_id': None, 'candidate_id': c['candidate_id'], 'source': c.get('sources'),
+                'reason_code': 'incomplete_source_coverage', 'reason': (c.get('validation') or {}).get('message')}
+                for c in coverage_candidates)
+            if (name == 'repair_structures' or 'updates' in result) and on_event:
+                on_event({'iteration':iteration,'status':'structure-repair',
+                    'updated_reading_ids':list(updates),'reused_reading_ids':reused})
             # 理由换一种说法不是新依据；来源或实际候选变化仍会形成新反馈。
             progress = [{key: value for key, value in issue.items()
                          if key not in {'reason', 'candidate_id'}} for issue in issues]
-            if (result['structures'] or missing) and issues and iteration < 12 and feedback.observe('structure_verification', source['sha256'], progress):
+            if structure_rows and issues and iteration < 12 and feedback.observe('structure_verification', source['sha256'], progress):
                 observation = {'verification_issues':issues,
-                    'required_report_inventory': _structure_inventory(complete_report),
-                    'required_next_step':'按具体来源补读原页/文字或调整区域，返回完整结构报告，保留全部无关结构，不能只回答待修项；真实缺失保留原原因。'}
-                if missing:
-                    observation['missing_structures'] = _structure_inventory(missing)
+                    'reused_reading_ids': [key for key, row in structure_rows.items() if row['status'] == 'valid'],
+                    'required_next_step':'只核对structure_repairs列出的失败项，通过repair_structures提交有变化的项；其他成功项由宿主原样复用。真实缺失保留原原因，不声明为新提取。'}
                 if native:
                     history.extend([{'role':'assistant','content':None,'tool_calls':[native]},
                         {'role':'tool','tool_call_id':native['id'],'content':json.dumps(observation,ensure_ascii=False)}])
                 if on_event: on_event({'iteration':iteration,'status':'verification',
                     'issues':issues,'feedback':feedback.state()})
                 continue
-            if missing:
-                raise ValueError('结构修订报告遗漏此前结构，已保留完整响应，未采用局部结果覆盖')
             # 已有完整坐标/Wyckoff解码能力继续保留，但不再挡在AI内容识别之前。
             from .structure_extractor import extract_structure_candidates as decode_geometry
             decoded = decode_geometry(markdown, source=source, material_state_ref=material_state_ref, pdf_path=path)

@@ -1,0 +1,25 @@
+{
+  "tested_source_sha256": {
+    "backend/ingest/structure_reading.py": "5b0a06bd0b4693f0e6d1c1bcb27e4249b941228c24bd0ea9929c389b46ee92cb",
+    "backend/ingest/chart_reading.py": "25a48450b2d0418e84a506d04005d1580afefdcaf07e84414e5d064b7154226d",
+    "backend/tests/test_structure_incremental_repair.py": "847fd35ecbcc8d5d65fb50b769f47f75e0f1a4f90aa7f5bc59526fd8370932e6",
+    "tests/TestForRealScenario/test_structure_request_redundancy.py": "725623dbd3fa2eb90706da27967a4376cd71eebb0a1b2725087162a422f33927"
+  },
+  "isolated_tests_passed": 110,
+  "adjacent_shared_passed": 65,
+  "form_contract_node24_passed": 233,
+  "field_contract": "passed",
+  "mutation_detected": 12,
+  "business_phases_completed": [],
+  "dependency_manifest_unchanged": true,
+  "bandit": "unavailable",
+  "pip_audit": "unavailable",
+  "npm_vulnerabilities": {
+    "info": 0,
+    "low": 4,
+    "moderate": 6,
+    "high": 5,
+    "critical": 2,
+    "total": 17
+  }
+}
