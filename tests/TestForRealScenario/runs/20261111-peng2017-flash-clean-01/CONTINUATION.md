@@ -1,51 +1,63 @@
-# 当前接续入口（2026-11-12，目标今天09:00 Asia/Shanghai）
+# 当前接续入口（2026-11-12约06:37，目标09:00 Asia/Shanghai）
 
-## 必须继续的目标
+## 任务未完成，继续执行
 
-用户已批准程序管理唯一面板技术身份，要求先实现237–240，再继续Y-H双视觉模型真实五阶段以及最后重新上传、无需代码调试的一轮。后续按推荐意见执行，不再弹框。当前整个目标未完成，不能声明黑盒通过。
+用户已授权先面板技术身份、237–240，再完成Y-H双模型真实五阶段及最后同文件新上传无代码调试轮。不要弹框，按推荐方案执行；不改科学契约、不伪造通过。Flash尚无PaperID，整个黑盒没有完成。继续当前任务，不要中途删除重传。完整流程位于tests/TestForRealScenario/document-upload-blackbox-workflow.md。
 
-## 已提交
+任务b5a836764aa24e7cbb88b243a1ed2768；最新generation21从网页续跑，上一代23/29片段完成后空表框引用被原Schema拒绝。先读取get_state和chunks/manifest，别重复点。当前执行模型官方api.deepseek.com/deepseek-flash，Safari显示deepseek-v4.1-flash。主文3片段和多数SI已经提取；结构/原图成功步骤保留。未正式送审。
 
-- 11524ba8：程序唯一面板身份，48相邻测试、原失败回放；新模型科学未完成单列。
-- 07924cc1：237调研复核（远程Spec没推送，Issue保持OPEN）。
-- 5c8fcd31：238–240实现接线，128后端、12相关UI、250四宿主、12变异、字段契约、构建；SQL/RQ/HTTP独立恢复探针及人工材料不覆盖回归。真实新文献题目→第二Worker→交接业务仍需验证。新上传默认true，旧任务不自动策略回填。
-- e2929de6：仅完整原生JSON对象后单个冗余闭合大括号的有界解码，原参数/ID保留，80相关、250表单/12变异及字段契约；不修科学键、不加重试。
-- a3155260：恢复原234定位要求。轴刻度在实际定位带内须存在共同变换；横轴印刷文字位置，原像素同宽轴条及细节再次读取的坐标/附件身份保持。v12只重读失败面板，原38条主图数据确定性复核后原样复用、零AI。114相关、250表单、12变异、字段契约通过。SI13新Flash科学读取仍未通过（不能把0读数当过）。
+## 环境与禁止事项
 
-分支mayuan；未推送或部署；提交后工作树干净。代码检查每次写前/提交前核对分支。用户既有其他论文271/1204/1429保持。原数据库只读调查；业务只网页。
+cwd /Users/mayuan/Codes/SC-Wiki，分支mayuan。每次写文件、提交前查分支；合理验证后仅暂存本任务明确路径自动本地提交，AGENTS多行格式。不push/deploy/切分支/改库；不读取或记录密码、令牌、Key。Python /Users/mayuan/software/miniconda3/envs/sc-wiki/bin/python，Node PATH /Users/mayuan/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin。原生实时环境、业务MySQL127.0.0.1:3307/scwiki，10 Worker保持。watchfiles监视backend，编辑后端会重启Worker，先安全暂停或仅在失败时修改。不要派子代理。
 
-## 当前真实任务
+业务上传/保存/送审/退回/返修/批准只网页，允许只读DB/状态。用户授权跨轮定向清理当前轮，完整跑通后才清理并新上传，不能中途删稿跳生命周期。旧GPT调试轮已五阶段通过，论文1485已按流程清理并全量gzip存档；报告在../20261111-peng2017-flash-blackbox-01/GPT-DEBUG-ROUND-REPORT.md。不把已删除1485作为当前论文；不擅自增加所有模型必须同一SHA再完整跑的条件，用户要求两个不同模型通过及最后一轮新上传无调试。
 
-Task b5a836764aa24e7cbb88b243a1ed2768；原用户Safari窗口22617，详情http://127.0.0.1:5173/upload/tasks/b5a836764aa24e7cbb88b243a1ed2768。当前generation4，Job fbeee92c-b2ef-4815-a608-619236cc5084，实际STARTED，最新已从SI13推进SI14，extracting/chart_reading，无正式论文ID。下步先查实际状态，从成功步骤继续，别重传/删稿。
+## 浏览器
 
-实际LLM1/deepseek-flash，官方api.deepseek.com；官方当前pricing确认Flash支持Vision，别猜不支持或擅自换模型。主图Fig4原38条有独立原位图参照，零差异。task旧无human_questions_policy，按兼容规则不自动升级；最终新上传才默认启用。
+Safari窗口22617，原用户myth620137018@163.com：
+http://127.0.0.1:5173/account
+http://127.0.0.1:5173/upload
+http://127.0.0.1:5173/upload/tasks/b5a836764aa24e7cbb88b243a1ed2768
 
-两PDF：sources在../20261106-peng2017/sources，主文SHA bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846；SI SHA 361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93。角色及任务文件ID在实际state，不按文件名改角色。
+Chrome超管mayuan_mark@163.com，窗口1758018215历史审核页、1758018117/account。每次按实际URL重枚举，不沿用标签序号。browser_action.py用Python导入act(...,window=22617)整数调用；CLI window字符串比较有bug勿用。所有动作留events/action脚本。旧GPT manual_field_ui.py等只借鉴，硬编码旧Task/窗口/索引必须先重新绑定，不可原样执行。
 
-generation3已真正消费后因SI13原生参数完整对象多一个大括号失败，不是503/上下文超限。完整失败/请求归档native-json-failure。编码已修。由该真实回复进一步检出轴标定残差吸收错误和横轴错位，固定原图正反回归、缓存局部恢复及细节转接均修。隔离axis-calibration-live各时间目录保存新模型输出：初15条人工核对发现错0eV位置，后13预算耗尽、0条、7次0条均明确不计科学通过；不提高动作预算、不用GPT答案冒充Flash提取。真实任务目前继续后续图，能否形成完整草稿需实际检查。
+## 原文件和科学裁定
 
-## 科学裁定保留
+原件在../20261106-peng2017/sources：
+正文2017 YHn LaHn-彭枫.pdf，SHA bf0725bea058339b814489fe213ec8285a0fca01eb5143da95254330eea06846。
+SI 2017 YHn LaHn-彭枫 Supplementary.pdf，SHA 361ad424b516ced961f64c3aa37ee4e05b1539d3c3d5ed4fbb2659a39413ed93。
+DOI 10.1103/PhysRevLett.119.107001。
 
-LaH9@50只Cc，保留Fig1c冲突，不拆卡，S30声子350GPa不证明50GPa；PrH9@100两组0K为用户裁定且F-43m；CeH10@200 Tc/DOS Fm-3m，不混R-3m声子；ScH10@300仅P63/mmc结构，不录Cmcm；LaH10@200 EPC共用QE注明推断。笼型标签按用户先前清单核对。
+既有人类裁定不再问：
+- LaH9@50仅Cc，保留Fig1c P63/mmc冲突，S30声子是350GPa不能证明50GPa。
+- PrH9@100两组Tc=0K属用户裁定，F-43m；不能冒称模型从图框自动识零。当前提取仅保留DOS，没有<56K的Tc记录，稍后用正常人工表单落实裁定。
+- CeH10@200 Tc/DOS Fm-3m，R-3m声子来源不混用。
+- ScH10@300仅P63/mmc结构，不录Cmcm。
+- LaH10@200共用QE，注明推断；800eV/2π×0.03Å^-1属VASP/CASTEP优化，不能给QE。
+- 笼型标签：Fm-3m YH10/CeH10/LaH10、P63/mmc YH9/CeH9。
+- 原文YH9@150 λ4.42、Tc276/253；YH10@400 λ2.41、Tc303/287；mu0.1/0.13。主图Flash图读值可有约数偏差，但不能覆盖原文精确值且保留候选去向。S15 λ沿横轴，不拿纵向频率当λ。
 
-退回两项：论文图谱标题目标High-throughput Study on Rare-earth Clathrate Hydride High-temperature Superconductors（当前草稿标题仍不同，是真实修改项）；材料级若ScH6@300还错Im-3m则改P63/mmc/194/hexagonal，保持约99/86K和mu，不借别压晶胞。若已正确就选其他真实修改/缺注释项，用户允许按推荐不弹框，不故意改坏。
+返修图谱标题目标High-throughput Study on Rare-earth Clathrate Hydride High-temperature Superconductors。材料项若ScH6@300仍Im-3m则改P63/mmc/194/hexagonal并保留Tc约99/86及来源，不借别压晶胞；已正确不故意改坏，按授权找其他真实缺少的说明或修改项，记录前后依据。
 
-## 已完成的GPT排障轮与最终未完成范围
+## 新提交与故障处理
 
-GPT旧任务d789...正式论文1485曾走通完整五阶段；报告../20261111-peng2017-flash-blackbox-01/GPT-DEBUG-ROUND-REPORT.md，45物性/31结构及2009字段来源关系回读一致。已按用户流程网页定向删除1485和旧Flash0f9...，完整科学图gzip归档。它发生代码调试，不是最终无调试轮。必须继续当前Flash五阶段，留证后正常清理本轮数据、同原文件新上传走无需调试五阶段；用户还要求不同两模型都通过，GPT也需最终干净复测，不能拿旧1485已删除的结果替代。
+HEAD 81ab3d9e，当前修改已提交，未push/deploy。此前面板11524ba8、237调研07924cc1、238–240接线5c8fcd31，边界见各Spec validation。真实新文献问答→第二Worker→交接尚需留证；当前旧Task没有human_questions_policy，最终新上传默认开启。
 
-## 浏览器与可复用脚本
+新增：
+- a1244554：API completed且完整action唯一，仅缺固定最外层闭合时由宿主管理外框，内部缺损不修；原失败及54/23相关通过。
+- 22a1c21b：分类提示列明已有枚举，不转换坏响应。原失败重放拒绝，原文2/2新Flash判断matched，结构/材料正式继续。
+- 986c5c01：原assert_allowed接入ModelRuntime validate_result，范围保护拒绝的旧缓存先归档再重提，不再反复复用坏答案；72相邻、250表单/12变异/字段契约。
+- 81ab3d9e：官方Flash自动response_schema请求复用已有Responses受限动作；明确Chat、第三方、其他原生工具不改。用原Schema解包host动作，不伪造nativeID；实际动作Schema/说明计入96000，原规范有效检查点继续复用。真实同原文探针11候选Schema过但范围科学未过，分开记。
+  同时修复v2范围审计把别窗全文与块号注入system：current物性请求仅投影结论/理由/来源位置，完整审计留state，不能充当当前已读块。结构/目录目的继续旧提示保持缓存。105相邻、字段契约、全表单复跑250、12变异通过。
+- Responses strict上游仍可能不遵守Schema，不宣称协议保证所有回复合法。第19代metadata擅加3键被拒，原样留证后UI重试第20代推进23/29。最新空表框块ID确实在当前输入，但text空、不可引用，保护正确，无代码变更，UI续跑第21代。
 
-Safari22617有upload、task、account（普通用户myth620137018@163.com，LLM1已实读）；Chrome1758018215超管历史工作区，1758018117/account（mayuan_mark@163.com、超级管理员，LLM2）。每次按URL重枚举，不记标签序号。
+测试有一次249/1表单等待失败（226枚举应用后保存按钮），隔离4通过及原全套复跑250通过；没改前端/测试超时/断言。错误辅助命令路径与缺JWT导致未有效执行单列，不当产品失败。/tmp/scwiki-schema-source-final.log为105通过，schema-form-repeat.log250，schema-mutation.log12检出。各失败原请求/回执归档在本目录workflow-enum-failure、chunk-source-failure、range-scope-cache-failure、scope-audit-source-failure、metadata-extra-fields-failure、empty-table-citation-failure。
 
-本轮browser_action.py act(...,window=22617) Python导入调用有效；CLI window参数是字符串，不能用CLI传window（会比较失败），要转int或省略仅URL唯一时。正文DOM脚本不会读取密码/token。旧GPT manual_field_ui.py 等可借鉴，硬编码旧task/window/字段序号，必须复制后按本轮真实状态重新绑定，不能原样运行。
+## 下一步
 
-真实上传/保存/提交/拒绝/返修/批准只网页。只读DB核验所有权组/方法/结构，不直接SQL/API改业务。原生确认框若卡死先核对窗口；旧源文献/用户数据不清理。模型请求并发保持10注册Worker，空闲心跳约480秒不等于故障。
+1. 继续当前21代至解析和整理完整草稿。所有主要科学值、所属状态、方法/参数/结构/选定来源按原文与既有裁定核验，用正常网页保存重读。
+2. 用户送审→超管真实两项退回→原用户同ID返修重提→超管具体真实日志批准→探索YH10打开该轮Paper→只读MySQL按组/方法所有权查正式数据和来源哈希。
+3. 调试轮五阶段全通才归档/定向清理，然后同两原PDF新上传最终无需代码调试五阶段，保留最终正式论文。不能ready或局部测试就结束。
+4. 每分钟内有有意义更新。时间目标09:00不是伪造通过的理由；真实不可恢复外部阻塞明确说明停点。
 
-## 记录
-
-最新实现验收在docs/specs/238、239、240/validation.md及234/axis-calibration-validation.md。原失败和各运行日志位于本目录。使用过全局MEMORY.md的227历史注册，最终引用重新核对78–111附近准确行，不能用旧30–34。不可更新全局记忆（未授权）。
-
-## 03:51后最新补充（优先于前述运行中快照）
-
-Task第4代已在SI14因缺panel而唯一几何不足停止，目前仍failed、无PaperID。工作区正在验证v13：真实6闭合框能唯一恢复旧native缺键，横轴主值角色明确；旧matplotlib/Source ownership bug也补了当前面板/唯一共用轴限制与曲线纯图框保护。最新隔离λB约2.3±图读分辨率0.2，A未解决；不能称整图过。新代码需最终测试、本地提交后，仍从同Task网页继续。未上传/删稿/送审；后续必须真的走完整流程及最后新上传无调试轮。
+用过全局MEMORY.md #227注册，最后引用准确78–111附近行及对应rollout ID；不更新全局记忆。后续状态易变，此文件不能替代get_state与真实网页确认。
