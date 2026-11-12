@@ -48,6 +48,11 @@ and evidence instead of flattening it into a falsely exact bare number. Reading 
 the source facts and is not a physical uncertainty field. Prefer an explicitly reported exact value
 for the same underlying result when the read original context establishes that relationship.
 Only dos_fermi is a standard electronic property in this profile; do not generate band_gap. DOS uses its own units/definitions.
+This patch organizes BOTH Tc AND electronic dos_fermi candidates. A numeric dos_fermi candidate is
+a scientific result and must remain in records (or unresolved with its real scientific reason), never
+excluded just because it is not Tc. The host preserves only the separate historical provenance archive,
+not a missing output candidate. Use its existing candidate_id and property-specific units; the host
+retains its electronic record type. Tc method/group rules apply to Tc, not to DOS.
 Reuse parameters.lambda_ep, omega_log, mu_star; do not create synonymous extension fields.
 Unreported omega_log, smearing or QE functional stays empty. Never transfer VASP PBE to QE.
 Read Methods, table notes and SI to fill genuinely missing reported values, not just mark the first miss.
@@ -91,7 +96,8 @@ PROMPT += """
 candidate_evidences may reference a source_id and quote_span in the original source catalog instead
 of repeating its text. Read that source; if it is only in source_index request read_source_ids first.
 quote_span uses original Unicode characters, left closed/right open. Do not treat evidence_id as a
-source_id. The host keeps full provenance, including dos_fermi_sources, outside this value/grouping patch.
+source_id. The host keeps the separate historical dos_fermi_sources provenance archive unchanged;
+this does not remove current dos_fermi candidates from this value/grouping patch.
 """
 
 
@@ -360,7 +366,8 @@ def apply_plan(states, sources, response, *, state_offset=0):
             si, mi, record = original[key]
             if action == "excluded":
                 if _numeric(record) or entry.get("category") not in {"curve_only", "method_description", "non_result"}:
-                    raise ValueError("不能以图注或方法理由丢弃数值结果")
+                    raise ValueError(f"不能以图注或方法理由丢弃数值结果：{key}（{record.get('property_code')}）；"
+                        "本次同时整理tc和dos_fermi，当前数值候选须保留在records，或说明真实科学疑点列入unresolved，不能假定宿主会代补")
                 _evidence(entry.get("source_ids"), by_source)
             else:
                 if entry.get("category") not in {"not_reported", "ambiguous", "conflict", "unreadable"}:

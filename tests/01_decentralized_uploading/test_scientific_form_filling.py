@@ -177,6 +177,20 @@ def test_numeric_result_cannot_be_excluded_as_curve_text():
         apply_plan([state], sources, plan)
 
 
+def test_dos_exclusion_feedback_identifies_current_candidate_without_dropping_it():
+    from backend.ingest.scientific_form_filling import apply_plan
+    state, sources = fixture()
+    record = deepcopy(state['property_modules'][0]['records'][2])
+    record.update(record_type='property', property_code='dos_fermi', value_number=.0231)
+    state['property_modules'] = [{'module_code':'electronic_properties','records':[record]}]
+    plan = {'done':True,'records':[], 'unresolved':[], 'excluded':[{
+        'candidate_id':'s0:m0:r0','category':'non_result','source_ids':[sources[0]['source_id']],
+        'reason':'DOS is not Tc and is supposedly retained by host archive.'}]}
+    with pytest.raises(ValueError, match=r's0:m0:r0.*dos_fermi'):
+        apply_plan([state], sources, plan)
+    assert record['value_number'] == .0231
+
+
 def test_llm_requests_unread_block_then_fills_missing_value():
     from backend.ingest.scientific_form_filling import fill_scientific_forms
     state, _ = fixture()
