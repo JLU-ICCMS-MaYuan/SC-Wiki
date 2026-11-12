@@ -262,7 +262,7 @@ def test_feedback_checkpoint_resumes_with_pixels_and_without_reasking_successes(
 
 
 @pytest.mark.parametrize('fault',['roi','unit'])
-def test_spectrum_feedback_uses_new_crop_as_evidence_and_keeps_original_coordinates(tmp_path,fault):
+def test_spectrum_feedback_uses_new_crop_as_evidence_and_keeps_original_coordinates(tmp_path,fault,monkeypatch):
     import base64,hashlib,io
     import pymupdf
     from PIL import Image
@@ -270,6 +270,10 @@ def test_spectrum_feedback_uses_new_crop_as_evidence_and_keeps_original_coordina
     from backend.ingest.document_ir import DocumentIR,DocumentBlock,PageGeometry,content_hash
     from backend.ingest.pdf_regions import region_locator,render_region_image
     from backend.ingest.image_feedback import read_spectrum
+    from types import SimpleNamespace
+    from backend.rag import llm_context
+    monkeypatch.setattr(llm_context,'get_llm_config',lambda:SimpleNamespace(
+        base_url='https://api.deepseek.com',model='deepseek-flash'))
     image,correct=fixture();out=io.BytesIO();Image.fromarray(image).save(out,format='PNG')
     path=tmp_path/'spectrum.pdf'
     with pymupdf.open() as pdf:
@@ -291,6 +295,12 @@ def test_spectrum_feedback_uses_new_crop_as_evidence_and_keeps_original_coordina
     original='data:image/png;base64,'+base64.b64encode(rendered['png']).decode();calls=[]
     def model(prompt,content,**options):
         request=json.loads(content);calls.append(request)
+        if 'report_spectrum_calibration' in [x['function']['name'] for x in options.get('tool_definitions',[])]:
+            assert options.get('_json_action_transport') is True
+            target=request['target_image']
+            assert target['original_image']==1 and target['coordinate_space']=='full_original_pixels'
+            assert target['sha256']==hashlib.sha256(rendered['png']).hexdigest()
+            assert target['size_px']==[rendered['width'],rendered['height']]
         schema=next(x['function']['parameters'] for x in options['tool_definitions']
                     if x['function']['name']=='report_spectrum_calibration')
         assert 'prefixItems' not in json.dumps(schema)

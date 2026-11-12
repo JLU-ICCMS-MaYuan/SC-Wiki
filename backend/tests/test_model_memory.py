@@ -3,6 +3,26 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables import RunnableLambda
 
 
+def test_identical_current_observation_is_referenced_without_summarizing_science(tmp_path):
+    import json
+    from copy import deepcopy
+    from backend.ingest.model_memory import prepare_request, _fixed_token_estimate
+    receipt={'action':'read_complete_object','file_id':'original',
+             'text_observations':[{'text':f'Original unabridged row {i}: value 4.4788'}for i in range(600)]}
+    request={'system_prompt':'Read the original source.', 'user_prompt':json.dumps({'observation':receipt}),
+             'tool_history':[{'role':'assistant','content':None,'tool_calls':[{'id':'actual',
+                'type':'function','function':{'name':'read_complete_object','arguments':'{}'}}]},
+                {'role':'tool','tool_call_id':'actual','content':json.dumps(receipt)}]}
+    original=deepcopy(request)
+    prepared=prepare_request(request,tmp_path,budget=_fixed_token_estimate(request)+500)
+    assert json.loads(prepared['user_prompt'])['observation']==receipt
+    reference=json.loads(prepared['tool_history'][1]['content'])
+    assert reference['source_text_location']=='request.observation'
+    assert prepared['tool_history'][0]==request['tool_history'][0]
+    assert prepared['tool_history'][1]['tool_call_id']=='actual'
+    assert request==original and not (tmp_path/'memory.json').exists()
+
+
 def test_repeated_long_source_identifiers_fit_without_losing_identity(tmp_path):
     import hashlib,json
     from backend.ingest.model_memory import prepare_request, expand_source_texts, _fixed_token_estimate

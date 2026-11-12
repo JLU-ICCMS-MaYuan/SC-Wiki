@@ -590,6 +590,7 @@ def save_draft(task_id: str, draft: dict[str, Any], *, editor=None, changes=None
     publish_cache()
     if state.get("is_shadow"):
         return draft
+    persisted_draft = draft
     with SessionLocal.begin() as session:
         from backend.services.workdrafts import row
         current = row(session, 'upload', task_id, True)
@@ -611,7 +612,13 @@ def save_draft(task_id: str, draft: dict[str, Any], *, editor=None, changes=None
                     persist_upload(session, task_id, state, draft)
                     client.persist(task_key(task_id))
                     client.persist(draft_key(task_id))
-    return draft
+        if current is not None:
+            # 同一行锁事务内读取SQL实际存储表示，不能在事务外采纳并发人工稿。
+            session.flush()
+            session.refresh(current, attribute_names=['body'])
+            from .tc_contexts import map_draft
+            persisted_draft = map_draft(current.body)
+    return persisted_draft
 
 
 def task_directory(task_id: str) -> Path:

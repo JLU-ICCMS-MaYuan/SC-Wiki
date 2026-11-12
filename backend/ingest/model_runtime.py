@@ -543,6 +543,32 @@ def _unchanged_legacy_generated_draft(task_id, state, draft):
                  or snapshot['execution_generation'] == state.get('execution_generation')))
 
 
+def _unchanged_sql_generated_draft(task_id, state, draft):
+    """旧检查点的原AI快照只允许数据库自身的精确JSON表示变化。"""
+    from .upload_tasks import artifact_path
+    from .evidence_audit import current_change_events
+    if draft is None or current_change_events(state) or current_change_events(draft):
+        return False
+    snapshot = read_json(artifact_path(task_id), {})
+    original = snapshot.get('ai_values') if isinstance(snapshot, dict) else None
+    if (not isinstance(original, dict) or snapshot.get('task_id') != task_id
+            or 'paper_id' not in snapshot or snapshot['paper_id'] is not None
+            or 'user_values' not in snapshot or snapshot['user_values'] is not None
+            or snapshot.get('execution_generation') != state.get('execution_generation')
+            or not state.get('execution_input_hash')
+            or snapshot.get('execution_input_hash') != state['execution_input_hash']
+            or digest(original) != state.get('execution_draft_hash')):
+        return False
+    from backend.database import SessionLocal
+    from sqlalchemy import text
+    with SessionLocal() as session:
+        if session.bind.dialect.name != 'mysql':
+            return False
+        encoded = session.execute(text('SELECT CAST(:generated_json AS JSON)'),
+            {'generated_json': json.dumps(original, ensure_ascii=False)}).scalar_one()
+    return json.loads(encoded) == draft
+
+
 def resume_task(task_id):
     from .upload_tasks import get_state, get_draft, update_state, upload_task_lock, enqueue_processing, redis_client, draft_key
     from backend.rag.llm_context import get_llm_config
@@ -561,7 +587,8 @@ def resume_task(task_id):
         draft = get_draft(task_id)
         draft_hash = digest(draft)
         if (state.get("execution_draft_hash") and state["execution_draft_hash"] != draft_hash
-                and not _unchanged_legacy_generated_draft(task_id, state, draft)):
+                and not _unchanged_legacy_generated_draft(task_id, state, draft)
+                and not _unchanged_sql_generated_draft(task_id, state, draft)):
             raise ValueError("当前草稿已变化，不能用旧上下文覆盖，请保留草稿后处理")
         identity = state.get("execution_model") or {}
         config = get_llm_config()

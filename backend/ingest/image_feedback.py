@@ -533,6 +533,12 @@ def read_spectrum(model,prompt,payload,figure,states,images):
         'strict':True,'parameters':_spectrum_wire_schema(_strict(Reading.model_json_schema()))}})
     request={**payload,'region_id':figure['region_locator']['region_id'],
         'target_bbox_pdf_pt':figure['bbox_pdf_pt'],'feedback_version':VERSION}
+    import hashlib
+    with Image.open(io.BytesIO(figure['image'])) as target:
+        request['target_image'] = {'original_image': 2 if figure.get('context_image') else 1,
+            'size_px': list(target.size), 'sha256': hashlib.sha256(figure['image']).hexdigest(),
+            'coordinate_space': 'full_original_pixels',
+            'attachment_mapping': 'IMAGE_TILE_MANIFEST maps attachments to this original image; add tile offsets for original pixel coordinates.'}
     progress=FeedbackProgress();history=[];target_images=list(images);exhausted=set()
     for iteration in range(13):
         available=deepcopy([d for d in definitions if d['function']['name'] not in exhausted
@@ -541,10 +547,20 @@ def read_spectrum(model,prompt,payload,figure,states,images):
             properties=definition['function']['parameters']['properties']
             if 'region_id' in properties:properties['region_id']={'type':'string','enum':list(tools.regions)}
         request['available_regions']=list(tools.regions.values())
+        options = {'images': images, 'tool_definitions': available, 'read_timeout': 180}
+        from backend.rag.llm_context import get_llm_config
+        from backend.rag.deepseek_strict import official
+        from backend.rag.registered_actions import FLASH_MODELS
+        config = get_llm_config()
+        if official(config) and config.model in FLASH_MODELS:
+            options['_json_action_transport'] = True
+        if history:
+            options['tool_history'] = history
         result=model(prompt+'\nUse report_spectrum_calibration; extra crops are evidence only. '
-            'Report pixel coordinates in the ORIGINAL target image (attachment 2 when context is present), never in an extra crop.',
-            json.dumps(request,ensure_ascii=False),images=images,tool_definitions=available,
-            **({'tool_history':history} if history else {}),read_timeout=180)
+            'target_image identifies the ORIGINAL target before transport tiling, not an attachment position. '
+            'Use its full original pixel dimensions for roi, ticks, and trace_anchors; never 0–1000 normalized coordinates. '
+            'When IMAGE_TILE_MANIFEST is present, use original_image to find its attachments; never use a context tile or extra crop coordinate frame.',
+            json.dumps(request,ensure_ascii=False),**options)
         action=result.get('action') or {};native=result.get('_tool_call');name=action.get('name')
         if name in names:
             arguments={k:v for k,v in (action.get('arguments') or {}).items() if k!='reason'}
@@ -560,8 +576,7 @@ def read_spectrum(model,prompt,payload,figure,states,images):
             except ValueError as error:
                 request['observation']={'error':str(error),'available_regions':list(tools.regions)}
                 if not progress.observe(name,arguments,{'error':str(error)}):exhausted.add(name)
-            if native:history=[{'role':'assistant','content':None,'tool_calls':[native]},
-                {'role':'tool','tool_call_id':native['id'],'content':json.dumps(request['observation'],ensure_ascii=False)}]
+            history = _action_history(action,request['observation'],native,result.get('_tool_transport'))
             continue
         answer=action.get('arguments') if name=='report_spectrum_calibration' else result
         if not isinstance(answer, dict) or not isinstance(answer.get('panels'), list):
@@ -582,6 +597,5 @@ def read_spectrum(model,prompt,payload,figure,states,images):
         if not failures:return answer
         if not progress.observe('spectrum_verification',figure['region_locator']['region_id'],failures):return answer
         request['verification_issues']=failures
-        if native:history=[{'role':'assistant','content':None,'tool_calls':[native]},
-            {'role':'tool','tool_call_id':native['id'],'content':json.dumps({'failures':failures},ensure_ascii=False)}]
+        history = _action_history(action,{'failures':failures},native,result.get('_tool_transport'))
     raise ValueError('谱图工具预算已耗尽，原标定与成功结果保留')

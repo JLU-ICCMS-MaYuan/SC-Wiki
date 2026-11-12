@@ -163,7 +163,7 @@ def calibrate(figure: dict, states: list[dict], *, complete=None):
     images=["data:image/png;base64,"+base64.b64encode(figure["image"]).decode()]
     if figure.get('context_image'):
         images.insert(0,"data:image/png;base64,"+base64.b64encode(figure['context_image']).decode())
-    prompt=CALIBRATION_PROMPT+'\n若有两张图片，第1张为整图及完整图注，第2张为标定目标；所有像素坐标按标定目标。'
+    prompt=CALIBRATION_PROMPT+'\n分片传输前的原始图片1为上下文、原始图片2为标定目标（只有一张时为原始图片1）；原始图片序号不等于实际附件序号。以target_image和IMAGE_TILE_MANIFEST确定目标及完整原图像素坐标，不以分片像素或0–1000归一化坐标报告。'
     payload=dict(size_px=figure['size_px'],caption_context=figure['text'],material_states=hints)
     if figure.get('document_ir') and figure.get('_pdf_path'):
         from backend.ingest.image_feedback import read_spectrum
