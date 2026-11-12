@@ -261,6 +261,8 @@ export interface UploadTokenUsage {
 }
 
 export interface UploadTaskState {
+  parsing_mode?: 'shallow' | 'deep' | null
+  defer_parsing?: boolean
   pause_reason?: string | null
   human_questions_summary?: { queue_revision: number; pending_count: number;
     can_create_questions: boolean; can_answer_existing: boolean }

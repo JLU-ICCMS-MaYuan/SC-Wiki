@@ -36,6 +36,11 @@ class FileDeclaration(BaseModel):
 class CreateUploadTask(BaseModel):
     files: list[FileDeclaration] = Field(min_length=1)
     parser_profile: Literal["complementary"] | None = None
+    defer_parsing: bool = False
+
+
+class FinalizeUploadTask(BaseModel):
+    parsing_mode: Literal["shallow", "deep"] | None = None
 
 
 class RoleDecision(BaseModel):
@@ -126,6 +131,7 @@ def create_upload_task(
             current_user.id,
             files=[item.model_dump() for item in body.files],
             parser_profile=body.parser_profile,
+            defer_parsing=body.defer_parsing,
         )
     except ValueError as exc:
         message = str(exc)
@@ -283,7 +289,7 @@ async def upload_task_file(
         await file.close()
 
     queued = False
-    if all(item.get("upload_status") == "completed" for item in state.get("files") or []):
+    if not state.get("defer_parsing") and all(item.get("upload_status") == "completed" for item in state.get("files") or []):
         state, queued = lock_uploaded_manifest(task_id)
         if queued:
             try:
@@ -298,16 +304,22 @@ async def upload_task_file(
 
 
 @router.post("/{task_id}/finalize")
-def finalize_upload_task(task_id: str, current_user: User = Depends(get_current_user)):
+def finalize_upload_task(task_id: str, body: FinalizeUploadTask | None = None,
+                         current_user: User = Depends(get_current_user)):
     from backend.ingest.upload_tasks import enqueue_processing, lock_uploaded_manifest
 
     _owned_state(task_id, current_user)
     try:
-        state, queued = lock_uploaded_manifest(task_id)
+        state, queued = lock_uploaded_manifest(task_id, parsing_mode=body.parsing_mode if body else None)
     except ValueError as exc:
         raise _error(409, "UPLOAD_INCOMPLETE", str(exc)) from exc
     if queued:
-        enqueue_processing(task_id)
+        try:
+            enqueue_processing(task_id)
+        except Exception as exc:
+            update_state(task_id, status='failed', processing_status='failed',
+                         error_code='upload_queue_unavailable', processing_error=str(exc))
+            raise _error(503, 'UPLOAD_QUEUE_UNAVAILABLE', '文件已保存，但解析任务暂时无法启动') from exc
     return {"ok": True, "queued": queued, "data": public_task_state(state)}
 
 

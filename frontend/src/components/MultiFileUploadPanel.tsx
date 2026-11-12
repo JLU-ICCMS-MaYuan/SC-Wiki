@@ -100,6 +100,7 @@ const MultiFileUploadPanel: React.FC<Props> = ({ onCreated }) => {
     try {
       const created = await api.post<{ ok: boolean; data: UploadTaskState }>('/api/upload-tasks', {
           parser_profile: 'complementary',
+          defer_parsing: true,
         files: items.map(item => ({
           client_id: item.clientId, role: item.role, filename: item.file.name,
           size: item.file.size, media_type: item.file.type || null,

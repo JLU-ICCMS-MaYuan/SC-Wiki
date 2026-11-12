@@ -73,7 +73,14 @@ func GetPaper(c *gin.Context) {
 			return
 		}
 	}
-	c.JSON(http.StatusOK, paperForViewer(paper, user, workflows[paper.ID]))
+	result := paperForViewer(paper, user, workflows[paper.ID])
+	if paper.ReviewStatus == "published" {
+		if err := addShallowSubmissionMetadata(database.DB, &paper, result); err != nil {
+			c.JSON(503, gin.H{"error": "论文收录信息暂不可读取，请重试"})
+			return
+		}
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 // targetPaperGraphQuery 集中声明 #90 读取契约，避免公开、管理和上传者详情各自漏载关联。
@@ -132,7 +139,7 @@ func paperOwner(paper *models.Paper, user *models.User) bool {
 }
 
 func canViewPaper(paper *models.Paper, user *models.User) bool {
-	if paperAdmin(user) || paper.ReviewStatus == reviewStatusApproved {
+	if paperAdmin(user) || paper.ReviewStatus == reviewStatusApproved || paper.ReviewStatus == "published" {
 		return true
 	}
 	if user == nil {
@@ -154,7 +161,7 @@ func paperForViewer(paper models.Paper, user *models.User, workflow ...paperWork
 		result["uploaded_by_user_id"] = paper.UploadedBy
 		result["reviewed_by_user_id"] = paper.ReviewedBy
 	}
-	result["can_edit"] = (paperOwner(&paper, user) && paper.ReviewStatus != reviewStatusRejected) || paperAdmin(user)
+	result["can_edit"] = paper.ReviewStatus != "published" && ((paperOwner(&paper, user) && paper.ReviewStatus != reviewStatusRejected) || paperAdmin(user))
 	status := paper.ReviewStatus
 	if len(workflow) > 0 && workflow[0].Status != "" {
 		status = workflow[0].Status
@@ -183,11 +190,11 @@ func ListPapers(c *gin.Context) {
 	query := database.DB.Model(&models.Paper{})
 	if !paperAdmin(user) {
 		if user == nil {
-			query = query.Where("review_status = ?", reviewStatusApproved)
+			query = query.Where("review_status IN ?", []string{reviewStatusApproved, "published"})
 		} else {
 			query = query.Where(
 				"review_status IN ? OR (review_status = ? AND uploaded_by_user_id = ?)",
-				[]string{reviewStatusApproved, reviewStatusPending}, reviewStatusRejected, user.ID,
+				[]string{reviewStatusApproved, reviewStatusPending, "published"}, reviewStatusRejected, user.ID,
 			)
 		}
 	}
@@ -231,6 +238,10 @@ func PatchPaper(c *gin.Context) {
 	}
 	if !paperOwner(&paper, user) && !paperAdmin(user) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "无权修改该论文"})
+		return
+	}
+	if paper.ReviewStatus == "published" {
+		c.JSON(http.StatusConflict, gin.H{"code": "shallow_paper_read_only", "error": "直接收录论文当前为只读，请在提交入库前完成编辑"})
 		return
 	}
 	if !paperAdmin(user) && paper.ReviewStatus == reviewStatusRejected {
@@ -631,7 +642,9 @@ func paperToDict(p models.Paper) gin.H {
 		"knowledge_graph_title": p.KnowledgeGraphTitle,
 		"key_finding":           p.KeyFinding,
 		"research_motivation":   p.ResearchMotivation,
+		"research_materials":    p.ResearchMaterials,
 		"review_status":         p.ReviewStatus,
+		"parsing_mode":          map[bool]string{true: "shallow", false: "deep"}[p.ReviewStatus == "published"],
 		"created_at":            p.CreatedAt,
 		"updated_at":            p.UpdatedAt,
 		"tc_max":                tcMax,
@@ -820,4 +833,48 @@ func flatRecordToDict(row recordSearchRow) gin.H {
 		"status":        status,
 		"doi":           row.DOI,
 	}
+}
+
+// 直接收录仍保留作者身份和未创建全站目录的家族名称；不把候选当作已审核目录。
+func addShallowSubmissionMetadata(db *gorm.DB, paper *models.Paper, result gin.H) error {
+	var event models.PaperHistoryEvent
+	err := db.Select("classification_snapshot").Where("paper_id=? AND paper_revision=? AND event_type='uploaded'", paper.ID, paper.ContentRevision).
+		Order("id DESC").First(&event).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	var snapshot struct {
+		Submission struct {
+			Paper map[string]json.RawMessage `json:"paper"`
+		} `json:"upload_submission"`
+	}
+	if err = json.Unmarshal(event.ClassificationSnapshot, &snapshot); err != nil {
+		return err
+	}
+	for _, key := range []string{"corresponding_authors", "co_first_authors"} {
+		var values []string
+		if raw, ok := snapshot.Submission.Paper[key]; ok {
+			if err = json.Unmarshal(raw, &values); err != nil {
+				return err
+			}
+			result[key] = values
+		}
+	}
+	var candidates []map[string]interface{}
+	if raw, ok := snapshot.Submission.Paper["material_families"]; ok {
+		if err = json.Unmarshal(raw, &candidates); err != nil {
+			return err
+		}
+	}
+	families := materialFamiliesToDict(paper.MaterialFamilyLinks)
+	for _, candidate := range candidates {
+		if candidate["id"] == nil {
+			families = append(families, gin.H(candidate))
+		}
+	}
+	result["material_families"] = families
+	return nil
 }

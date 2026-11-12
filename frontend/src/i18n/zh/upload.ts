@@ -4,6 +4,18 @@
 // PROCESSING_STAGES（处理阶段）与 UploadTaskStatus（任务状态）的显示标签，
 // 键与后端 value 对齐；`role` 是上传文件角色，`cell` 是晶胞表示。
 export default {
+  chooseParsingMode: '上传完成，请选择解析方式',
+  parsingModeHint: '浅度：只提取论文信息，提交即入库。深度：提取科学数据，核对后送审。',
+  shallowParsing: '浅度解析',
+  shallowReady: '论文信息已生成，可编辑后提交入库',
+  shallowProcessing: '正在提取论文信息',
+  paperInformation: '论文信息',
+  deepParsing: '深度解析',
+  submitDirectly: '提交入库',
+  submittedDirectly: '论文已直接收录，可在搜索页检索。',
+  paperInformationSearch: '论文信息搜索',
+  paperSearchHint: '标题、DOI 或期刊',
+
   humanQuestionTitle: '需要你的科学判断',
   humanQuestionHelp: '只暂挂相关字段，其他内容继续处理。不点击不会采用推荐；回答不代表审核通过。',
   humanQuestionManual: '人工填写',

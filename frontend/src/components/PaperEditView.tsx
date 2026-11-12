@@ -30,7 +30,7 @@ interface PaperEditViewProps {
 
 // 审核状态的颜色映射；标签文案按 value 查 dict.enums.reviewStatus。
 const STATUS_COLORS: Record<string, 'warning' | 'success' | 'error' | 'info'> = {
-  pending: 'warning', approved: 'success', rejected: 'error', needs_revision: 'info',
+  published: 'info', pending: 'warning', approved: 'success', rejected: 'error', needs_revision: 'info',
 }
 
 // 按当前语言解析审核状态标签；字典未收录的值回退原文（后端 value 是接口契约，不翻译）。
@@ -71,6 +71,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
   }
 
   const reviewStatus = paper.workflow_status || paper.review_status
+  const statusHeading = paper.review_status === 'published' ? t('upload.shallowParsing') : t('paperDetail.reviewStatus')
   const showingPublishedVersion = paper.review_status === 'approved' && reviewStatus !== 'approved'
 
   // 论文数据由 props 传入；同步到本地展示状态，切换论文时重新填充
@@ -97,7 +98,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
     <PropertySpectraProvider context={{ target: { target: 'paper', target_id: String(paper.id) } }}>
     <Box data-paper-detail>
     <MaterialOutlineLayout>
-      <PaperStructuralCollection paperId={paper.id} />
+      {paper.review_status !== "published" && <PaperStructuralCollection paperId={paper.id} />}
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 3 }}>
         <Box>
@@ -115,7 +116,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
 
       <Alert severity={STATUS_COLORS[reviewStatus] || 'info'} sx={{ mb: showingPublishedVersion ? 1 : 2 }}>
         {reviewStatus
-          ? `${t('paperDetail.reviewStatus')}: ${reviewStatusLabel(dict, reviewStatus)}`
+          ? `${statusHeading}: ${reviewStatusLabel(dict, reviewStatus)}`
           : t('paperDetail.submittedNotice')}
       </Alert>
       {showingPublishedVersion && <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.publishedVersionNotice')}</Alert>}
@@ -194,7 +195,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
                     </Box>
                   )}
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    <Chip label={`${t('paperDetail.reviewStatus')}: ${reviewStatusLabel(dict, reviewStatus) || reviewStatusLabel(dict, 'pending')}`}
+                    <Chip label={`${statusHeading}: ${reviewStatusLabel(dict, reviewStatus) || reviewStatusLabel(dict, 'pending')}`}
                       size="small" color={STATUS_COLORS[reviewStatus] || 'default'} />
                     <Chip label={`${t('paperDetail.dataSource')}: Local`} size="small" color="primary" />
                     {paper?.id && <Chip label={`ID: ${paper.id}`} size="small" variant="outlined" />}
@@ -203,7 +204,10 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
               </Box>
             </Box>
 
-            <PaperMaterialsSection states={paper.material_states || []} historicalMaterials={paper.research_materials} />
+            {paper.review_status === 'published' ? <Box sx={{ mt: 2 }}>
+              <Typography variant="caption" color="text.secondary">{t('upload.researchMaterialsTitle')}</Typography>
+              <Typography variant="body2">{toTextList(paper.research_materials).join(t('upload.listSeparator')) || '-'}</Typography>
+            </Box> : <PaperMaterialsSection states={paper.material_states || []} historicalMaterials={paper.research_materials} />}
             {/* 材料状态 */}
             {(paper.material_states || []).length > 0 ? (
               <Box component="details" open sx={{

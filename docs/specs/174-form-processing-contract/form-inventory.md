@@ -17,6 +17,7 @@ UploadPage/UploadTaskPage的UploadModelActivity挂载独立UploadHumanQuestions�
 
 | 用户入口 | 主要代码 | 本轮覆盖状态 |
 | --- | --- | --- |
+| `/upload/tasks/:taskId` 浅度论文编辑及启动模式选择 | UploadPage、UploadParsingModeChoice、UploadTaskEditor；沿原字段差量存储，不请求来源核对 | #241：真实编辑器的保存/提交与零核对请求、服务器模式固定、真实来源提取及隔离正式入库/Go匿名搜索通过；深度四宿主沿原回归，不宣称全站性能已验收 |
 | `/upload/tasks/:taskId` 上传校对 | UploadTaskPage、UploadTaskEditor、MaterialStatesEditor、PropertyModuleEditor | 完整宿主及大草稿浏览器验证通过 |
 | `/papers/:id/revise` 返修 | PaperRevisionPage、UploadTaskEditor | 完整宿主回归通过 |
 | `/admin/papers/:id/edit` 管理员与超级管理员编辑 | AdminPaperEditPage、MaterialStatesEditor | 两种角色分别完整宿主回归通过 |

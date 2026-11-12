@@ -343,7 +343,7 @@ class Paper(Base):
                 (review_status = 'approved' AND approved_revision = content_revision)
                 OR
                 (
-                    review_status IN ('pending', 'rejected')
+                    review_status IN ('pending', 'rejected', 'published')
                     AND approved_revision IS NULL
                 )
             )

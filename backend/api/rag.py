@@ -482,6 +482,9 @@ def _validate_draft(
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     from backend.ingest.parsing_workflows import require_workflow
     require_workflow(draft)
+    from backend.ingest.shallow_parsing import is_shallow, validate_shallow
+    if is_shallow(draft):
+        return validate_shallow(draft, partial=partial)
     paper, material_states = _draft_values(draft)
     _validate_tc_method_invariants(material_states, partial=partial)
     _validate_property_module_contract(material_states, partial=partial)
@@ -1581,6 +1584,9 @@ async def put_upload_draft(
             previous = get_draft(task_id) or {}
             from backend.ingest.parsing_workflows import preserve_binding, require_task_workflow
             require_task_workflow(state, previous)
+            if state.get('parsing_mode') == 'shallow':
+                from backend.ingest.shallow_parsing import validate_shallow
+                validate_shallow(draft, partial=True)
             normalized = _normalize_draft(draft)
             preserve_binding(normalized, previous)
             # 全文分类和关键词来源分析只由服务端生成；浏览器只能编辑正式字段值。
@@ -1896,6 +1902,10 @@ async def _create_pending_paper(
     from backend.ingest.upload_tasks import markdown_path
     from backend.rag.database import async_session_factory
 
+    from backend.ingest.shallow_parsing import validate_shallow
+    shallow = state.get('parsing_mode') == 'shallow'
+    if shallow:
+        validate_shallow(draft, partial=True)
     paper_materials_provided = 'research_materials' in (draft.get('paper') or {}) or bool(draft.get('_parsing_workflow'))
     try:
         draft = _normalize_draft(convert_legacy_scientific_draft(draft))
@@ -1959,11 +1969,17 @@ async def _create_pending_paper(
                     research_motivation=draft.get("research_motivation") or paper_data.get("research_motivation"),
                     research_materials=paper_data.get("research_materials") or [],
                     builds_on=paper_data.get("builds_on") or [],
-                    review_status="pending",
+                    review_status="published" if shallow else "pending",
                     uploaded_by_user_id=int(state["user_id"]),
                 )
                 session.add(paper)
                 await session.flush()
+                if shallow:
+                    from backend.ingest.shallow_parsing import research_systems
+                    for system_key, elements in research_systems(paper.research_materials).items():
+                        session.add(models.ChemicalSystem(paper_id=paper.id,
+                            paper_revision=paper.content_revision, system_key=system_key,
+                            elements_list=elements, element_count=len(elements)))
                 uploader = await session.get(User, int(state["user_id"]))
                 from backend.services.paper_history import append_paper_history_event
 
@@ -2030,10 +2046,12 @@ async def _create_pending_paper(
                             raise _upload_error(409, "document_source_mismatch", "解析文档来源不一致")
                         document_runs[paper_file.id] = await persist_document(session, paper, paper_file, ir)
 
-                scientific_targets = await persist_scientific_draft(session, paper, draft,
-                    source_file_ids={key:value.id for key,value in paper_files.items()})
-                from backend.services.spectra import bind_to_paper
-                await bind_to_paper(session, paper, draft, target="upload", target_id=task_id)
+                scientific_targets = []
+                if not shallow:
+                    scientific_targets = await persist_scientific_draft(session, paper, draft,
+                        source_file_ids={key:value.id for key,value in paper_files.items()})
+                    from backend.services.spectra import bind_to_paper
+                    await bind_to_paper(session, paper, draft, target="upload", target_id=task_id)
                 from backend.services.citation_graph import persist_reference_extraction
 
                 citation_extraction = draft.get("citation_extraction")
@@ -2076,8 +2094,9 @@ async def _create_pending_paper(
                         source_locations.append(chunk)
 
                 from backend.ingest.submission_sources import reviewed_legacy_targets
-                scientific_targets = reviewed_legacy_targets(scientific_targets, evidence_checks, draft, source_locations)
-                evidence_groups = [
+                if not shallow:
+                    scientific_targets = reviewed_legacy_targets(scientific_targets, evidence_checks, draft, source_locations)
+                evidence_groups = [] if shallow else [
                     ("classification", draft.get("classification_evidence") or []),
                     *[(target.field_path, [target.evidence]) for target in scientific_targets],
                 ]
@@ -2176,6 +2195,9 @@ async def _create_pending_paper(
                         source_limits=state.get('document_source_limits')or[], **frozen))
                     # 正式交接才冻结整稿；旧上传历史保留，不新增逐字段时间线。
                     await session.execute(sql_delete(models.ScientificUploadDraft).where(models.ScientificUploadDraft.task_id == task_id))
+                if shallow:
+                    from backend.ingest.scientific_evidence import delete_target
+                    await session.run_sync(lambda sync: delete_target(sync, 'upload', task_id))
                 paper_id = paper.id
         return paper_id
     except manual_evidence.ManualEvidenceError as exc:
@@ -2258,7 +2280,7 @@ def _record_submitted_upload(
     artifact_manifest = publish_artifact_path(task_id, submitted=True)
     update_state(
         task_id, status="submitted", paper_id=paper_id,
-        review_status="pending", submission_status="submitted",
+        review_status="published" if (draft.get("_parsing_workflow") or {}).get("workflow_key") == "paper-only" else "pending", submission_status="submitted",
         artifact_manifest=artifact_manifest,
     )
 
@@ -2336,13 +2358,13 @@ async def _submit_upload_draft_locked(
     if int(state.get("user_id") or 0) != current_user.id:
         raise _upload_error(403, "submit_forbidden", "只有上传者可以提交草稿")
     if state.get("paper_id"):
-        return {"ok": True, "paper_id": state["paper_id"], "review_status": "pending"}
+        return {"ok": True, "paper_id": state["paper_id"], "review_status": state.get("review_status", "pending")}
     if state.get("duplicate"):
         raise _upload_error(
             409, "duplicate_doi", "该论文已经存在",
             existing_paper_id=state.get("existing_paper_id"),
         )
-    if (state.get("consistency") or {}).get("status") == "warning":
+    if state.get("parsing_mode") != "shallow" and (state.get("consistency") or {}).get("status") == "warning":
         from backend.ingest.document_identity import confirmation
         message, current_consistency_version = confirmation(state)
         if not consistency_acknowledged or consistency_version != current_consistency_version:
@@ -2357,22 +2379,27 @@ async def _submit_upload_draft_locked(
     from backend.ingest.parsing_workflows import require_task_workflow
     require_task_workflow(state, draft)
 
-    from backend.ingest.property_evidence import upload_snapshot, resolve_results
-    import copy
-    snapshot = upload_snapshot(task_id, current_user.id)
-    from backend.database import SessionLocal
-    from backend.ingest.scientific_evidence import load_results
-    from backend.ingest import manual_evidence
-    manual_snapshot = snapshot
-    # 人工说明只归档，不再形成第二套批准门禁或触发全量历史读取。
-    manual_baseline = snapshot
-    with SessionLocal() as check_session:
-        cached = load_results(check_session, snapshot, current_user.id, include_stale=True)
-    evidence_checks = resolve_results(snapshot, cached, current_user.id, evidence_job_id, expected_evidence_version)
-    draft = copy.deepcopy(draft)
-    from backend.ingest.reviewed_sources import apply_property_sources
-    apply_property_sources(draft, evidence_checks)
-
+    shallow = state.get('parsing_mode') == 'shallow'
+    if shallow:
+        from backend.ingest.shallow_parsing import validate_shallow
+        validate_shallow(draft)
+        evidence_checks = manual_snapshot = manual_baseline = None
+    else:
+        from backend.ingest.property_evidence import upload_snapshot, resolve_results
+        import copy
+        snapshot = upload_snapshot(task_id, current_user.id)
+        from backend.database import SessionLocal
+        from backend.ingest.scientific_evidence import load_results
+        from backend.ingest import manual_evidence
+        manual_snapshot = snapshot
+        # 人工说明只归档，不再形成第二套批准门禁或触发全量历史读取。
+        manual_baseline = snapshot
+        with SessionLocal() as check_session:
+            cached = load_results(check_session, snapshot, current_user.id, include_stale=True)
+        evidence_checks = resolve_results(snapshot, cached, current_user.id, evidence_job_id, expected_evidence_version)
+        draft = copy.deepcopy(draft)
+        from backend.ingest.reviewed_sources import apply_property_sources
+        apply_property_sources(draft, evidence_checks)
     cleanup_context = CleanupContext.from_state(task_id, state)
     update_state(task_id, status="submitting", submission_status="submitting")
     try:
@@ -2394,11 +2421,11 @@ async def _submit_upload_draft_locked(
             cleanup_transient_data(
                 task_id,
                 context=cleanup_context,
-                preserve_review_snapshot=True,
+                preserve_review_snapshot=not shallow,
             )
         except Exception as exc:
             print(f"  [上传] paper_id={paper_id} 已提交，但临时数据清理失败: {exc}")
-    return {"ok": True, "paper_id": paper_id, "review_status": "pending"}
+    return {"ok": True, "paper_id": paper_id, "review_status": "published" if shallow else "pending"}
 
 
 @router.get("/papers/{paper_id}/review-artifact")

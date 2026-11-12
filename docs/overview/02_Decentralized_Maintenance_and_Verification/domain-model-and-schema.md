@@ -37,7 +37,7 @@ Read switch 验收前保持科学写入停用，Contract 默认拒绝删除旧�
 - 预测 Tc 和测量 Tc 由记录类型、方法和 Conditions 类型共同约束；每个“论文 revision +
   MaterialState + Tc 记录类型 + 方法”最多一条代表记录。
 - 科学子实体没有独立审核状态。论文一次审核覆盖当前 revision 的 File、Chunk、Evidence、
-  结构、Tc 和普通物性；只有 `approved_revision = content_revision` 才具备公开资格。
+  结构、Tc 和普通物性；这些深度科学数据只有 `approved_revision = content_revision` 才具备公开资格。浅度论文使用独立的 published 直接收录状态，approved_revision 及人工审核信息为空，只有论文信息参与网站搜索与详情，不放宽科学数据或 RAG 的批准门。状态约束迁移及隔离验证见 [#241](../../specs/241-shallow-paper-parsing/validation.md)。
 - Python 与 Go 模型已经映射目标表；上传、管理员重写、公开详情、搜索、统计和导出正常路径均使用
   `PropertyRecord`。旧载荷只在输入边界单向转换，旧科学表不再作为正常读取或写入回退。
 - `run_migrations.py` 默认只升级到 `issue90_copy_v1`；未经显式 Contract 确认，不会删除旧科学表。

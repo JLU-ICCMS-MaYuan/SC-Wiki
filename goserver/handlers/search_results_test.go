@@ -20,7 +20,7 @@ func resultFixture(t *testing.T, db *gorm.DB) *gin.Engine {
 	database.DB = db
 	ddl := []string{
 		"CREATE TABLE papers (id INTEGER PRIMARY KEY, content_revision INTEGER, approved_revision INTEGER, review_status VARCHAR(20), title VARCHAR(100), doi VARCHAR(100), journal VARCHAR(100), year INTEGER)",
-		"CREATE TABLE chemical_systems (id INTEGER PRIMARY KEY, system_key VARCHAR(100))",
+		"CREATE TABLE chemical_systems (id INTEGER PRIMARY KEY, system_key VARCHAR(100), paper_id INTEGER, paper_revision INTEGER)",
 		"CREATE TABLE superconductors (id INTEGER PRIMARY KEY, chemical_system_id INTEGER, chemical_formula VARCHAR(100))",
 		"CREATE TABLE material_states (id INTEGER PRIMARY KEY, paper_id INTEGER, paper_revision INTEGER, state_key VARCHAR(100), superconductor_id INTEGER, material_name VARCHAR(100), pressure_value_gpa REAL, reported_space_group_symbol VARCHAR(100), reported_space_group_number INTEGER, structure_optimization VARCHAR(32))",
 		"CREATE TABLE paper_structural_records (id VARCHAR(32) PRIMARY KEY, paper_id INTEGER, paper_revision INTEGER, record_key VARCHAR(100), kind VARCHAR(16), material VARCHAR(100), system_key VARCHAR(100), pressure_gpa REAL, state_key VARCHAR(100), retention VARCHAR(20))",
@@ -36,7 +36,7 @@ func resultFixture(t *testing.T, db *gorm.DB) *gin.Engine {
 	}
 	rows := []string{
 		"INSERT INTO papers VALUES (271,1,1,'approved','来源论文','10.1/example','PNAS',2024),(272,1,1,'approved','独立模型来源','10.1/model','PNAS',2023),(273,2,1,'approved','旧版本','10.1/old','PNAS',2025),(274,1,NULL,'pending','待审','10.1/pending','PNAS',2025)",
-		"INSERT INTO chemical_systems VALUES (1,'H-La-Sc'),(2,'La-Sc')",
+		"INSERT INTO chemical_systems (id,system_key) VALUES (1,'H-La-Sc'),(2,'La-Sc')",
 		"INSERT INTO superconductors VALUES (1,1,'LaSc2H24'),(2,2,'LaSc2')",
 		"INSERT INTO material_families VALUES (1,'hydrogen_based','氢基超导体'),(2,'custom_test','自建家族')",
 		"INSERT INTO material_family_aliases VALUES (1,'hydride'),(1,'hydrogen based')",
@@ -64,7 +64,7 @@ func resultFixture(t *testing.T, db *gorm.DB) *gin.Engine {
 	db.Exec("INSERT INTO material_states VALUES (100,273,1,'old',1,NULL,300,'P6/mmm',191,'sscha'),(101,274,1,'pending',1,NULL,300,'P6/mmm',191,'sscha')")
 	// 第二个体系提供真实多页及同论文跨状态条件的反例。
 	db.Exec("INSERT INTO papers VALUES (275,1,1,'approved','多页论文','10.1/pages','PNAS',2022)")
-	db.Exec("INSERT INTO chemical_systems VALUES (3,'Fe'),(4,'O')")
+	db.Exec("INSERT INTO chemical_systems (id,system_key) VALUES (3,'Fe'),(4,'O')")
 	db.Exec("INSERT INTO superconductors VALUES (3,3,'Fe'),(4,4,'O')")
 	for i := 0; i < 41; i++ {
 		db.Exec("INSERT INTO material_states VALUES (?,275,1,?,3,NULL,?,'Im-3m',229,'classical_static')", 200+i, fmt.Sprintf("fe-%03d", i), i+1)

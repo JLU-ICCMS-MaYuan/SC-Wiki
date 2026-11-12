@@ -84,6 +84,7 @@ const SearchPage:React.FC=()=>{
  const identity=authLoading?'loading':`${user?.id??'anonymous'}:${user?.role??''}:${user?.is_approved??false}`
  const {t}=useLanguage(),[params,setParams]=useSearchParams(),location=useLocation()
  const [selected,setSelected]=useState(new Set<string>((params.get('elements')||'').split(',').filter(Boolean))),[formula,setFormula]=useState(params.get('formula')||''),[mode,setMode]=useState(params.get('mode')||'elements_combination_search')
+ const [paperKeyword,setPaperKeyword]=useState(params.get('keyword')||'')
  const elementSearchModes=[
  {value:'elements_combination_search',label:'search.modeCombination',description:'search.modeCombinationDescription'},
  {value:'elements_exact_search',label:'search.modeExact',description:'search.modeExactDescription'},
@@ -93,7 +94,7 @@ const SearchPage:React.FC=()=>{
  useEffect(()=>{if(entry){setSelected(new Set((params.get('elements')||'').split(',').filter(Boolean)));setFormula(params.get('formula')||'');setMode(params.get('mode')||'elements_combination_search')}},[entry,paramsKey])
  const filters={...searchFilters(params),...(!canReview?{review:'All'}:{})},setFilters=(next:SearchFilters)=>setParams(updateFilters(params,next),{replace:true})
  if(params.has('paper_id'))return <Navigate replace to={`/papers/${encodeURIComponent(params.get('paper_id')||'')}`} />
- if(entry || (!params.has('elements')&&!params.has('formula'))) {
+ if(entry || (!params.has('elements')&&!params.has('formula')&&!params.has('keyword'))) {
     return (
       <Box>
         <Box sx={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:2,mb:3 }}>
@@ -104,14 +105,25 @@ const SearchPage:React.FC=()=>{
           </Box>
         </Box>
 
+        <Card sx={{ mb:3 }}>
+          <CardContent>
+            <Typography variant="h2" gutterBottom>{t('upload.paperInformationSearch')}</Typography>
+            <Box component="form" onSubmit={event => { event.preventDefault(); if(paperKeyword.trim()) setParams({keyword:paperKeyword.trim(),view:'papers'}) }}
+              sx={{display:'flex',gap:1,alignItems:'center'}}>
+              <Box component="input" aria-label={t('upload.paperSearchHint')} placeholder={t('upload.paperSearchHint')}
+                value={paperKeyword} onChange={event=>setPaperKeyword(event.target.value)} sx={{...bareInputSx,textAlign:'left',border:'1px solid',borderColor:'divider',borderRadius:1}} />
+              <Button type="submit" variant="contained" disabled={!paperKeyword.trim()}>{t('search.search')}</Button>
+            </Box>
+          </CardContent>
+        </Card>
         {/* Formula search card */}
         <Card sx={{ mb:3 }}>
           <CardContent>
             <Typography variant="h2" gutterBottom>{t('search.formulaSearch')}</Typography>
             <Box sx={{ display:'grid',gridTemplateColumns:'minmax(0,1fr) auto',gap:1.5,alignItems:'end' }}>
               <Box sx={{ minHeight:56,border:'1px solid',borderColor:'divider',borderRadius:1,p:'8px 12px',display:'grid',alignContent:'center',bgcolor:'background.paper' }}>
-                <Box component="label" sx={{ color:'text.secondary',fontSize:12,fontWeight:700 }}>Formula</Box>
-                <Box component="input" value={formula} onChange={e=>setFormula(e.target.value)}
+                <Box component="label" htmlFor="search-formula-input" sx={{ color:'text.secondary',fontSize:12,fontWeight:700 }}>Formula</Box>
+                <Box component="input" id="search-formula-input" value={formula} onChange={e=>setFormula(e.target.value)}
                   sx={{ border:'none',outline:'none',fontSize:15,fontWeight:600,mt:0.5,width:'100%',bgcolor:'transparent',fontFamily:'inherit' }} />
               </Box>
               <Button variant="contained" component={RouterLink} to={searchURL([],mode,formula)} target="_blank" rel="noopener noreferrer" disabled={!formulaQuery}>{t('search.search')}</Button>

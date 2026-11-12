@@ -38,7 +38,7 @@ describe('探索页元素默认选中（Issue #65）', () => {
   it('Formula 输入框默认为空，不预填 LaH', () => {
     renderAt('/search')
 
-    const formulaInput = screen.getByRole('textbox')
+    const formulaInput = screen.getByRole('textbox', { name: 'Formula' })
     expect(formulaInput).toHaveValue('')
   })
 

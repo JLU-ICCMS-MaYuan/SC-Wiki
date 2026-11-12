@@ -100,7 +100,7 @@ const UploadModelActivity: React.FC<{ task: UploadTaskState; onUpdated: (task: U
     {task.processing_error && !activity?.error && <Alert severity={failed ? 'error' : 'info'} sx={{ mt: 1 }}>{task.processing_error}</Alert>}
     {task.status === 'paused' && <Typography variant="body2" sx={{ mt: 1 }}>{t('upload.pausedRetention')}</Typography>}
     {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
-    <UploadHumanQuestions task={task} onAnswered={reloadTask} />
+    {task.parsing_mode !== 'shallow' && <UploadHumanQuestions task={task} onAnswered={reloadTask} />}
     {!!activity?.history?.length && <Accordion disableGutters elevation={0} sx={{ mt: 1 }}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>{t('upload.modelHistory')}</AccordionSummary>
       <AccordionDetails sx={{ maxHeight: 280, overflow: 'auto' }}>

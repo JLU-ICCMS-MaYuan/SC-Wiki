@@ -1,4 +1,5 @@
 import { MaterialOutlineLayout } from '../components/PaperMaterialsSection'
+import UploadParsingModeChoice from '../components/UploadParsingModeChoice'
 import React, { useState, useRef, useEffect } from 'react'
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import {
@@ -66,8 +67,10 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const activeCall = activity?.phase && ['processing', 'requesting', 'receiving', 'retry_wait', 'compacting'].includes(activity.status)
   const activityLabel = activeCall ? t('upload.modelPhase.' + activity.phase) : undefined
   const knownActivityLabel = activityLabel !== 'upload.modelPhase.' + activity?.phase ? activityLabel : undefined
-  const phaseLabel = taskState?.processing_status !== 'succeeded'
-    ? knownActivityLabel || parsingPhaseLabel(processingPhase, lang) : undefined
+  const phaseLabel = taskState?.parsing_mode === 'shallow'
+    ? t(taskState.processing_status === 'succeeded' ? 'upload.shallowReady' : 'upload.shallowProcessing')
+    : taskState?.processing_status !== 'succeeded'
+      ? knownActivityLabel || parsingPhaseLabel(processingPhase, lang) : undefined
   const [taskLoading, setTaskLoading] = useState(false)
   const [taskPollTick, setTaskPollTick] = useState(0)
   const [taskCenterTick, setTaskCenterTick] = useState(0)
@@ -309,7 +312,7 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
   // 论文详情由 /papers/:id 路由承载，离开后仍可通过刷新、前进/后退或直接访问地址回到
   const handleTaskSubmitted = (paperId: number) => {
     setTaskState(null)
-    setSnackbar(t('upload.submittedForReview'))
+    setSnackbar(t(taskState?.parsing_mode === 'shallow' ? 'upload.submittedDirectly' : 'upload.submittedForReview'))
     navigate(`/papers/${paperId}`)
   }
 
@@ -438,6 +441,14 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                     </Box>
                   </Box>
 
+                  <UploadParsingModeChoice key={'parsing-mode:' + taskState.task_id} task={taskState} onStarted={updated => {
+                    setTaskState(updated)
+                    setTaskPollTick(value => value + 1)
+                    setTaskCenterTick(value => value + 1)
+                  }} />
+                  {taskState.parsing_mode && <Typography variant="caption" color="text.secondary">
+                    {t(taskState.parsing_mode === 'shallow' ? 'upload.shallowParsing' : 'upload.deepParsing')}
+                  </Typography>}
                   {taskState?.reading_state && ['ir_ready', 'claims_ready', 'coverage_checked', 'needs_review'].includes(taskState.reading_state) &&
                     <Alert severity={taskState.reading_state === 'needs_review' ? 'warning' : 'info'} sx={{ mb: 1 }}>
                       {t(`upload.readingStates.${taskState.reading_state}`)}

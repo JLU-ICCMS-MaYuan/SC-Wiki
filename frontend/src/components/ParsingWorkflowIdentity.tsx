@@ -7,7 +7,7 @@ const ParsingWorkflowIdentity: React.FC<{ binding?: ParsingWorkflowBinding }> = 
   const { t } = useLanguage()
   if (!binding) return null
   const name = binding.workflow_key === 'conventional-theory-calculation'
-    ? t('upload.workflowConventional') : binding.workflow_key
+    ? t('upload.workflowConventional') : binding.workflow_key === 'paper-only' ? t('upload.shallowParsing') : binding.workflow_key
   return <Typography variant="caption" color="text.secondary" data-parsing-workflow={binding.workflow_key}>
     {t('upload.workflowIdentity', { name, version: binding.form_version })}
   </Typography>

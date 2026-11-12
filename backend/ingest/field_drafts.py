@@ -337,6 +337,9 @@ def apply_changes(draft, changes):
             validate_conditions((record.get("payload") or {}).get("calculation_conditions"))
         except FormContractError as error:
             fail("form_contract_invalid", str(error), 400)
+    from .shallow_parsing import is_shallow, validate_shallow
+    if is_shallow(draft):
+        validate_shallow(updated, partial=True)
     return updated
 
 

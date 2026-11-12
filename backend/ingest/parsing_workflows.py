@@ -42,7 +42,13 @@ class Workflow:
 
 CURRENT = Workflow('conventional-theory-calculation', '常规超导理论计算', 1,
                    'scientific-form-contract', 1, FORM_SHA256, _run_conventional)
-WORKFLOWS = {CURRENT.key: CURRENT}
+def _run_shallow(task_id):
+    from .upload_jobs import _process_upload_task
+    return _process_upload_task(task_id)
+
+
+SHALLOW = Workflow('paper-only', '浅度解析', 1, 'paper-level-info', 1, FORM_SHA256, _run_shallow)
+WORKFLOWS = {CURRENT.key: CURRENT, SHALLOW.key: SHALLOW}
 
 
 def require_workflow(draft, *, required=False):
@@ -64,6 +70,10 @@ def require_task_workflow(state, draft=None):
     if required and draft is not None and draft.get(BINDING) != state.get(BINDING):
         raise HTTPException(409, detail={'code': 'parsing_workflow_changed',
                                         'message': '草稿流程与原解析任务不一致，请重新打开'})
+    if state.get('parsing_mode') == 'shallow' and workflow != SHALLOW:
+        raise HTTPException(409, detail={'code': 'parsing_mode_changed', 'message': '解析模式与任务不一致'})
+    if state.get('parsing_mode') == 'deep' and workflow == SHALLOW:
+        raise HTTPException(409, detail={'code': 'parsing_mode_changed', 'message': '深度任务不能改为浅度直接入库'})
     return workflow
 
 

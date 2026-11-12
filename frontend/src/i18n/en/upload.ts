@@ -2,6 +2,18 @@
 // 推导，缺键或多键会在 `tsc -b` 阶段报错。处理阶段/任务状态/文件角色/晶胞表示等
 // 枚举标签与后端 value 对齐，仅展示文案随语言变化。
 export default {
+  chooseParsingMode: 'Files uploaded. Choose parsing depth',
+  parsingModeHint: 'Shallow: paper information and direct submission. Deep: scientific data, verification and review.',
+  shallowParsing: 'Shallow parsing',
+  shallowReady: 'Paper information ready for editing and submission',
+  shallowProcessing: 'Extracting paper information',
+  paperInformation: 'Paper information',
+  deepParsing: 'Deep parsing',
+  submitDirectly: 'Submit to database',
+  submittedDirectly: 'Paper published and available in search.',
+  paperInformationSearch: 'Paper search',
+  paperSearchHint: 'Title, DOI or journal',
+
   humanQuestionTitle: 'Scientific decision needed',
   humanQuestionHelp: 'Only related fields wait; other work continues. No click means no answer. An answer does not approve a field.',
   humanQuestionManual: 'Enter a direction',

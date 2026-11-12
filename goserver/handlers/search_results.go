@@ -149,13 +149,51 @@ func searchResultKeys(db *gorm.DB, b searchResultsRequest) ([]string, error) {
 	return matched, nil
 }
 
+// 浅度论文只用论文级研究材料索引；没有科学条件的数据不能满足科学筛选。
+func shallowPaperCandidates(db *gorm.DB, b searchResultsRequest, keys []string) *gorm.DB {
+	q := db.Table("papers AS sp").Where("sp.review_status='published' AND sp.approved_revision IS NULL")
+	if b.ReviewStatus != "" && b.ReviewStatus != "published" {
+		return q.Where("1=0")
+	}
+	if b.PressureMin != nil || b.PressureMax != nil || b.TcMin != nil || b.TcMax != nil || b.ChartOnly {
+		return q.Where("1=0")
+	}
+	if len(b.Elements) > 0 || b.Formula != "" {
+		q = q.Where("EXISTS (?)", db.Table("chemical_systems AS pc").Select("1").
+			Where("pc.paper_id=sp.id AND pc.paper_revision=sp.content_revision AND pc.system_key IN ?", keys))
+	}
+	if b.Keyword != "" {
+		like := "%" + b.Keyword + "%"
+		q = q.Where("(sp.title LIKE ? OR sp.doi LIKE ? OR sp.journal LIKE ?)", like, like, like)
+	}
+	if b.YearMin != nil {
+		q = q.Where("sp.year>=?", *b.YearMin)
+	}
+	if b.YearMax != nil {
+		q = q.Where("sp.year<=?", *b.YearMax)
+	}
+	if b.MaterialFamilyID != nil || b.SuperconductorType != "" {
+		family := db.Table("paper_material_families AS pmf").Select("1").
+			Joins("JOIN material_families AS mf ON mf.id=pmf.material_family_id").
+			Where("pmf.paper_id=sp.id AND pmf.paper_revision=sp.content_revision")
+		if b.MaterialFamilyID != nil {
+			family = family.Where("mf.id=?", *b.MaterialFamilyID)
+		} else {
+			normalized := normalizeClassificationName(b.SuperconductorType)
+			family = family.Where("mf.code=? OR mf.normalized_name=? OR EXISTS (SELECT 1 FROM material_family_aliases mfa WHERE mfa.material_family_id=mf.id AND mfa.normalized_alias=?)", b.SuperconductorType, normalized, normalized)
+		}
+		q = q.Where("EXISTS (?)", family)
+	}
+	return q
+}
+
 func SearchResults(c *gin.Context) {
 	var b searchResultsRequest
 	if c.ShouldBindJSON(&b) != nil || b.Offset < 0 || b.Offset > 100000 || b.Limit < 0 || b.Limit > 100 || len(b.Elements) > 118 {
 		c.JSON(400, gin.H{"error": "检索参数无效"})
 		return
 	}
-	if (b.MaterialFamilyID != nil && *b.MaterialFamilyID == 0) || (b.ReviewStatus != "" && b.ReviewStatus != "approved" && b.ReviewStatus != "pending" && b.ReviewStatus != "rejected") {
+	if (b.MaterialFamilyID != nil && *b.MaterialFamilyID == 0) || (b.ReviewStatus != "" && b.ReviewStatus != "approved" && b.ReviewStatus != "pending" && b.ReviewStatus != "rejected" && b.ReviewStatus != "published") {
 		c.JSON(400, gin.H{"error": "检索筛选无效"})
 		return
 	}
@@ -204,7 +242,7 @@ func SearchResults(c *gin.Context) {
 		return
 	}
 	papers := func() *gorm.DB {
-		return db.Table("papers AS p").Where("p.id IN (?) OR p.id IN (?)", states().Select("ms.paper_id"), records().Select("r.paper_id"))
+		return db.Table("papers AS p").Where("p.id IN (?) OR p.id IN (?) OR p.id IN (?)", states().Select("ms.paper_id"), records().Select("r.paper_id"), shallowPaperCandidates(db, b, keys).Select("sp.id"))
 	}
 	if err = papers().Count(&paperTotal).Error; err != nil {
 		searchResultError(c, err)

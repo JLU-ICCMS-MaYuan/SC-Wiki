@@ -147,7 +147,9 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const revisionMeta = useRef<RevisionDraftResponse | null>(null)
   const draftUrl = revisionPaperId ? `/api/rag/papers/${revisionPaperId}/revision-draft` : `/api/rag/upload-tasks/${taskId}/draft`
   const submitUrl = revisionPaperId ? `${draftUrl}/submit` : `/api/rag/upload-tasks/${taskId}/submit`
-  const evidenceTarget: EvidenceTarget | undefined = readOnly ? undefined : revisionPaperId
+  const shallow = draft?._parsing_workflow?.workflow_key === 'paper-only'
+  const loadedDraftIdentity = useRef<string | undefined>(undefined)
+  const evidenceTarget: EvidenceTarget | undefined = readOnly || !draft || shallow || loadedDraftIdentity.current !== draftUrl ? undefined : revisionPaperId
     ? revision ? { target: 'revision', target_id: revision.revision_id } : undefined
     : { target: 'upload', target_id: taskId }
   const fieldSaver = useRef<ReturnType<typeof createFieldDraftSaver> | null>(null)
@@ -209,7 +211,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       revisionMeta.current = { ...revisionMeta.current, draft_version: result.draft_version }
       setRevision(revisionMeta.current)
     }
-  }, [t])
+  }, [t, draftUrl])
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
   const [error, setError] = useState('')
   // 本次提交发现的校验问题；驱动字段错误态与定位，提交成功或重新加载草稿时清空
@@ -260,6 +262,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     if (draftOverride !== undefined) {
       const normalized = normalizeUploadDraft(draftOverride)
       if (revisionMeta.current || !revisionPaperId) { fieldSaver.current = createFieldDraftSaver(revisionMeta.current ? {target: 'revision', target_id: revisionMeta.current.revision_id} : {target: 'upload', target_id: taskId}); fieldSaver.current.initialize(normalized) }
+      loadedDraftIdentity.current = draftUrl
       setDraft(normalized)
       setLoading(false)
       setDirty(false)
@@ -284,6 +287,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       }
       const normalized = preserveRawNumbers(unwrapData(response), normalizeUploadDraft(unwrapData(response)))
       if (revisionMeta.current || !revisionPaperId) { fieldSaver.current = createFieldDraftSaver(revisionMeta.current ? {target: 'revision', target_id: revisionMeta.current.revision_id} : {target: 'upload', target_id: taskId}); fieldSaver.current.initialize(normalized) }
+      loadedDraftIdentity.current = draftUrl
       setDraft(normalized)
       setDirty(false)
       setError('')
@@ -294,7 +298,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   }, [taskId, draftOverride, draftUrl, revisionPaperId])
 
   const refreshState = useWorkdraftRefresh(evidenceTarget, {
-    enabled: draftOverride === undefined && !readOnly && !loading && Boolean(draft),
+    enabled: draftOverride === undefined && !readOnly && !shallow && !loading && Boolean(draft),
     busy: () => saving || submitting || evidenceWorkflow.busy || evidenceWorkflow.hasPendingWrites(),
     dirty: () => dirty || evidenceWorkflow.hasUnsavedRefreshInput(),
     editVersion: () => revisionRef.current + ':' + evidenceWorkflow.getRefreshRevision(),
@@ -416,16 +420,16 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     if (draft.paper.doi && !/^10\.\d{4,9}\/\S+$/i.test(draft.paper.doi.trim())) {
       issues.push({ field: 'paper.doi', message: t('upload.doiInvalid') })
     }
-    if (!draft.paper.paper_type || draft.paper.paper_type === 'unknown') {
+    if (!shallow && (!draft.paper.paper_type || draft.paper.paper_type === 'unknown')) {
       issues.push({ field: 'paper.paper_type', message: t('upload.paperTypeRequired') })
     }
-    if (draft.paper.paper_type === 'theoretical' && !draft.paper.theoretical_subtype) {
+    if (!shallow && draft.paper.paper_type === 'theoretical' && !draft.paper.theoretical_subtype) {
       issues.push({ field: 'paper.theoretical_subtype', message: t('upload.theoreticalSubtypeRequired') })
     }
-    if (!draft.paper.material_families?.length) {
+    if (!shallow && !draft.paper.material_families?.length) {
       issues.push({ field: 'paper.material_families', message: t('upload.materialFamilyRequired') })
     }
-    if (draft.paper.paper_type !== 'review' && draft.material_states.length === 0) {
+    if (!shallow && draft.paper.paper_type !== 'review' && draft.material_states.length === 0) {
       issues.push({ field: 'material_states', message: t('upload.materialStateRequired') })
     }
     draft.material_states.forEach((state, stateIndex) => {
@@ -503,7 +507,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   }
 
   const submit = async () => {
-    if (!evidenceTarget) return
+    if (!shallow && !evidenceTarget) return
     const validationIssues = validate()
     if (validationIssues.length > 0) {
       setError(validationIssues.map(item => item.message).join(t('upload.sentenceSeparator')))
@@ -514,7 +518,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     setSubmitting(true)
     try {
       if (!(await saveDraft(false))) return
-      const evidencePayload = await evidenceWorkflow.gate(evidenceTarget)
+      const evidencePayload = shallow ? {} : await evidenceWorkflow.gate(evidenceTarget!)
       if (!evidencePayload) return
       let response: SubmitResponse | { data: SubmitResponse }
       try {
@@ -595,11 +599,11 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       {revision?.review_comment && <Alert severity="warning" sx={{ mb: 2 }}>{revision.review_comment}</Alert>}
       {revision?.warnings?.map(warning => <Alert key={warning} severity="warning" sx={{ mb: 2 }}>{warning}</Alert>)}
       {revision?.conflict && <Alert severity="error" sx={{ mb: 2 }}>{t('paperDetail.revisionConflict')}</Alert>}
-      {evidenceWorkflow.dialog}
-      <EvidenceFieldMarkers records={evidenceWorkflow.records} scope="upload-editor" onOpen={evidenceWorkflow.openIssue} onChange={evidenceWorkflow.invalidate} />
+      {!shallow && evidenceWorkflow.dialog}
+      {!shallow && <EvidenceFieldMarkers records={evidenceWorkflow.records} scope="upload-editor" onOpen={evidenceWorkflow.openIssue} onChange={evidenceWorkflow.invalidate} />}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
         <Box>
-          <Typography variant="h6" fontWeight={700}>{frozenSnapshot ? '正式交出内容' : revisionPaperId ? t('paperDetail.revisionTitle') : readOnly ? t('upload.aiDraftTitle') : t('upload.checkAiDraftTitle')}</Typography>
+          <Typography variant="h6" fontWeight={700}>{shallow ? t('upload.paperInformation') : frozenSnapshot ? '正式交出内容' : revisionPaperId ? t('paperDetail.revisionTitle') : readOnly ? t('upload.aiDraftTitle') : t('upload.checkAiDraftTitle')}</Typography>
           {!frozenEvidenceRecords&&<ManuscriptHistoryLink target={revisionPaperId?'paper':'upload'} targetId={revisionPaperId?String(revisionPaperId):taskId}/>}
           <Typography variant="body2" color="text.secondary">
             {frozenSnapshot ? '显示当时保存的整份内容及采用资料。' : readOnly ? (statusNote || t('upload.defaultNote')) : t('upload.editorSubtitle')}
@@ -615,7 +619,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           <Button variant="outlined" startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
             disabled={saving || submitting || Boolean(revision?.conflict)} onClick={() => void saveDraft(true)}>{t('upload.saveNow')}</Button>
           <Button variant="contained" startIcon={submitting ? <CircularProgress size={16} /> : <SendIcon />}
-            disabled={saving || submitting || Boolean(revision?.conflict)} onClick={() => void submit()}>{revisionPaperId ? t('paperDetail.resubmit') : t('upload.submitReview')}</Button>
+            disabled={saving || submitting || Boolean(revision?.conflict)} onClick={() => void submit()}>{shallow ? t('upload.submitDirectly') : revisionPaperId ? t('paperDetail.resubmit') : t('upload.submitReview')}</Button>
         </Box>
         )}
       </Box>
@@ -732,7 +736,9 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         />
       </Box>
 
-      <PaperMaterialsSection states={draft.material_states} historicalMaterials={draft.paper.research_materials} />
+      {shallow ? <TextField fullWidth multiline sx={{ mt: 2 }} label={t('upload.researchMaterialsTitle')}
+        value={toLines(draft.paper.research_materials || [])} disabled={readOnly || submitting} onChange={event => setPaperField('research_materials', fromLines(event.target.value))} />
+        : <PaperMaterialsSection states={draft.material_states} historicalMaterials={draft.paper.research_materials} />}
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mt: 2, '& > *': { minWidth: 0 } }}>
         <FormControl fullWidth error={hasIssue('paper.paper_type')} data-issue-field="paper.paper_type">
@@ -851,7 +857,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         <EvidenceNotes evidence={classificationEvidence} />
       </Box>
 
-      <MaterialStatesEditor fixedContract={draft._form_contract_version === 1} beforeStructureUpload={() => saveDraft(false)}
+      {!shallow && <MaterialStatesEditor fixedContract={draft._form_contract_version === 1} beforeStructureUpload={() => saveDraft(false)}
         independentStructureWorkspace
         propertySpectra={parsingPreview ? undefined : { frozenListing: frozenSpectra, initialListing: loadedSpectra, target: revisionPaperId && revisionMeta.current
           ? { target: 'revision', target_id: revisionMeta.current.revision_id }
@@ -894,8 +900,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         paperType={draft.paper.paper_type}
         superconductorKind={draft.paper.superconductor_kind}
         onError={setError}
-      />
-      {draft.structure_candidates?.length ? <PaperStructuralWorkspace candidates={draft.structure_candidates || []} observations={draft.structural_observations || []}
+      />}
+      {!shallow && draft.structure_candidates?.length ? <PaperStructuralWorkspace candidates={draft.structure_candidates || []} observations={draft.structural_observations || []}
         readOnly={readOnly || submitting} issues={draft.structural_extraction_issues || []}
         onCandidates={values => setDraftField('structure_candidates', values)}
         onObservations={values => setDraftField('structural_observations', values)}

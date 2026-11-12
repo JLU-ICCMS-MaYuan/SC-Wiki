@@ -1941,7 +1941,7 @@ def _handle_duplicate_locked(task_id: str, state: dict[str, Any], existing: Any)
             candidate_path = local_candidate
         action = "candidate_saved"
 
-    can_view = existing.review_status in {"approved", "pending"} or (
+    can_view = existing.review_status in {"approved", "pending", "published"} or (
         existing.review_status == "rejected"
         and int(existing.uploaded_by_user_id or 0) == int(state.get("user_id") or 0)
     )
@@ -2031,7 +2031,7 @@ def process_upload_task(task_id: str) -> dict[str, Any]:
         from .upload_usage import collect_upload_usage
         with execution_context(runtime), collect_upload_usage(task_id):
             from .upload_resume import resume_spectra
-            resumed = resume_spectra(task_id)
+            resumed = None if (get_state(task_id) or {}).get('parsing_mode') == 'shallow' else resume_spectra(task_id)
             if resumed is not None:
                 return resumed
             return _process_upload_task(task_id)
@@ -2131,6 +2131,9 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         state = update_state(task_id, files=files if state.get('files') else [])
         from .paper_first import prepare_paper
         from .upload_source_bundle import paper_source_chunks
+        if state.get('parsing_mode') == 'shallow':
+            from .shallow_parsing import finish_task
+            return finish_task(task_id, state, paper_source_chunks(task_id, state, root))
         prepare_paper(task_id, state, paper_source_chunks(task_id, state, root))
         # 论文级核对保存后再读科学图源，供适用性及材料状态阶段共同使用。
         from .chart_reading import enrich_document

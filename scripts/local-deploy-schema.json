@@ -2,7 +2,7 @@
   "deferred_source_heads": [],
   "schema_heads": [
     "20261102_0160",
-    "20261106_0225"
+    "20261112_0241"
   ],
   "tables": {
     "admin_applications": {
@@ -3264,7 +3264,7 @@
     },
     "papers": {
       "checks": [
-        "((content_revision>=1)and(((review_status='approved')and(approved_revision=content_revision))or((review_statusin('pending','rejected'))and(approved_revisionisnull))))",
+        "((content_revision>=1)and(((review_status='approved')and(approved_revision=content_revision))or((review_statusin('pending','rejected','published'))and(approved_revisionisnull))))",
         "(superconductor_kindin('conventional','unconventional','unknown'))"
       ],
       "columns": {

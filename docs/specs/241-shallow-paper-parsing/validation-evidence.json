@@ -1,0 +1,63 @@
+{
+  "status": "passed",
+  "source_pdf": ".data/demo_runs/cah6-multimodal-20261102-01/sources/main.pdf",
+  "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+  "reused_document_ir": ".data/backups/cah6-full-reparse-20261102-231004/trial-da888afa80b84e09958b1f59a974404f/artifacts/document_ir/025e91d43b1c467bbc80a9ed3e56df6f.json",
+  "text_extraction": "复用哈希核验的原文IR，未复用字段答案",
+  "model": "deepseek-flash",
+  "model_calls": [
+    {
+      "phase": "paper_info_extraction",
+      "model": "deepseek-flash",
+      "prompt_hash": "e0d21556867674fde8af86a4d76a75738f542d11ffc699af53828e573571bb70",
+      "usage": {
+        "input_tokens": 17649,
+        "input_tokens_details": {
+          "cache_write_tokens": null,
+          "cached_tokens": 896
+        },
+        "output_tokens": 814,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 18463
+      }
+    }
+  ],
+  "forbidden_calls": [],
+  "paper": {
+    "paper_id": 1,
+    "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+    "year": 2012,
+    "doi": "10.1073/pnas.1118168109",
+    "research_materials": [
+      "CaH4",
+      "CaH6",
+      "CaH12",
+      "CaH2",
+      "H2",
+      "Ca"
+    ],
+    "review_status": "published"
+  },
+  "failed_submit_recovered": true,
+  "repeat_submit_idempotent": true,
+  "business_database_used": false,
+  "go_search": "passed",
+  "source_baseline": "ec299f10；仅覆盖本次改动的隔离提交投影，原有5个未提交文件使用HEAD版本",
+  "worker_entry": "backend.ingest.upload_jobs.process_upload_task",
+  "source_hashes": {
+    "backend/api/rag.py": "dc368ac5ab855d6037926df6c483a19a5e0a8528edbbd93bc926e472ef9aed23",
+    "backend/ingest/upload_tasks.py": "1b6e037b4b810a32c7572fcc9bd3728240c609ad6eda70778a1b0752999fcf2a",
+    "backend/ingest/upload_jobs.py": "4698bc651e0ad5d2c037b4797f6e8dc49931996acea1ce6925fcb59c6b2ae5ca",
+    "backend/ingest/shallow_parsing.py": "48191e1d836c18f431a917e352a617925d36f6dcb14726d7a5899f9305b98677",
+    "backend/ingest/parsing_workflows.py": "ba8345e7caa6e8b5b948e250483fa765c070c35554cab9319484b766ef239621",
+    "backend/ingest/field_drafts.py": "2a441e2bc1d9a848cfb5b2638fb0c83bd2e4b8c9ffab2ff415663a682294ea50",
+    "backend/ingest/scientific_evidence.py": "df0e466099ce51d95cb205f93818c0128153f90562f2209a508ec99a7855d5ef",
+    "backend/models.py": "1b427c19050b7146666b8520a28984dc1b7c31def658eea17771a16b2ef7a66f",
+    "goserver/handlers/search_results.go": "62f20efc029dfd7e92a2516dd9a4fbb27774d84ac7bdb176ba729bd429016ed1",
+    "goserver/handlers/papers.go": "9f1282ade72243ef6b85d1acf6230f0df8ac03c985b0e8d9687d4696594c9b7c"
+  },
+  "fixture_schema_note": "隔离ORM夹具仅将JSON/TEXT字面量默认值包装为MySQL表达式；#241状态约束实际执行降级和升级。不是全量fresh迁移验收。",
+  "owned_services_stopped": true
+}

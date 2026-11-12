@@ -168,6 +168,7 @@ def create_task(
     *,
     files: list[dict[str, Any]] | None = None,
     parser_profile: str | None = None,
+    defer_parsing: bool = False,
 ) -> dict[str, Any]:
     task_id = uuid.uuid4().hex
     # 新任务只提供一个默认流程；历史状态不经过此创建入口。
@@ -201,6 +202,8 @@ def create_task(
         "revision": 1,
         "state_schema_version": UPLOAD_STATE_SCHEMA_VERSION,
         "parser_profile": parser_profile,
+        "defer_parsing": defer_parsing,
+        "parsing_mode": None if defer_parsing else "deep",
         "file_role_policy": USER_FILE_ROLE_POLICY,
         "workflow_policy": "typed-parsing-v1",
         "parser_runs": [],
@@ -478,7 +481,7 @@ def update_task_file(task_id: str, file_id: str, **changes: Any) -> dict[str, An
                 raise
 
 
-def lock_uploaded_manifest(task_id: str) -> tuple[dict[str, Any], bool]:
+def lock_uploaded_manifest(task_id: str, *, parsing_mode: str | None = None) -> tuple[dict[str, Any], bool]:
     """全部文件完成时只允许一个请求获得入队权。"""
     client = redis_client()
     key = task_key(task_id)
@@ -490,8 +493,14 @@ def lock_uploaded_manifest(task_id: str) -> tuple[dict[str, Any], bool]:
                 if not raw:
                     raise KeyError("上传任务不存在或已过期")
                 state = json.loads(raw)
+                if parsing_mode is not None and parsing_mode not in {'shallow', 'deep'}:
+                    raise ValueError('解析模式无效')
                 if state.get("status") != "uploading":
+                    if parsing_mode is not None and parsing_mode != state.get('parsing_mode', 'deep'):
+                        raise ValueError('任务已经启动，不能改变解析模式')
                     return state, False
+                if state.get('defer_parsing') and parsing_mode is None:
+                    raise ValueError('请先选择浅度解析或深度解析')
                 if not state.get("files") or any(
                     item.get("upload_status") != "completed" for item in state["files"]
                 ):
@@ -499,6 +508,8 @@ def lock_uploaded_manifest(task_id: str) -> tuple[dict[str, Any], bool]:
                 state = apply_state_changes(
                     state, now=int(time.time()), status="queued", stage="queued",
                     processing_status="processing",
+                    parsing_mode=parsing_mode or state.get('parsing_mode') or 'deep',
+                    defer_parsing=False,
                 )
                 pipeline.multi()
                 pipeline.set(key, _encoded(state))
@@ -598,7 +609,7 @@ def save_draft(task_id: str, draft: dict[str, Any], *, editor=None, changes=None
             from .tc_contexts import map_draft
             current.body = map_draft(draft, compact=True)
             current.revision += 1
-        if has_upload_checks(session, task_id):
+        if state.get("parsing_mode") == "shallow" or has_upload_checks(session, task_id):
             persist_upload(session, task_id, state, draft)
             client.persist(task_key(task_id))
             client.persist(draft_key(task_id))

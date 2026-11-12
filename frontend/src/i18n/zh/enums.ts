@@ -65,6 +65,7 @@ export default {
   structureOptimization: { unknown: '未说明', classical_static: '静态结构优化', quasi_harmonic: '准简谐结构优化', anharmonic_quantum: '量子非谐自由能结构优化', sscha: 'SSCHA量子非谐结构优化' },
   // 论文审核状态。needs_revision 是历史遗留状态，仍可能出现在旧数据中。
   reviewStatus: {
+    published: '直接收录',
     pending: '待审核',
     approved: '审核完成',
     rejected: '已拒绝',
