@@ -19,7 +19,7 @@ import { evidenceProblem } from './EvidenceFieldMarkers'
 import { createEvidenceDraftQueue } from '../lib/evidenceDraftQueue'
 import { createManualEvidenceDrafts, manualDraftKey, manualFieldIdentity, manualValueIdentity, type PreparedManualEvidence } from '../lib/manualEvidenceDrafts'
 import { changedScientificFields } from '../lib/evidenceFields'
-import { evidenceSiblings, evidencePartName } from '../lib/evidenceOwnership'
+import { evidenceSiblings, evidencePartName, canonicalEvidencePath } from '../lib/evidenceOwnership'
 import { evidenceStatusLabel, evidenceStatus } from '../lib/evidenceStatus'
 import { useLanguage } from '../context/LanguageContext'
 
@@ -265,14 +265,15 @@ export function useEvidenceWorkflow(options?: {
       drawerReturn.current = { trigger, field, anchor, top: anchor.getBoundingClientRect().top, scroller: scroller || document.scrollingElement }
     }
     setSelected(key); setSelectedKeys(keys || [key]); setSaveError(targetRef.current ? queueFor(targetRef.current).error()?.message || '' : '')
+    const locatorField = canonicalEvidencePath(fallback?.field || '')
     if (fallback?.placeholder && targetRef.current && optionsRef.current?.saveCurrent && !optionsRef.current.readOnly
-        && (fallback.field.startsWith('paper.') || fallback.field.startsWith('material_states[') || fallback.structure_field)) {
+        && (locatorField.startsWith('paper.') || locatorField.startsWith('material_states[') || fallback.structure_field)) {
       const session = drawerSession.current
       void (async () => {
         try {
           // 查看只定位已保存的字段；未保存的值继续由父草稿持有，不能在打开时顺带保存。
           const {record} = await api.post<{record: EvidenceRecord}>(`${base}/identify-field`, { ...targetRef.current,
-            field: fallback.field, state_key: fallback.state_key, module_key: fallback.module_key,
+            field: locatorField, state_key: fallback.state_key, module_key: fallback.module_key,
             record_key: fallback.record_key, record_field_key: fallback.record_field_key,
             structure_field: fallback.structure_field, structure_hash: fallback.structure_hash })
           if (drawerSession.current !== session) return

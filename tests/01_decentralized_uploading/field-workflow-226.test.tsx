@@ -90,6 +90,35 @@ async function open(role:string){
  await screen.findByLabelText('人工修改判断理由（必填）')
  return host
 }
+it.each(['upload','revision','admin','superadmin'])('%s 新方法的点号路径先定位真实字段，再显示人工修改区且零保存/模型',async role=>{
+ const methodField='material_states[0].property_modules[0].records[0].method_code'
+ const own={key:'new-method',item_key:'new-method',field:methodField,fields:[methodField],label:'预测方法',
+  state_key:'s',module_key:'new-module',record_key:'new-record',record_field:'method_code',
+  current_value:'unknown',status:'unchecked',reason:'',evidences:[],required:true,human_modified:true}
+ draft.material_states[0].property_modules=[{module_key:'new-module',module_code:'superconductive_properties',
+  definition_key:'module.superconductive_properties',definition_version:1,records:[{
+   record_key:'new-record',module_code:'superconductive_properties',record_type:'predicted_tc',property_code:'tc',
+   definition_key:'record.superconductive_properties.predicted_tc.unknown',definition_version:2,
+   name_raw:'Tc',value_kind:'number',value_number:0,value_raw:'0 K',unit_raw:'K',canonical_unit:'K',
+   method_code:'unknown',payload:{parameters:{mu_star:.1},calculation_conditions:{}},evidences:[],is_representative:false}]}]
+ const get=vi.mocked(api.get).getMockImplementation()!,post=vi.mocked(api.post).getMockImplementation()!
+ vi.mocked(api.get).mockImplementation(async path=>path.includes('/field-detail')&&path.includes('new-method')
+  ? {record:own,review_token:'current-method',approval_state:'modification_required',source_state:'available'} as never
+  : path.includes('/manual-context')?{version:'current',record:own} as never:get(path))
+ vi.mocked(api.post).mockImplementation(async(path,body)=>path.endsWith('/identify-field')?{record:own} as never:post(path,body))
+ await renderHost(role)
+ const anchor=await waitFor(()=>{
+  const node=document.querySelector('[data-issue-field="material_states.0.property_modules.0.records.0.method_code"] [data-evidence-key]')
+  expect(node).toBeTruthy();return node!
+ })
+ fireEvent.click(anchor)
+ await waitFor(()=>expect(api.post).toHaveBeenCalledWith(expect.stringMatching(/\/identify-field$/),
+  expect.objectContaining({field:methodField,state_key:'s',module_key:'new-module',record_key:'new-record'})))
+ fireEvent.click(await screen.findByRole('tab',{name:'来源核对',exact:true}))
+ await screen.findByLabelText('人工修改判断理由（必填）')
+ expect(api.patch).not.toHaveBeenCalled();expect(api.put).not.toHaveBeenCalled()
+ expect(vi.mocked(api.post).mock.calls.some(([path])=>path.endsWith('/jobs'))).toBe(false)
+})
 it.each(['upload','revision','admin','superadmin'])('%s 原正常列表本地修改后显示人工区；零资料明确通过标黄且零模型',async role=>{
  const host=await open(role)
  await waitFor(()=>expect(host.querySelector('[data-evidence-status="attention"]')).toBeTruthy())

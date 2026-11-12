@@ -2,6 +2,10 @@ import type { EvidenceRecord } from '../components/EvidenceWorkflow'
 
 export const normalizedEvidencePath = (field: string) => field.replace(/\[(\d+)\]/g, '.$1').replace('.omega_log_k', '.omega_log')
 
+/** DOM容器索引转为服务端字段路径；参数内部路径及稳定身份保持原样。 */
+export const canonicalEvidencePath = (field: string) => field.replace(
+  /(^|\.)(material_states|property_modules|records)\.(\d+)(?=\.|$)/g, '$1$2[$3]')
+
 /** 所属关系仅用于入口和展示；不能授予另一个子项科学通过资格。 */
 export function evidenceOwnerKey(record: EvidenceRecord): string {
   if (!record.settings_field) return record.key
