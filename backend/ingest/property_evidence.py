@@ -1422,6 +1422,7 @@ def run_evidence_job(job_id: str):
             progress = (lambda activity: update_activity(job_id, job['owner'], activity)) if job.get('purpose') == 'field' else None
             fresh = review_fields(batch_records, snapshot['chunks'], model_name=config.model,
                 cancelled=cancelled,
+                source_policy='referenced' if any(r.get('evidences') for r in batch_records) else 'initial',
                 on_partial=evidence_stream_guard(job_id, job['owner'], started, deadline_seconds),
                 manifest=snapshot.get('pdf_manifest') or [], human_context=human_context,
                 review_started_at=job.get('review_started_at'), **({'on_activity': progress} if progress else {}))

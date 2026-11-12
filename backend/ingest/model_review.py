@@ -411,9 +411,24 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                         # 不把排版对齐当作科学支持，也不冒造IR块编号。
                         windows = [s for s in catalog.values() if not s.get('block_id')
                                    and str(s.get('file_id')) == identity[0]]
+                        page = value.get('pdf_page') or value.get('page_start') or value.get('page')
+                        if page is not None:
+                            # 同一材料名/数值可在多页出现；已有真页码不能在预读转接时丢掉。
+                            try:
+                                page = int(page)
+                                windows = [s for s in windows if s.get('page_start') is not None
+                                    and int(s['page_start']) <= page <= int(s.get('page_end') or s['page_start'])]
+                            except (ValueError, TypeError):
+                                windows = []
                         ref = source_reference({'file_id': value['file_id'], 'quote': value['quote']}, windows)
                         if ref:
                             referenced_ids.add(ref['source_id'])
+                        elif page is not None:
+                            # 预读整窗口不等于选定引句。原页内同词多次出现也应读源，
+                            # 不改写其块/字符定位，更不自动授予科学支持。
+                            from .source_highlight import text_locator
+                            referenced_ids.update(s['source_id'] for s in windows
+                                if text_locator(s['content'], value['quote'])['match_kind'] != 'unlocated')
                 for child in value.values(): collect(child)
             elif isinstance(value, list):
                 for child in value: collect(child)

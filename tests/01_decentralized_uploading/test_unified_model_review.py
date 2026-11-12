@@ -30,6 +30,29 @@ def test_model_locates_format_variant_without_old_matcher(monkeypatch):
     assert checked['human_confirmed'] is False
 
 
+def test_native_table_quote_preread_keeps_its_original_pdf_page():
+    from backend.ingest.model_review import review_fields
+    row={'key':'structure','item_key':'structure','field':'material_states[0].structure.structure_text',
+         'current_value':'unchanged geometry hash','required':True,'kind':'field','label':'结构',
+         'claim':{'value':'unchanged geometry hash'},
+         'evidences':[{'file_id':'si','block_id':'actual-ir-cell','pdf_page':33,'quote':'PrH10'}]}
+    chunks=[{'file_id':'si','chunk_index':0,'page_start':5,'page_end':5,
+             'content':'PrH10 is mentioned in another context.'},
+            {'file_id':'si','chunk_index':1,'page_start':33,'page_end':34,
+             'content':'Table S1. PrH10 (400 GPa) Fm-3m a=b=c=4.49610. The label PrH10 repeats.'},
+            {'file_id':'other','chunk_index':2,'page_start':33,'page_end':33,
+             'content':'PrH10 from an unrelated document must never be pre-read.'}]
+    row=ev.complete_snapshot('upload','isolated',[row],chunks,{})['records'][0]
+    calls=[]
+    def observe(_prompt,content,**options):
+        body=json.loads(content);calls.append(body)
+        assert [s['source_id']for s in body['sources']]==['review-source-1']
+        return {'results':[{'key':'structure','status':'uncertain','reason':'Input observation only; no scientific approval.',
+                           'source_ids':['review-source-1']}]}
+    result=review_fields([row],chunks,model=observe,source_policy='referenced',max_rounds=1)
+    assert len(calls)==1 and result['structure']['status']=='uncertain'
+
+
 def test_invalid_reference_is_returned_to_model_and_other_results_survive():
     from backend.ingest.model_review import review_fields
     snap = case()
