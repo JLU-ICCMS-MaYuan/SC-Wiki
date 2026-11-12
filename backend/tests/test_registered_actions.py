@@ -53,6 +53,28 @@ def test_actual_schema_budget_and_independent_function_refs():
     assert _fixed_token_estimate(request)==_fixed_token_estimate({'system_prompt':'JSON','user_prompt':'source','response_schema':schema})
 
 
+def test_actual_filling_schema_wire_unions_have_explicit_types_and_same_acceptance():
+    from backend.ingest.scientific_output_schema import filling_schema
+    from backend.rag.deepseek_strict import schema_tool
+    from backend.tests.test_strict_scientific_output import _value
+    from jsonschema import Draft202012Validator
+    original=filling_schema();before=deepcopy(original)
+    wire=action_schema([schema_tool(original)])
+    def inspect(node):
+        if isinstance(node,list):
+            for item in node:inspect(item)
+        elif isinstance(node,dict):
+            for item in node.get('anyOf',[]):assert 'type'in item
+            for item in node.values():inspect(item)
+    inspect(wire)
+    value=_value(original,original)
+    samples=[value,{**value,'unregistered':True}]
+    for sample in samples:
+        wrapper={'action':{'name':'report_structured_output','arguments':sample}}
+        assert Draft202012Validator(original).is_valid(sample)==Draft202012Validator(wire).is_valid(wrapper)
+    assert original==before
+
+
 @pytest.mark.parametrize('bad', [False, True])
 def test_official_flash_schema_default_uses_same_closed_responses_protocol(monkeypatch, bad):
     schema = {'type': 'object', 'properties': {'value': {'type': 'number'}, 'source': {'type': ['string', 'null']}},

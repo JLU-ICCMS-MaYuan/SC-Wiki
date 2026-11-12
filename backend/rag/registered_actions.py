@@ -41,7 +41,8 @@ def action_schema(definitions):
             'description':function.get('description','')})
     result={'type':'object','properties':{'action':{'anyOf':choices}},'required':['action'],'additionalProperties':False}
     if shared:result['$defs']=shared
-    return result
+    from .deepseek_strict import responses_schema
+    return responses_schema(result)
 
 
 def conversation(history):

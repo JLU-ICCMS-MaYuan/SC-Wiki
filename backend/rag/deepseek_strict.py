@@ -89,6 +89,18 @@ def wire_tools(definitions):
     return result
 
 
+def responses_schema(schema):
+    """Responses保留标准$defs名称，共用已验证的等价联合/引用展开。"""
+    projected=wire_schema(schema)
+    def canonical(node):
+        if isinstance(node,list):return [canonical(item)for item in node]
+        if not isinstance(node,dict):return node
+        return {('$defs' if key=='$def'else key):
+            value.replace('#/$def/','#/$defs/')if key=='$ref'else canonical(value)
+            for key,value in node.items()}
+    return canonical(projected)
+
+
 def request_tools(request):
     return request_view(request)['tool_definitions']
 
