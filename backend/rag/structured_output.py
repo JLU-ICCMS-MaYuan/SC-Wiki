@@ -68,7 +68,14 @@ def validate_output(value, schema):
     except ValidationError as exc:
         path = ".".join(str(p) for p in exc.absolute_path) or "$"
         # 不把模型内容、源文或凭据塞入错误提示。
-        raise StructuredOutputError(f"模型输出未遵守固定字段结构：{path}（{exc.validator}）") from exc
+        detail = ''
+        if exc.validator in {'required', 'additionalProperties'} and isinstance(exc.schema, dict):
+            # 仅反馈程序声明的键；模型任意键名和取值不进入重试提示。
+            keys = exc.schema.get('required' if exc.validator == 'required' else 'properties', [])
+            if exc.validator == 'required' and isinstance(exc.instance, dict):
+                keys = [key for key in keys if key not in exc.instance]
+            detail = '；' + ('缺少必需键：' if exc.validator == 'required' else '仅允许键：') + ', '.join(keys)
+        raise StructuredOutputError(f"模型输出未遵守固定字段结构：{path}（{exc.validator}）{detail}") from exc
 
 
 def validate_tool_action(action, definitions, *, argument_context=None):

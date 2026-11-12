@@ -67,7 +67,11 @@ or {"done":true,"records":[{"candidate_ids":["s0:m0:r0"],"group":"common-conditi
 The server copies the original record identity/type/state and source text. Do not emit IDs, permissions,
 review decisions, new property types or UI definitions. values may contain value_kind/value_number/value_min/
 value_max/value_text/value_boolean/value_raw/method_code/method_raw/unit_raw/canonical_unit/uncertainty,
-parameters/calculation_conditions/approximation only. Always supply the numeric value for the declared kind.
+parameters/calculation_conditions only. Always supply the numeric value for the declared kind.
+The strict output schema requires every declared key, including nullable keys. Use null for unreported
+scalar/container values; never omit a required key and never add placeholder, note, or synonym keys.
+Put explanations in the existing record.reason field. The illustrative JSON above abbreviates nullable
+keys for readability; the actual response must include every key required by the supplied schema.
 Candidate record.evidences are evidence_id references into candidate_evidences, which preserves the
 original quotations and file/page/block identities once. These are original candidate evidence, not new
 scientific conclusions. Do not use evidence_id as source_id; request further source blocks when needed.

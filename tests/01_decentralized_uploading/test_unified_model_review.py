@@ -49,6 +49,46 @@ def test_invalid_reference_is_returned_to_model_and_other_results_survive():
     assert len(calls) == 2 and all(r['status'] == 'supported' for r in result.values())
 
 
+def test_catalogued_unread_reference_is_actually_read_then_rechecked_only_for_pending_field():
+    from backend.ingest.model_review import review_fields
+    row={'key':'spacing','item_key':'spacing','field':'paper.summary','kind':'field','label':'spacing',
+        'current_value':.03,'claim':{'value':.03},'required':True,
+        'evidences':[{'file_id':'si','quote':'Referenced record background.'}]}
+    chunks=[{'file_id':'si','chunk_index':0,'page_start':2,'content':'Referenced record background.'},
+            {'file_id':'si','chunk_index':1,'page_start':3,'content':'The spacing is 0.03 inverse angstrom.'}]
+    snap=ev.complete_snapshot('upload','isolated',[row],chunks,{})
+    other=deepcopy(snap['records'][0]);other.update(key='other',item_key='other')
+    calls=[]
+    def model(_prompt,body,**options):
+        request=json.loads(body);calls.append(request)
+        if len(calls)==1:
+            assert {s['source_id']for s in request['sources']}=={'review-source-0'}
+            return {'results':[{'key':'spacing','status':'supported','reason':'Needs the actual methods paragraph.',
+                'source_ids':['review-source-1']},{'key':'other','status':'supported','reason':'Background is read.',
+                'source_ids':['review-source-0']}]}
+        assert [r['key']for r in request['records']]==['spacing']
+        assert request['previous_error']
+        source=next(s for s in request['sources']if s['source_id']=='review-source-1')
+        assert source['content']==chunks[1]['content']
+        return {'results':[{'key':'spacing','status':'supported','reason':'Actual full methods paragraph now read.',
+                            'source_ids':['review-source-1']}]}
+    result=review_fields([*snap['records'],other],snap['chunks'],model=model,source_policy='referenced',max_rounds=4)
+    assert len(calls)==2 and all(r['status']=='supported'for r in result.values())
+    assert result['spacing']['review_followup']['actions']==2  # 失败回复与实际补读均在原预算计数。
+
+
+def test_program_read_alone_never_accepts_the_earlier_unread_conclusion():
+    from backend.ingest.model_review import review_fields
+    snap=case();snap['chunks'].append({'file_id':'si','chunk_index':1,'page_start':3,
+        'content':'Additional original text, not an automatic scientific conclusion.'})
+    def model(_prompt,body,**options):
+        return {'results':[{'key':'spacing','status':'supported','reason':'Cites an unread directory item.',
+                            'source_ids':['review-source-1']}]}
+    result=review_fields(snap['records'],snap['chunks'],model=model,source_policy='referenced',max_rounds=1)
+    assert result['spacing']['status']=='unchecked' and result['spacing']['review_error']
+    assert result['spacing']['evidences']==[]
+
+
 def test_technical_failure_does_not_erase_completed_fields():
     from backend.ingest.model_review import review_fields
     snap = case(); other = deepcopy(snap['records'][0]); other.update(key='other', item_key='other')

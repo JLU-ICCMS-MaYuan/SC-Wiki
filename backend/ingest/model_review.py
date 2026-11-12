@@ -494,7 +494,7 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                        for r in pending.values()],
                    'sources': list(read.values()),
                    'source_index': [{k: s.get(k) for k in ('source_id', 'file_id', 'page_start', 'block_id')}
-                                    | {'preview': s['content'][:100]} for s in catalog.values()],
+                                    | {'preview': s['content'][:100]} for key,s in catalog.items() if key not in read],
                    'documents': [{'file_id': key, 'pages': [p.pdf_page for p in ir.pages],
                                   'tables': [t.table_id for t in ir.tables]} for key, ir in tools.documents.items()],
                    'tools': allowed_tools, 'remaining_actions': tools.budget.max_actions - tools.budget.actions,
@@ -527,11 +527,16 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
             pdfs_received = True
             if isinstance(answer.get('results'), list):
                 errors = []
+                unread_references=set()
                 for raw in answer['results']:
                     row = pending.get(raw.get('key')) if isinstance(raw, dict) else None
                     if row is None:
                         continue
                     try:
+                        ids=raw.get('source_ids')or[]
+                        if isinstance(ids,list):
+                            unread_references.update(key for key in ids if isinstance(key,str)
+                                and key in catalog and key not in read and str(catalog[key].get('content')or'').strip())
                         status = raw.get('status')
                         if on_human_question:
                             if raw.get('resolution') not in {'resolved', 'not_reported', 'unresolved', 'human_required'}:
@@ -643,6 +648,22 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                 if not pending:
                     break
                 error = '；'.join(errors) or '缺少这些字段的最终结果：' + ','.join(pending)
+                requested_pages=set()
+                for key in sorted(unread_references):
+                    source=catalog[key];document=tools.documents.get(source['file_id'])
+                    block=next((b for b in document.blocks if b.metadata.get('source_id')==key),None)if document else None
+                    if block:requested_pages.add((source['file_id'],block.pdf_page))
+                if requested_pages:
+                    observations=[]
+                    for file_id,page in sorted(requested_pages):
+                        observed=tools.call('read_page',{'file_id':file_id,'page':page})
+                        observations.append(observed)
+                        for block in observed.get('blocks',[]):
+                            key=block.get('metadata',{}).get('source_id')
+                            if key in catalog:read[key]=catalog[key]
+                    observation={'actual_program_read_for_unread_citations':observations,
+                        'instruction':'Earlier conclusions citing unread IDs were rejected. Re-evaluate only the pending fields using the full sources now supplied; this read is not scientific approval.'}
+                    activity('tool','已补读当前字段引用但尚未读到的原文，等待模型重新核实')
                 repeated_error = repeated_error + 1 if error == last_error else 0
                 last_error = error
                 if repeated_error >= 2:
