@@ -28,16 +28,17 @@ def test_tc_record_hint_does_not_change_structure_only_request_identity():
     assert 'retain all structures' in original
 
 
-def test_whole_paper_scope_audit_cannot_offer_other_window_as_current_extraction_source():
+@pytest.mark.parametrize('purpose',['form','structure'])
+def test_whole_paper_scope_audit_cannot_offer_other_window_as_current_extraction_source(purpose):
     from backend.ingest.tc_material_scope import scope_prompt
     value = scope()
     marker = '361a4d642b57f5ade746276252a4a9f4653d5fe4624e0ba0c55fbc1c11a920a0'
     value['excluded_materials'][0]['evidences'][0]['content'] = '<!-- block: ' + marker + ' --> Other window Tc < 56 K.'
     before = deepcopy(value)
-    prompt = scope_prompt(value)
+    prompt = scope_prompt(value,purpose=purpose)
     assert marker not in prompt
     assert 'Other window' not in prompt
-    assert 'CeH10' in prompt and '本文仅报告Tc小于56 K' in prompt
+    if purpose=='form':assert 'CeH10' in prompt and '本文仅报告Tc小于56 K' in prompt
     assert value == before  # 完整原审计与来源保存，不在提示投影时删除。
 
 

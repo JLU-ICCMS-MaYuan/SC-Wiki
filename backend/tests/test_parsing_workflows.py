@@ -151,6 +151,29 @@ def test_all_windows_participate_and_final_call_failure_pauses(monkeypatch):
     assert len(calls[-1]['window_reports']) == 3
 
 
+def test_aggregate_reuses_valid_window_bibliography_without_requesting_it_again(monkeypatch):
+    from backend.ingest import property_evidence
+    from backend.rag.structured_output import validate_output
+    import json
+    monkeypatch.setattr(property_evidence,'SOURCE_BATCH_CHARS',30)
+    sources=[{**SOURCES[0],'content':SOURCES[0]['content']+str(i)}for i in range(2)]
+    calls=[]
+    def model(_prompt,body,**options):
+        request=json.loads(body);calls.append(request)
+        value=result();value.update(contribution_source_ids=['review-source-0'],tc_materials=[])
+        if 'window_reports'in request:
+            value.pop('paper')
+        else:
+            identity=request['sources'][0]['source_id']
+            value['source_ids']=value['contribution_source_ids']=[identity]
+        validate_output(value,options['response_schema'])
+        return value
+    report=workflows.assess(sources,complete=model)
+    assert report['status']=='matched'
+    assert report['paper']==result()['paper']
+    assert len(calls)==3
+
+
 def test_paused_task_timing_never_claims_complete():
     from backend.ingest.upload_contracts import apply_state_changes, apply_user_activity
     timing = dict(elapsed_seconds=0, started_at=10, running_since=10, finished_at=None)

@@ -172,9 +172,7 @@ def geometry_observations(image):
         regions = horizontal_axis_text_regions(view, round(y), bounds)
         if len(regions) >= 2:
             result['horizontal_axis_text_regions'].append({'frame_y': y*1000/(height-1),
-                'bounds': bounds, 'regions': regions,
-                'label_tick_anchors':horizontal_tick_anchors(view,round(y),regions),
-                'role': 'printed_text_geometry_only_not_tick_values'})
+                'bounds': bounds, 'regions': regions, 'role': 'printed_text_geometry_only_not_tick_values'})
     for first,second in zip(frames,frames[1:]):
         if (abs(first[0]-second[0])<=width*.025 and abs(first[1]-second[1])<=width*.025
                 and second[2]-first[2]>=max(8,height*.025)):

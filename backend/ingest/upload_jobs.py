@@ -570,8 +570,14 @@ def _read_chunk(
         from backend.ingest.domain_extraction import DOMAIN_SYSTEM_PROMPT, COMPLEMENTARY_SYSTEM_PROMPT, normalize_extraction, EXTRACTION_OUTPUT_SCHEMA
         from backend.ingest.scientific_output_schema import bind_extraction_sources
         system_prompt = COMPLEMENTARY_SYSTEM_PROMPT if profile == "complementary" else DOMAIN_SYSTEM_PROMPT
-        generation_schema = bind_extraction_sources(EXTRACTION_OUTPUT_SCHEMA, json.loads(chunk.content),
+        input_context=json.loads(chunk.content)
+        generation_schema = bind_extraction_sources(EXTRACTION_OUTPUT_SCHEMA, input_context,
                                                     allow_block_references=profile == "complementary")
+        if input_context.get('required_completion_targets'):
+            system_prompt += ('\nHOST COMPLETION SCOPE: extract missing numerical results from required_completion_targets '
+                'and their actually reported pairing/condition context on these original pages. Do not retype unrelated '
+                'results. original_alternative_block_ids are registered readings of the SAME original PDF, not AI answers; '
+                'judge their actual text and cite the correct source. Do not invent a Tc to store an unpaired parameter.')
     system_prompt += scope_prompt(material_scope)
     from backend.ingest.scientific_context import CONTEXT_VERSION
     from backend.rag.llm_context import get_llm_config
@@ -583,7 +589,7 @@ def _read_chunk(
         "output_schema": generation_schema if structured else None,
     }, sort_keys=True).encode("utf-8")).hexdigest()
 
-    context = json.loads(chunk.content) if structured else None
+    context = input_context if structured else None
     source_handoff = None
     base_signature = signature
     cached = json.loads(result_path.read_text(encoding="utf-8")) if result_path.exists() else {}
@@ -622,6 +628,15 @@ def _read_chunk(
             return cached
     if structured:
         # 身份与原文不变；只为新/失败请求说明原Schema已排除的空文本版面定位块。
+        from .scientific_output_schema import constrain_extraction_records
+        # 已存片段已经通过同一固定表单校验，以上直接复用；只收紧新请求的生成表示。
+        generation_schema=constrain_extraction_records(generation_schema)
+        system_prompt += ('\nFIXED RECORD OWNERSHIP: lambda_ep, omega_log and mu_star are parameters of '
+            'an actually reported predicted_tc record, NEVER independent custom/property records. If this '
+            'window has no supported paired Tc, retain its parameter/figure source with an out_of_model_scope '
+            'exclusion for this extraction stage; later global filling can assign it only with original '
+            'pairing and conditions. Never invent a Tc or new property key to store a standalone parameter. '
+            'custom is allowed only for the existing thermodynamical_properties stability payload.')
         system_prompt += ('\nPROGRAM SOURCE ID CONTRACT: blocks marked layout_only_no_text_evidence '
             'cannot be cited as block_id or quote_id. A table_id is not a text evidence block. '
             'Cite a populated cell, paragraph or caption registered in the supplied source schema. '
@@ -660,9 +675,14 @@ def _read_chunk(
         from backend.rag.structured_output import StructuredOutputError
         try:
             assert_allowed(value.get('material_states') or [], material_scope)
+            if structured:
+                from .fixed_form_contract import validate_model_record
+                for row in value.get('material_states')or[]:
+                    for module in row.get('property_modules')or[]:
+                        for record in module.get('records')or[]:validate_model_record(record)
         except ValueError as exc:
             raise StructuredOutputError(str(exc)) from exc
-    if material_scope:
+    if material_scope or structured:
         # 只有通过已有范围检查的响应才可成为可复用的成功检查点。
         schema_options['validate_result'] = validate_scope
     if source_handoff:
@@ -2451,6 +2471,7 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
             check=lambda: _ensure_not_cancelled(task_id), completed=segment_completed)
 
         document_set = {}
+        chart_source_limits = []
         legacy_sources = {}
         if state.get("parser_profile", "legacy") != "legacy" and any(str(item.get("kind")).lower() == "pdf" for item in sources):
             from backend.ingest.document_ir import DocumentIR
@@ -2537,6 +2558,23 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                     exclusion = {"file_id": file_id, "category": decision.get("category"), "reason": decision.get("reason")}
                     exclusion.update({k: decision[k] for k in ("block_id", "table_id", "row_index") if decision.get(k) is not None})
                     exclusions_by_file.setdefault(file_id, []).append(exclusion)
+                needed=[d['block_id']for d in decisions if d.get('decision')=='needs_extraction' and d.get('block_id')]
+                if needed:
+                    from .domain_extraction import coverage_completion_chunks
+                    item=next(row for row in sources if row['file_id']==file_id)
+                    next_index=1+max((int(c.get('_source',{}).get('chunk_index',-1))for c in candidates
+                        if c.get('_source',{}).get('file_id')==file_id),default=-1)
+                    for offset,part in enumerate(coverage_completion_chunks(ir,needed)):
+                        part.chunk_index=next_index+offset
+                        with call_phase('chunk_extraction',filename=item.get('original_filename'),
+                                        pages=list(range(part.source_page,part.source_page_end+1))):
+                            extra=_read_chunk(task_id,part,file_id,{**item,'parser_profile':state['parser_profile'],
+                                'tc_material_scope':(state.get('workflow_assessment')or{}).get('tc_material_scope')})
+                        extra_claims=claims_from_candidates(extra,document_set,prefix=f'candidates[{len(candidates)}]',legacy_sources=legacy_sources)
+                        candidates.append(extra);claims.extend(extra_claims)
+                        apply_claim_evidence({'candidates':candidates},extra_claims)
+                        exclusions_by_file.setdefault(file_id,[]).extend(extra.get('coverage_exclusions')or[])
+                    _atomic_write_json(artifact_directory(task_id)/'claims.json',[c.model_dump(mode='json')for c in claims])
                 coverage[file_id] = audit_coverage(ir, [claim for claim in claims
                     if any(e.file_id == file_id for e in claim.evidences)],
                     exclusions=exclusions_by_file.get(file_id),
@@ -2544,8 +2582,13 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
             _atomic_write_json(artifact_directory(task_id) / "coverage.json", coverage)
             unresolved = any(c.status != ClaimStatus.VALIDATED for c in claims)
             incomplete = any(report["requires_human"] for report in coverage.values())
+            from .coverage_audit import reviewable_chart_limits
+            limits = reviewable_chart_limits(document_set,coverage,invalid_claims=unresolved)
+            if limits is not None:
+                chart_source_limits = limits
+                update_state(task_id, document_source_limits=limits)
             update_state(task_id, reading_state="needs_review" if unresolved or incomplete else "coverage_checked")
-            if unresolved or incomplete:
+            if unresolved or (incomplete and limits is None):
                 from backend.ingest.coverage_audit import coverage_failure_message
                 file_names = {str(item.get("file_id")): str(item.get("original_filename") or item.get("file_id"))
                               for item in state.get("files") or []}
@@ -2783,6 +2826,13 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                 generation_issues.append({"field": field, "code": "model_missing",
                                           "message": str(assessment.get("reason") or "需要人工核对")})
         draft["generation_issues"] = generation_issues
+        for limit in chart_source_limits:
+            observation=limit['observation']
+            draft['generation_issues'].append({'field':'','code':'chart_value_unread',
+                'message':f"解析未从此处未读图生成数值，后续人工填写仍须依原图校对；PDF第{limit['pdf_page']}页 / "
+                    f"{observation.get('figure')or observation.get('region_id')} / "
+                    f"{observation.get('panel','')} / {observation.get('category','')}：{observation['reason']}；"
+                    '这是读取限制，不是原文未报告，也不是已核准数据。'})
         from backend.rag.llm_context import get_llm_config
         _atomic_write_json(artifact_directory(task_id) / "generation_attempts.json", {
             "source_hash": hashlib.sha256(json.dumps(

@@ -89,10 +89,10 @@ from .tc_material_scope import PROMPT as MATERIAL_SCOPE_PROMPT
 PROMPT += '\n' + MATERIAL_SCOPE_PROMPT
 
 
-def _schema():
+def _schema(*, include_paper=True):
     from .scientific_output_schema import obj, nullable, array
     text = {'type': 'string'}
-    return obj({
+    schema = obj({
         'paper_type': {'type': 'string', 'enum': ['theoretical', 'experimental', 'review', 'unknown']},
         'theoretical_subtype': {'type': ['string', 'null'], 'enum': ['calculation', 'method', 'theory', None]},
         'superconductor_kind': {'type': 'string', 'enum': ['conventional', 'unconventional', 'unknown']},
@@ -101,6 +101,9 @@ def _schema():
             'has_range_tc': {'type': 'boolean'}, 'source_ids': array(text), 'reason': text})),
         'paper': obj({'title': nullable(text), 'doi': nullable(text),
                       'year': nullable({'type': 'integer'}), 'authors': array(text)})})
+    if not include_paper:
+        schema['properties'].pop('paper');schema['required'].remove('paper')
+    return schema
 
 
 def assess(chunks, *, complete=None, model='', cancelled=lambda: None):
@@ -124,7 +127,9 @@ def assess(chunks, *, complete=None, model='', cancelled=lambda: None):
             reports.append(complete(PROMPT, json.dumps({'sources': batch}, ensure_ascii=False),
                                     response_schema=_schema()))
             if isinstance(reports[-1], dict) and isinstance(reports[-1].get('paper'), dict):
-                base['paper'].update({k: v for k, v in reports[-1]['paper'].items() if v not in (None, [], '')})
+                for key,value in reports[-1]['paper'].items():
+                    if value not in (None,[],'') or key not in base['paper']:
+                        base['paper'][key]=deepcopy(value)
             base['covered_batches'] += 1
         except Exception as exc:
             if type(exc).__name__ == 'UploadCancelled':
@@ -133,14 +138,17 @@ def assess(chunks, *, complete=None, model='', cancelled=lambda: None):
     cancelled()
     try:
         from .source_ownership import source_identity_index
+        reuse_paper = len(reports)>1 and bool(base['paper'])
         raw = reports[0] if len(reports) == 1 else complete(PROMPT +
             '\n汇总时source_index保留原编号及文件角色。contribution_source_ids只能选file_role=main的正文依据；'
-            'SI可列入source_ids支持上下文，不能混入正文贡献编号。不得靠编号大小猜文件归属。',
+            'SI可列入source_ids支持上下文，不能混入正文贡献编号。不得靠编号大小猜文件归属。' +
+            ('\n题录已由有效窗口取得并保留，当前仅汇总分类与材料范围；不要再次返回paper，不改写已保存题录。'if reuse_paper else ''),
             json.dumps({'window_reports': reports, 'source_index': source_identity_index(sources)},
-                       ensure_ascii=False), response_schema=_schema())
+                       ensure_ascii=False), response_schema=_schema(include_paper=not reuse_paper))
         if not isinstance(raw, dict) or not isinstance(raw.get('reason'), str) or not raw['reason'].strip():
             raise ValueError('invalid routing response')
-        base['paper'] = deepcopy(raw.get('paper') or {})
+        if isinstance(raw.get('paper'),dict):base['paper'] = deepcopy(raw['paper'])
+        elif reuse_paper:base['paper_metadata_origin']='reused_valid_window_reports'
         base['reason'] = raw['reason'][:1000]
         by_id = {c['source_id']: c for c in sources}
         from .tc_material_scope import collect_scope

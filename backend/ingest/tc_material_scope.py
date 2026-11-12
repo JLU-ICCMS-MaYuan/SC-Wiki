@@ -104,13 +104,18 @@ def assert_allowed(states, scope, *, purpose='form'):
 
 def scope_prompt(scope, *, purpose='form'):
     if (scope or {}).get('rule_version') == VERSION:
+        if purpose == 'structure':
+            return ('\nCURRENT-PAPER STRUCTURE POLICY v2: retain all structures actually studied in the '
+                'current paper/body/SI regardless of absent/range-only Tc. Do not import reference-only '
+                'structures. Judge the currently supplied original file and registered read-only tools; '
+                'Tc range audit text is not a source of coordinates, file identity or page identity.\n')
         excluded = (scope or {}).get('excluded_materials') or []
         # 整篇审计保留原文；当前片段只接收范围结论，不把别窗正文伪装成可引用输入。
         audit = [{'material': e['material'], 'has_specific_tc': e.get('has_specific_tc'),
                   'has_range_tc': e.get('has_range_tc'), 'reasons': e.get('reasons', []),
                   'source_refs': [{k: source.get(k) for k in
                       ('file_id', 'file_role', 'chunk_index', 'page_start', 'page_end')}
-                      for source in e.get('evidences', [])]} for e in excluded] if purpose == 'form' else excluded
+                      for source in e.get('evidences', [])]} for e in excluded]
         return ('\nCURRENT-PAPER STRUCTURE POLICY v2: retain all structures actually studied in this '
             'body/SI regardless of absent/range-only Tc. Do not import reference-only structures. '
             'Range-only materials cannot acquire invented Tc points; preserve original bounds and sources. '

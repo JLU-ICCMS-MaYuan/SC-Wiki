@@ -70,6 +70,43 @@ class CoverageReport(BaseModel):
     requires_human: bool = True
 
 
+def reviewable_chart_limits(documents, reports, *, invalid_claims=False):
+    """只将已实际读图的诚实缺失交既有表单核对；不改变原覆盖报告或接受科学值。"""
+    from copy import deepcopy
+    from .chart_reading import VERSION, unresolved_block
+    if invalid_claims:return None
+    result=[]
+    for file_id,report in reports.items():
+        if not report.get('requires_human'):continue
+        if (report.get('uncovered_candidates') or report.get('truncation_signals') or report.get('empty_pages')
+                or set(report.get('limitations') or [])-{'unreadable_exclusion_present'}):return None
+        ir=documents.get(file_id)
+        if ir is None:return None
+        reading=ir.coverage.get('chart_reading')or{}
+        if (reading.get('status')!='completed' or reading.get('version')!=VERSION
+                or reading.get('source_sha256')!=ir.source_sha256
+                or sorted(reading.get('scanned_pages')or[])!=sorted(p.pdf_page for p in ir.pages)):return None
+        targets={t['region_id']:t for t in reading.get('targets')or[]}
+        blocks={b.block_id:b for b in ir.blocks if b.metadata.get('selected_for_reading')is not False}
+        regions=report.get('unreadable_regions')or[]
+        if not regions:return None
+        for region in regions:
+            block=blocks.get(region.get('locator'));issue=(block.metadata.get('chart_unresolved')or{})if block else{}
+            if (not issue or issue.get('reason_code') or issue.get('point') is not None
+                    or block.metadata.get('source_kind')!='vision'
+                    or issue.get('region_id')not in targets
+                    or issue.get('page')!=block.pdf_page
+                    or targets[issue['region_id']].get('page')!=block.pdf_page
+                    or not str(issue.get('reason')or'').strip()):return None
+            expected=unresolved_block(ir.source_sha256,issue,block.reading_order)
+            if (block.block_id!=expected.block_id or block.content_hash!=expected.content_hash
+                    or block.text!=expected.text):return None
+            result.append({'file_id':file_id,'source_sha256':ir.source_sha256,'block_id':block.block_id,
+                'content_hash':block.content_hash,'pdf_page':block.pdf_page,'observation':deepcopy(issue),
+                'disposition':'no_numeric_value_generated_from_this_unread_source'})
+    return result
+
+
 def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncated: bool = False,
                    processed_pages: list[int] | None = None,
                    exclusions: list[dict] | None = None) -> CoverageReport:

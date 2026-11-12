@@ -61,3 +61,34 @@ HEAD 81ab3d9e，当前修改已提交，未push/deploy。此前面板11524ba8、
 4. 每分钟内有有意义更新。时间目标09:00不是伪造通过的理由；真实不可恢复外部阻塞明确说明停点。
 
 用过全局MEMORY.md #227注册，最后引用准确78–111附近行及对应rollout ID；不更新全局记忆。后续状态易变，此文件不能替代get_state与真实网页确认。
+
+## 2026-11-12约09:56最新接续（优先于全部旧快照）
+
+09:00目标已未达成，已如实告知用户；不能宣布完成，仍须持续五阶段及最后新上传无代码调试轮。当前没有正式Flash PaperID，后四阶段没有执行。现Task仍b5a836...，第40代刚从Safari可见按钮继续，原39代29/29提取完成且正文漏提已补，唯一阻塞为已知PrH9三个未读的交接实现定位键误读，现已修正并有真实固定回放。
+
+HEAD cf1cad9a（07:46）；随后多组变更尚未提交，需等/tmp/scwiki-cumulative-final-backend.log及最新验证核对后明确路径自动提交，不能混入外部改动。根目录git diff/status列出的均为本轮新增/修改；还有新backend/tests/test_chart_source_handoff.py及gzip真实fixture。没有改标准scientific_form_contract、依赖、.env、数据库结构，没有push/deploy。
+
+新增已落地待收尾：
+- v14标定恢复在cf1cad9a：保留旧54条（38主图＋16SI柱）逐块哈希全等。SI已完成，当前总主图38、SI33（新15 DOS及lambda4.4/2.3，精度0.2），剩SI4个说明、主图Pr3个真实未读。原图/回执与原不完整coverage保持。
+- 最初轴锚点直接加入全部初始请求导致无关重读，已撤回，初始请求恢复。仅错误反馈附原轴文字逐字框、唯一原像素短刻度，无转录值；只修轴时不重复整篇SI，其他页通过目录和原工具可读，预算仍96000。line唯一category/series的轴修复复用旧点，不要求全部重填，多点不唯一不猜测。
+- 普通图值未读不属于#239真正科学冲突，不新增问题/确认步骤。之前讨论过source-question/旧任务显式启用方案，**没有实施，不能接着误写**。当前helper reviewable_chart_limits只对已实际读图、当前版本、同源页/目标/原块/文本哈希、无point和程序错误码的真实缺失交到既有草稿科学核对，不产生数字、不清除raw coverage.requires_human。所有其他未覆盖/断言/文字读取/技术/预算问题仍停止。草稿generation_issues明确解析未生成这些数字；后续人工0K照用户裁定从正常表单填写，不是自动读图成功。首次record_handoff保存document_source_limits原清单（SQL测试通过）。
+- 真实coverage.unreadable_regions字段是locator；最初helper+辅助夹具错用block_id，真实gzip回放先检出None后修正。fixture backend/tests/fixtures/chart-source-locator-real.json.gz。不要换成模糊匹配。
+- 正文p4真实lambda4.42/2.41漏提：短分类item_N身份精确回代；needs_extraction对其原页与已登记同源备用文字一次补提，不喂旧AI答案；新候选追加到原数组，不改旧候选。coverage39已无真正未覆盖项。
+- #230有效题录原已保存，workflow最终汇总不再重复要求paper；保留有效窗口题录含空值，未知不覆盖前面值。native旧提示只在实际Responses传输投影为host提示，缓存规范身份不变。两项有先失败回归，路由已真正matched。
+- v2结构收录不依赖Tc，structure scope不携整篇Tc审计正文/异文件页码，避免正文file_id读SI33。每个PDF独立读取，仅当前file_id/pages；相位示意不冒充坐标。动作名额用尽仅允许结果工具总结已读/真实未读，不加预算（partial rows分支的最后槽位过滤可再核对是否需要统一放到分支后，但无实际故障前别主动扩张）。主文已结束、SI也已通过后进入39代材料提取。
+- 当前新/失败提取请求把既有fixed_form_contract.validate_model_record接受条件投影到生成Schema：tc/dos_fermi或已登记热力学稳定性custom。阻止独立custom lambda；参数事实保留IR，后续Tc配对须原文。signature在投影之前，已有效File chunk cache仍复用，validate_result在ModelRuntime缓存前校验fixed record。人工入口/契约锁定摘要不动。相关63后端、字段契约通过，最新合并91日志后又加真实locator回归，最终数字以当前新日志为准。
+
+最新测试：
+/tmp/scwiki-cumulative-final-backend.log正在/刚执行（应主动读取结果），最新同前端/tmp/scwiki-cumulative-form.log 250通过、mutation12检出，字段检查通过。先前有单项MUI保存按钮等待波动，原全套重跑通过，没有加超时或放宽断言。辅助脚本错误路径、环境缺JWT、初始fixture漏parse_profile、错误locator测试夹具明确单列，不作产品通过。
+
+浏览器：
+Safari22617当前Task新开在一个独立标签，URL仍原b5；account邮箱myth620137018@163.com、用户、LLM1已于09:15重读。helper browser_action.py增加每次按URL匹配后原生激活该窗口/标签并等待.2秒布局，已真实点击成功。浏览器曾后台冻结/getClientRects为0导致没点到，不能认定续跑已执行；先看UI/实际generation。此helper在ignored run路径，可作为辅助源按需明确force add；不要add整run。
+最后一次点击是40代，处理后台先get_state；不要重复上传/删除，不调用业务API或SQL替代网页。
+
+真正剩余：
+1 当前40代若成功进入summarizing/材料状态，检查草稿主要科学数据和全部已有科学裁定，用真实网页保存、字段理由/证据、正常审核。
+2 同论文真实送审→Chrome超管具体两项退回→Safari同ID返修保存重读/重提→超管具体通过日志批准→探索YH10打开本轮新Paper→只读正式库+来源/原文件核验。
+3 调试轮五阶段过后才定向归档清理，再同两原PDF新上传最后无需修代码/后台改值的一轮，保留最终正式Paper。旧GPT1485的历史通过已归档且已删除，不拿它冒充当前。
+原人类裁定和源哈希见本文前段，不再问。不能为赶时间去掉保护、补科学常识、伪造通过、借别压晶胞、丢选定引用。不要继续新增无关功能。先实际跑当前流程和读实际状态，别长时间推演假想问题。
+
+09:57实际第40代已越过coverage到summarizing/material_identifying，预览25状态；仍未送审，无正式Flash PaperID。当前所有代码相关合并回归/tmp/scwiki-cumulative-final-backend.log为92通过，最新同前端全套250＋12变异通过，字段契约通过。

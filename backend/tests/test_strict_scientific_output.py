@@ -210,8 +210,30 @@ def test_real_chunk_entry_passes_schema_archives_response_and_never_retries_keys
         assert result["material_states"] == []
         assert call() == result  # 相同结构与内容命中缓存，不再调用模型。
         archived = json.loads(next(tmp_path.rglob("input.json")).read_text())
-        assert archived["response_schema"] == EXTRACTION_OUTPUT_SCHEMA
+        from backend.ingest.scientific_output_schema import constrain_extraction_records
+        assert archived["response_schema"] == constrain_extraction_records(EXTRACTION_OUTPUT_SCHEMA)
     assert len(calls) == 1
+
+
+def test_record_generation_rejects_unpaired_custom_but_keeps_standard_and_thermal_cases():
+    from copy import deepcopy
+    from backend.ingest.domain_extraction import EXTRACTION_OUTPUT_SCHEMA
+    from backend.ingest.scientific_output_schema import constrain_extraction_records
+    from backend.rag.structured_output import validate_output,StructuredOutputError
+    base=EXTRACTION_OUTPUT_SCHEMA;before=deepcopy(base)
+    projected=constrain_extraction_records(base)
+    row=_value(base['$defs']['ExtractedRecord'],base)
+    row['evidences']=[{'file_id':'fixture','pdf_page':1,'block_id':'block','quote':'synthetic type fixture','quote_id':None}]
+    def check(value,schema):validate_output(value,{'$ref':'#/$defs/ExtractedRecord','$defs':schema['$defs']})
+    check(row,projected)
+    bad=deepcopy(row);bad.update(property_code='custom',module_code='superconductive_properties')
+    check(bad,base)
+    with pytest.raises(StructuredOutputError):check(bad,projected)
+    thermal=deepcopy(bad);thermal['module_code']='thermodynamical_properties'
+    value=base['$defs']['ExtractedRecord']['properties']['payload']['properties']['thermodynamic_stability']['anyOf'][0]
+    thermal['payload']['thermodynamic_stability']=_value(value,base)
+    check(thermal,projected)
+    assert base==before
 
 
 def test_original_bad_payload_is_rejected_without_mutating_it():

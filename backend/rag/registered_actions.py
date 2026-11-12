@@ -6,6 +6,8 @@ MARKER='_json_action_transport'
 VERSION='registered-json-actions-v1'
 SCHEMA_MODE='responses-registered-schema-v1'
 FLASH_MODELS={'deepseek-flash','deepseek-v4-flash','deepseek-v4-flash-vision-exp'}
+NATIVE_SCHEMA_HINT='\nSchema transport strict-function-v1: use the registered report_structured_output function for the complete JSON response.'
+HOST_SCHEMA_HINT='\nSchema transport responses-host-v1: Return {"action":{"name":"report_structured_output","arguments":<the entire requested result>}}. All result fields belong inside action.arguments. The action object contains only name and arguments; do not put paper, data, IDs or other result fields beside arguments.'
 INSTRUCTION='''
 This request uses a host-dispatched JSON Schema action protocol. Return only the action name and
 arguments allowed by the schema. The host executes the actual registered read-only tool. Do not
@@ -17,7 +19,7 @@ source and argument constraints remain unchanged. This is not a native provider 
 def schema_request(request):
     """规范结构不变；实际传输使用同一登记动作外框。"""
     from .deepseek_strict import schema_tool
-    return {'system_prompt': request['system_prompt'] + INSTRUCTION,
+    return {'system_prompt': request['system_prompt'].replace(NATIVE_SCHEMA_HINT,HOST_SCHEMA_HINT) + INSTRUCTION,
             'user_prompt': request['user_prompt'],
             'tool_definitions': [schema_tool(request['response_schema'])]}
 

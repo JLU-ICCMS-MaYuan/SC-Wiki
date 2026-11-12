@@ -89,8 +89,9 @@ def test_repeated_valid_point_does_not_broadcast_changed_pressure_or_phase():
     assert list(key) in reused
 
 
-def test_axis_repair_reuses_actual_point_observation_without_requiring_full_retyping():
-    original=panel();patch=deepcopy(original);patch['axis']['ticks'][0]['value']=220;patch['points']=[]
+@pytest.mark.parametrize('kind',['bar','line'])
+def test_axis_repair_reuses_actual_point_observation_without_requiring_full_retyping(kind):
+    original=panel();original['kind']=kind;patch=deepcopy(original);patch['axis']['ticks'][0]['value']=220;patch['points']=[]
     result,reused=_merge_chart_repair({'panels':[original],'notes':[]},{'panels':[patch],'notes':[]},
         {('Fig. 1','Tc','tc','YH10','blue')})
     assert result['panels'][0]['points']==original['points']

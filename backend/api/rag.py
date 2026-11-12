@@ -2172,7 +2172,8 @@ async def _create_pending_paper(
                     from types import SimpleNamespace
                     actor = uploader or SimpleNamespace(id=int(state['user_id']), username='unknown')
                     await session.run_sync(lambda sync: handoffs.record_handoff(sync, paper, actor,
-                        action='submit', holder='review', operation_id=task_id, initial=True, **frozen))
+                        action='submit', holder='review', operation_id=task_id, initial=True,
+                        source_limits=state.get('document_source_limits')or[], **frozen))
                     # 正式交接才冻结整稿；旧上传历史保留，不新增逐字段时间线。
                     await session.execute(sql_delete(models.ScientificUploadDraft).where(models.ScientificUploadDraft.task_id == task_id))
                 paper_id = paper.id

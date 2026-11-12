@@ -46,6 +46,31 @@ def _axis_label_focus(raw, issues):
         'suggested_crop_bbox_normalized':[0,top,1000,bottom]}]) for top,bottom in merged]
 
 
+def _axis_word_details(raw, issues):
+    """逐个原文字框交给同模型读取；不提供数字文本或答案。"""
+    import io,base64,hashlib,math
+    from PIL import Image
+    from .image_geometry import horizontal_tick_anchors
+    image=Image.open(io.BytesIO(raw));result=[];seen=set()
+    for issue in issues:
+        boxes=issue.get('axis_text_regions') or []
+        if 'horizontal_spine_pixel' not in issue:continue
+        anchors=horizontal_tick_anchors(image,issue['horizontal_spine_pixel'],boxes)
+        for anchor in anchors:
+            box=anchor['label_bbox'];identity=tuple(box)
+            if identity in seen:continue
+            seen.add(identity)
+            pixels=[max(0,math.floor(box[0]*(image.width-1)/1000)-2),
+                    max(0,math.floor(box[1]*(image.height-1)/1000)-2),
+                    min(image.width,math.ceil(box[2]*(image.width-1)/1000)+3),
+                    min(image.height,math.ceil(box[3]*(image.height-1)/1000)+3)]
+            stream=io.BytesIO();image.crop(pixels).save(stream,format='PNG');data=stream.getvalue()
+            result.append(('data:image/png;base64,'+base64.b64encode(data).decode(),
+                {**anchor,'bbox_pixels_in_image_2':pixels,'image_sha256':hashlib.sha256(data).hexdigest(),
+                 'role':'one_original_axis_label_glyph_no_transcription','resized':False}))
+    return result
+
+
 def _action_history(action, response, native, transport):
     if native:
         return [{'role':'assistant','content':None,'tool_calls':[native]},
@@ -107,7 +132,16 @@ def _merge_chart_repair(previous, incoming, verified):
             continue
         index = by_key[key]
         old = result['panels'][index]
-        if old['kind'] != 'bar' or panel['kind'] != 'bar':
+        mergeable=old['kind']==panel['kind'] and old['kind']in{'bar','line'}
+        if mergeable and old['kind']=='line':
+            old_ids=[(p['category'],p['series'])for p in old['points']+old['unresolved']]
+            new_ids=[(p['category'],p['series'])for p in panel['points']+panel['unresolved']]
+            if len(old_ids)!=len(set(old_ids)) or len(new_ids)!=len(set(new_ids)):
+                if not panel['points'] and not panel['unresolved']:
+                    revised=deepcopy(panel);revised['points']=deepcopy(old['points']);revised['unresolved']=deepcopy(old['unresolved'])
+                    result['panels'][index]=revised;continue
+                raise ValueError('多点线图局部修订无法唯一对应原观察，未猜测配对或丢弃旧点')
+        if not mergeable:
             result['panels'][index] = deepcopy(panel)
             continue
         old_points = {(p['category'], p['series']): p for p in old['points']}
@@ -197,8 +231,9 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
     previous_answer, verified, reuse_events, calibration_cache = None, set(), [], {}
     axis_detail = None
     axis_focus_urls=[]
+    axis_word_urls=[]
     def attach_axis_detail(issues):
-        nonlocal axis_detail, images, axis_focus_urls
+        nonlocal axis_detail, images, axis_focus_urls, axis_word_urls
         result = _axis_label_detail(current_rendered['png'], issues)
         if result is None: return
         old_images = list(images)
@@ -206,9 +241,11 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
         axis_detail = result
         url, metadata = result
         focus=_axis_label_focus(current_rendered['png'],issues)
-        removed={url,previous_url,*axis_focus_urls}
+        words=_axis_word_details(current_rendered['png'],issues)
+        removed={url,previous_url,*axis_focus_urls,*axis_word_urls}
         axis_focus_urls=[entry[0] for entry in focus]
-        images = images[:2] + [url] + axis_focus_urls + [value for value in images[2:] if value not in removed]
+        axis_word_urls=[entry[0] for entry in words]
+        images = images[:2] + [url] + axis_focus_urls + axis_word_urls + [value for value in images[2:] if value not in removed]
         for region in payload.get('additional_image_regions') or []:
             index = region.get('image_index')
             if index and index <= len(old_images) and old_images[index-1] in images:
@@ -220,6 +257,16 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
             'source_region_id':locator['region_id'],'source_sha256':source['sha256'],
             'instruction':'One separate actual axis-label band; same full width/x coordinates as image 2. Identify its own panel or a genuinely shared axis from image 2; never borrow another axis.'}
             for i,entry in enumerate(focus)]
+        payload['program_axis_label_words']=[{**entry[1],'image_index':4+len(focus)+i,
+            'source_region_id':locator['region_id'],'source_sha256':source['sha256'],
+            'instruction':'Read this one actual printed label, then associate its observed number with the unique measured tick position. No number is supplied by the program; never assign values by list order.'}
+            for i,entry in enumerate(words)]
+        # 当前动作只修原像素轴位置。正文/SI其余页继续保留在原文工具中，不随每次精读重发。
+        all_pages=payload.get('source_pages')or[]
+        keep={request['pdf_page'],full.get('pdf_page')}
+        payload.setdefault('source_page_index',[{'page':row.get('page'),'available_via':'read_document/read_page'}for row in all_pages])
+        payload['source_pages']=[row for row in all_pages if row.get('page')in keep]
+        payload['technical_repair_scope']='Only repair the declared axis geometry. Reuse existing point observations and scientific conditions. Other original pages remain available through the registered read-only tools; they are not newly read evidence.'
         on_event({'stage':'feedback','status':'axis-text-detail-attached','metadata':payload['program_axis_label_detail']})
     objects = visual_objects(ir)
     for iteration in range(13):  # 复用文档工具已有动作预算，不另设无限循环。
@@ -256,9 +303,6 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
             'Image 2 and crop_bbox are the FIXED target coordinate frame. Detail images are supplementary; '
             'use additional_image_regions.coordinate_transform to map any detail coordinates back to image 2. '
             'Geometry in tool receipts belongs to its region_id, never copy detail coordinates into target coordinates. '
-            'horizontal_axis_text_regions.label_tick_anchors give measured positions of unique actual tick marks. '
-            'Read each number from its label_bbox, then copy its unique tick position; never use a glyph left edge '
-            'or the frame endpoint as the tick position. These observations contain no numeric tick values. '
             'For bar-chart feedback, report ONLY corrected points or axis observations in the SAME figure/panel/quantity. '
             'The host retains verified points and their conditions; do not repeat or rewrite them. '
             'retained_tool_observations also preserve your earlier digitization of THIS target; '
@@ -373,7 +417,8 @@ def read_chart(model, prompt, request, images, ir, path, source, crop, *, cancel
                     calibration_cache[check_key] = calibrate_panel(panel, Image.open(io.BytesIO(rendered['png'])),
                         {**source,'page':request['pdf_page']},current_crop)
                 found, missing = deepcopy(calibration_cache[check_key])
-                if panel['kind'] == 'bar':
+                pairs=[(p['category'],p['series'])for p in panel['points']+panel['unresolved']]
+                if panel['kind'] == 'bar' or panel['kind']=='line' and len(pairs)==len(set(pairs)):
                     verified = {key for key in verified if key[:3] != _chart_panel_key(panel)}
                     verified.update((*_chart_panel_key(panel), r['point']['category'], r['point']['series']) for r in found)
             except ChartReadingError as error:

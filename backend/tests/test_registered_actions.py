@@ -61,6 +61,8 @@ def test_official_flash_schema_default_uses_same_closed_responses_protocol(monke
     def handle(request):
         body = json.loads(request.content); sent.append(body)
         assert request.url.path == '/responses' and 'tools' not in body
+        assert 'Schema transport strict-function-v1' not in body['instructions']
+        assert 'All result fields belong inside action.arguments.' in body['instructions']
         assert body['stream'] is False and body['reasoning'] == {'effort': 'none'}
         value = {'value': 42, **({} if bad else {'source': None})}
         text = json.dumps({'action': {'name': 'report_structured_output', 'arguments': value}})

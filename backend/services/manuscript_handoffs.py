@@ -139,7 +139,7 @@ def _freeze_files(files):
 
 
 def record_handoff(session, paper, user, *, action, draft, records, operation_id, files=(), manual=(),
-                   holder='review', comment='', initial=False, spectra=None):
+                   holder='review', comment='', initial=False, spectra=None, source_limits=()):
     """调用方持有论文行锁，并与业务修改处在同一事务内。"""
     from backend.ingest.parsing_workflows import require_workflow
     require_workflow(draft)
@@ -175,6 +175,8 @@ def record_handoff(session, paper, user, *, action, draft, records, operation_id
         receiver='原上传者' if holder == 'author' else '审核人员' if holder == 'review' else '公开批准版',
         published_snapshot_id=public_id, comment=comment)
     payload = {'handoff': handoff}
+    if initial and source_limits:
+        payload['document_source_limits']=deepcopy(list(source_limits))
     if action=='submit' and initial:
         payload['upload_submission']={'paper':{k:(draft.get('paper') or {}).get(k)
             for k in ('material_families','co_first_authors','corresponding_authors')},

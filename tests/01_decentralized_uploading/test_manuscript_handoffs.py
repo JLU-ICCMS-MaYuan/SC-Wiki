@@ -41,6 +41,18 @@ def test_no_change_reuses_content_but_records_each_handoff(context):
                 if (e.classification_snapshot or {}).get('manuscript_snapshot')]) == 1
 
 
+def test_original_chart_limits_remain_in_initial_history_without_changing_science(context):
+    session,paper,author,_=context
+    limits=[{'file_id':'si','source_sha256':'a'*64,'block_id':'chart-unresolved-source',
+             'observation':{'reason':'Unquantified overlap; not a reported numerical zero.'}}]
+    result=h.record_handoff(session,paper,author,action='submit',holder='review',initial=True,
+        operation_id='source-limits',draft={'paper':{'title':'isolated'},'material_states':[]},
+        records=[],source_limits=limits)
+    event=session.get(models.PaperHistoryEvent,result['event_id'])
+    assert event.classification_snapshot['document_source_limits']==limits
+    assert event.classification_snapshot['manuscript_snapshot']['draft']['material_states']==[]
+
+
 def test_reason_or_result_change_freezes_new_content_and_preserves_old(context):
     session, paper, author, reviewer = context
     first = handoff(session, paper, author, 'submit', initial=True)

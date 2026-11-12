@@ -373,6 +373,37 @@ def structured_chunks(ir: DocumentIR, *, max_chars: int = 500000,
     return chunks
 
 
+def coverage_completion_chunks(ir, block_ids):
+    """只读取真实未覆盖块所在原页及其已登记备用原文，不传旧模型答案。"""
+    from .image_catalog import is_original_block
+    targets=set(block_ids)
+    originals={b.block_id:b for b in ir.blocks if is_original_block(b)}
+    if not targets or not targets<=originals.keys():raise ValueError('漏提目标不是当前原文块')
+    pages={originals[key].pdf_page for key in targets}
+    alternatives=set()
+    for route in ir.coverage.get('routing',[]):
+        if route.get('selected') in targets:
+            alternatives.update(x['block_id']for x in route.get('alternatives',[]) if x.get('block_id')in originals)
+    view=ir.model_copy(deep=True)
+    view.pages=[p for p in view.pages if p.pdf_page in pages]
+    view.blocks=[b for b in view.blocks if b.pdf_page in pages and is_original_block(b)
+        and (b.metadata.get('selected_for_reading')is not False or b.block_id in alternatives)]
+    for block in view.blocks:
+        if block.block_id in alternatives:block.metadata['selected_for_reading']=True
+    view.tables=[t for t in view.tables if t.pdf_page in pages]
+    result=[]
+    for chunk in structured_chunks(view):
+        payload=json.loads(chunk.content)
+        present={b['block_id']for p in payload['pages']for b in p['blocks']}
+        if not targets&present:continue
+        payload['required_completion_targets']=sorted(targets&present)
+        payload['original_alternative_block_ids']=sorted(alternatives&present)
+        chunk.content=json.dumps(payload,ensure_ascii=False)
+        result.append(chunk)
+    if not result:raise ValueError('漏提目标未进入完整原文窗口')
+    return result
+
+
 def _normalize_tc_method(raw: object, kind: str) -> str:
     """模型可能把方法写成自由文本（如 Allen-Dynes-modified McMillan）；
     映射常见同义写到枚举，无法识别时回退 unknown，不让整篇解析因此失败。"""

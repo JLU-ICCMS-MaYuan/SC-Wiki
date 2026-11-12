@@ -201,3 +201,18 @@ def test_empty_layout_container_is_explicit_without_reextracting_valid_chunk(tmp
     assert body['pages'][0]['blocks'][0]['text']==original['pages'][0]['blocks'][0]['text']
     assert context==original
     assert jobs._read_chunk('task',chunk,'main',source)==first and len(requests)==1
+
+
+def test_missing_result_completion_uses_originals_and_registered_alternative_only(tmp_path):
+    from backend.ingest.domain_extraction import coverage_completion_chunks
+    _,ir,context,_=case(tmp_path)
+    previous=ir.model_dump(mode='json')
+    chunks=coverage_completion_chunks(ir,['ocr'])
+    assert len(chunks)==1
+    payload=json.loads(chunks[0].content)
+    blocks={b['block_id']:b for p in payload['pages']for b in p['blocks']}
+    assert set(blocks)=={'ocr','repair'}
+    assert blocks['repair']['text']=='LaH10 Tc = 200 K at 150 GPa'
+    assert payload['required_completion_targets']==['ocr']
+    assert ir.model_dump(mode='json')==previous
+    with pytest.raises(ValueError):coverage_completion_chunks(ir,['not-an-original-source'])

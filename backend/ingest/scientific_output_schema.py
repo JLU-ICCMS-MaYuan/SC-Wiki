@@ -132,6 +132,22 @@ def extraction_schema(base):
     return result
 
 
+def constrain_extraction_records(schema):
+    """前移既有固定表单接受条件；不影响人工扩展或改变科学字段契约。"""
+    result=deepcopy(schema)
+    record=result['$defs']['ExtractedRecord']
+    standard=deepcopy(record)
+    standard['properties']['property_code']={'type':'string','enum':list(CONTRACT['standard_properties'])}
+    thermal=deepcopy(record)
+    thermal['properties']['property_code']={'type':'string','enum':['custom']}
+    thermal['properties']['module_code']={'type':'string','enum':['thermodynamical_properties']}
+    value=thermal['properties']['payload']['properties']['thermodynamic_stability']
+    nonnull=[branch for branch in value['anyOf']if branch.get('type')!='null']
+    thermal['properties']['payload']['properties']['thermodynamic_stability']=nonnull[0]if len(nonnull)==1 else{'anyOf':nonnull}
+    result['$defs']['ExtractedRecord']={'anyOf':[standard,thermal]}
+    return result
+
+
 def bind_extraction_sources(base, context, *, allow_block_references=True):
     """把既有来源范围和引用互斥规则前移到生成；原IR、表格及旧响应不改。"""
     blocks = [block for page in context.get("pages") or [] for block in page.get("blocks") or []
