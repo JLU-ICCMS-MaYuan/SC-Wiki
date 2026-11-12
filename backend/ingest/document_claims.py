@@ -88,6 +88,12 @@ def claims_from_candidates(candidate: dict, documents: dict[str, DocumentIR], *,
             return
         # 材料状态条件也必须有来源，不能只核对 Tc 数字。
         if "material_states[" in path and not any(key in path for key in ("property_modules[","tc_results[","properties[")):
+            if not own and str(node.get('state_key') or '').startswith('structure-state-'):
+                # 结构归属已创建的父状态沿其自有原文定位，不从其他状态或物性借源。
+                # 原始行和表格块可能同时留档，仅投影当前IR能精确定位的引用；
+                # 显式父来源永不被替换，下面仍执行同一validate_claim保护。
+                own = [source for source in (node.get('structure') or {}).get('sources') or []
+                       if isinstance(source, dict) and _locators([source], documents, default_file)]
             values = {key:node[key] for key in ("material","material_name","pressure_value_gpa","pressure_min_gpa",
                 "pressure_max_gpa","pressure_raw","pressure_unit_raw","state_kind","temperature_value_k",
                 "structure_optimization","magnetic_field_t","magnetic_field_value_t","temperature_raw","temperature_unit_raw","note",
